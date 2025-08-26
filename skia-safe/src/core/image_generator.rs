@@ -1,8 +1,7 @@
-#[cfg(feature = "gpu")]
-use crate::gpu;
-use crate::{prelude::*, yuva_pixmap_info, Data, ImageInfo, YUVAPixmapInfo};
-use skia_bindings::{self as sb, SkImageGenerator};
 use std::fmt;
+
+use crate::{prelude::*, yuva_pixmap_info, Data, ImageInfo, Recorder, YUVAPixmapInfo};
+use skia_bindings::{self as sb, SkImageGenerator};
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 unsafe_send_sync!(ImageGenerator);
@@ -35,9 +34,15 @@ impl ImageGenerator {
         ImageInfo::from_native_ref(&self.native().fInfo)
     }
 
-    #[cfg(feature = "gpu")]
-    pub fn is_valid(&self, mut context: Option<&mut gpu::RecordingContext>) -> bool {
-        unsafe { sb::C_SkImageGenerator_isValid(self.native(), context.native_ptr_or_null_mut()) }
+    pub fn is_valid(&self, recorder: Option<&mut dyn Recorder>) -> bool {
+        unsafe {
+            sb::C_SkImageGenerator_isValid(
+                self.native(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
+            )
+        }
     }
 
     pub fn is_protected(self) -> bool {

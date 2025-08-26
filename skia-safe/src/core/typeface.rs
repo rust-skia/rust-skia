@@ -64,12 +64,14 @@ impl Typeface {
         &self,
     ) -> Option<Vec<font_arguments::variation_position::Coordinate>> {
         unsafe {
-            let r = self.native().getVariationDesignPosition(ptr::null_mut(), 0);
+            let r = sb::C_SkTypeface_getVariationDesignPosition(self.native(), ptr::null_mut(), 0);
             if r != -1 {
                 let mut v = vec![font_arguments::variation_position::Coordinate::default(); r as _];
-                let elements = self
-                    .native()
-                    .getVariationDesignPosition(v.native_mut().as_mut_ptr(), r);
+                let elements = sb::C_SkTypeface_getVariationDesignPosition(
+                    self.native(),
+                    v.native_mut().as_mut_ptr(),
+                    r as _,
+                );
                 assert_eq!(elements, r);
                 Some(v)
             } else {
@@ -80,14 +82,15 @@ impl Typeface {
 
     pub fn variation_design_parameters(&self) -> Option<Vec<VariationAxis>> {
         unsafe {
-            let r = self
-                .native()
-                .getVariationDesignParameters(ptr::null_mut(), 0);
+            let r =
+                sb::C_SkTypeface_getVariationDesignParameters(self.native(), ptr::null_mut(), 0);
             if r != -1 {
                 let mut v = vec![VariationAxis::default(); r as _];
-                let elements = self
-                    .native()
-                    .getVariationDesignParameters(v.native_mut().as_mut_ptr(), r);
+                let elements = sb::C_SkTypeface_getVariationDesignParameters(
+                    self.native(),
+                    v.native_mut().as_mut_ptr(),
+                    r as _,
+                );
                 assert_eq!(elements, r);
                 Some(v)
             } else {
@@ -136,12 +139,13 @@ impl Typeface {
     }
 
     pub fn unichars_to_glyphs(&self, uni: &[Unichar], glyphs: &mut [GlyphId]) {
-        assert_eq!(uni.len(), glyphs.len());
         unsafe {
-            self.native().unicharsToGlyphs(
+            sb::C_SkTypeface_unicharsToGlyphs(
+                self.native(),
                 uni.as_ptr(),
-                uni.len().try_into().unwrap(),
+                uni.len(),
                 glyphs.as_mut_ptr(),
+                glyphs.len(),
             )
         }
     }
@@ -153,16 +157,15 @@ impl Typeface {
     pub fn text_to_glyphs(&self, text: impl EncodedText, glyphs: &mut [GlyphId]) -> usize {
         let (ptr, size, encoding) = text.as_raw();
         unsafe {
-            self.native().textToGlyphs(
+            sb::C_SkTypeface_textToGlyphs(
+                self.native(),
                 ptr,
                 size,
                 encoding.into_native(),
                 glyphs.as_mut_ptr(),
-                glyphs.len().try_into().unwrap(),
+                glyphs.len(),
             )
         }
-        .try_into()
-        .unwrap()
     }
 
     pub fn unichar_to_glyph(&self, unichar: Unichar) -> GlyphId {
@@ -177,9 +180,15 @@ impl Typeface {
         unsafe { self.native().countTables().try_into().unwrap() }
     }
 
+    #[deprecated(since = "0.88.0", note = "use read_table_tags")]
     pub fn table_tags(&self) -> Option<Vec<FontTableTag>> {
+        self.read_table_tags()
+    }
+
+    pub fn read_table_tags(&self) -> Option<Vec<FontTableTag>> {
         let mut v: Vec<FontTableTag> = vec![0; self.count_tables()];
-        (unsafe { self.native().getTableTags(v.as_mut_ptr()) } != 0).if_true_some(v)
+        (unsafe { sb::C_SkTypeface_readTableTags(self.native(), v.as_mut_ptr(), v.len()) } != 0)
+            .if_true_some(v)
     }
 
     pub fn get_table_size(&self, tag: FontTableTag) -> Option<usize> {
@@ -217,14 +226,15 @@ impl Typeface {
         glyphs: &[GlyphId],
         adjustments: &mut [i32],
     ) -> bool {
-        (adjustments.len() + 1 == glyphs.len())
-            && unsafe {
-                self.native().getKerningPairAdjustments(
-                    glyphs.as_ptr(),
-                    glyphs.len().try_into().unwrap(),
-                    adjustments.as_mut_ptr(),
-                )
-            }
+        unsafe {
+            sb::C_SkTypeface_getKerningPairAdjustments(
+                self.native(),
+                glyphs.as_ptr(),
+                glyphs.len(),
+                adjustments.as_mut_ptr(),
+                adjustments.len(),
+            )
+        }
     }
 
     pub fn new_family_name_iterator(&self) -> impl Iterator<Item = LocalizedString> {

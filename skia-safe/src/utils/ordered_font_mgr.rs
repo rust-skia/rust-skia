@@ -1,10 +1,7 @@
+use std::{fmt, mem::transmute, ops::Deref};
+
 use crate::{prelude::*, FontMgr};
 use skia_bindings::{self as sb, SkOrderedFontMgr, SkRefCntBase};
-use std::{
-    fmt,
-    mem::transmute,
-    ops::{Deref, DerefMut},
-};
 
 pub type OrderedFontMgr = RCHandle<SkOrderedFontMgr>;
 require_base_type!(SkOrderedFontMgr, sb::SkFontMgr);
@@ -17,12 +14,6 @@ impl Deref for OrderedFontMgr {
     type Target = FontMgr;
     fn deref(&self) -> &Self::Target {
         unsafe { transmute_ref(self) }
-    }
-}
-
-impl DerefMut for OrderedFontMgr {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { transmute_ref_mut(self) }
     }
 }
 

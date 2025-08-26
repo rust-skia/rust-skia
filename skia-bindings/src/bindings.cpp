@@ -33,6 +33,7 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkColorTable.h"
+#include "include/core/SkCPURecorder.h"
 #include "include/core/SkContourMeasure.h"
 #include "include/core/SkCoverageMode.h"
 #include "include/core/SkCubicMap.h"
@@ -62,6 +63,7 @@
 #include "include/core/SkPixelRef.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkPoint3.h"
+#include "include/core/SkRecorder.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkRegion.h"
@@ -359,7 +361,7 @@ extern "C" int C_SkSurface_height(const SkSurface* self) {
     return self->height();
 }
 
-extern "C" void C_SkSurface_imageInfo(SkSurface* self, SkImageInfo* info) {
+extern "C" void C_SkSurface_imageInfo(const SkSurface* self, SkImageInfo* info) {
     *info = self->imageInfo();
 }
 
@@ -462,8 +464,8 @@ extern "C" size_t C_SkImage_textureSize(const SkImage* self) {
     return self->textureSize();
 }
 
-extern "C" bool C_SkImage_isValid(const SkImage* self, GrRecordingContext* context) {
-    return self->isValid(context);
+extern "C" bool C_SkImage_isValid(const SkImage* self, SkRecorder* recorder) {
+    return self->isValid(recorder);
 }
 
 extern "C" SkImage* C_SkImage_makeScaled(const SkImage* self, const SkImageInfo* info, const SkSamplingOptions* sampling) {
@@ -474,8 +476,8 @@ extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
 
-extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, GrDirectContext* context, const SkIRect* subset) {
-    return self->makeSubset(context, *subset).release();
+extern "C" SkImage* C_SkImage_makeSubset(const SkImage* self, SkRecorder* recorder, const SkIRect* subset, const SkImage::RequiredProperties* properties) {
+    return self->makeSubset(recorder, *subset, *properties).release();
 }
 
 extern "C" SkImage* C_SkImage_withDefaultMipmaps(const SkImage* self) {
@@ -494,8 +496,8 @@ extern "C" bool C_SkImage_isLazyGenerated(const SkImage* self) {
     return self->isLazyGenerated();
 }
 
-extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, GrDirectContext* direct, SkColorSpace* target) {
-    return self->makeColorSpace(direct, sp(target)).release();
+extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkRecorder* recorder, SkColorSpace* target, const SkImage::RequiredProperties* properties) {
+    return self->makeColorSpace(recorder, sp(target), *properties).release();
 }
 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
@@ -628,12 +630,20 @@ extern "C" void C_SkPath_Construct(SkPath* uninitialized) {
     new(uninitialized) SkPath();
 }
 
-extern "C" void C_SkPath_Make(SkPath* uninitialized, 
-    const SkPoint pts[], int pointCount,
-    const uint8_t vbs[], int verbCount,
-    const SkScalar ws[], int wCount,
+extern "C" void C_SkPath_Raw(SkPath* uninitialized, 
+    const SkPoint pts[], size_t pointCount,
+    const SkPathVerb vbs[], size_t verbCount,
+    const SkScalar ws[], size_t wCount,
     SkPathFillType ft, bool isVolatile) {
-    new(uninitialized) SkPath(SkPath::Make(pts, pointCount, vbs, verbCount, ws, wCount, ft, isVolatile));
+    new(uninitialized) SkPath(SkPath::Raw(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
+}
+
+extern "C" void C_SkPath_Make(SkPath* uninitialized, 
+    const SkPoint pts[], size_t pointCount,
+    const uint8_t vbs[], size_t verbCount,
+    const SkScalar ws[], size_t wCount,
+    SkPathFillType ft, bool isVolatile) {
+    new(uninitialized) SkPath(SkPath::Make(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
 }
 
 extern "C" void C_SkPath_Rect(SkPath* uninitialized,
@@ -647,7 +657,7 @@ extern "C" void C_SkPath_Oval(SkPath* uninitialized,
 }
 
 extern "C" void C_SkPath_OvalWithStartIndex(SkPath* uninitialized,
-    const SkRect& r, SkPathDirection dir, unsigned startIndex) {
+    const SkRect& r, SkPathDirection dir, unsigned int startIndex) {
     new(uninitialized) SkPath(SkPath::Oval(r, dir, startIndex));
 }
 
@@ -667,10 +677,10 @@ extern "C" void C_SkPath_RRectWithStartIndex(SkPath* uninitialized,
 }
 
 extern "C" void C_SkPath_Polygon(SkPath* uninitialized,
-    const SkPoint pts[], int count, bool isClosed,
+    const SkPoint pts[], size_t count, bool isClosed,
     SkPathFillType ft,
     bool isVolatile) {
-    new(uninitialized) SkPath(SkPath::Polygon(pts, count, isClosed, ft, isVolatile));
+    new(uninitialized) SkPath(SkPath::Polygon(SkSpan(pts, count), isClosed, ft, isVolatile));
 }
 
 extern "C" void C_SkPath_destruct(const SkPath* self) {
@@ -709,8 +719,24 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
+extern "C" void C_SkPath_makeFillType(const SkPath* self, SkPathFillType newFillType, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->makeFillType(newFillType));
+}
+
 extern "C" SkPoint C_SkPath_getPoint(const SkPath* self, int index) {
     return self->getPoint(index);
+}
+
+extern "C" size_t C_SkPath_getPoints(const SkPath* self, SkPoint* points, size_t count) {
+    return self->getPoints(SkSpan(points, count));
+}
+
+extern "C" size_t C_SkPath_getVerbs(const SkPath* self, uint8_t* verbs, size_t count) {
+    return self->getVerbs(SkSpan(verbs, count));
+}
+
+extern "C" void C_SkPath_addPoly(SkPath* self, const SkPoint* points, size_t count, bool close) {
+    self->addPoly(SkSpan(points, count), close);
 }
 
 extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
@@ -751,12 +777,20 @@ extern "C" void C_SkPathBuilder_destruct(SkPathBuilder* self) {
     self->~SkPathBuilder();
 }
 
-extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, SkPath* path) {
-    *path = self->snapshot();
+extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->snapshot());
 }
 
-extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* path) {
-    *path = self->detach();
+extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->detach());
+}
+
+extern "C" void C_SkPathBuilder_polylineTo(SkPathBuilder* self, const SkPoint* points, size_t count) {
+    self->polylineTo(SkSpan(points, count));
+}
+
+extern "C" void C_SkPathBuilder_addPolygon(SkPathBuilder* self, const SkPoint* points, size_t count, bool close) {
+    self->addPolygon(SkSpan(points, count), close);
 }
 
 extern "C" bool C_SkPathBuilder_isEmpty(const SkPathBuilder* self) {
@@ -773,6 +807,18 @@ extern "C" bool C_SkPathBuilder_getLastPt(const SkPathBuilder* self, SkPoint* po
 
 extern "C" size_t C_SkPathBuilder_countPoints(const SkPathBuilder* self) {
     return self->countPoints();
+}
+
+extern "C" const SkPoint* C_SkPathBuilder_points(const SkPathBuilder* self, size_t* count) {
+    auto span = self->points();
+    *count = span.size();
+    return span.begin();
+}
+
+extern "C" const SkPathVerb* C_SkPathBuilder_verbs(const SkPathBuilder* self, size_t* count) {
+    auto span = self->verbs();
+    *count = span.size();
+    return span.begin();
 }
 
 //
@@ -877,6 +923,62 @@ extern "C" void C_SkCanvas_getTotalMatrix(const SkCanvas* self, SkMatrix* matrix
 
 extern "C" void C_SkCanvas_discard(SkCanvas* self) {
     self->discard();
+}
+
+extern "C" void C_SkCanvas_drawPoints(SkCanvas* self, SkCanvas::PointMode mode, const SkPoint* points, size_t pointCount, const SkPaint* paint) {
+    self->drawPoints(mode, SkSpan(points, pointCount), *paint);
+}
+
+extern "C" void C_SkCanvas_drawGlyphs(
+    SkCanvas* self, 
+    const SkGlyphID* glyphs, size_t glyphCount,
+    const SkPoint* positions,
+    SkPoint origin, const SkFont* font, const SkPaint* paint) {
+    self->drawGlyphs(
+        SkSpan(glyphs, glyphCount), 
+        SkSpan(positions, glyphCount),
+        origin, *font, *paint);
+}
+
+extern "C" void C_SkCanvas_drawGlyphs2(
+    SkCanvas* self, 
+    const SkGlyphID* glyphs, size_t glyphCount,
+    const SkPoint* positions,
+    const uint32_t* clusters,
+    const char* utf8Text, size_t textSize,
+    SkPoint origin, const SkFont* font, const SkPaint* paint) {
+    self->drawGlyphs(
+        SkSpan(glyphs, glyphCount), 
+        SkSpan(positions, glyphCount),
+        SkSpan(clusters, glyphCount),
+        SkSpan(utf8Text, textSize), 
+        origin, *font, *paint);
+}
+
+extern "C" void C_SkCanvas_drawGlyphsRSXform(
+    SkCanvas* self, 
+    const SkGlyphID* glyphs, size_t glyphCount,
+    const SkRSXform* xforms,
+    SkPoint origin, const SkFont* font, const SkPaint* paint) {
+    self->drawGlyphsRSXform(
+        SkSpan(glyphs, glyphCount), 
+        SkSpan(xforms, glyphCount),
+        origin, *font, *paint);
+}
+
+extern "C" void C_SkCanvas_drawAtlas(
+    SkCanvas* self,
+    const SkImage* atlas, 
+    const SkRSXform* xform, size_t xformCount,
+    const SkRect* tex, const SkColor* colors, SkBlendMode mode,
+    const SkSamplingOptions* sampling, const SkRect* cullRect, const SkPaint* paint) {
+
+    self->drawAtlas(
+        atlas,
+        SkSpan(xform, xformCount),
+        SkSpan(tex, xformCount),
+        SkSpan(colors, colors == nullptr ? 0 : xformCount),
+        mode, *sampling, cullRect, paint);
 }
 
 //
@@ -1102,6 +1204,10 @@ extern "C" bool C_SkMatrix_hasPerspective(const SkMatrix* self) {
     return self->hasPerspective();
 }
 
+extern "C" bool C_SkMatrix_setPolyToPoly(SkMatrix* self, const SkPoint* src, size_t srcLen, const SkPoint* dst, size_t dstLen) {
+    return self->setPolyToPoly(SkSpan(src, srcLen), SkSpan(dst, dstLen));
+}
+
 extern "C" bool C_SkMatrix_invert(const SkMatrix* self, SkMatrix* inverse) {
     return self->invert(inverse);
 }
@@ -1120,6 +1226,30 @@ extern "C" const SkMatrix* C_SkMatrix_InvalidMatrix() {
 
 extern "C" void C_SkMatrix_normalizePerspective(SkMatrix* self) {
     self->normalizePerspective();
+}
+
+extern "C" void C_SkMatrix_mapPoints(const SkMatrix* self, SkPoint* dst, const SkPoint* src, size_t count) {
+    self->mapPoints(SkSpan(dst, count), SkSpan(src, count));
+}
+
+extern "C" void C_SkMatrix_mapHomogeneousPoints(const SkMatrix* self, SkPoint3* dst, const SkPoint3* src, size_t count) {
+    self->mapHomogeneousPoints(SkSpan(dst, count), SkSpan(src, count));
+}
+
+extern "C" void C_SkMatrix_mapPointsToHomogeneous(const SkMatrix* self, SkPoint3* dst, const SkPoint* src, size_t count) {
+    self->mapPointsToHomogeneous(SkSpan(dst, count), SkSpan(src, count));
+}
+
+extern "C" SkPoint C_SkMatrix_mapPoint(const SkMatrix* self, SkPoint p) {
+    return self->mapPoint(p);
+}
+
+extern "C" SkPoint C_SkMatrix_mapPointAffine(const SkMatrix* self, SkPoint p) {
+    return self->mapPointAffine(p);
+}
+
+extern "C" void C_SkMatrix_mapVectors(const SkMatrix* self, SkVector* dst, const SkVector* src, size_t count) {
+    self->mapVectors(SkSpan(dst, count), SkSpan(src, count));
 }
 
 //
@@ -1361,23 +1491,24 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosTextH(const void *text, size_t byteLength,
-                                                     const SkScalar xPos[], SkScalar constY, const SkFont *font,
+                                                     const SkScalar xPos[], size_t characterCount, 
+                                                     SkScalar constY, const SkFont *font,
                                                      SkTextEncoding encoding) {
-    return SkTextBlob::MakeFromPosTextH(text, byteLength, xPos, constY, *font, encoding).release();
+    return SkTextBlob::MakeFromPosTextH(text, byteLength, SkSpan(xPos, characterCount), constY, *font, encoding).release();
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosText(const void *text, size_t byteLength,
-                                                    const SkPoint pos[],
+                                                    const SkPoint pos[], size_t characterCount,
                                                     const SkFont *font,
                                                     SkTextEncoding encoding) {
-    return SkTextBlob::MakeFromPosText(text, byteLength, pos, *font, encoding).release();
+    return SkTextBlob::MakeFromPosText(text, byteLength, SkSpan(pos, characterCount), *font, encoding).release();
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromRSXform(const void *text, size_t byteLength,
-                                                    const SkRSXform xform[],
+                                                    const SkRSXform xform[], size_t characterCount,
                                                     const SkFont *font,
                                                     SkTextEncoding encoding) {
-    return SkTextBlob::MakeFromRSXform(text, byteLength, xform, *font, encoding).release();
+    return SkTextBlob::MakeFromRSXform(text, byteLength, SkSpan(xform, characterCount), *font, encoding).release();
 }
 
 extern "C" void C_SkTextBlob_Iter_destruct(SkTextBlob::Iter* self) {
@@ -1400,6 +1531,14 @@ extern "C" void C_SkTypeface_fontStyle(const SkTypeface* self, SkFontStyle* unin
     new (uninitialized) SkFontStyle(self->fontStyle());
 }
 
+extern "C" int C_SkTypeface_getVariationDesignPosition(const SkTypeface* self, SkFontArguments::VariationPosition::Coordinate* coordinates, size_t count) {
+    return self->getVariationDesignPosition(SkSpan(coordinates, count));
+}
+
+extern "C" int C_SkTypeface_getVariationDesignParameters(const SkTypeface* self, SkFontParameters::Variation::Axis* parameters, size_t count) {
+    return self->getVariationDesignParameters(SkSpan(parameters, count));
+}
+
 extern "C" SkTypeface* C_SkTypeface_makeClone(const SkTypeface* self, const SkFontArguments* arguments) {
     return self->makeClone(*arguments).release();
 }
@@ -1416,8 +1555,24 @@ extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream, SkFontMgr*
     return SkTypeface::MakeDeserialize(stream, sp(lastResortFontMgr)).release();
 }
 
+extern "C" void C_SkTypeface_unicharsToGlyphs(const SkTypeface* self, const SkUnichar* uni, size_t uniCount, SkGlyphID* glyphs, size_t glyphsCount) {
+    self->unicharsToGlyphs(SkSpan(uni, uniCount), SkSpan(glyphs, glyphsCount));
+}
+
+extern "C" size_t C_SkTypeface_textToGlyphs(const SkTypeface* self, const void* text, size_t byteLength, SkTextEncoding encoding, SkGlyphID* glyphs, size_t glyphsCount) {
+    return self->textToGlyphs(text, byteLength, encoding, SkSpan(glyphs, glyphsCount));
+}
+
+extern "C" int C_SkTypeface_readTableTags(const SkTypeface* self, SkFontTableTag* tags, size_t count) {
+    return self->readTableTags(SkSpan(tags, count));
+}
+
 extern "C" SkData* C_SkTypeface_copyTableData(const SkTypeface* self, SkFontTableTag tag) {
     return self->copyTableData(tag).release();
+}
+
+extern "C" bool C_SkTypeface_getKerningPairAdjustments(const SkTypeface* self, const SkGlyphID* glyphs, size_t glyphsCount, int32_t* adjustments, size_t adjustmentsCount) {
+    return self->getKerningPairAdjustments(SkSpan(glyphs, glyphsCount), SkSpan(adjustments, adjustmentsCount));
 }
 
 extern "C" SkStreamAsset* C_SkTypeface_openStream(const SkTypeface* self, int* ttcIndex) {
@@ -1502,16 +1657,64 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
     self->setTypeface(sp(tf));
 }
 
+extern "C" size_t C_SkFont_textToGlyphs(
+    const SkFont* self,
+    const void* text, size_t byteLength, 
+    SkTextEncoding encoding,
+    SkGlyphID* glyphs, size_t glyphsCount) {
+    return self->textToGlyphs(text, byteLength, encoding, SkSpan(glyphs, glyphsCount));
+}
+
+extern "C" void C_SkFont_unicharsToGlyphs(
+    const SkFont* self,
+    const SkUnichar* src, size_t charsCount,
+    SkGlyphID* dst) {
+    self->unicharsToGlyphs(SkSpan(src, charsCount), SkSpan(dst, charsCount));
+}
+
+extern "C" void C_SkFont_getWidthBounds(
+    const SkFont* self,
+    const SkGlyphID* glyphs, size_t glyphCount,
+    SkScalar* widths, SkRect* bounds,
+    const SkPaint* paint) {
+    self->getWidthsBounds(SkSpan(glyphs, glyphCount), SkSpan(widths, glyphCount), SkSpan(bounds, glyphCount), paint);
+}
+
+extern "C" void C_SkFont_getPos(
+    const SkFont* self,
+    const SkGlyphID* glyphs, size_t glyphCount,
+    SkPoint* pos,
+    SkPoint origin) {
+    self->getPos(SkSpan(glyphs, glyphCount), SkSpan(pos, glyphCount), origin);
+}
+
+extern "C" void C_SkFont_getXPos(
+    const SkFont* self,
+    const SkGlyphID* glyphs, size_t glyphCount,
+    SkScalar* xPos,
+    SkScalar origin) {
+    self->getXPos(SkSpan(glyphs, glyphCount), SkSpan(xPos, glyphCount), origin);
+}
+
 extern "C" void C_SkFont_getIntercepts(
     const SkFont* self, 
-    const SkGlyphID glyphs[], 
-    int count, 
-    const SkPoint pos[], 
+    const SkGlyphID* glyphs, 
+    size_t count, 
+    const SkPoint* pos, 
     SkScalar top, SkScalar bottom, 
     const SkPaint* paint, 
     VecSink<SkScalar>* vs) {
-    auto r = self->getIntercepts(glyphs, count, pos, top, bottom, paint);
+    auto r = self->getIntercepts(SkSpan(glyphs, count), SkSpan(pos, count), top, bottom, paint);
     vs->set(r);
+}
+
+extern "C" bool C_SkFont_getPath(const SkFont* self, SkGlyphID glyphID, SkPath* pathR) {
+    auto path = self->getPath(glyphID);
+    if (!path) {
+        return false;
+    }
+    *pathR = path.value();
+    return true;
 }
 
 //
@@ -1617,14 +1820,16 @@ extern "C" SkTypeface* C_SkFontMgr_legacyMakeTypeface(const SkFontMgr* self, con
 
 #if defined(SK_BUILD_FOR_ANDROID) && defined(SK_FONTMGR_ANDROID_AVAILABLE)
 #include "include/ports/SkFontMgr_android.h"
+#include "include/ports/SkFontScanner_FreeType.h"
 #endif
 
 #if defined(SK_FONTMGR_CORETEXT_AVAILABLE) && (defined(SK_BUILD_FOR_IOS) || defined(SK_BUILD_FOR_MAC))
 #include "include/ports/SkFontMgr_mac_ct.h"
 #endif
 
-#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE) && defined(SK_TYPEFACE_FACTORY_FREETYPE)
 #include "include/ports/SkFontMgr_fontconfig.h"
+#include "include/ports/SkFontScanner_FreeType.h"
 #endif
 
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
@@ -1651,12 +1856,12 @@ extern "C" SkFontMgr* C_SkFontMgr_NewSystem() {
     mgr = SkFontMgr_New_DirectWrite();
 #elif defined(SK_BUILD_FOR_WIN) && defined(SK_FONTMGR_GDI_AVAILABLE)
     mgr = SkFontMgr_New_GDI();
-#elif defined(SK_BUILD_FOR_ANDROID) && defined(SK_FONTMGR_ANDROID_AVAILABLE)
-    mgr = SkFontMgr_New_Android(nullptr);
+#elif defined(SK_BUILD_FOR_ANDROID) && defined(SK_FONTMGR_ANDROID_AVAILABLE) && defined(SK_TYPEFACE_FACTORY_FREETYPE)
+    mgr = SkFontMgr_New_Android(nullptr, SkFontScanner_Make_FreeType());
 #elif defined(SK_FONTMGR_CORETEXT_AVAILABLE) && (defined(SK_BUILD_FOR_IOS) || defined(SK_BUILD_FOR_MAC))
     mgr = SkFontMgr_New_CoreText(nullptr);
-#elif defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
-    mgr = SkFontMgr_New_FontConfig(nullptr);
+#elif defined(SK_FONTMGR_FONTCONFIG_AVAILABLE) && defined(SK_TYPEFACE_FACTORY_FREETYPE)
+    mgr = SkFontMgr_New_FontConfig(nullptr, SkFontScanner_Make_FreeType());
 #elif defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
     // In particular, this is used on ChromeOS, which is Linux-like but doesn't have
     // FontConfig.
@@ -1790,6 +1995,22 @@ extern "C" bool C_SkPoint_isFinite(const SkPoint* self) {
 }
 
 //
+// core/SkRecorder.h
+//
+
+extern "C" void C_SkRecorder_delete(SkRecorder* self) {
+    delete self;
+}
+
+extern "C" void C_SkRecorder_type(const SkRecorder* self, SkRecorder::Type* ty) {
+    *ty = self->type();
+}
+
+extern "C" skcpu::Recorder* C_SkRecorder_cpuRecorder(SkRecorder* self) {
+    return self->cpuRecorder();
+}
+
+//
 // core/SkRect.h
 //
 
@@ -1799,6 +2020,23 @@ extern "C" bool C_SkIRect_isEmpty(const SkIRect* self) {
 
 extern "C" bool C_SkIRect_contains(const SkIRect* self, const SkRect* rect) {
     return self->contains(*rect);
+}
+
+extern "C" bool C_SkRect_Bounds(const SkPoint* pts, size_t count, SkRect* bounds) {
+    auto boundsOpt = SkRect::Bounds(SkSpan(pts, count));
+    auto hasValue = boundsOpt.has_value();
+    if (hasValue) {
+        *bounds = *boundsOpt;
+    }
+    return hasValue;
+}
+
+extern "C" bool C_SkRect_setBoundsCheck(SkRect* self, const SkPoint* pts, size_t count) {
+    return self->setBoundsCheck(SkSpan(pts, count));
+}
+
+extern "C" void C_SkRect_setBoundsNoCheck(SkRect* self, const SkPoint* pts, size_t count) {
+    self->setBoundsNoCheck(SkSpan(pts, count));
 }
 
 extern "C" void C_SkRect_round(const SkRect* self, SkIRect* dst) {
@@ -2061,6 +2299,10 @@ extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
 
 extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
+}
+
+extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, SkRecorder* recorder) {
+    return self->isValid(recorder);
 }
 
 extern "C" bool C_SkImageGenerator_isProtected(const SkImageGenerator* self) {
@@ -2588,8 +2830,8 @@ extern "C" SkPathEffect* C_SkCornerPathEffect_Make(SkScalar radius) {
 // effects/SkDashPathEffect.h
 //
 
-extern "C" SkPathEffect* C_SkDashPathEffect_Make(const SkScalar intervals[], int count, SkScalar phase) {
-    return SkDashPathEffect::Make(intervals, count, phase).release();
+extern "C" SkPathEffect* C_SkDashPathEffect_Make(const SkScalar intervals[], size_t count, SkScalar phase) {
+    return SkDashPathEffect::Make(SkSpan(intervals, count), phase).release();
 }
 
 //

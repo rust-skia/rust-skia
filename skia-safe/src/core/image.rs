@@ -1,6 +1,6 @@
 use crate::{
     gpu, prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint,
-    IRect, ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap,
+    IRect, ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, Recorder,
     SamplingOptions, Shader, SurfaceProps, TextureCompressionType, TileMode,
 };
 use skia_bindings::{self as sb, SkImage, SkRefCntBase};
@@ -249,6 +249,18 @@ pub mod images {
 /// pixels are not accessible.
 pub use skia_bindings::SkImage_CachingHint as CachingHint;
 variant_name!(CachingHint::Allow);
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[repr(C)]
+pub struct RequiredProperties {
+    pub mipmapped: bool,
+}
+
+native_transmutable!(
+    sb::SkImage_RequiredProperties,
+    RequiredProperties,
+    required_properties_layout
+);
 
 /// [`Image`] describes a two dimensional array of pixels to draw. The pixels may be
 /// decoded in a raster bitmap, encoded in a [`Picture`] or compressed data stream,
@@ -930,8 +942,8 @@ impl Image {
     }
 
     /// Returns `true` if [`Image`] can be drawn on either raster surface or GPU surface.
-    /// If context is `None`, tests if [`Image`] draws on raster surface;
-    /// otherwise, tests if [`Image`] draws on GPU surface associated with context.
+    /// If recorder is None, tests if SkImage draws on raster surface;
+    /// otherwise, tests if SkImage draws on the associated GPU surface.
     ///
     /// [`Image`] backed by GPU texture may become invalid if associated context is
     /// invalid. lazy image may be invalid and may not draw to raster surface or
@@ -942,9 +954,15 @@ impl Image {
     /// Returns: `true` if [`Image`] can be drawn
     ///
     /// example: <https://fiddle.skia.org/c/@Image_isValid>
-    #[cfg(feature = "gpu")]
-    pub fn is_valid(&self, context: &mut gpu::RecordingContext) -> bool {
-        unsafe { sb::C_SkImage_isValid(self.native(), context.native_mut()) }
+    pub fn is_valid(&self, recorder: Option<&mut dyn Recorder>) -> bool {
+        unsafe {
+            sb::C_SkImage_isValid(
+                self.native(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
+            )
+        }
     }
 
     /// Create a new image by copying this image and scaling to fit the [`ImageInfo`]'s dimensions
@@ -1325,65 +1343,38 @@ impl Image {
         Data::from_ptr(unsafe { sb::C_SkImage_refEncodedData(self.native()) })
     }
 
-    /// See [`Self::new_subset_with_context`]
-    #[deprecated(since = "0.64.0", note = "use make_subset()")]
-    pub fn new_subset(&self, rect: impl AsRef<IRect>) -> Option<Image> {
-        self.make_subset(None, rect)
-    }
-
     /// Returns subset of this image.
     ///
     /// Returns `None` if any of the following are true:
     ///   - Subset is empty
     ///   - Subset is not contained inside the image's bounds
     ///   - Pixels in the image could not be read or copied
-    ///
-    /// If this image is texture-backed, the context parameter is required and must match the
-    /// context of the source image. If the context parameter is provided, and the image is
-    /// raster-backed, the subset will be converted to texture-backed.
-    ///
-    /// - `subset`   bounds of returned [`Image`]
-    /// - `context`  the [`gpu::DirectContext`] in play, if it exists
-    ///
-    /// Returns: the subsetted image, or `None`
-    ///
-    /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.64.0", note = "use make_subset()")]
-    pub fn new_subset_with_context<'a>(
-        &self,
-        rect: impl AsRef<IRect>,
-        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
-    ) -> Option<Image> {
-        self.make_subset(direct, rect)
-    }
-
-    /// Returns subset of this image.
-    ///
-    /// Returns `None` if any of the following are true:
-    ///     - Subset is empty - Subset is not contained inside the image's bounds
-    ///     - Pixels in the source image could not be read or copied
-    ///     - This image is texture-backed and the provided context is null or does not match the
-    ///     source image's context.
+    ///   - This image is texture-backed and the provided context is null or does not match
+    ///     the source image's context.
     ///
     /// If the source image was texture-backed, the resulting image will be texture-backed also.
     /// Otherwise, the returned image will be raster-backed.
     ///
-    /// * `direct` - the [`gpu::DirectContext`] of the source image (`None` is ok if the source
-    ///                 image is not texture-backed).
-    /// * `subset` - bounds of returned [`Image`] Returns: the subsetted image, or `None`
+    /// * `recorder` - the recorder of the source image (`None` is ok if the
+    ///                            source image was texture-backed).
+    /// * `subset` - bounds of returned [`Image`]
+    /// * `required_properties` - properties the returned [`Image`] must possess (e.g. mipmaps)
     ///
-    /// example: <https://fiddle.skia.org/c/@Image_makeSubset>
-    pub fn make_subset<'a>(
+    /// Returns: the subsetted image, or `None`
+    pub fn make_subset(
         &self,
-        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
+        recorder: Option<&mut dyn Recorder>,
         subset: impl AsRef<IRect>,
+        required_properties: RequiredProperties,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeSubset(
                 self.native(),
-                direct.into().native_ptr_or_null_mut(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
                 subset.as_ref().native(),
+                required_properties.native(),
             )
         })
     }
@@ -1571,12 +1562,6 @@ impl Image {
         unsafe { sb::C_SkImage_isLazyGenerated(self.native()) }
     }
 
-    /// See [`Self::new_color_space_with_context`]
-    #[deprecated(since = "0.64.0", note = "use make_color_space()")]
-    pub fn new_color_space(&self, color_space: impl Into<Option<ColorSpace>>) -> Option<Image> {
-        self.make_color_space(None, color_space)
-    }
-
     /// Creates [`Image`] in target [`ColorSpace`].
     /// Returns `None` if [`Image`] could not be created.
     ///
@@ -1584,50 +1569,27 @@ impl Image {
     /// Otherwise, converts pixels from [`Image`] [`ColorSpace`] to target [`ColorSpace`].
     /// If [`Image`] `color_space()` returns `None`, [`Image`] [`ColorSpace`] is assumed to be `s_rgb`.
     ///
-    /// If this image is texture-backed, the context parameter is required and must match the
-    /// context of the source image.
+    /// If this image is graphite-backed, the recorder parameter is required.
     ///
-    /// - `target`   [`ColorSpace`] describing color range of returned [`Image`]
-    /// - `direct`   The [`gpu::DirectContext`] in play, if it exists
-    ///
-    /// Returns: created [`Image`] in target [`ColorSpace`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Image_makeColorSpace>
-    #[deprecated(since = "0.64.0", note = "use make_color_space()")]
-    pub fn new_color_space_with_context<'a>(
-        &self,
-        color_space: impl Into<Option<ColorSpace>>,
-        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
-    ) -> Option<Image> {
-        self.make_color_space(direct, color_space)
-    }
-
-    /// Creates [`Image`] in target [`ColorSpace`].
-    /// Returns `None` if [`Image`] could not be created.
-    ///
-    /// Returns original [`Image`] if it is in target [`ColorSpace`].
-    /// Otherwise, converts pixels from [`Image`] [`ColorSpace`] to target [`ColorSpace`].
-    /// If [`Image`] `color_space()` returns `None`, [`Image`] [`ColorSpace`] is assumed to be `s_rgb`.
-    ///
-    /// If this image is texture-backed, the context parameter is required and must match the
-    /// context of the source image.
-    ///
-    /// - `direct`   The [`gpu::DirectContext`] in play, if it exists
-    /// - `target`   [`ColorSpace`] describing color range of returned [`Image`]
+    /// * `target_color_space` - [`ColorSpace`] describing color range of returned [`Image`]
+    /// * `recorder` - The Recorder in which to create the new image
+    /// * `required_properties` - properties the returned [`Image`] must possess (e.g. mipmaps)
     ///
     /// Returns: created [`Image`] in target [`ColorSpace`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Image_makeColorSpace>
-    pub fn make_color_space<'a>(
+    pub fn make_color_space(
         &self,
-        direct: impl Into<Option<&'a mut gpu::DirectContext>>,
+        recorder: Option<&mut dyn Recorder>,
         color_space: impl Into<Option<ColorSpace>>,
+        required_properties: RequiredProperties,
     ) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImage_makeColorSpace(
                 self.native(),
-                direct.into().native_ptr_or_null_mut(),
+                recorder
+                    .map(|r| r.as_recorder_ref())
+                    .native_ptr_or_null_mut(),
                 color_space.into().into_ptr_or_null(),
+                required_properties.native(),
             )
         })
     }

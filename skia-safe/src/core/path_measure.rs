@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, ContourMeasure, Matrix, Path, Point, Vector};
+use crate::{prelude::*, scalar, ContourMeasure, Matrix, Path, PathBuilder, Point, Vector};
 use skia_bindings::{self as sb, SkPathMeasure};
 use std::fmt;
 
@@ -96,7 +96,7 @@ impl PathMeasure {
         .if_true_some((position, tangent))
     }
 
-    // TODO: rename to get_matrix(), because the function expects arguments?
+    #[deprecated(since = "0.88.0", note = "Use get_matrix()")]
     #[must_use]
     pub fn matrix(
         &mut self,
@@ -116,19 +116,50 @@ impl PathMeasure {
         .if_true_some(m)
     }
 
-    // TODO: rename to get_segment(), because the function has arguments?
+    #[must_use]
+    pub fn get_matrix(
+        &mut self,
+        distance: scalar,
+        matrix: &mut Matrix,
+        flags: impl Into<Option<MatrixFlags>>,
+    ) -> bool {
+        unsafe {
+            self.native_mut().getMatrix(
+                distance,
+                matrix.native_mut(),
+                // note: depending on the OS, different representation types are generated for MatrixFlags
+                #[allow(clippy::useless_conversion)]
+                flags.into().unwrap_or_default().bits().try_into().unwrap(),
+            )
+        }
+    }
+
+    #[deprecated(since = "0.88.0", note = "Use get_segment()")]
     pub fn segment(
         &mut self,
         start_d: scalar,
         stop_d: scalar,
         start_with_move_to: bool,
     ) -> Option<Path> {
-        let mut p = Path::default();
+        let mut p = PathBuilder::default();
         unsafe {
             self.native_mut()
                 .getSegment(start_d, stop_d, p.native_mut(), start_with_move_to)
         }
-        .if_true_some(p)
+        .if_true_some(p.detach())
+    }
+
+    pub fn get_segment(
+        &mut self,
+        start_d: scalar,
+        stop_d: scalar,
+        dst: &mut PathBuilder,
+        start_with_move_to: bool,
+    ) -> bool {
+        unsafe {
+            self.native_mut()
+                .getSegment(start_d, stop_d, dst.native_mut(), start_with_move_to)
+        }
     }
 
     #[allow(clippy::wrong_self_convention)]

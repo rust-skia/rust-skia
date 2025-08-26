@@ -1,3 +1,8 @@
+use std::{
+    cmp::{max, min},
+    mem,
+};
+
 use crate::{
     interop,
     prelude::*,
@@ -8,10 +13,6 @@ use crate::{
     Contains, IPoint, ISize, IVector, Point, Size, Vector,
 };
 use skia_bindings::{self as sb, SkIRect, SkRect};
-use std::{
-    cmp::{max, min},
-    mem,
-};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -284,6 +285,10 @@ impl IRect {
         )
     }
 
+    pub fn as_i32s(&self) -> &[i32] {
+        unsafe { safer::from_raw_parts(&self.left, 4) }
+    }
+
     #[deprecated(since = "0.27.0", note = "removed without replacement")]
     #[must_use]
     pub fn empty() -> &'static Self {
@@ -481,6 +486,22 @@ impl Rect {
         Point::from((self.center_x(), self.center_y()))
     }
 
+    pub fn tl(&self) -> Point {
+        Point::from((self.left, self.top))
+    }
+
+    pub fn tr(&self) -> Point {
+        Point::from((self.right, self.top))
+    }
+
+    pub fn bl(&self) -> Point {
+        Point::from((self.left, self.bottom))
+    }
+
+    pub fn br(&self) -> Point {
+        Point::from((self.right, self.bottom))
+    }
+
     pub fn to_quad(self) -> [Point; 4] {
         let mut quad = [Point::default(); 4];
         unsafe { self.native().toQuad(quad.native_mut().as_mut_ptr()) }
@@ -500,24 +521,29 @@ impl Rect {
         *self = Self::new(left, top, right, bottom)
     }
 
+    pub fn bounds(pts: &[Point]) -> Option<Rect> {
+        let mut bounds = Rect::default();
+        unsafe { sb::C_SkRect_Bounds(pts.native().as_ptr(), pts.len(), bounds.native_mut()) }
+            .if_true_some(bounds)
+    }
+
+    pub fn bounds_or_empty(pts: &[Point]) -> Rect {
+        Self::bounds(pts).unwrap_or_else(Self::new_empty)
+    }
+
     pub fn set_bounds(&mut self, points: &[Point]) {
-        unsafe {
-            self.native_mut()
-                .setBoundsCheck(points.native().as_ptr(), points.len().try_into().unwrap());
-        }
+        self.set_bounds_check(points);
     }
 
     pub fn set_bounds_check(&mut self, points: &[Point]) -> bool {
         unsafe {
-            self.native_mut()
-                .setBoundsCheck(points.native().as_ptr(), points.len().try_into().unwrap())
+            sb::C_SkRect_setBoundsCheck(self.native_mut(), points.native().as_ptr(), points.len())
         }
     }
 
     pub fn set_bounds_no_check(&mut self, points: &[Point]) {
         unsafe {
-            self.native_mut()
-                .setBoundsNoCheck(points.native().as_ptr(), points.len().try_into().unwrap())
+            sb::C_SkRect_setBoundsNoCheck(self.native_mut(), points.native().as_ptr(), points.len())
         }
     }
 
@@ -531,11 +557,7 @@ impl Rect {
 
     pub fn from_bounds(points: &[Point]) -> Option<Self> {
         let mut r = Self::default();
-        unsafe {
-            r.native_mut()
-                .setBoundsCheck(points.native().as_ptr(), points.len().try_into().unwrap())
-        }
-        .if_true_some(r)
+        r.set_bounds_check(points).if_true_some(r)
     }
 
     pub fn set_xywh(&mut self, x: f32, y: f32, width: f32, height: f32) {

@@ -24,6 +24,7 @@ native_transmutable!(
 );
 
 #[derive(Clone, PartialEq, Debug)]
+#[repr(C)]
 pub struct ColorSpaceTransferFn {
     pub g: f32,
     pub a: f32,

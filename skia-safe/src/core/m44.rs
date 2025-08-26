@@ -850,6 +850,7 @@ mod tests {
         let vr = Rect::new(-4.5, -4.0, 4.5, 2.0);
         let dst = Rect::new(0.0, 0.0, 1350.0, 900.0);
 
+        #[allow(deprecated)]
         let m = Matrix::from_rect_to_rect(vr, dst, matrix::ScaleToFit::Center).unwrap();
         let m44 = M44::from(m);
         let m3 = m44.to_m33();

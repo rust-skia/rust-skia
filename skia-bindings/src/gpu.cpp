@@ -2,6 +2,7 @@
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
+#include "include/core/SkCPURecorder.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkSurface.h"
@@ -24,14 +25,6 @@ extern "C" bool C_SkSurface_replaceBackendTexture(
         GrSurfaceOrigin origin,
         SkSurface::ContentChangeMode contentChangeMode) {
     return self->replaceBackendTexture(*backendTexture, origin, contentChangeMode);
-}
-
-//
-// core/SkImageGenerator.h
-//
-
-extern "C" bool C_SkImageGenerator_isValid(const SkImageGenerator* self, GrRecordingContext* context) {
-    return self->isValid(context);
 }
 
 //
@@ -137,6 +130,10 @@ extern "C" bool C_GrRecordingContext_abandoned(GrRecordingContext* self) {
 
 extern "C" int C_GrRecordingContext_maxSurfaceSampleCountForColorType(const GrRecordingContext* self, SkColorType colorType) {
     return self->maxSurfaceSampleCountForColorType(colorType);
+}
+
+extern "C" skcpu::Recorder* C_GrRecordingContext_makeCPURecorder(GrRecordingContext* self) {
+    return self->makeCPURecorder().release();
 }
 
 //

@@ -1132,7 +1132,7 @@ impl Canvas {
     }
 
     /// Replaces clip with the intersection or difference of clip and `path`,
-    /// with an aliased or anti-aliased clip edge. [`crate::path::FillType`] determines if `path`
+    /// with an aliased or anti-aliased clip edge. [`crate::PathFillType`] determines if `path`
     /// describes the area inside or outside its contours; and if path contour overlaps
     /// itself or another path contour, whether the overlaps form part of the area.
     /// `path` is transformed by [`Matrix`] before it is combined with clip.
@@ -1299,8 +1299,13 @@ impl Canvas {
     /// example: <https://fiddle.skia.org/c/@Canvas_drawPoints>
     pub fn draw_points(&self, mode: PointMode, pts: &[Point], paint: &Paint) -> &Self {
         unsafe {
-            self.native_mut()
-                .drawPoints(mode, pts.len(), pts.native().as_ptr(), paint.native())
+            sb::C_SkCanvas_drawPoints(
+                self.native_mut(),
+                mode,
+                pts.native().as_ptr(),
+                pts.len(),
+                paint.native(),
+            )
         }
         self
     }
@@ -1569,7 +1574,7 @@ impl Canvas {
     /// [`Path`] contains an array of path contour, each of which may be open or closed.
     ///
     /// In `paint`: [`crate::paint::Style`] determines if [`RRect`] is stroked or filled:
-    /// if filled, [`crate::path::FillType`] determines whether path contour describes inside or
+    /// if filled, [`crate::PathFillType`] determines whether path contour describes inside or
     /// outside of fill; if stroked, [`Paint`] stroke width describes the line thickness,
     /// [`crate::paint::Cap`] describes line ends, and [`crate::paint::Join`] describes how
     /// corners are drawn.
@@ -1835,13 +1840,14 @@ impl Canvas {
         let utf8_text = utf8_text.as_ref().as_bytes();
         let origin = origin.into();
         unsafe {
-            self.native_mut().drawGlyphs(
-                count.try_into().unwrap(),
+            sb::C_SkCanvas_drawGlyphs2(
+                self.native_mut(),
                 glyphs.as_ptr(),
+                count,
                 positions.native().as_ptr(),
                 clusters.as_ptr(),
-                utf8_text.len().try_into().unwrap(),
                 utf8_text.as_ptr() as _,
+                utf8_text.len(),
                 origin.into_native(),
                 font.native(),
                 paint.native(),
@@ -1892,9 +1898,10 @@ impl Canvas {
             GlyphPositions::Points(points) => {
                 assert_eq!(points.len(), count);
                 unsafe {
-                    self.native_mut().drawGlyphs1(
-                        count.try_into().unwrap(),
+                    sb::C_SkCanvas_drawGlyphs(
+                        self.native_mut(),
                         glyphs,
+                        count,
                         points.native().as_ptr(),
                         origin,
                         font,
@@ -1905,9 +1912,10 @@ impl Canvas {
             GlyphPositions::RSXforms(xforms) => {
                 assert_eq!(xforms.len(), count);
                 unsafe {
-                    self.native_mut().drawGlyphs2(
-                        count.try_into().unwrap(),
+                    sb::C_SkCanvas_drawGlyphsRSXform(
+                        self.native_mut(),
                         glyphs,
+                        count,
                         xforms.native().as_ptr(),
                         origin,
                         font,
@@ -2106,12 +2114,13 @@ impl Canvas {
             assert_eq!(color_slice.len(), count);
         }
         unsafe {
-            self.native_mut().drawAtlas(
+            sb::C_SkCanvas_drawAtlas(
+                self.native_mut(),
                 atlas.native(),
                 xform.native().as_ptr(),
+                count,
                 tex.native().as_ptr(),
                 colors.native().as_ptr_or_null(),
-                count.try_into().unwrap(),
                 mode,
                 sampling.into().native(),
                 cull_rect.into().native().as_ptr_or_null(),

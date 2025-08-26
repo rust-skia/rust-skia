@@ -1,10 +1,10 @@
 use std::{fmt, mem};
 
 use crate::{
-    matrix, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, Point, RRect, Rect,
-    Vector,
+    matrix, path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, PathVerb, Point,
+    RRect, Rect, Vector,
 };
-use skia_bindings::{self as sb, SkPathBuilder};
+use skia_bindings::{self as sb, SkPathBuilder, SkPath_AddPathMode};
 
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;
 variant_name!(ArcSize::Large);
@@ -15,6 +15,12 @@ unsafe_send_sync!(PathBuilder);
 impl NativeDrop for SkPathBuilder {
     fn drop(&mut self) {
         unsafe { sb::C_SkPathBuilder_destruct(self) }
+    }
+}
+
+impl Default for PathBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -29,6 +35,12 @@ impl fmt::Debug for PathBuilder {
         f.debug_struct("PathBuilder")
             .field("fill_type", &self.fill_type())
             .finish()
+    }
+}
+
+impl From<PathBuilder> for Path {
+    fn from(mut value: PathBuilder) -> Self {
+        value.detach()
     }
 }
 
@@ -56,15 +68,11 @@ impl PathBuilder {
     }
 
     pub fn snapshot(&self) -> Path {
-        let mut path = Path::default();
-        unsafe { sb::C_SkPathBuilder_snapshot(self.native(), path.native_mut()) }
-        path
+        Path::construct(|path| unsafe { sb::C_SkPathBuilder_snapshot(self.native(), path) })
     }
 
     pub fn detach(&mut self) -> Path {
-        let mut path = Path::default();
-        unsafe { sb::C_SkPathBuilder_detach(self.native_mut(), path.native_mut()) }
-        path
+        Path::construct(|path| unsafe { sb::C_SkPathBuilder_detach(self.native_mut(), path) })
     }
 
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
@@ -139,8 +147,18 @@ impl PathBuilder {
 
     pub fn polyline_to(&mut self, points: &[Point]) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .polylineTo(points.native().as_ptr(), points.len().try_into().unwrap());
+            sb::C_SkPathBuilder_polylineTo(
+                self.native_mut(),
+                points.native().as_ptr(),
+                points.len(),
+            );
+        }
+        self
+    }
+
+    pub fn r_move_to(&mut self, pt: impl Into<Point>) -> &mut Self {
+        unsafe {
+            self.native_mut().rMoveTo(pt.into().into_native());
         }
         self
     }
@@ -185,6 +203,22 @@ impl PathBuilder {
                 pt2.into().into_native(),
                 pt3.into().into_native(),
             );
+        }
+        self
+    }
+
+    pub fn r_arc_to(
+        &mut self,
+        r: (scalar, scalar),
+        x_axis_rotate: scalar,
+        large_arc: ArcSize,
+        sweep: PathDirection,
+        d: impl Into<Vector>,
+    ) -> &mut Self {
+        let d = d.into();
+        unsafe {
+            self.native_mut()
+                .rArcTo(r.0, r.1, x_axis_rotate, large_arc, sweep, d.x, d.y);
         }
         self
     }
@@ -259,7 +293,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
         start_index: impl Into<Option<usize>>,
     ) -> &mut Self {
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         let start_index = start_index.into().unwrap_or(0);
         unsafe {
             self.native_mut()
@@ -274,7 +308,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
         start_index: impl Into<Option<usize>>,
     ) -> &mut Self {
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         // m86: default start index changed from 0 to 1
         let start_index = start_index.into().unwrap_or(1);
         unsafe {
@@ -290,7 +324,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
         start_index: impl Into<Option<usize>>,
     ) -> &mut Self {
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         // m86: default start index changed from 0 to 6 or 7 depending on the path's direction.
         let start_index =
             start_index
@@ -313,7 +347,7 @@ impl PathBuilder {
         dir: impl Into<Option<PathDirection>>,
     ) -> &mut Self {
         let center = center.into();
-        let dir = dir.into().unwrap_or(PathDirection::CW);
+        let dir = dir.into().unwrap_or_default();
         unsafe {
             self.native_mut().addCircle(center.x, center.y, radius, dir);
         }
@@ -322,9 +356,10 @@ impl PathBuilder {
 
     pub fn add_polygon(&mut self, pts: &[Point], close: bool) -> &mut Self {
         unsafe {
-            self.native_mut().addPolygon(
+            sb::C_SkPathBuilder_addPolygon(
+                self.native_mut(),
                 pts.native().as_ptr(),
-                pts.len().try_into().unwrap(),
+                pts.len(),
                 close,
             );
         }
@@ -332,8 +367,26 @@ impl PathBuilder {
     }
 
     pub fn add_path(&mut self, path: &Path) -> &mut Self {
-        unsafe { self.native_mut().addPath(path.native()) };
+        unsafe {
+            self.native_mut()
+                .addPath(path.native(), 0., 0., SkPath_AddPathMode::Append)
+        };
         self
+    }
+
+    pub fn add_path_with_transform(
+        &mut self,
+        src: &Path,
+        matrix: &Matrix,
+        mode: impl Into<Option<path::AddPathMode>>,
+    ) {
+        unsafe {
+            self.native_mut().addPath1(
+                src.native(),
+                matrix.native(),
+                mode.into().unwrap_or(path::AddPathMode::Append),
+            )
+        };
     }
 
     pub fn inc_reserve(&mut self, extra_pt_count: usize, extra_verb_count: usize) {
@@ -365,9 +418,13 @@ impl PathBuilder {
         self
     }
 
+    pub fn is_finite(&self) -> bool {
+        unsafe { self.native().isFinite() }
+    }
+
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         let n = self.native_mut();
-        n.fFillType = unsafe { mem::transmute::<i32, sb::SkPathFillType>(n.fFillType as i32 ^ 2) };
+        n.fFillType = unsafe { mem::transmute::<u8, sb::SkPathFillType>(n.fFillType as u8 ^ 2) };
         self
     }
 
@@ -392,6 +449,22 @@ impl PathBuilder {
 
     pub fn is_inverse_fill_type(&self) -> bool {
         PathFillType::is_inverse(self.fill_type())
+    }
+
+    pub fn points(&self) -> &[Point] {
+        unsafe {
+            let mut len = 0;
+            let points = sb::C_SkPathBuilder_points(self.native(), &mut len);
+            safer::from_raw_parts(Point::from_native_ptr(points), len)
+        }
+    }
+
+    pub fn verbs(&self) -> &[PathVerb] {
+        unsafe {
+            let mut len = 0;
+            let verbs = sb::C_SkPathBuilder_verbs(self.native(), &mut len);
+            safer::from_raw_parts(verbs, len)
+        }
     }
 }
 

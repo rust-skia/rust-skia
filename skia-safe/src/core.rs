@@ -20,6 +20,7 @@ mod color_table;
 mod color_type;
 pub mod contour_measure;
 mod coverage_mode;
+mod cpu_recorder;
 mod cubic_map;
 mod data;
 mod data_table;
@@ -59,6 +60,7 @@ mod pixmap;
 mod point;
 mod point3;
 mod raster_handle_allocator;
+pub mod recorder;
 mod rect;
 pub mod region;
 pub mod rrect;
@@ -125,6 +127,7 @@ pub use paint::Paint;
 pub use tile_mode::*;
 // We keep these around for the time being.
 pub use arc::Arc;
+pub use cpu_recorder::cpu;
 pub use paint::Cap as PaintCap;
 pub use paint::Join as PaintJoin;
 pub use paint::Style as PaintStyle;
@@ -141,6 +144,7 @@ pub use point::*;
 pub use point3::*;
 #[allow(unused)]
 pub use raster_handle_allocator::*;
+pub use recorder::{Recorder, RecorderRef};
 pub use rect::*;
 pub use region::Region;
 pub use rrect::RRect;
@@ -168,7 +172,6 @@ pub use un_pre_multiply::*;
 pub use vertices::Vertices;
 pub use yuva_info::YUVAInfo;
 pub use yuva_pixmaps::{yuva_pixmap_info, YUVAPixmapInfo, YUVAPixmaps};
-
 //
 // Skia specific traits used for overloading functions.
 //

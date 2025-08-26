@@ -120,7 +120,7 @@ impl FinalBuildConfiguration {
                 .arg("is_official_build", yes_if(!build.skia_debug))
                 .arg("is_debug", yes_if(build.skia_debug))
                 .arg("skia_enable_svg", yes_if(features[feature::SVG]))
-                .arg("skia_enable_gpu", yes_if(features.gpu()))
+                .arg("skia_enable_ganesh", yes_if(features.gpu()))
                 .arg("skia_enable_skottie", no())
                 .arg("skia_enable_pdf", yes_if(features[feature::PDF]))
                 .arg("skia_use_gl", yes_if(features[feature::GL]))
