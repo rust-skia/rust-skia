@@ -470,6 +470,8 @@ impl PathBuilder {
 
 #[cfg(test)]
 mod tests {
+    use crate::{paint, surfaces, Paint};
+
     use super::*;
 
     #[test]
@@ -477,5 +479,18 @@ mod tests {
         let mut builder = PathBuilder::new();
         let _path = builder.snapshot();
         let _path = builder.detach();
+    }
+
+    #[test]
+    fn issue_1195() {
+        let mut surface = surfaces::raster_n32_premul((1000, 1000)).unwrap();
+        let canvas = surface.canvas();
+        let mut paint = Paint::default();
+        paint.set_style(paint::Style::Stroke);
+        let mut path = PathBuilder::new();
+        path.move_to((250., 250.));
+        path.cubic_to((300., 300.), (700., 700.), (750., 750.));
+        let pathsh = path.snapshot();
+        canvas.draw_path(&pathsh, &paint);
     }
 }
