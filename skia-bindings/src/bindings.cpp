@@ -751,8 +751,8 @@ extern "C" void C_SkPath_computeTightBounds(const SkPath* self, SkRect* uninitia
 // core/SkPathBuilder.h
 //
 
-extern "C" void C_SkPathBuilder_Construct(SkPathBuilder* uninitialized) {
-    new(uninitialized) SkPathBuilder();
+extern "C" SkPathBuilder* C_SkPathBuilder_new() {
+    return new SkPathBuilder();
 }
 
 /* m87: Implementation is missing.
@@ -761,20 +761,20 @@ extern "C" void C_SkPathBuilder_Construct2(SkPathBuilder* uninitialized, SkPathF
 }
 */
 
-extern "C" void C_SkPathBuilder_Construct3(SkPathBuilder* uninitialized, const SkPath& path) {
-    new(uninitialized) SkPathBuilder(path);
+extern "C" SkPathBuilder* C_SkPathBuilder_newFromPath(const SkPath& path) {
+     return new SkPathBuilder(path);
 }
 
 extern "C" void C_SkPathBuilder_computeBounds(const SkPathBuilder* self, SkRect* uninitialized) {
     new (uninitialized) SkRect(self->computeBounds());
 }
 
-extern "C" void C_SkPathBuilder_CopyConstruct(SkPathBuilder* uninitialized, const SkPathBuilder& pathBuilder) {
-    new(uninitialized) SkPathBuilder(pathBuilder);
+extern "C" SkPathBuilder* C_SkPathBuilder_clone(const SkPathBuilder* pathBuilder) {
+    return new SkPathBuilder(*pathBuilder);
 }
 
-extern "C" void C_SkPathBuilder_destruct(SkPathBuilder* self) {
-    self->~SkPathBuilder();
+extern "C" void C_SkPathBuilder_delete(SkPathBuilder* self) {
+    delete self;
 }
 
 extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, SkPath* uninitialized) {
