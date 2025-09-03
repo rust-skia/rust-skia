@@ -6,9 +6,6 @@ use std::{
     slice,
 };
 
-pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
-variant_name!(ApplyPerspectiveClip::Yes);
-
 bitflags! {
     // m85: On Windows the SkMatrix_TypeMask is defined as i32,
     // but we stick to u32 (macOS / Linux), because there is no need to leak
@@ -181,14 +178,14 @@ impl Matrix {
         m
     }
 
+    #[deprecated(since = "0.0.0", note = "Use rect_2_rect")]
     #[must_use]
     pub fn rect_to_rect(
         src: impl AsRef<Rect>,
         dst: impl AsRef<Rect>,
         scale_to_fit: impl Into<Option<ScaleToFit>>,
     ) -> Option<Self> {
-        #[allow(deprecated)]
-        Self::from_rect_to_rect(src, dst, scale_to_fit.into().unwrap_or(ScaleToFit::Fill))
+        Self::rect_2_rect(src, dst, scale_to_fit.into().unwrap_or(ScaleToFit::Fill))
     }
 
     #[must_use]
@@ -539,34 +536,38 @@ impl Matrix {
         self
     }
 
-    #[deprecated(
-        since = "0.88.0",
-        note = "Legacy matrix rect-to-rect function, may be removed soon"
-    )]
-    pub fn set_rect_to_rect(
-        &mut self,
-        src: impl AsRef<Rect>,
-        dst: impl AsRef<Rect>,
-        stf: ScaleToFit,
-    ) -> bool {
-        unsafe {
-            self.native_mut()
-                .setRectToRect(src.as_ref().native(), dst.as_ref().native(), stf)
-        }
-    }
-
-    #[deprecated(
-        since = "0.88.0",
-        note = "Legacy matrix rect-to-rect function, may be removed soon"
-    )]
+    #[deprecated(since = "0.88.0", note = "Use rect_2_rect")]
     pub fn from_rect_to_rect(
         src: impl AsRef<Rect>,
         dst: impl AsRef<Rect>,
         stf: ScaleToFit,
     ) -> Option<Self> {
+        Self::rect_2_rect(src, dst, stf)
+    }
+
+    pub fn rect_2_rect(
+        src: impl AsRef<Rect>,
+        dst: impl AsRef<Rect>,
+        stf: impl Into<Option<ScaleToFit>>,
+    ) -> Option<Self> {
         let mut m = Self::new_identity();
-        #[allow(deprecated)]
-        m.set_rect_to_rect(src, dst, stf).then_some(m)
+        unsafe {
+            sb::C_SkMatrix_Rect2Rect(
+                src.as_ref().native(),
+                dst.as_ref().native(),
+                stf.into().unwrap_or(ScaleToFit::Fill),
+                m.native_mut(),
+            )
+        }
+        .then_some(m)
+    }
+
+    pub fn rect_to_rect_or_identity(
+        src: impl AsRef<Rect>,
+        dst: impl AsRef<Rect>,
+        stf: impl Into<Option<ScaleToFit>>,
+    ) -> Self {
+        Self::rect_2_rect(src, dst, stf).unwrap_or(Matrix::new_identity())
     }
 
     pub fn poly_to_poly(src: &[Point], dst: &[Point]) -> Option<Matrix> {
@@ -738,23 +739,17 @@ impl Matrix {
         vec
     }
 
-    pub fn map_rect(&self, rect: impl AsRef<Rect>) -> (Rect, bool) {
-        self.map_rect_with_perspective_clip(rect, ApplyPerspectiveClip::Yes)
-    }
-
-    pub fn map_rect_with_perspective_clip(
-        &self,
-        rect: impl AsRef<Rect>,
-        perspective_clip: ApplyPerspectiveClip,
-    ) -> (Rect, bool) {
-        let mut rect = *rect.as_ref();
-        let ptr = rect.native_mut();
-        let rect_stays_rect = unsafe { self.native().mapRect(ptr, ptr, perspective_clip) };
-        (rect, rect_stays_rect)
+    pub fn map_rect(&self, src: impl AsRef<Rect>) -> (Rect, bool) {
+        let mut dst = Rect::default();
+        let rect_stays_rect = unsafe {
+            self.native()
+                .mapRect(dst.native_mut(), src.as_ref().native())
+        };
+        (dst, rect_stays_rect)
     }
 
     pub fn map_rect_to_quad(&self, rect: impl AsRef<Rect>) -> [Point; 4] {
-        let mut quad = rect.as_ref().to_quad();
+        let mut quad = rect.as_ref().to_quad(None);
         self.map_points_inplace(quad.as_mut());
         quad
     }

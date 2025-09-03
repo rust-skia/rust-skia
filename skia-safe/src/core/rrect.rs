@@ -271,7 +271,7 @@ impl RRect {
     #[must_use]
     pub fn transform(&self, matrix: &Matrix) -> Option<Self> {
         let mut r = Self::default();
-        unsafe { self.native().transform(matrix.native(), r.native_mut()) }.then_some(r)
+        unsafe { self.native().transform1(matrix.native(), r.native_mut()) }.then_some(r)
     }
 
     pub fn dump(&self, as_hex: impl Into<Option<bool>>) {

@@ -3,8 +3,8 @@ use std::{fmt, marker::PhantomData, mem::forget, ptr};
 use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
 
 use crate::{
-    interop::DynamicMemoryWStream, matrix::ApplyPerspectiveClip, path_types, prelude::*, scalar,
-    Arc, Data, Matrix, PathDirection, PathFillType, PathVerb, Point, RRect, Rect, Vector,
+    interop::DynamicMemoryWStream, path_types, prelude::*, scalar, Data, Matrix, PathDirection,
+    PathFillType, PathVerb, Point, RRect, Rect, Vector,
 };
 
 /// [`Path`] contain geometry. [`Path`] may be empty, or contain one or more verbs that
@@ -82,7 +82,6 @@ impl fmt::Debug for Path {
             .field("is_convex", &self.is_convex())
             .field("is_oval", &self.is_oval())
             .field("is_rrect", &self.is_rrect())
-            .field("is_arc", &self.is_arc())
             .field("is_empty", &self.is_empty())
             .field("is_last_contour_closed", &self.is_last_contour_closed())
             .field("is_finite", &self.is_finite())
@@ -363,15 +362,6 @@ impl Path {
     pub fn is_rrect(&self) -> Option<RRect> {
         let mut rrect = RRect::default();
         unsafe { self.native().isRRect(rrect.native_mut()) }.then_some(rrect)
-    }
-
-    /// Returns [`Arc`] if path is representable as an oval arc. In other words, could this
-    /// path be drawn using `Canvas::draw_arc()`.
-    ///
-    /// Returns: [`Arc`] if [`Path`] contains only a single arc from an oval
-    pub fn is_arc(&self) -> Option<Arc> {
-        let mut arc = Arc::default();
-        unsafe { self.native().isArc(arc.native_mut()) }.then_some(arc)
     }
 
     /// Returns if [`Path`] is empty.
@@ -767,38 +757,19 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_transform>
     #[must_use]
     pub fn with_transform(&self, matrix: &Matrix) -> Path {
-        self.with_transform_with_perspective_clip(matrix, ApplyPerspectiveClip::Yes)
-    }
-
-    /// Transforms verb array, [`Point`] array, and weight by matrix.
-    /// transform may change verbs and increase their number.
-    ///
-    /// * `matrix` - [`Matrix`] to apply to [`Path`]
-    /// * `pc` - whether to apply perspective clipping
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_transform>
-    #[must_use]
-    pub fn with_transform_with_perspective_clip(
-        &self,
-        matrix: &Matrix,
-        perspective_clip: ApplyPerspectiveClip,
-    ) -> Path {
         let mut path = Path::default();
-        unsafe {
-            self.native()
-                .transform(matrix.native(), path.native_mut(), perspective_clip)
-        };
+        unsafe { self.native().transform(matrix.native(), path.native_mut()) };
         path
     }
 
     #[must_use]
-    pub fn make_transform(&self, m: &Matrix, pc: impl Into<Option<ApplyPerspectiveClip>>) -> Path {
-        self.with_transform_with_perspective_clip(m, pc.into().unwrap_or(ApplyPerspectiveClip::Yes))
+    pub fn make_transform(&self, m: &Matrix) -> Path {
+        self.with_transform(m)
     }
 
     #[must_use]
     pub fn make_scale(&self, (sx, sy): (scalar, scalar)) -> Path {
-        self.make_transform(&Matrix::scale((sx, sy)), ApplyPerspectiveClip::No)
+        self.make_transform(&Matrix::scale((sx, sy)))
     }
 
     /// Returns last point on [`Path`]. Returns `None` if [`Point`] array is empty,
@@ -1721,21 +1692,8 @@ impl Path {
     ///
     /// * `matrix` - [`Matrix`] to apply to [`Path`]
     pub fn transform(&mut self, matrix: &Matrix) -> &mut Self {
-        self.transform_with_perspective_clip(matrix, ApplyPerspectiveClip::Yes)
-    }
-
-    /// Transforms verb array, [`Point`] array, and weight by matrix.
-    /// transform may change verbs and increase their number.
-    ///
-    /// * `matrix` - [`Matrix`] to apply to [`Path`]
-    /// * `pc` - whether to apply perspective clipping
-    pub fn transform_with_perspective_clip(
-        &mut self,
-        matrix: &Matrix,
-        pc: ApplyPerspectiveClip,
-    ) -> &mut Self {
         let self_ptr = self.native_mut() as *mut _;
-        unsafe { self.native().transform(matrix.native(), self_ptr, pc) };
+        unsafe { self.native().transform(matrix.native(), self_ptr) };
         self
     }
 
