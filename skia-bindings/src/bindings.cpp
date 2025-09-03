@@ -1204,6 +1204,15 @@ extern "C" bool C_SkMatrix_hasPerspective(const SkMatrix* self) {
     return self->hasPerspective();
 }
 
+extern "C" bool C_SkMatrix_Rect2Rect(const SkRect* src, const SkRect* dst, SkMatrix::ScaleToFit scaleToFit, SkMatrix* m) {
+    auto r = SkMatrix::Rect2Rect(*src, *dst, scaleToFit);
+    if (r.has_value()) {
+        *m = *r;
+        return true;
+    }
+    return false;
+}
+
 extern "C" bool C_SkMatrix_setPolyToPoly(SkMatrix* self, const SkPoint* src, size_t srcLen, const SkPoint* dst, size_t dstLen) {
     return self->setPolyToPoly(SkSpan(src, srcLen), SkSpan(dst, dstLen));
 }

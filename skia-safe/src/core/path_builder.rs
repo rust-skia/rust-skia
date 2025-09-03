@@ -1,8 +1,8 @@
 use std::{fmt, mem};
 
 use crate::{
-    matrix, path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, PathVerb, Point,
-    RRect, Rect, Vector,
+    path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, PathVerb, Point, RRect,
+    Rect, Vector,
 };
 use skia_bindings::{self as sb, SkPathBuilder, SkPath_AddPathMode};
 
@@ -410,14 +410,9 @@ impl PathBuilder {
         self
     }
 
-    pub fn transform(
-        &mut self,
-        matrix: &Matrix,
-        pc: impl Into<Option<matrix::ApplyPerspectiveClip>>,
-    ) -> &mut Self {
-        let pc = pc.into().unwrap_or(matrix::ApplyPerspectiveClip::Yes);
+    pub fn transform(&mut self, matrix: &Matrix) -> &mut Self {
         unsafe {
-            self.native_mut().transform(matrix.native(), pc);
+            self.native_mut().transform(matrix.native());
         }
         self
     }
