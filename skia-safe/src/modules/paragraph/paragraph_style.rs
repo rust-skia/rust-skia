@@ -319,6 +319,15 @@ impl ParagraphStyle {
         self.native_mut().fApplyRoundingHack = value;
         self
     }
+
+    pub fn fake_missing_font_styles(&self) -> bool {
+        self.native().fFakeMissingFontStyles
+    }
+
+    pub fn set_fake_missing_font_styles(&mut self, value: bool) -> &mut Self {
+        self.native_mut().fFakeMissingFontStyles = value;
+        self
+    }
 }
 
 #[cfg(test)]
