@@ -9,12 +9,16 @@ use skia_bindings::{self as sb, SkPathBuilder, SkPath_AddPathMode};
 pub use skia_bindings::SkPathBuilder_ArcSize as ArcSize;
 variant_name!(ArcSize::Large);
 
-pub type PathBuilder = Handle<SkPathBuilder>;
+// PathBuilder can't be a Handle<>, because SkPathBuilder contains several STArrays with interior
+// pointers.
+//
+// See <https://github.com/rust-skia/rust-skia/pull/1195>.
+pub type PathBuilder = RefHandle<SkPathBuilder>;
 unsafe_send_sync!(PathBuilder);
 
 impl NativeDrop for SkPathBuilder {
     fn drop(&mut self) {
-        unsafe { sb::C_SkPathBuilder_destruct(self) }
+        unsafe { sb::C_SkPathBuilder_delete(self) }
     }
 }
 
@@ -26,7 +30,7 @@ impl Default for PathBuilder {
 
 impl Clone for PathBuilder {
     fn clone(&self) -> Self {
-        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_CopyConstruct(pb, self.native()) })
+        Self::from_ptr(unsafe { sb::C_SkPathBuilder_clone(self.native()) }).unwrap()
     }
 }
 
@@ -46,7 +50,7 @@ impl From<PathBuilder> for Path {
 
 impl PathBuilder {
     pub fn new() -> Self {
-        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_Construct(pb) })
+        Self::from_ptr(unsafe { sb::C_SkPathBuilder_new() }).unwrap()
     }
 
     /* m87: No Implementation.
@@ -56,7 +60,7 @@ impl PathBuilder {
     */
 
     pub fn new_path(path: &Path) -> Self {
-        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_Construct3(pb, path.native()) })
+        Self::from_ptr(unsafe { sb::C_SkPathBuilder_newFromPath(path.native()) }).unwrap()
     }
 
     pub fn fill_type(&self) -> PathFillType {
@@ -470,6 +474,8 @@ impl PathBuilder {
 
 #[cfg(test)]
 mod tests {
+    use crate::{paint, surfaces, Paint};
+
     use super::*;
 
     #[test]
@@ -477,5 +483,18 @@ mod tests {
         let mut builder = PathBuilder::new();
         let _path = builder.snapshot();
         let _path = builder.detach();
+    }
+
+    #[test]
+    fn issue_1195() {
+        let mut surface = surfaces::raster_n32_premul((1000, 1000)).unwrap();
+        let canvas = surface.canvas();
+        let mut paint = Paint::default();
+        paint.set_style(paint::Style::Stroke);
+        let mut path = PathBuilder::new();
+        path.move_to((250., 250.));
+        path.cubic_to((300., 300.), (700., 700.), (750., 750.));
+        let pathsh = path.snapshot();
+        canvas.draw_path(&pathsh, &paint);
     }
 }
