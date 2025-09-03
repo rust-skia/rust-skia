@@ -726,7 +726,7 @@ impl M44 {
     #[must_use]
     pub fn invert(&self) -> Option<M44> {
         let mut m = Self::default();
-        unsafe { self.native().invert(m.native_mut()) }.if_true_some(m)
+        unsafe { self.native().invert(m.native_mut()) }.then_some(m)
     }
 
     #[must_use]

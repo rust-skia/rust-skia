@@ -416,13 +416,13 @@ pub mod run_handler {
             buffer: &SkShaper_RunHandler_Buffer,
             glyph_count: usize,
         ) -> Buffer {
-            let offsets = buffer.offsets.into_option().map(|mut offsets| {
+            let offsets = buffer.offsets.into_non_null().map(|mut offsets| {
                 slice::from_raw_parts_mut(Point::from_native_ref_mut(offsets.as_mut()), glyph_count)
             });
 
             let clusters = buffer
                 .clusters
-                .into_option()
+                .into_non_null()
                 .map(|clusters| slice::from_raw_parts_mut(clusters.as_ptr(), glyph_count));
 
             Buffer {

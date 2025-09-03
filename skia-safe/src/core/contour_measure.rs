@@ -49,7 +49,7 @@ impl ContourMeasure {
             self.native()
                 .getPosTan(distance, p.native_mut(), v.native_mut())
         }
-        .if_true_some((p, v))
+        .then_some((p, v))
     }
 
     #[must_use]
@@ -70,7 +70,7 @@ impl ContourMeasure {
                 flags.into().unwrap_or_default().bits().try_into().unwrap(),
             )
         }
-        .if_true_some(m)
+        .then_some(m)
     }
 
     #[must_use]

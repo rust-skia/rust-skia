@@ -444,7 +444,7 @@ impl Canvas {
     /// example: <https://fiddle.skia.org/c/@Canvas_getProps>
     pub fn props(&self) -> Option<SurfaceProps> {
         let mut sp = SurfaceProps::default();
-        unsafe { self.native().getProps(sp.native_mut()) }.if_true_some(sp)
+        unsafe { self.native().getProps(sp.native_mut()) }.then_some(sp)
     }
 
     /// Returns the [`SurfaceProps`] associated with the canvas (i.e., at the base of the layer
@@ -581,7 +581,7 @@ impl Canvas {
     /// example: <https://fiddle.skia.org/c/@Canvas_peekPixels>
     pub fn peek_pixels(&self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }.if_true_some(pixmap)
+        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }.then_some(pixmap)
     }
 
     /// Copies [`Rect`] of pixels from [`Canvas`] into `dst_pixels`. [`Matrix`] and clip are
@@ -1194,7 +1194,7 @@ impl Canvas {
     /// example: <https://fiddle.skia.org/c/@Canvas_getLocalClipBounds>
     pub fn local_clip_bounds(&self) -> Option<Rect> {
         let r = Rect::construct(|r| unsafe { sb::C_SkCanvas_getLocalClipBounds(self.native(), r) });
-        r.is_empty().if_false_some(r)
+        (!r.is_empty()).then_some(r)
     }
 
     /// Returns [`IRect`] bounds of clip, unaffected by [`Matrix`]. If clip is empty,
@@ -1208,7 +1208,7 @@ impl Canvas {
     pub fn device_clip_bounds(&self) -> Option<IRect> {
         let r =
             IRect::construct(|r| unsafe { sb::C_SkCanvas_getDeviceClipBounds(self.native(), r) });
-        r.is_empty().if_false_some(r)
+        (!r.is_empty()).then_some(r)
     }
 
     /// Fills clip with color `color`.

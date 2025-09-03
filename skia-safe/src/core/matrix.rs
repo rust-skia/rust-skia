@@ -566,12 +566,12 @@ impl Matrix {
     ) -> Option<Self> {
         let mut m = Self::new_identity();
         #[allow(deprecated)]
-        m.set_rect_to_rect(src, dst, stf).if_true_some(m)
+        m.set_rect_to_rect(src, dst, stf).then_some(m)
     }
 
     pub fn poly_to_poly(src: &[Point], dst: &[Point]) -> Option<Matrix> {
         let mut m = Matrix::new();
-        m.set_poly_to_poly(src, dst).if_true_some(m)
+        m.set_poly_to_poly(src, dst).then_some(m)
     }
 
     pub fn set_poly_to_poly(&mut self, src: &[Point], dst: &[Point]) -> bool {
@@ -588,12 +588,12 @@ impl Matrix {
 
     pub fn from_poly_to_poly(src: &[Point], dst: &[Point]) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        m.set_poly_to_poly(src, dst).if_true_some(m)
+        m.set_poly_to_poly(src, dst).then_some(m)
     }
 
     pub fn invert(&self) -> Option<Matrix> {
         let mut m = Matrix::new_identity();
-        unsafe { sb::C_SkMatrix_invert(self.native(), m.native_mut()) }.if_true_some(m)
+        unsafe { sb::C_SkMatrix_invert(self.native(), m.native_mut()) }.then_some(m)
     }
 
     pub fn set_affine_identity(affine: &mut [scalar; 6]) {
@@ -603,7 +603,7 @@ impl Matrix {
     #[must_use]
     pub fn to_affine(self) -> Option<[scalar; 6]> {
         let mut affine = [scalar::default(); 6];
-        unsafe { self.native().asAffine(affine.as_mut_ptr()) }.if_true_some(affine)
+        unsafe { self.native().asAffine(affine.as_mut_ptr()) }.then_some(affine)
     }
 
     pub fn set_affine(&mut self, affine: &[scalar; 6]) -> &mut Self {
@@ -821,7 +821,7 @@ impl Matrix {
             self.native()
                 .decomposeScale(size.native_mut(), remaining.native_ptr_or_null_mut())
         }
-        .if_true_some(size)
+        .then_some(size)
     }
 
     pub fn i() -> &'static Matrix {

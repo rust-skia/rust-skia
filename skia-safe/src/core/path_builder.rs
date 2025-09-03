@@ -438,8 +438,7 @@ impl PathBuilder {
 
     pub fn get_last_pt(&self) -> Option<Point> {
         let mut p = Point::default();
-        unsafe { sb::C_SkPathBuilder_getLastPt(self.native(), p.native_mut()) }
-            .if_true_then_some(|| p)
+        unsafe { sb::C_SkPathBuilder_getLastPt(self.native(), p.native_mut()) }.then_some(p)
     }
 
     pub fn set_last_pt(&mut self, p: impl Into<Point>) {

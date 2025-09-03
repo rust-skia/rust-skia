@@ -437,8 +437,8 @@ impl TextStyle {
 
     pub fn font_arguments(&self) -> Option<&FontArguments> {
         unsafe { sb::C_TextStyle_getFontArguments(self.native()) }
-            .into_option()
-            .map(|ptr| FontArguments::from_native_ref(unsafe { &*ptr }))
+            .into_non_null()
+            .map(|ptr| FontArguments::from_native_ref(unsafe { ptr.as_ref() }))
     }
 
     /// The contents of the [`crate::FontArguments`] will be copied into the [`TextStyle`].

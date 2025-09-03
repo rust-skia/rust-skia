@@ -73,7 +73,7 @@ impl<'pixels> Pixmap<'pixels> {
             self.native()
                 .extractSubset(pixmap.native_mut(), area.as_ref().native())
         }
-        .if_true_some(pixmap)
+        .then_some(pixmap)
     }
 
     pub fn info(&self) -> &ImageInfo {
@@ -214,13 +214,13 @@ impl<'pixels> Pixmap<'pixels> {
 
     /// Access the underlying pixels as a byte array. This is a rust-skia specific function.
     pub fn bytes(&self) -> Option<&'pixels [u8]> {
-        let addr = self.addr().into_option()?;
+        let addr = self.addr().into_non_null()?;
         let len = self.compute_byte_size();
-        Some(unsafe { slice::from_raw_parts(addr as *const u8, len) })
+        Some(unsafe { slice::from_raw_parts(addr.as_ptr() as *const _, len) })
     }
 
     pub fn bytes_mut(&mut self) -> Option<&'pixels mut [u8]> {
-        let addr = self.writable_addr().into_option()?;
+        let addr = self.writable_addr().into_non_null()?;
         let len = self.compute_byte_size();
         Some(unsafe { slice::from_raw_parts_mut(addr.as_ptr() as *mut u8, len) })
     }
@@ -231,7 +231,7 @@ impl<'pixels> Pixmap<'pixels> {
     /// [`Pixel::matches_color_type()`] when matched against the [`ColorType`] of this Pixmap's
     /// pixels.
     pub fn pixels<P: Pixel>(&self) -> Option<&'pixels [P]> {
-        let addr = self.addr().into_option()?;
+        let addr = self.addr().into_non_null()?;
 
         let info = self.info();
         let ct = info.color_type();
@@ -239,7 +239,7 @@ impl<'pixels> Pixmap<'pixels> {
 
         if info.bytes_per_pixel() == pixel_size && P::matches_color_type(ct) {
             let len = self.compute_byte_size() / pixel_size;
-            return Some(unsafe { slice::from_raw_parts(addr as *const P, len) });
+            return Some(unsafe { slice::from_raw_parts(addr.as_ptr() as *const _, len) });
         }
 
         None

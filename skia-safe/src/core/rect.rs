@@ -247,7 +247,7 @@ impl IRect {
     #[must_use]
     pub fn intersect(a: &Self, b: &Self) -> Option<Self> {
         let mut r = Self::default();
-        unsafe { r.native_mut().intersect(a.native(), b.native()) }.if_true_some(r)
+        unsafe { r.native_mut().intersect(a.native(), b.native()) }.then_some(r)
     }
 
     pub fn intersects(a: &Self, b: &Self) -> bool {
@@ -262,7 +262,7 @@ impl IRect {
             min(a.right, b.right),
             min(a.bottom, b.bottom),
         );
-        r.is_empty().if_false_some(r)
+        (!r.is_empty()).then_some(r)
     }
 
     pub fn join(a: &Self, b: &Self) -> Self {
@@ -524,7 +524,7 @@ impl Rect {
     pub fn bounds(pts: &[Point]) -> Option<Rect> {
         let mut bounds = Rect::default();
         unsafe { sb::C_SkRect_Bounds(pts.native().as_ptr(), pts.len(), bounds.native_mut()) }
-            .if_true_some(bounds)
+            .then_some(bounds)
     }
 
     pub fn bounds_or_empty(pts: &[Point]) -> Rect {
@@ -557,7 +557,7 @@ impl Rect {
 
     pub fn from_bounds(points: &[Point]) -> Option<Self> {
         let mut r = Self::default();
-        r.set_bounds_check(points).if_true_some(r)
+        r.set_bounds_check(points).then_some(r)
     }
 
     pub fn set_xywh(&mut self, x: f32, y: f32, width: f32, height: f32) {

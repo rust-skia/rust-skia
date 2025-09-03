@@ -918,7 +918,7 @@ impl Image {
     /// example: <https://fiddle.skia.org/c/@Image_peekPixels>
     pub fn peek_pixels(&self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native().peekPixels(pixmap.native_mut()) }.if_true_some(pixmap)
+        unsafe { self.native().peekPixels(pixmap.native_mut()) }.then_some(pixmap)
     }
 
     /// Returns `true` if the contents of [`Image`] was created on or uploaded to GPU memory,

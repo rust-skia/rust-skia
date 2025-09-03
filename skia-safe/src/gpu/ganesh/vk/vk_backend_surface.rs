@@ -37,8 +37,7 @@ pub mod backend_formats {
 
     pub fn as_vk_format(backend_format: &BackendFormat) -> Option<Format> {
         let mut r = Format::UNDEFINED;
-        unsafe { sb::C_GrBackendFormats_AsVkFormat(backend_format.native(), &mut r) }
-            .if_true_some(r)
+        unsafe { sb::C_GrBackendFormats_AsVkFormat(backend_format.native(), &mut r) }.then_some(r)
     }
 
     pub fn get_vk_ycbcr_conversion_info(
@@ -48,8 +47,8 @@ pub mod backend_formats {
             YcbcrConversionInfo::from_native_ptr(sb::C_GrBackendFormats_GetVkYcbcrConversionInfo(
                 backend_format.native(),
             ))
-            .into_option()
-            .map(|r| &*r)
+            .into_non_null()
+            .map(|r| r.as_ref())
         }
     }
 }
@@ -88,7 +87,7 @@ pub mod backend_textures {
             let mut image_info = ImageInfo::default();
 
             sb::C_GrBackendTextures_GetVkImageInfo(texture.native(), image_info.native_mut())
-                .if_true_some(image_info)
+                .then_some(image_info)
         }
     }
 
@@ -121,7 +120,7 @@ pub mod backend_render_targets {
     pub fn get_vk_image_info(target: &BackendRenderTarget) -> Option<ImageInfo> {
         let mut info = ImageInfo::default();
         unsafe { sb::C_GrBackendRenderTargets_GetVkImageInfo(target.native(), info.native_mut()) }
-            .if_true_some(info)
+            .then_some(info)
     }
 
     pub fn set_vk_image_layout(

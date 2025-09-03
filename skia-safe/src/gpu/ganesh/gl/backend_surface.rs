@@ -54,7 +54,7 @@ pub mod backend_textures {
         unsafe {
             sb::C_GrBackendTextures_GetGLTextureInfo(texture.native(), texture_info.native_mut())
         }
-        .if_true_some(texture_info)
+        .then_some(texture_info)
     }
 
     pub fn gl_texture_parameters_modified(texture: &mut BackendTexture) {
@@ -98,6 +98,6 @@ pub mod backend_render_targets {
                 info.native_mut(),
             )
         }
-        .if_true_some(info)
+        .then_some(info)
     }
 }

@@ -131,8 +131,7 @@ impl BackendFormat {
     #[cfg(feature = "d3d")]
     pub fn as_dxgi_format(&self) -> Option<d3d::DXGI_FORMAT> {
         let mut f = sb::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-        unsafe { self.native().asDxgiFormat(&mut f) }
-            .if_true_some(d3d::DXGI_FORMAT::from_native_c(f))
+        unsafe { self.native().asDxgiFormat(&mut f) }.then_some(d3d::DXGI_FORMAT::from_native_c(f))
     }
 
     #[must_use]
@@ -299,7 +298,7 @@ impl BackendTexture {
         backend_texture: *mut GrBackendTexture,
     ) -> Option<BackendTexture> {
         Self::native_is_valid(backend_texture)
-            .if_true_then_some(|| BackendTexture::from_ptr(backend_texture).unwrap())
+            .then(|| BackendTexture::from_ptr(backend_texture).unwrap())
     }
 
     pub fn dimensions(&self) -> ISize {
@@ -368,12 +367,10 @@ impl BackendTexture {
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         unsafe {
             let mut info = sb::GrD3DTextureResourceInfo::default();
-            self.native()
-                .getD3DTextureResourceInfo(&mut info)
-                .if_true_then_some(|| {
-                    assert!(!info.fResource.fObject.is_null());
-                    d3d::TextureResourceInfo::from_native_c(info)
-                })
+            self.native().getD3DTextureResourceInfo(&mut info).then(|| {
+                assert!(!info.fResource.fObject.is_null());
+                d3d::TextureResourceInfo::from_native_c(info)
+            })
         }
     }
 
@@ -490,7 +487,7 @@ impl BackendRenderTarget {
         native: GrBackendRenderTarget,
     ) -> Option<BackendRenderTarget> {
         let backend_render_target = BackendRenderTarget::from_native_c(native);
-        Self::native_is_valid(backend_render_target.native()).if_true_some(backend_render_target)
+        Self::native_is_valid(backend_render_target.native()).then_some(backend_render_target)
     }
 
     pub fn dimensions(&self) -> ISize {
@@ -547,7 +544,7 @@ impl BackendRenderTarget {
     #[cfg(feature = "d3d")]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         let mut info = sb::GrD3DTextureResourceInfo::default();
-        unsafe { self.native().getD3DTextureResourceInfo(&mut info) }.if_true_then_some(|| {
+        unsafe { self.native().getD3DTextureResourceInfo(&mut info) }.then(|| {
             assert!(!info.fResource.fObject.is_null());
             d3d::TextureResourceInfo::from_native_c(info)
         })

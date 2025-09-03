@@ -56,7 +56,7 @@ impl PathEffect {
         let mut dst = PathBuilder::new();
         let mut stroke_rec_r = stroke_rec.clone();
         self.filter_path_inplace(&mut dst, src, &mut stroke_rec_r, cull_rect)
-            .if_true_some((dst, stroke_rec_r))
+            .then_some((dst, stroke_rec_r))
     }
 
     pub fn filter_path_inplace(

@@ -117,7 +117,7 @@ pub fn num_planes(config: PlaneConfig) -> usize {
 /// Number of Y, U, V, A channels in the ith plane for a given [PlaneConfig] (or [None] if i is
 /// invalid).
 pub fn num_channels_in_plane(config: PlaneConfig, i: usize) -> Option<usize> {
-    (i < num_planes(config)).if_true_then_some(|| {
+    (i < num_planes(config)).then(|| {
         unsafe { sb::C_SkYUVAInfo_NumChannelsInPlane(config, i.try_into().unwrap()) }
             .try_into()
             .unwrap()
@@ -183,7 +183,7 @@ impl YUVAInfo {
                 siting_y,
             )
         };
-        Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
+        Self::native_is_valid(&n).then(|| Self::from_native_c(n))
     }
 
     pub fn plane_config(&self) -> PlaneConfig {

@@ -335,9 +335,9 @@ impl Bitmap {
     /// memory to hold pixels; allocation does not take place until the pixels are written to. The
     /// actual behavior depends on the platform implementation of `calloc()`.
     pub fn alloc_pixels_flags(&mut self, image_info: &ImageInfo) {
-        self.try_alloc_pixels_flags(image_info)
-            .into_option()
-            .expect("Bitmap::alloc_pixels_flags failed");
+        if !self.try_alloc_pixels_flags(image_info) {
+            panic!("Bitmap::alloc_pixels_flags failed");
+        }
     }
 
     /// Sets [`ImageInfo`] to info following the rules in `set_info()` and allocates pixel memory.
@@ -380,9 +380,9 @@ impl Bitmap {
         image_info: &ImageInfo,
         row_bytes: impl Into<Option<usize>>,
     ) {
-        self.try_alloc_pixels_info(image_info, row_bytes.into())
-            .into_option()
-            .expect("Bitmap::alloc_pixels_info failed");
+        if !self.try_alloc_pixels_info(image_info, row_bytes.into()) {
+            panic!("Bitmap::alloc_pixels_info failed");
+        }
     }
 
     /// Sets [`ImageInfo`] to width, height, and native color type; and allocates pixel memory. If
@@ -425,9 +425,9 @@ impl Bitmap {
         (width, height): (i32, i32),
         is_opaque: impl Into<Option<bool>>,
     ) {
-        self.try_alloc_n32_pixels((width, height), is_opaque.into().unwrap_or(false))
-            .into_option()
-            .expect("Bitmap::alloc_n32_pixels_failed")
+        if !self.try_alloc_n32_pixels((width, height), is_opaque.into().unwrap_or(false)) {
+            panic!("Bitmap::alloc_n32_pixels_failed");
+        }
     }
 
     // TODO: wrap installPixels with releaseProc.
@@ -470,9 +470,9 @@ impl Bitmap {
     ///
     /// Aborts if `info().color_type()` is [`ColorType::Unknown`], or allocation fails.
     pub fn alloc_pixels(&mut self) {
-        self.try_alloc_pixels()
-            .into_option()
-            .expect("Bitmap::alloc_pixels failed")
+        if !self.try_alloc_pixels() {
+            panic!("Bitmap::alloc_pixels failed");
+        }
     }
 
     // TODO: allocPixels(Allocator*)
@@ -723,7 +723,7 @@ impl Bitmap {
                 offset.native_mut(),
             )
         }
-        .if_true_some(offset)
+        .then_some(offset)
     }
 
     /// Copies [`Bitmap`] pixel address, row bytes, and [`ImageInfo`] to pixmap, if address is
@@ -733,7 +733,7 @@ impl Bitmap {
     /// example: <https://fiddle.skia.org/c/@Bitmap_peekPixels>
     pub fn peek_pixels(&self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native().peekPixels(pixmap.native_mut()) }.if_true_some(pixmap)
+        unsafe { self.native().peekPixels(pixmap.native_mut()) }.then_some(pixmap)
     }
 
     /// Make a shader with the specified tiling, matrix and sampling.  

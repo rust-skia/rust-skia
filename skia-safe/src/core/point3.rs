@@ -86,7 +86,7 @@ impl Point3 {
     #[must_use]
     pub fn normalized(&self) -> Option<Self> {
         let mut normalized = *self;
-        unsafe { normalized.native_mut().normalize() }.if_true_some(normalized)
+        unsafe { normalized.native_mut().normalize() }.then_some(normalized)
     }
 
     // TODO: with_scale()?

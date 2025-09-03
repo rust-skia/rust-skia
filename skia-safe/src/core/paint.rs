@@ -236,7 +236,7 @@ impl Paint {
 
     pub fn as_blend_mode(&self) -> Option<BlendMode> {
         let mut bm = BlendMode::default();
-        unsafe { sb::C_SkPaint_asBlendMode(self.native(), &mut bm) }.if_true_some(bm)
+        unsafe { sb::C_SkPaint_asBlendMode(self.native(), &mut bm) }.then_some(bm)
     }
 
     pub fn blend_mode_or(&self, default_mode: BlendMode) -> BlendMode {

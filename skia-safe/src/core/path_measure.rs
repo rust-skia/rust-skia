@@ -93,7 +93,7 @@ impl PathMeasure {
             self.native_mut()
                 .getPosTan(distance, position.native_mut(), tangent.native_mut())
         }
-        .if_true_some((position, tangent))
+        .then_some((position, tangent))
     }
 
     #[deprecated(since = "0.88.0", note = "Use get_matrix()")]
@@ -113,7 +113,7 @@ impl PathMeasure {
                 flags.into().unwrap_or_default().bits().try_into().unwrap(),
             )
         }
-        .if_true_some(m)
+        .then_some(m)
     }
 
     #[must_use]
@@ -146,7 +146,7 @@ impl PathMeasure {
             self.native_mut()
                 .getSegment(start_d, stop_d, p.native_mut(), start_with_move_to)
         }
-        .if_true_some(p.detach())
+        .then_some(p.detach())
     }
 
     pub fn get_segment(

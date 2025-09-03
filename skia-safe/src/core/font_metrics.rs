@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar};
+use crate::scalar;
 use skia_bindings::{self as sb, SkFontMetrics};
 
 bitflags! {
@@ -59,7 +59,7 @@ impl FontMetrics {
     }
 
     fn if_valid(&self, flag: self::Flags, value: scalar) -> Option<scalar> {
-        self.flags.contains(flag).if_true_some(value)
+        self.flags.contains(flag).then_some(value)
     }
 
     pub fn has_bounds(&self) -> bool {

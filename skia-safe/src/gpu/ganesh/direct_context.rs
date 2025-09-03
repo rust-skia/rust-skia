@@ -416,7 +416,7 @@ impl DirectContext {
                 ptr::null_mut(),
             )
         }
-        .if_true_some(previous)
+        .then_some(previous)
     }
 
     // TODO: add variant with GpuFinishedProc / GpuFinishedContext
@@ -444,7 +444,7 @@ impl DirectContext {
                 ptr::null_mut(),
             )
         }
-        .if_true_some(previous)
+        .then_some(previous)
     }
 
     pub fn delete_backend_texture(&mut self, texture: &BackendTexture) {

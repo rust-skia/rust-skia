@@ -62,7 +62,7 @@ pub fn local_bounds(
             r.native_mut(),
         )
     }
-    .if_true_some(r)
+    .then_some(r)
 }
 
 impl Canvas {

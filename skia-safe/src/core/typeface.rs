@@ -188,7 +188,7 @@ impl Typeface {
     pub fn read_table_tags(&self) -> Option<Vec<FontTableTag>> {
         let mut v: Vec<FontTableTag> = vec![0; self.count_tables()];
         (unsafe { sb::C_SkTypeface_readTableTags(self.native(), v.as_mut_ptr(), v.len()) } != 0)
-            .if_true_some(v)
+            .then_some(v)
     }
 
     pub fn get_table_size(&self, tag: FontTableTag) -> Option<usize> {
@@ -251,8 +251,7 @@ impl Typeface {
 
     pub fn post_script_name(&self) -> Option<String> {
         let mut name = interop::String::default();
-        unsafe { self.native().getPostScriptName(name.native_mut()) }
-            .if_true_then_some(|| name.as_str().into())
+        unsafe { self.native().getPostScriptName(name.native_mut()) }.then(|| name.as_str().into())
     }
 
     pub fn resource_name(&self) -> Option<String> {
@@ -273,7 +272,7 @@ impl Typeface {
                 let stream = stream.native_mut().as_stream_mut();
                 let read =
                     unsafe { sb::C_SkStream_read(stream, data.as_mut_ptr() as _, data.len()) };
-                (read == data.len()).if_true_some((data, ttc_index.try_into().unwrap()))
+                (read == data.len()).then_some((data, ttc_index.try_into().unwrap()))
             })
     }
 
@@ -315,7 +314,7 @@ impl Iterator for LocalizedStringsIter {
                 language.native_mut(),
             )
         }
-        .if_true_then_some(|| LocalizedString {
+        .then(|| LocalizedString {
             string: string.as_str().into(),
             language: language.as_str().into(),
         })
