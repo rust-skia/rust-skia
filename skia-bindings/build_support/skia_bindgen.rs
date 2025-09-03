@@ -411,8 +411,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkRuntimeEffect_SpecializeResult",
     // m81: derives from std::string
     "SkSL::String",
-    "std::basic_string",
-    "std::basic_string_value_type",
+    // The following two were replaced by a more generic variant further down (LLVM 21)
+    // "std::basic_string",
+    // "std::basic_string_value_type",
     // m81: wrong size on macOS and Linux
     "SkRuntimeEffect",
     "GrShaderCaps",
@@ -464,6 +465,8 @@ const OPAQUE_TYPES: &[&str] = &[
     // Fix bindgen 0.70 layout failures
     "skgpu::VulkanBackendContext",
     "GrYUVABackendTextures",
+    // LLVM21
+    "std::basic_string.*",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
