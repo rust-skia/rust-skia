@@ -467,6 +467,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "GrYUVABackendTextures",
     // LLVM21
     "std::basic_string.*",
+    "std::__tree.*",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
