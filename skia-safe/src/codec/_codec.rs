@@ -172,7 +172,7 @@ impl Codec<'_> {
     pub fn valid_subset(&self, desired_subset: impl AsRef<IRect>) -> Option<IRect> {
         let mut desired_subset = *desired_subset.as_ref();
         unsafe { sb::C_SkCodec_getValidSubset(self.native(), desired_subset.native_mut()) }
-            .if_true_some(desired_subset)
+            .then_some(desired_subset)
     }
 
     pub fn encoded_format(&self) -> EncodedImageFormat {

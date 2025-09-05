@@ -91,7 +91,7 @@ impl Region {
 
     pub fn boundary_path(&self) -> Option<Path> {
         let mut path = Path::default();
-        unsafe { self.native().getBoundaryPath1(path.native_mut()) }.if_true_some(path)
+        unsafe { self.native().getBoundaryPath1(path.native_mut()) }.then_some(path)
     }
 
     pub fn set_empty(&mut self) -> bool {
@@ -388,8 +388,8 @@ impl<'a> Iterator<'a> {
 
     pub fn rgn(&self) -> Option<&Region> {
         unsafe {
-            let r = sb::C_SkRegion_Iterator_rgn(self.native()).into_option()?;
-            Some(transmute_ref(&*r))
+            let r = sb::C_SkRegion_Iterator_rgn(self.native()).into_non_null()?;
+            Some(Region::from_native_ref(r.as_ref()))
         }
     }
 }
@@ -507,7 +507,7 @@ impl iter::Iterator for Spanerator<'_> {
             let mut right = 0;
             self.native_mut()
                 .next(&mut left, &mut right)
-                .if_true_some((left, right))
+                .then_some((left, right))
         }
     }
 }

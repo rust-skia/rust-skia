@@ -351,7 +351,7 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_isOval>
     pub fn is_oval(&self) -> Option<Rect> {
         let mut bounds = Rect::default();
-        unsafe { self.native().isOval(bounds.native_mut()) }.if_true_some(bounds)
+        unsafe { self.native().isOval(bounds.native_mut()) }.then_some(bounds)
     }
 
     /// Returns [`RRect`] if path is representable as [`RRect`].
@@ -362,7 +362,7 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_isRRect>
     pub fn is_rrect(&self) -> Option<RRect> {
         let mut rrect = RRect::default();
-        unsafe { self.native().isRRect(rrect.native_mut()) }.if_true_some(rrect)
+        unsafe { self.native().isRRect(rrect.native_mut()) }.then_some(rrect)
     }
 
     /// Returns [`Arc`] if path is representable as an oval arc. In other words, could this
@@ -371,7 +371,7 @@ impl Path {
     /// Returns: [`Arc`] if [`Path`] contains only a single arc from an oval
     pub fn is_arc(&self) -> Option<Arc> {
         let mut arc = Arc::default();
-        unsafe { self.native().isArc(arc.native_mut()) }.if_true_some(arc)
+        unsafe { self.native().isArc(arc.native_mut()) }.then_some(arc)
     }
 
     /// Returns if [`Path`] is empty.
@@ -503,7 +503,7 @@ impl Path {
         let mut line = [Point::default(); 2];
         #[allow(clippy::tuple_array_conversions)]
         unsafe { self.native().isLine(line.native_mut().as_mut_ptr()) }
-            .if_true_some((line[0], line[1]))
+            .then_some((line[0], line[1]))
     }
 
     /// Returns the number of points in [`Path`].
@@ -733,7 +733,7 @@ impl Path {
             self.native()
                 .isRect(rect.native_mut(), &mut is_closed, &mut direction)
         }
-        .if_true_some((rect, is_closed, direction))
+        .then_some((rect, is_closed, direction))
     }
 }
 
@@ -810,7 +810,7 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_getLastPt>
     pub fn last_pt(&self) -> Option<Point> {
         let mut last_pt = Point::default();
-        unsafe { self.native().getLastPt(last_pt.native_mut()) }.if_true_some(last_pt)
+        unsafe { self.native().getLastPt(last_pt.native_mut()) }.then_some(last_pt)
     }
 }
 
@@ -872,7 +872,7 @@ impl Path {
             self.native()
                 .interpolate(ending.native(), weight, out.native_mut())
         }
-        .if_true_some(out)
+        .then_some(out)
     }
 
     /// Sets FillType, the rule used to fill [`Path`]. While there is no check
@@ -1838,8 +1838,8 @@ impl Iter<'_> {
         #[allow(clippy::map_clone)]
         self.native()
             .fConicWeights
-            .into_option()
-            .map(|p| unsafe { *p })
+            .into_non_null()
+            .map(|p| unsafe { *p.as_ref() })
     }
 
     /// Returns `true` if last [`Verb::Line`] returned by `next()` was generated
@@ -1956,7 +1956,7 @@ impl Iterator for RawIter<'_> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
 
         let verb = unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) };
-        (verb != Verb::Done).if_true_some((verb, points[0..verb.points()].into()))
+        (verb != Verb::Done).then_some((verb, points[0..verb.points()].into()))
     }
 }
 
@@ -2043,7 +2043,7 @@ impl Path {
                 .readFromMemory(bytes.as_ptr() as _, bytes.len())
                 > 0
         }
-        .if_true_some(path)
+        .then_some(path)
     }
     /// (See skbug.com/40032862)
     /// Returns a non-zero, globally unique value. A different value is returned

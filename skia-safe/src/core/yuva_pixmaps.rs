@@ -81,7 +81,7 @@ impl YUVAPixmapInfo {
                 row_bytes_ptr,
             )
         };
-        Self::native_is_valid(&info).if_true_then_some(|| Self::from_native_c(info))
+        Self::native_is_valid(&info).then(|| Self::from_native_c(info))
     }
 
     /// Like above but uses [yuva_pixmap_info::default_color_type_for_data_type] to determine each plane's [ColorType]. If
@@ -103,7 +103,7 @@ impl YUVAPixmapInfo {
 
         let info = unsafe { SkYUVAPixmapInfo::new1(info.native(), data_type, row_bytes_ptr) };
 
-        Self::native_is_valid(&info).if_true_then_some(|| Self::from_native_c(info))
+        Self::native_is_valid(&info).then(|| Self::from_native_c(info))
     }
 
     pub fn yuva_info(&self) -> &YUVAInfo {
@@ -127,7 +127,7 @@ impl YUVAPixmapInfo {
     /// Row bytes for the ith plane. Returns `None` if `i` >= [`Self::num_planes()`] or this
     /// [YUVAPixmapInfo] is invalid.
     pub fn row_bytes(&self, i: usize) -> Option<usize> {
-        (i < self.num_planes()).if_true_then_some(|| unsafe {
+        (i < self.num_planes()).then(|| unsafe {
             sb::C_SkYUVAPixmapInfo_rowBytes(self.native(), i.try_into().unwrap())
         })
     }
@@ -139,7 +139,7 @@ impl YUVAPixmapInfo {
 
     /// Image info for the ith plane, or `None` if `i` >= [`Self::num_planes()`]
     pub fn plane_info(&self, i: usize) -> Option<&ImageInfo> {
-        (i < self.num_planes()).if_true_then_some(|| {
+        (i < self.num_planes()).then(|| {
             ImageInfo::from_native_ref(unsafe {
                 &*sb::C_SkYUVAPixmapInfo_planeInfo(self.native(), i.try_into().unwrap())
             })
@@ -180,7 +180,7 @@ impl YUVAPixmapInfo {
         let mut pixmaps: [Pixmap; Self::MAX_PLANES] = Default::default();
         self.native()
             .initPixmapsFromSingleAllocation(memory, pixmaps[0].native_mut())
-            .if_true_some(pixmaps)
+            .then_some(pixmaps)
     }
 
     /// Is this valid and does it use color types allowed by the passed [SupportedDataTypes]?
@@ -194,7 +194,7 @@ impl YUVAPixmapInfo {
         let mut pixmap_info = Self::new_invalid();
         let r = set_pixmap_info(&mut pixmap_info);
         (r && Self::native_is_valid(&pixmap_info))
-            .if_true_then_some(|| YUVAPixmapInfo::from_native_c(pixmap_info))
+            .then(|| YUVAPixmapInfo::from_native_c(pixmap_info))
     }
 
     /// Returns `true` if this has been configured with a non-empty dimensioned [YUVAInfo] with

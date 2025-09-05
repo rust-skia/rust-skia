@@ -10,12 +10,12 @@ variant_name!(PathOp::XOR);
 
 pub fn op(one: &Path, two: &Path, op: PathOp) -> Option<Path> {
     let mut result = Path::default();
-    unsafe { sb::Op(one.native(), two.native(), op, result.native_mut()) }.if_true_some(result)
+    unsafe { sb::Op(one.native(), two.native(), op, result.native_mut()) }.then_some(result)
 }
 
 pub fn simplify(path: &Path) -> Option<Path> {
     let mut result = Path::default();
-    unsafe { sb::Simplify(path.native(), result.native_mut()) }.if_true_some(result)
+    unsafe { sb::Simplify(path.native(), result.native_mut()) }.then_some(result)
 }
 
 #[deprecated(
@@ -24,12 +24,12 @@ pub fn simplify(path: &Path) -> Option<Path> {
 )]
 pub fn tight_bounds(path: &Path) -> Option<Rect> {
     let rect = path.compute_tight_bounds();
-    rect.is_finite().if_true_some(rect)
+    rect.is_finite().then_some(rect)
 }
 
 pub fn as_winding(path: &Path) -> Option<Path> {
     let mut result = Path::default();
-    unsafe { sb::AsWinding(path.native(), result.native_mut()) }.if_true_some(result)
+    unsafe { sb::AsWinding(path.native(), result.native_mut()) }.then_some(result)
 }
 
 pub type OpBuilder = Handle<SkOpBuilder>;
@@ -63,7 +63,7 @@ impl OpBuilder {
 
     pub fn resolve(&mut self) -> Option<Path> {
         let mut path = Path::default();
-        unsafe { self.native_mut().resolve(path.native_mut()) }.if_true_some(path)
+        unsafe { self.native_mut().resolve(path.native_mut()) }.then_some(path)
     }
 }
 

@@ -64,7 +64,7 @@ impl YUVABackendTextureInfo {
         let n = unsafe {
             GrYUVABackendTextureInfo::new(info.native(), formats[0].native(), mip_mapped, origin)
         };
-        Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
+        Self::native_is_valid(&n).then(|| Self::from_native_c(n))
     }
 
     pub fn yuva_info(&self) -> &YUVAInfo {
@@ -90,7 +90,7 @@ impl YUVABackendTextureInfo {
 
     /// Format of the ith plane, or `None` if `i >= Self::num_planes()`
     pub fn plane_format(&self, i: usize) -> Option<&BackendFormat> {
-        (i < self.num_planes()).if_true_some(BackendFormat::from_native_ref(
+        (i < self.num_planes()).then_some(BackendFormat::from_native_ref(
             &self.native().fPlaneFormats[i],
         ))
     }
@@ -159,7 +159,7 @@ impl YUVABackendTextures {
                 texture_origin,
             )
         });
-        Self::native_is_valid(&n).if_true_then_some(|| Self::from_native_c(n))
+        Self::native_is_valid(&n).then(|| Self::from_native_c(n))
     }
 
     pub fn textures(&self) -> Vec<BackendTexture> {

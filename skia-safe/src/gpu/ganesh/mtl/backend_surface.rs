@@ -14,7 +14,7 @@ pub mod backend_formats {
     pub fn as_mtl_format(backend_format: &BackendFormat) -> Option<mtl::PixelFormat> {
         let pixel_format = unsafe { sb::C_GrBackendFormats_AsMtlFormat(backend_format.native()) };
         // Mtl's PixelFormat == 0 is invalid.
-        (pixel_format != 0).if_true_some(pixel_format)
+        (pixel_format != 0).then_some(pixel_format)
     }
 }
 
@@ -49,7 +49,7 @@ pub mod backend_textures {
         unsafe {
             let mut texture_info = mtl::TextureInfo::default();
             sb::C_GrBackendTextures_GetMtlTextureInfo(texture.native(), texture_info.native_mut())
-                .if_true_some(texture_info)
+                .then_some(texture_info)
         }
     }
 }
@@ -79,6 +79,6 @@ pub mod backend_render_targets {
                 info.native_mut(),
             )
         }
-        .if_true_some(info)
+        .then_some(info)
     }
 }

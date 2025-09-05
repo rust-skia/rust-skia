@@ -150,7 +150,7 @@ impl ColorType {
         unsafe {
             sb::SkColorTypeValidateAlphaType(self.into_native(), alpha_type, &mut alpha_type_r)
         }
-        .if_true_some(alpha_type_r)
+        .then_some(alpha_type_r)
     }
 }
 

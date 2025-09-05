@@ -134,14 +134,14 @@ impl Vertices {
     #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn tex_coords(&self) -> Option<&[Point]> {
-        let texs = self.native().fTexs.into_option()?;
+        let texs = self.native().fTexs.into_non_null()?;
         Some(unsafe { slice::from_raw_parts(texs.as_ptr() as *const _, self.vertex_count()) })
     }
 
     #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn colors(&self) -> Option<&[Color]> {
-        let colors = self.native().fColors.into_option()?;
+        let colors = self.native().fColors.into_non_null()?;
         Some(unsafe { slice::from_raw_parts(colors.as_ptr() as *const _, self.vertex_count()) })
     }
 
@@ -160,7 +160,7 @@ impl Vertices {
     #[deprecated(since = "0.29.0", note = "will be removed without replacement")]
     #[allow(deprecated)]
     pub fn indices(&self) -> Option<&[u16]> {
-        let indices = self.native().fIndices.into_option()?;
+        let indices = self.native().fIndices.into_non_null()?;
         Some(unsafe { slice::from_raw_parts_mut(indices.as_ptr(), self.index_count()) })
     }
 
@@ -249,7 +249,7 @@ impl Builder {
     pub fn indices(&mut self) -> Option<&mut [u16]> {
         unsafe {
             let vertices = &*self.native().fVertices.fPtr;
-            let indices = vertices.fIndices.into_option()?;
+            let indices = vertices.fIndices.into_non_null()?;
             Some(slice::from_raw_parts_mut(
                 indices.as_ptr(),
                 vertices.fIndexCount.try_into().unwrap(),
@@ -260,7 +260,7 @@ impl Builder {
     pub fn tex_coords(&mut self) -> Option<&mut [Point]> {
         unsafe {
             let vertices = &*self.native().fVertices.fPtr;
-            let mut coords = vertices.fTexs.into_option()?;
+            let mut coords = vertices.fTexs.into_non_null()?;
             Some(slice::from_raw_parts_mut(
                 Point::from_native_ref_mut(coords.as_mut()),
                 vertices.fVertexCount.try_into().unwrap(),
@@ -271,7 +271,7 @@ impl Builder {
     pub fn colors(&mut self) -> Option<&mut [Color]> {
         unsafe {
             let vertices = &*self.native().fVertices.fPtr;
-            let mut colors = vertices.fColors.into_option()?;
+            let mut colors = vertices.fColors.into_non_null()?;
             Some(slice::from_raw_parts_mut(
                 Color::from_native_ref_mut(colors.as_mut()),
                 vertices.fVertexCount.try_into().unwrap(),

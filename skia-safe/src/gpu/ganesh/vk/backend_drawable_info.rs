@@ -50,7 +50,7 @@ impl BackendDrawableInfo {
         unsafe {
             let mut di = vk::DrawableInfo::default();
             sb::C_GrBackendDrawableInfo_getVkDrawableInfo(self.native(), di.native_mut())
-                .if_true_some(di)
+                .then_some(di)
         }
     }
 }

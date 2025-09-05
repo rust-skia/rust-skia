@@ -48,7 +48,7 @@ impl ColorFilter {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();
         unsafe { self.native().asAColorMode(color.native_mut(), &mut mode) }
-            .if_true_some((color, mode))
+            .then_some((color, mode))
     }
 
     /// If the filter can be represented by a 5x4 matrix, this
@@ -56,7 +56,7 @@ impl ColorFilter {
     /// If not, this returns `None` and ignores the parameter.
     pub fn to_a_color_matrix(&self) -> Option<[scalar; 20]> {
         let mut matrix: [scalar; 20] = Default::default();
-        unsafe { self.native().asAColorMatrix(&mut matrix[0]) }.if_true_some(matrix)
+        unsafe { self.native().asAColorMatrix(&mut matrix[0]) }.then_some(matrix)
     }
 
     /// Returns `true` if the filter is guaranteed to never change the alpha of a color it filters.

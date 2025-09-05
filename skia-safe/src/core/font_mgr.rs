@@ -53,11 +53,9 @@ impl FontStyleSet {
             )
         }
 
+        let style = style.as_str();
         // Note: Android's FontMgr returns empty style names.
-        let name = style
-            .as_str()
-            .is_empty()
-            .if_false_then_some(|| style.as_str().into());
+        let name = (!style.is_empty()).then(|| style.into());
 
         (font_style, name)
     }

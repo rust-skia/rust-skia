@@ -4,10 +4,9 @@ use std::{
     fmt::Debug,
     hash::{Hash, Hasher},
     marker::PhantomData,
-    mem::{self, MaybeUninit},
+    mem,
     ops::{Deref, DerefMut, Index, IndexMut},
-    ptr::{self, NonNull},
-    slice,
+    ptr, slice,
 };
 
 use skia_bindings::{
@@ -25,65 +24,24 @@ pub(crate) unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT
     &mut *(from as *mut FromT as *mut ToT)
 }
 
-pub(crate) trait IntoOption {
+pub(crate) trait IntoNonNull {
     type Target;
-    fn into_option(self) -> Option<Self::Target>;
+    fn into_non_null(self) -> Option<ptr::NonNull<Self::Target>>;
 }
 
-impl<T> IntoOption for *const T {
-    type Target = *const T;
+impl<T> IntoNonNull for *const T {
+    type Target = T;
 
-    fn into_option(self) -> Option<Self::Target> {
-        if !self.is_null() {
-            Some(self)
-        } else {
-            None
-        }
+    fn into_non_null(self) -> Option<ptr::NonNull<Self::Target>> {
+        ptr::NonNull::new(self as *mut T)
     }
 }
 
-impl<T> IntoOption for *mut T {
-    type Target = ptr::NonNull<T>;
+impl<T> IntoNonNull for *mut T {
+    type Target = T;
 
-    fn into_option(self) -> Option<Self::Target> {
+    fn into_non_null(self) -> Option<ptr::NonNull<Self::Target>> {
         ptr::NonNull::new(self)
-    }
-}
-
-impl IntoOption for bool {
-    type Target = ();
-
-    fn into_option(self) -> Option<Self::Target> {
-        if self {
-            Some(())
-        } else {
-            None
-        }
-    }
-}
-
-pub(crate) trait IfBoolSome {
-    fn if_true_some<V>(self, v: V) -> Option<V>;
-    fn if_false_some<V>(self, v: V) -> Option<V>;
-    fn if_true_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V>;
-    fn if_false_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V>;
-}
-
-impl IfBoolSome for bool {
-    fn if_true_some<V>(self, v: V) -> Option<V> {
-        self.into_option().and(Some(v))
-    }
-
-    fn if_false_some<V>(self, v: V) -> Option<V> {
-        (!self).if_true_some(v)
-    }
-
-    fn if_true_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
-        self.into_option().map(|()| f())
-    }
-
-    fn if_false_then_some<V>(self, f: impl FnOnce() -> V) -> Option<V> {
-        (!self).into_option().map(|()| f())
     }
 }
 
@@ -338,8 +296,8 @@ pub(crate) fn construct<N>(construct: impl FnOnce(*mut N)) -> N {
 
 #[must_use]
 pub(crate) fn try_construct<N>(construct: impl FnOnce(*mut N) -> bool) -> Option<UnsafeCell<N>> {
-    let mut instance = MaybeUninit::uninit();
-    construct(instance.as_mut_ptr()).if_true_some(unsafe { instance.assume_init() }.into())
+    let mut instance = mem::MaybeUninit::uninit();
+    construct(instance.as_mut_ptr()).then_some(unsafe { instance.assume_init() }.into())
 }
 
 impl<N: NativeDrop> Drop for Handle<N> {
@@ -385,18 +343,12 @@ pub(crate) trait NativeSliceAccess<N: NativeDrop> {
 
 impl<N: NativeDrop> NativeSliceAccess<N> for [Handle<N>] {
     fn native(&self) -> &[N] {
-        let ptr = self
-            .first()
-            .map(|f| f.native() as *const N)
-            .unwrap_or(ptr::null());
+        let ptr = self.first().native_ptr_or_null();
         unsafe { slice::from_raw_parts(ptr, self.len()) }
     }
 
     fn native_mut(&mut self) -> &mut [N] {
-        let ptr = self
-            .first_mut()
-            .map(|f| f.native_mut() as *mut N)
-            .unwrap_or(ptr::null_mut());
+        let ptr = self.first_mut().native_ptr_or_null_mut();
         unsafe { slice::from_raw_parts_mut(ptr, self.len()) }
     }
 }
@@ -586,7 +538,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
 
     /// Returns the pointer to the handle.
     #[allow(unused)]
-    pub(crate) fn as_ptr(&self) -> &NonNull<N> {
+    pub(crate) fn as_ptr(&self) -> &ptr::NonNull<N> {
         &self.0
     }
 }
