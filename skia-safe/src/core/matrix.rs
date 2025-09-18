@@ -1,31 +1,11 @@
-use super::scalar_;
-use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
-use skia_bindings::{self as sb, SkMatrix};
 use std::{
     ops::{Index, IndexMut, Mul},
     slice,
 };
 
-bitflags! {
-    // m85: On Windows the SkMatrix_TypeMask is defined as i32,
-    // but we stick to u32 (macOS / Linux), because there is no need to leak
-    // the platform difference to the Rust side.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct TypeMask: u32 {
-        const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as _;
-        const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as _;
-        const SCALE = sb::SkMatrix_TypeMask_kScale_Mask as _;
-        const AFFINE = sb::SkMatrix_TypeMask_kAffine_Mask as _;
-        const PERSPECTIVE = sb::SkMatrix_TypeMask_kPerspective_Mask as _;
-    }
-}
-
-impl TypeMask {
-    const UNKNOWN: u32 = sb::SkMatrix_kUnknown_Mask as _;
-}
-
-pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
-variant_name!(ScaleToFit::Fill);
+use super::scalar_;
+use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
+use skia_bindings::{self as sb, SkMatrix};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -128,11 +108,6 @@ impl Matrix {
         }
     }
 
-    #[deprecated(since = "0.33.0", note = "use Matrix::scale()")]
-    pub fn new_scale(scale: (scalar, scalar)) -> Self {
-        Self::scale(scale)
-    }
-
     #[must_use]
     pub fn scale((sx, sy): (scalar, scalar)) -> Self {
         let mut m = Self::new();
@@ -140,16 +115,17 @@ impl Matrix {
         m
     }
 
-    #[deprecated(since = "0.33.0", note = "use Matrix::translate()")]
-    pub fn new_trans(d: impl Into<Vector>) -> Self {
-        Self::translate(d)
-    }
-
     #[must_use]
     pub fn translate(d: impl Into<Vector>) -> Self {
         let mut m = Self::new();
         m.set_translate(d);
         m
+    }
+
+    #[must_use]
+    pub fn scale_translate((sx, sy): (scalar, scalar), t: impl Into<Vector>) -> Self {
+        let t = t.into();
+        Self::construct(|m| unsafe { sb::C_SkMatrix_ScaleTranslate(sx, sy, t.x, t.y, m) })
     }
 
     #[must_use]
@@ -177,7 +153,12 @@ impl Matrix {
         m.set_skew((kx, ky), None);
         m
     }
+}
 
+pub type ScaleToFit = skia_bindings::SkMatrix_ScaleToFit;
+variant_name!(ScaleToFit::Fill);
+
+impl Matrix {
     #[deprecated(since = "0.0.0", note = "Use rect_2_rect")]
     #[must_use]
     pub fn rect_to_rect(
@@ -207,7 +188,27 @@ impl Matrix {
         );
         m
     }
+}
 
+bitflags! {
+    // m85: On Windows the SkMatrix_TypeMask is defined as i32,
+    // but we stick to u32 (macOS / Linux), because there is no need to leak
+    // the platform difference to the Rust side.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct TypeMask: u32 {
+        const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as _;
+        const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as _;
+        const SCALE = sb::SkMatrix_TypeMask_kScale_Mask as _;
+        const AFFINE = sb::SkMatrix_TypeMask_kAffine_Mask as _;
+        const PERSPECTIVE = sb::SkMatrix_TypeMask_kPerspective_Mask as _;
+    }
+}
+
+impl TypeMask {
+    const UNKNOWN: u32 = sb::SkMatrix_kUnknown_Mask as _;
+}
+
+impl Matrix {
     pub fn get_type(&self) -> TypeMask {
         TypeMask::from_bits_truncate(unsafe { sb::C_SkMatrix_getType(self.native()) } as _)
     }
@@ -837,13 +838,8 @@ impl Matrix {
         self.native_mut().fTypeMask = 0x80;
     }
 
-    pub fn set_scale_translate(
-        &mut self,
-        (sx, sy): (scalar, scalar),
-        t: impl Into<Vector>,
-    ) -> &mut Self {
-        let t = t.into();
-        unsafe { sb::C_SkMatrix_setScaleTranslate(self.native_mut(), sx, sy, t.x, t.y) }
+    pub fn set_scale_translate(&mut self, s: (scalar, scalar), t: impl Into<Vector>) -> &mut Self {
+        *self = Self::scale_translate(s, t);
         self
     }
 

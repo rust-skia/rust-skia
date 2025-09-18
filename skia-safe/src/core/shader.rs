@@ -114,15 +114,35 @@ impl Shader {
         .unwrap()
     }
 
-    /// Return a shader that will compute this shader in a specific color space.
-    /// By default, all shaders operate in the destination (surface) color space.
-    /// The results of a shader are still always converted to the destination - this
-    /// API has no impact on simple shaders or images. Primarily, it impacts shaders
-    /// that perform mathematical operations, like Blend shaders, or runtime shaders.
+    /// Return a shader that will compute this shader in a context such that any child shaders
+    /// return RGBA values converted to the `input_cs` colorspace.
+    ///
+    /// It is then assumed that the RGBA values returned by this shader have been transformed into
+    /// `output_cs` by the shader being wrapped.  By default, shaders are assumed to return values
+    /// in the destination colorspace and premultiplied. Using a different `output_cs` than `input_cs`
+    /// allows custom shaders to replace the color management Skia normally performs w/o forcing
+    /// authors to otherwise manipulate surface/image color info to avoid unnecessary or incorrect
+    /// work.
+    ///
+    /// If the shader is not performing colorspace conversion but needs to operate in the `input_cs`
+    /// then it should have `output_cs` be the same as `input_cs`. Regardless of the `output_cs` here,
+    /// the RGBA values of the returned [`Shader`] are always converted from `output_cs` to the
+    /// destination surface color space.
+    ///
+    /// A `None` `input_cs` is assumed to be the destination CS.
+    /// A `None` `output_cs` is assumed to be the `input_cs`.
     #[must_use]
-    pub fn with_working_color_space(&self, color_space: impl Into<ColorSpace>) -> Self {
+    pub fn with_working_color_space(
+        &self,
+        input_cs: impl Into<Option<ColorSpace>>,
+        output_cs: impl Into<Option<ColorSpace>>,
+    ) -> Self {
         Self::from_ptr(unsafe {
-            sb::C_SkShader_makeWithWorkingColorSpace(self.native(), color_space.into().into_ptr())
+            sb::C_SkShader_makeWithWorkingColorSpace(
+                self.native(),
+                input_cs.into().into_ptr_or_null(),
+                output_cs.into().into_ptr_or_null(),
+            )
         })
         .unwrap()
     }
