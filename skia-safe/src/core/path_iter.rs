@@ -102,12 +102,12 @@ impl<'a> Iterator for PathIter<'a> {
     type Item = PathIterRec<'a>;
 
     /// Holds the current verb, and its associated points
-    /// move:  points()[0]
-    /// line:  points()[0..1]
-    /// quad:  points()[0..2]
-    /// conic: points()[0..2] `f_conic_weight`
-    /// cubic: points()[0..3]
-    /// close: points()[0..1] ... as if close were a line from pts[0] to pts[1]
+    /// move:  `points()[0]`
+    /// line:  `points()[0..1]`
+    /// quad:  `points()[0..2]`
+    /// conic: `points()[0..2]` `conic_weight()`
+    /// cubic: `points()[0..3]`
+    /// close: `points()[0..1]` ... as if close were a line from `pts[0]` to `pts[1]`
     fn next(&mut self) -> Option<Self::Item> {
         try_construct(|r| unsafe { sb::C_SkPathIter_next(self.native_mut(), r) })
             .map(|r| PathIterRec(r.into_inner(), PhantomData))
