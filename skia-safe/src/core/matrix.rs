@@ -159,7 +159,7 @@ pub type ScaleToFit = skia_bindings::SkMatrix_ScaleToFit;
 variant_name!(ScaleToFit::Fill);
 
 impl Matrix {
-    #[deprecated(since = "0.0.0", note = "Use rect_2_rect")]
+    #[deprecated(since = "0.89.0", note = "Use rect_2_rect")]
     #[must_use]
     pub fn rect_to_rect(
         src: impl AsRef<Rect>,
