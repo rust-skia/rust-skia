@@ -87,7 +87,11 @@ mod core {
     assert_impl_all!(ImageInfo: Send, Sync);
     assert_impl_all!(M44: Send, Sync);
     assert_impl_all!(MaskFilter: Send, Sync);
+
     assert_impl_all!(Matrix: Send, Sync);
+    assert_impl_all!(matrix::ScaleToFit: Send, Sync);
+    assert_impl_all!(matrix::TypeMask: Send, Sync);
+
     assert_impl_all!(Paint: Send, Sync);
 
     assert_impl_all!(Path: Send);
@@ -102,6 +106,12 @@ mod core {
     assert_impl_all!(PathDirection: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
     assert_impl_all!(PathFillType: Send, Sync);
+
+    assert_not_impl_all!(PathIter: Send, Sync);
+    assert_not_impl_all!(PathIterRec: Send, Sync);
+    assert_not_impl_all!(PathContourIter: Send, Sync);
+    assert_not_impl_all!(PathContourIterRec: Send, Sync);
+
     assert_not_impl_any!(PathMeasure: Send, Sync);
     assert_impl_all!(PathVerb: Send, Sync);
 
