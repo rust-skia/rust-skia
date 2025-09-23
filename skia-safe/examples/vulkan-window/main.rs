@@ -1,15 +1,15 @@
-#[cfg(not(all(feature = "vulkan", feature = "vulkan-window")))]
+#[cfg(not(feature = "vulkan"))]
 fn main() {
-    println!("To run this example, invoke cargo with --features \"vulkan,vulkan-window\".")
+    println!("To run this example, invoke cargo with --features \"vulkan\".")
 }
 
-#[cfg(all(feature = "vulkan", feature = "vulkan-window"))]
+#[cfg(feature = "vulkan")]
 mod context;
 
-#[cfg(all(feature = "vulkan", feature = "vulkan-window"))]
+#[cfg(feature = "vulkan")]
 mod renderer;
 
-#[cfg(all(feature = "vulkan", feature = "vulkan-window"))]
+#[cfg(feature = "vulkan")]
 fn main() {
     use skia_safe::{Color4f, Paint, Point, Rect};
     use std::sync::Arc;
