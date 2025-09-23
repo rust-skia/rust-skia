@@ -623,6 +623,63 @@ extern "C" void C_SkPaint_setImageFilter(SkPaint* self, SkImageFilter* imageFilt
 }
 
 //
+// core/SkPathIter.h
+//
+
+
+extern "C" void C_SkPathIter_Construct(
+    const SkPoint* points, size_t pointsCount,
+    const SkPathVerb* verbs, size_t verbsCount,
+    const float* conics, size_t conicsCount,
+    SkPathIter* uninitialized) {
+    new (uninitialized) SkPathIter(SkSpan(points, pointsCount), SkSpan(verbs, verbsCount), SkSpan(conics, conicsCount));
+}
+
+extern "C" void C_SkPathIter_destruct(SkPathIter* self) {
+    self->~SkPathIter();
+}
+
+extern "C" bool C_SkPathIter_next(SkPathIter* self, SkPathIter::Rec* unitialized) {
+    auto r = self->next();
+    if (r.has_value()) {
+        new (unitialized) SkPathIter::Rec(*r);
+        return true;
+    }
+    return false;
+}
+
+extern "C" bool C_SkPathIter_peekNextVerb(SkPathIter* self, SkPathVerb* verb) {
+    auto r = self->peekNextVerb();
+    if (r.has_value()) {
+        *verb = *r;
+        return true;
+    }
+    return false;
+}
+
+extern "C" void C_SkPathContourIter_Construct(
+    const SkPoint* points, size_t pointsCount,
+    const SkPathVerb* verbs, size_t verbsCount,
+    const float* conics, size_t conicsCount,
+    SkPathContourIter* uninitialized) {
+    new (uninitialized) SkPathContourIter(SkSpan(points, pointsCount), SkSpan(verbs, verbsCount), SkSpan(conics, conicsCount));
+}
+
+extern "C" void C_SkPathContourIter_destruct(SkPathContourIter* self) {
+    self->~SkPathContourIter();
+}
+
+extern "C" bool C_SkPathContourIter_next(SkPathContourIter* self, SkPathContourIter::Rec* unitialized) {
+    auto r = self->next();
+    if (r.has_value()) {
+        new (unitialized) SkPathContourIter::Rec(*r);
+        return true;
+    }
+    return false;
+}
+
+
+//
 // core/SkPath.h
 //
 
@@ -737,6 +794,10 @@ extern "C" size_t C_SkPath_getVerbs(const SkPath* self, uint8_t* verbs, size_t c
 
 extern "C" void C_SkPath_addPoly(SkPath* self, const SkPoint* points, size_t count, bool close) {
     self->addPoly(SkSpan(points, count), close);
+}
+
+extern "C" void C_SkPath_iter(const SkPath* self, SkPathIter* uninitialized) {
+    new (uninitialized) SkPathIter(self->iter());
 }
 
 extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
@@ -1184,6 +1245,10 @@ extern "C" SkV4 C_SkM44_map(const SkM44* self, float x, float y, float z, float 
 // core/SkMatrix.h
 //
 
+extern "C" void C_SkMatrix_ScaleTranslate(SkScalar sx, SkScalar sy, SkScalar tx, SkScalar ty, SkMatrix* uninitialized) {
+    new (uninitialized) SkMatrix(SkMatrix::ScaleTranslate(sx, sy, tx, ty));
+}
+
 extern "C" bool C_SkMatrix_Equals(const SkMatrix* self, const SkMatrix* rhs) {
     return *self == *rhs;
 }
@@ -1204,16 +1269,21 @@ extern "C" bool C_SkMatrix_hasPerspective(const SkMatrix* self) {
     return self->hasPerspective();
 }
 
+extern "C" bool C_SkMatrix_Rect2Rect(const SkRect* src, const SkRect* dst, SkMatrix::ScaleToFit scaleToFit, SkMatrix* m) {
+    auto r = SkMatrix::Rect2Rect(*src, *dst, scaleToFit);
+    if (r.has_value()) {
+        *m = *r;
+        return true;
+    }
+    return false;
+}
+
 extern "C" bool C_SkMatrix_setPolyToPoly(SkMatrix* self, const SkPoint* src, size_t srcLen, const SkPoint* dst, size_t dstLen) {
     return self->setPolyToPoly(SkSpan(src, srcLen), SkSpan(dst, dstLen));
 }
 
 extern "C" bool C_SkMatrix_invert(const SkMatrix* self, SkMatrix* inverse) {
     return self->invert(inverse);
-}
-
-extern "C" void C_SkMatrix_setScaleTranslate(SkMatrix* self, SkScalar sx, SkScalar sy, SkScalar tx, SkScalar ty) {
-    self->setScaleTranslate(sx, sy, tx, ty);
 }
 
 extern "C" bool C_SkMatrix_isFinite(const SkMatrix* self) {
@@ -2461,8 +2531,8 @@ extern "C" SkShader* C_SkShader_makeWithColorFilter(const SkShader* self, SkColo
     return self->makeWithColorFilter(sp(colorFilter)).release();
 }
 
-extern "C" SkShader* C_SkShader_makeWithWorkingColorSpace(const SkShader* self, SkColorSpace* colorSpace) {
-    return self->makeWithWorkingColorSpace(sp(colorSpace)).release();
+extern "C" SkShader* C_SkShader_makeWithWorkingColorSpace(const SkShader* self, SkColorSpace* inputCS, SkColorSpace* outputCS) {
+    return self->makeWithWorkingColorSpace(sp(inputCS), sp(outputCS)).release();
 }
 
 extern "C" SkShader* C_SkShaders_Empty() {

@@ -2,9 +2,10 @@ use std::{fmt, marker::PhantomData, mem::forget, ptr};
 
 use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
 
+use crate::PathIter;
 use crate::{
-    interop::DynamicMemoryWStream, matrix::ApplyPerspectiveClip, path_types, prelude::*, scalar,
-    Arc, Data, Matrix, PathDirection, PathFillType, PathVerb, Point, RRect, Rect, Vector,
+    interop::DynamicMemoryWStream, path_types, prelude::*, scalar, Data, Matrix, PathDirection,
+    PathFillType, PathVerb, Point, RRect, Rect, Vector,
 };
 
 /// [`Path`] contain geometry. [`Path`] may be empty, or contain one or more verbs that
@@ -82,7 +83,6 @@ impl fmt::Debug for Path {
             .field("is_convex", &self.is_convex())
             .field("is_oval", &self.is_oval())
             .field("is_rrect", &self.is_rrect())
-            .field("is_arc", &self.is_arc())
             .field("is_empty", &self.is_empty())
             .field("is_last_contour_closed", &self.is_last_contour_closed())
             .field("is_finite", &self.is_finite())
@@ -363,15 +363,6 @@ impl Path {
     pub fn is_rrect(&self) -> Option<RRect> {
         let mut rrect = RRect::default();
         unsafe { self.native().isRRect(rrect.native_mut()) }.then_some(rrect)
-    }
-
-    /// Returns [`Arc`] if path is representable as an oval arc. In other words, could this
-    /// path be drawn using `Canvas::draw_arc()`.
-    ///
-    /// Returns: [`Arc`] if [`Path`] contains only a single arc from an oval
-    pub fn is_arc(&self) -> Option<Arc> {
-        let mut arc = Arc::default();
-        unsafe { self.native().isArc(arc.native_mut()) }.then_some(arc)
     }
 
     /// Returns if [`Path`] is empty.
@@ -767,38 +758,19 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_transform>
     #[must_use]
     pub fn with_transform(&self, matrix: &Matrix) -> Path {
-        self.with_transform_with_perspective_clip(matrix, ApplyPerspectiveClip::Yes)
-    }
-
-    /// Transforms verb array, [`Point`] array, and weight by matrix.
-    /// transform may change verbs and increase their number.
-    ///
-    /// * `matrix` - [`Matrix`] to apply to [`Path`]
-    /// * `pc` - whether to apply perspective clipping
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_transform>
-    #[must_use]
-    pub fn with_transform_with_perspective_clip(
-        &self,
-        matrix: &Matrix,
-        perspective_clip: ApplyPerspectiveClip,
-    ) -> Path {
         let mut path = Path::default();
-        unsafe {
-            self.native()
-                .transform(matrix.native(), path.native_mut(), perspective_clip)
-        };
+        unsafe { self.native().transform(matrix.native(), path.native_mut()) };
         path
     }
 
     #[must_use]
-    pub fn make_transform(&self, m: &Matrix, pc: impl Into<Option<ApplyPerspectiveClip>>) -> Path {
-        self.with_transform_with_perspective_clip(m, pc.into().unwrap_or(ApplyPerspectiveClip::Yes))
+    pub fn make_transform(&self, m: &Matrix) -> Path {
+        self.with_transform(m)
     }
 
     #[must_use]
     pub fn make_scale(&self, (sx, sy): (scalar, scalar)) -> Path {
-        self.make_transform(&Matrix::scale((sx, sy)), ApplyPerspectiveClip::No)
+        self.make_transform(&Matrix::scale((sx, sy)))
     }
 
     /// Returns last point on [`Path`]. Returns `None` if [`Point`] array is empty,
@@ -816,7 +788,7 @@ impl Path {
 
 /// SegmentMask constants correspond to each drawing Verb type in [`crate::Path`]; for instance, if
 /// [`crate::Path`] only contains lines, only the [`crate::path::SegmentMask::LINE`] bit is set.
-pub use path_types::PathSegmentMask as SegmentMask;
+pub type SegmentMask = path_types::PathSegmentMask;
 
 impl Path {
     /// Returns a mask, where each set bit corresponds to a [`SegmentMask`] constant
@@ -833,17 +805,47 @@ impl Path {
 
 /// Verb instructs [`Path`] how to interpret one or more [`Point`] and optional conic weight;
 /// manage contour, and terminate [`Path`].
-pub use sb::SkPath_Verb as Verb;
+pub type Verb = sb::SkPath_Verb;
 variant_name!(Verb::Line);
 
 // SK_HIDE_PATH_EDIT_METHODS
 
 impl Path {
-    /// Returns a copy of this path in the current state, and resets the path to empty.
-    pub fn detach(&mut self) -> Self {
-        let result = self.clone();
-        self.reset();
-        result
+    /// Specifies whether [`Path`] is volatile; whether it will be altered or discarded
+    /// by the caller after it is drawn. [`Path`] by default have volatile set `false`, allowing
+    /// `Device` to attach a cache of data which speeds repeated drawing.
+    ///
+    /// Mark temporary paths, discarded or modified after use, as volatile
+    /// to inform `Device` that the path need not be cached.
+    ///
+    /// Mark animating [`Path`] volatile to improve performance.
+    /// Mark unchanging [`Path`] non-volatile to improve repeated rendering.
+    ///
+    /// raster surface [`Path`] draws are affected by volatile for some shadows.
+    /// GPU surface [`Path`] draws are affected by volatile for some shadows and concave geometries.
+    ///
+    /// * `is_volatile` - `true` if caller will alter [`Path`] after drawing
+    ///
+    /// Returns: reference to [`Path`]
+    pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
+        self.native_mut().set_fIsVolatile(is_volatile as _);
+        self
+    }
+
+    /// Exchanges the verb array, [`Point`] array, weights, and [`PathFillType`] with other.
+    /// Cached state is also exchanged. `swap()` internally exchanges pointers, so
+    /// it is lightweight and does not allocate memory.
+    ///
+    /// `swap()` usage has largely been replaced by PartialEq.
+    /// [`Path`] do not copy their content on assignment until they are written to,
+    /// making assignment as efficient as swap().
+    ///
+    /// * `other` - [`Path`] exchanged by value
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_swap>
+    pub fn swap(&mut self, other: &mut Path) -> &mut Self {
+        unsafe { self.native_mut().swap(other.native_mut()) }
+        self
     }
 
     /// Interpolates between [`Path`] with [`Point`] array of equal size.
@@ -889,6 +891,15 @@ impl Path {
         self.native_mut().set_fFillType(inverse);
         self
     }
+}
+
+impl Path {
+    /// Returns a copy of this path in the current state, and resets the path to empty.
+    pub fn detach(&mut self) -> Self {
+        let result = self.clone();
+        self.reset();
+        result
+    }
 
     /// Sets [`Path`] to its initial state.
     /// Removes verb array, [`Point`] array, and weights, and sets FillType to `Winding`.
@@ -918,45 +929,6 @@ impl Path {
         self
     }
 
-    /// Specifies whether [`Path`] is volatile; whether it will be altered or discarded
-    /// by the caller after it is drawn. [`Path`] by default have volatile set `false`, allowing
-    /// `Device` to attach a cache of data which speeds repeated drawing.
-    ///
-    /// Mark temporary paths, discarded or modified after use, as volatile
-    /// to inform `Device` that the path need not be cached.
-    ///
-    /// Mark animating [`Path`] volatile to improve performance.
-    /// Mark unchanging [`Path`] non-volatile to improve repeated rendering.
-    ///
-    /// raster surface [`Path`] draws are affected by volatile for some shadows.
-    /// GPU surface [`Path`] draws are affected by volatile for some shadows and concave geometries.
-    ///
-    /// * `is_volatile` - `true` if caller will alter [`Path`] after drawing
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
-        self.native_mut().set_fIsVolatile(is_volatile as _);
-        self
-    }
-
-    /// Exchanges the verb array, [`Point`] array, weights, and [`PathFillType`] with other.
-    /// Cached state is also exchanged. `swap()` internally exchanges pointers, so
-    /// it is lightweight and does not allocate memory.
-    ///
-    /// `swap()` usage has largely been replaced by PartialEq.
-    /// [`Path`] do not copy their content on assignment until they are written to,
-    /// making assignment as efficient as swap().
-    ///
-    /// * `other` - [`Path`] exchanged by value
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_swap>
-    pub fn swap(&mut self, other: &mut Path) -> &mut Self {
-        unsafe { self.native_mut().swap(other.native_mut()) }
-        self
-    }
-}
-
-impl Path {
     /// Grows [`Path`] verb array and [`Point`] array to contain `extra_pt_count` additional [`Point`].
     /// May improve performance and use less memory by
     /// reducing the number and size of allocations when creating [`Path`].
@@ -998,14 +970,11 @@ impl Path {
         self
     }
 
-    /// Adds beginning of contour at [`Point`] (x, y).
+    /// Specifies the beginning of contour. If the previous verb was a "move" verb, then this just
+    /// replaces the point value of that move, otherwise it appends a new "move" verb to the path
+    /// using the point.
     ///
-    /// * `x` - x-axis value of contour start
-    /// * `y` - y-axis value of contour start
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_moveTo>
+    /// Thus, each contour can only have 1 move verb in it (the last one specified).
     pub fn move_to(&mut self, p: impl Into<Point>) -> &mut Self {
         let p = p.into();
         unsafe {
@@ -1721,21 +1690,8 @@ impl Path {
     ///
     /// * `matrix` - [`Matrix`] to apply to [`Path`]
     pub fn transform(&mut self, matrix: &Matrix) -> &mut Self {
-        self.transform_with_perspective_clip(matrix, ApplyPerspectiveClip::Yes)
-    }
-
-    /// Transforms verb array, [`Point`] array, and weight by matrix.
-    /// transform may change verbs and increase their number.
-    ///
-    /// * `matrix` - [`Matrix`] to apply to [`Path`]
-    /// * `pc` - whether to apply perspective clipping
-    pub fn transform_with_perspective_clip(
-        &mut self,
-        matrix: &Matrix,
-        pc: ApplyPerspectiveClip,
-    ) -> &mut Self {
         let self_ptr = self.native_mut() as *mut _;
-        unsafe { self.native().transform(matrix.native(), self_ptr, pc) };
+        unsafe { self.native().transform(matrix.native(), self_ptr) };
         self
     }
 
@@ -1748,12 +1704,18 @@ impl Path {
         unsafe { self.native_mut().setLastPt(p.x, p.y) };
         self
     }
+
+    pub fn iter(&self) -> PathIter {
+        PathIter::from_native_c(construct(|iter| unsafe {
+            sb::C_SkPath_iter(self.native(), iter)
+        }))
+    }
 }
 
 /// Iterates through verb array, and associated [`Point`] array and conic weight.
 /// Provides options to treat open contours as closed, and to ignore
 /// degenerate data.
-#[repr(C)]
+#[repr(transparent)]
 pub struct Iter<'a>(SkPath_Iter, PhantomData<&'a Handle<SkPath>>);
 
 impl NativeAccess for Iter<'_> {
@@ -1807,8 +1769,8 @@ impl Iter<'_> {
     /// Returns: [`Iter`] of path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_Iter_const_SkPath>
-    pub fn new(path: &Path, force_close: bool) -> Iter {
-        Iter(
+    pub fn new(path: &Path, force_close: bool) -> Self {
+        Self(
             unsafe { SkPath_Iter::new1(path.native(), force_close) },
             PhantomData,
         )
@@ -1890,7 +1852,7 @@ impl Iterator for Iter<'_> {
     }
 }
 
-#[repr(C)]
+#[repr(transparent)]
 #[deprecated(
     since = "0.30.0",
     note = "User Iter instead, RawIter will soon be removed."

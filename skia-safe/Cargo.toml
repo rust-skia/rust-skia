@@ -18,7 +18,7 @@ categories = [
 ]
 license = "MIT"
 
-version = "0.88.0"
+version = "0.89.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2021"
 rust-version.workspace = true
@@ -62,7 +62,7 @@ vulkan-window = ["dep:ash", "dep:vulkano", "winit/rwh_05"]
 
 [dependencies]
 bitflags = "2.0"
-skia-bindings = { version = "=0.88.0", path = "../skia-bindings", default-features = false }
+skia-bindings = { version = "=0.89.0", path = "../skia-bindings", default-features = false }
 
 # vulkan-window example
 ash = { version = "^0.38.0", optional = true }

@@ -1,34 +1,11 @@
-use super::scalar_;
-use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
-use skia_bindings::{self as sb, SkMatrix};
 use std::{
     ops::{Index, IndexMut, Mul},
     slice,
 };
 
-pub use skia_bindings::SkApplyPerspectiveClip as ApplyPerspectiveClip;
-variant_name!(ApplyPerspectiveClip::Yes);
-
-bitflags! {
-    // m85: On Windows the SkMatrix_TypeMask is defined as i32,
-    // but we stick to u32 (macOS / Linux), because there is no need to leak
-    // the platform difference to the Rust side.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct TypeMask: u32 {
-        const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as _;
-        const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as _;
-        const SCALE = sb::SkMatrix_TypeMask_kScale_Mask as _;
-        const AFFINE = sb::SkMatrix_TypeMask_kAffine_Mask as _;
-        const PERSPECTIVE = sb::SkMatrix_TypeMask_kPerspective_Mask as _;
-    }
-}
-
-impl TypeMask {
-    const UNKNOWN: u32 = sb::SkMatrix_kUnknown_Mask as _;
-}
-
-pub use skia_bindings::SkMatrix_ScaleToFit as ScaleToFit;
-variant_name!(ScaleToFit::Fill);
+use super::scalar_;
+use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
+use skia_bindings::{self as sb, SkMatrix};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -131,11 +108,6 @@ impl Matrix {
         }
     }
 
-    #[deprecated(since = "0.33.0", note = "use Matrix::scale()")]
-    pub fn new_scale(scale: (scalar, scalar)) -> Self {
-        Self::scale(scale)
-    }
-
     #[must_use]
     pub fn scale((sx, sy): (scalar, scalar)) -> Self {
         let mut m = Self::new();
@@ -143,16 +115,17 @@ impl Matrix {
         m
     }
 
-    #[deprecated(since = "0.33.0", note = "use Matrix::translate()")]
-    pub fn new_trans(d: impl Into<Vector>) -> Self {
-        Self::translate(d)
-    }
-
     #[must_use]
     pub fn translate(d: impl Into<Vector>) -> Self {
         let mut m = Self::new();
         m.set_translate(d);
         m
+    }
+
+    #[must_use]
+    pub fn scale_translate((sx, sy): (scalar, scalar), t: impl Into<Vector>) -> Self {
+        let t = t.into();
+        Self::construct(|m| unsafe { sb::C_SkMatrix_ScaleTranslate(sx, sy, t.x, t.y, m) })
     }
 
     #[must_use]
@@ -180,15 +153,20 @@ impl Matrix {
         m.set_skew((kx, ky), None);
         m
     }
+}
 
+pub type ScaleToFit = skia_bindings::SkMatrix_ScaleToFit;
+variant_name!(ScaleToFit::Fill);
+
+impl Matrix {
+    #[deprecated(since = "0.89.0", note = "Use rect_2_rect")]
     #[must_use]
     pub fn rect_to_rect(
         src: impl AsRef<Rect>,
         dst: impl AsRef<Rect>,
         scale_to_fit: impl Into<Option<ScaleToFit>>,
     ) -> Option<Self> {
-        #[allow(deprecated)]
-        Self::from_rect_to_rect(src, dst, scale_to_fit.into().unwrap_or(ScaleToFit::Fill))
+        Self::rect_2_rect(src, dst, scale_to_fit.into().unwrap_or(ScaleToFit::Fill))
     }
 
     #[must_use]
@@ -210,7 +188,27 @@ impl Matrix {
         );
         m
     }
+}
 
+bitflags! {
+    // m85: On Windows the SkMatrix_TypeMask is defined as i32,
+    // but we stick to u32 (macOS / Linux), because there is no need to leak
+    // the platform difference to the Rust side.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct TypeMask: u32 {
+        const IDENTITY = sb::SkMatrix_TypeMask_kIdentity_Mask as _;
+        const TRANSLATE = sb::SkMatrix_TypeMask_kTranslate_Mask as _;
+        const SCALE = sb::SkMatrix_TypeMask_kScale_Mask as _;
+        const AFFINE = sb::SkMatrix_TypeMask_kAffine_Mask as _;
+        const PERSPECTIVE = sb::SkMatrix_TypeMask_kPerspective_Mask as _;
+    }
+}
+
+impl TypeMask {
+    const UNKNOWN: u32 = sb::SkMatrix_kUnknown_Mask as _;
+}
+
+impl Matrix {
     pub fn get_type(&self) -> TypeMask {
         TypeMask::from_bits_truncate(unsafe { sb::C_SkMatrix_getType(self.native()) } as _)
     }
@@ -539,34 +537,38 @@ impl Matrix {
         self
     }
 
-    #[deprecated(
-        since = "0.88.0",
-        note = "Legacy matrix rect-to-rect function, may be removed soon"
-    )]
-    pub fn set_rect_to_rect(
-        &mut self,
-        src: impl AsRef<Rect>,
-        dst: impl AsRef<Rect>,
-        stf: ScaleToFit,
-    ) -> bool {
-        unsafe {
-            self.native_mut()
-                .setRectToRect(src.as_ref().native(), dst.as_ref().native(), stf)
-        }
-    }
-
-    #[deprecated(
-        since = "0.88.0",
-        note = "Legacy matrix rect-to-rect function, may be removed soon"
-    )]
+    #[deprecated(since = "0.88.0", note = "Use rect_2_rect")]
     pub fn from_rect_to_rect(
         src: impl AsRef<Rect>,
         dst: impl AsRef<Rect>,
         stf: ScaleToFit,
     ) -> Option<Self> {
+        Self::rect_2_rect(src, dst, stf)
+    }
+
+    pub fn rect_2_rect(
+        src: impl AsRef<Rect>,
+        dst: impl AsRef<Rect>,
+        stf: impl Into<Option<ScaleToFit>>,
+    ) -> Option<Self> {
         let mut m = Self::new_identity();
-        #[allow(deprecated)]
-        m.set_rect_to_rect(src, dst, stf).then_some(m)
+        unsafe {
+            sb::C_SkMatrix_Rect2Rect(
+                src.as_ref().native(),
+                dst.as_ref().native(),
+                stf.into().unwrap_or(ScaleToFit::Fill),
+                m.native_mut(),
+            )
+        }
+        .then_some(m)
+    }
+
+    pub fn rect_to_rect_or_identity(
+        src: impl AsRef<Rect>,
+        dst: impl AsRef<Rect>,
+        stf: impl Into<Option<ScaleToFit>>,
+    ) -> Self {
+        Self::rect_2_rect(src, dst, stf).unwrap_or(Matrix::new_identity())
     }
 
     pub fn poly_to_poly(src: &[Point], dst: &[Point]) -> Option<Matrix> {
@@ -738,23 +740,17 @@ impl Matrix {
         vec
     }
 
-    pub fn map_rect(&self, rect: impl AsRef<Rect>) -> (Rect, bool) {
-        self.map_rect_with_perspective_clip(rect, ApplyPerspectiveClip::Yes)
-    }
-
-    pub fn map_rect_with_perspective_clip(
-        &self,
-        rect: impl AsRef<Rect>,
-        perspective_clip: ApplyPerspectiveClip,
-    ) -> (Rect, bool) {
-        let mut rect = *rect.as_ref();
-        let ptr = rect.native_mut();
-        let rect_stays_rect = unsafe { self.native().mapRect(ptr, ptr, perspective_clip) };
-        (rect, rect_stays_rect)
+    pub fn map_rect(&self, src: impl AsRef<Rect>) -> (Rect, bool) {
+        let mut dst = Rect::default();
+        let rect_stays_rect = unsafe {
+            self.native()
+                .mapRect(dst.native_mut(), src.as_ref().native())
+        };
+        (dst, rect_stays_rect)
     }
 
     pub fn map_rect_to_quad(&self, rect: impl AsRef<Rect>) -> [Point; 4] {
-        let mut quad = rect.as_ref().to_quad();
+        let mut quad = rect.as_ref().to_quad(None);
         self.map_points_inplace(quad.as_mut());
         quad
     }
@@ -842,13 +838,8 @@ impl Matrix {
         self.native_mut().fTypeMask = 0x80;
     }
 
-    pub fn set_scale_translate(
-        &mut self,
-        (sx, sy): (scalar, scalar),
-        t: impl Into<Vector>,
-    ) -> &mut Self {
-        let t = t.into();
-        unsafe { sb::C_SkMatrix_setScaleTranslate(self.native_mut(), sx, sy, t.x, t.y) }
+    pub fn set_scale_translate(&mut self, s: (scalar, scalar), t: impl Into<Vector>) -> &mut Self {
+        *self = Self::scale_translate(s, t);
         self
     }
 

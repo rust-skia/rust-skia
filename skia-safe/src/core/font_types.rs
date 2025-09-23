@@ -104,7 +104,7 @@ impl<T: EncodedText> EncodedText for &T {
     }
 }
 
-pub use skia_bindings::SkFontHinting as FontHinting;
+pub type FontHinting = skia_bindings::SkFontHinting;
 variant_name!(FontHinting::Full);
 
 #[cfg(test)]

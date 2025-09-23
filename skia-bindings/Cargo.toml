@@ -9,7 +9,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["external-ffi-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"]
 license = "MIT"
 
-version = "0.88.0"
+version = "0.89.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition = "2021"
 rust-version.workspace = true
@@ -31,7 +31,7 @@ doctest = false
 # Metadata used from inside the packaged crate that defines where to download the Skia archive from.
 # Note: use short hashes here because of filesystem path size restrictions.
 [package.metadata]
-skia = "m140-0.87.4"
+skia = "m141-0.88.0"
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf"]

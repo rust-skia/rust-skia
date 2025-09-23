@@ -192,6 +192,7 @@ impl fmt::Debug for ParagraphStyle {
             .field("effective_align", &self.effective_align())
             .field("hinting_is_on", &self.hinting_is_on())
             .field("replace_tab_characters", &self.replace_tab_characters())
+            .field("fake_missing_font_styles", &self.fake_missing_font_styles())
             .finish()
     }
 }
@@ -299,6 +300,15 @@ impl ParagraphStyle {
 
     pub fn turn_hinting_off(&mut self) -> &mut Self {
         self.native_mut().fHintingIsOn = false;
+        self
+    }
+
+    pub fn fake_missing_font_styles(&self) -> bool {
+        self.native().fFakeMissingFontStyles
+    }
+
+    pub fn set_fake_missing_font_styles(&mut self, value: bool) -> &mut Self {
+        self.native_mut().fFakeMissingFontStyles = value;
         self
     }
 

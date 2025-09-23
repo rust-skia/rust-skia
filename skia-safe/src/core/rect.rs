@@ -10,7 +10,7 @@ use crate::{
         is_finite,
         safe32::{sk32, sk64},
     },
-    Contains, IPoint, ISize, IVector, Point, Size, Vector,
+    Contains, IPoint, ISize, IVector, PathDirection, Point, Size, Vector,
 };
 use skia_bindings::{self as sb, SkIRect, SkRect};
 
@@ -502,10 +502,26 @@ impl Rect {
         Point::from((self.right, self.bottom))
     }
 
-    pub fn to_quad(self) -> [Point; 4] {
-        let mut quad = [Point::default(); 4];
-        unsafe { self.native().toQuad(quad.native_mut().as_mut_ptr()) }
-        quad
+    pub fn to_quad(&self, dir: impl Into<Option<PathDirection>>) -> [Point; 4] {
+        let mut pts = [Point::default(); 4];
+        self.copy_to_quad(&mut pts, dir);
+        pts
+    }
+
+    pub fn copy_to_quad(&self, pts: &mut [Point], dir: impl Into<Option<PathDirection>>) {
+        debug_assert!(pts.len() >= 4);
+        pts[0] = self.tl();
+        pts[2] = self.br();
+        match dir.into().unwrap_or(PathDirection::CW) {
+            PathDirection::CW => {
+                pts[1] = self.tr();
+                pts[3] = self.bl();
+            }
+            PathDirection::CCW => {
+                pts[1] = self.bl();
+                pts[3] = self.tr();
+            }
+        }
     }
 
     pub fn set_empty(&mut self) {

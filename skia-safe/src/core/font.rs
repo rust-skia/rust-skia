@@ -7,7 +7,7 @@ use crate::{
     Path, Point, Rect, Typeface, Unichar,
 };
 
-pub use skia_bindings::SkFont_Edging as Edging;
+pub type Edging = skia_bindings::SkFont_Edging;
 variant_name!(Edging::Alias);
 
 pub type Font = Handle<SkFont>;

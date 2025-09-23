@@ -1,10 +1,11 @@
 use super::{FontArguments, FontFamilies, TextBaseline, TextShadow};
 use crate::{
+    font,
     interop::{self, AsStr, FromStrs, SetStr},
     prelude::*,
     scalar,
     textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE},
-    Color, FontMetrics, FontStyle, Paint, Typeface,
+    Color, FontHinting, FontMetrics, FontStyle, Paint, Typeface,
 };
 use skia_bindings as sb;
 use std::{fmt, ops::Range};
@@ -247,6 +248,9 @@ impl fmt::Debug for TextStyle {
             .field("locale", &self.locale())
             .field("text_baseline", &self.text_baseline())
             .field("is_placeholder", &self.is_placeholder())
+            .field("font_edging", &self.font_edging())
+            .field("subpixel", &self.subpixel())
+            .field("font_hinting", &self.font_hinting())
             .finish()
     }
 }
@@ -579,6 +583,33 @@ impl TextStyle {
     pub fn set_placeholder(&mut self) -> &mut Self {
         self.native_mut().fIsPlaceholder = true;
         self
+    }
+
+    pub fn set_font_edging(&mut self, edging: font::Edging) -> &mut Self {
+        self.native_mut().fEdging = edging;
+        self
+    }
+
+    pub fn font_edging(&self) -> font::Edging {
+        self.native().fEdging
+    }
+
+    pub fn set_subpixel(&mut self, subpixel: bool) -> &mut Self {
+        self.native_mut().fSubpixel = subpixel;
+        self
+    }
+
+    pub fn subpixel(&self) -> bool {
+        self.native().fSubpixel
+    }
+
+    pub fn set_font_hinting(&mut self, hinting: FontHinting) -> &mut Self {
+        self.native_mut().fHinting = hinting;
+        self
+    }
+
+    pub fn font_hinting(&self) -> FontHinting {
+        self.native().fHinting
     }
 }
 
