@@ -53,7 +53,7 @@ pub fn jobs(workflow: &Workflow) -> Vec<Job> {
 }
 
 pub fn qa_jobs() -> Vec<Job> {
-    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp,vulkan-window";
+    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp";
     [
         Job {
             name: "stable-all-features".into(),
@@ -250,5 +250,5 @@ fn android_targets() -> Vec<TargetConf> {
 fn wasm_targets() -> Vec<TargetConf> {
     // Compiling ureq-proto v0.3.0
     //   error[E0277]: the trait bound `SystemRandom: ring::rand::SecureRandom` is not satisfied
-    [TargetConf::new("wasm32-unknown-emscripten", "").disable("ureq")].into()
+    [TargetConf::new("wasm32-unknown-emscripten", "").disable("ureq,x11,wayland,vulkan")].into()
 }

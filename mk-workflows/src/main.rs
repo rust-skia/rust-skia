@@ -34,6 +34,14 @@ pub struct Workflow {
     host_bin_ext: &'static str,
 }
 
+impl fmt::Display for Workflow {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.kind.fmt(f)?;
+        f.write_str(": ")?;
+        self.host_os.fmt(f)
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 enum WorkflowKind {
     QA,
@@ -81,6 +89,14 @@ pub struct Job {
     example_args: Option<String>,
 }
 
+impl fmt::Display for Job {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.name.fmt(f)?;
+        f.write_str(", features: ")?;
+        self.features.fmt(f)
+    }
+}
+
 fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let host_os = workflow.host_os;
     let job_template = workflow.job_template;
@@ -110,7 +126,8 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
 
         let targets: Vec<String> = targets
             .iter()
-            .map(|t| build_target(workflow, job, t).indented(2))
+            .filter_map(|t| build_target(workflow, job, t))
+            .map(|rendered| rendered.indented(2))
             .collect();
 
         parts.extend(targets);
@@ -175,8 +192,17 @@ fn macosx_deployment_target(
     None
 }
 
-fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> String {
+fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> Option<String> {
     let features = effective_features(workflow, job, target);
+    println!("Building: {workflow}, job: `{job}`, target `{target}` with effective features `{features}`");
+    if workflow.kind == WorkflowKind::Release && features != job.features {
+        println!(
+            ">>> Effective feature set `{features}` of a release workflow, does not match job features: `{}`, skipping.",
+            job.features
+        );
+        return None;
+    }
+
     let native_target = workflow.host_target == target.target.to_string();
     let example_args = if native_target {
         job.example_args.clone()
@@ -207,7 +233,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> String {
         .map(|(name, value)| (name.to_string(), value.to_string()))
         .collect();
 
-    render_template(TARGET_TEMPLATE, &replacements)
+    Some(render_template(TARGET_TEMPLATE, &replacements))
 }
 
 fn effective_features(workflow: &Workflow, job: &Job, target: &TargetConf) -> Features {
@@ -243,6 +269,12 @@ struct TargetConf {
     disabled_features: Features,
 }
 
+impl fmt::Display for TargetConf {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.target.fmt(f)
+    }
+}
+
 impl TargetConf {
     pub fn new(target: impl AsRef<str>, platform_features: impl Into<Features>) -> Self {
         Self {
@@ -266,7 +298,7 @@ impl TargetConf {
     }
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, PartialEq, Eq)]
 struct Features(HashSet<String>);
 
 impl Features {

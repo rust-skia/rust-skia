@@ -260,7 +260,7 @@ cargo run --example gl-window --features gl,x11
 An example application that opens a Window and renders a blue rectangle using [Vulkano](https://github.com/vulkano-rs/vulkano) (contributed by [@samizdatco](https://github.com/samizdatco) in [#1066](https://github.com/rust-skia/rust-skia/pull/1066))
 
 ```bash
-cargo run --example vulkan-window --features "vulkan,vulkan-window"
+cargo run --example vulkan-window --features "vulkan"
 ```
 
 To add Vulkan support to your system, the easiest way is to install the [LunarG SDK](https://vulkan.lunarg.com/sdk/home), and enable "System Global Installation" in the installer.
