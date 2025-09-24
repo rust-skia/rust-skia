@@ -48,7 +48,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features "d3d,gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -65,7 +65,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-pc-windows-msvc
+        cargo build -p skia-safe --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -77,19 +77,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
+        cargo clippy --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
+        cargo test --all --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: true
       run: |
-        cargo run --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" --driver cpu --driver pdf --driver svg
+        cargo run --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" --driver cpu --driver pdf --driver svg
 
     - name: 'Upload skia-org example images'
       if: true
@@ -152,7 +152,7 @@ jobs:
       run: |
         rustup target add x86_64-pc-windows-msvc
 
-    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features "d3d,gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -169,7 +169,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-pc-windows-msvc
+        cargo build -p skia-safe --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -181,19 +181,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
+        cargo clippy --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
+        cargo test --all --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "d3d,gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false

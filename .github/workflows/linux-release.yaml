@@ -41,7 +41,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features '
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features ""'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -118,7 +118,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features '
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features ""'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -195,7 +195,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features '
+    - name: 'Build skia-safe for aarch64-linux-android with features ""'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -272,7 +272,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features '
+    - name: 'Build skia-safe for x86_64-linux-android with features ""'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -349,7 +349,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features '
+    - name: 'Build skia-safe for i686-linux-android with features ""'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -426,7 +426,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features '
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features ""'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -528,7 +528,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -605,7 +605,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -682,7 +682,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -759,7 +759,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -836,7 +836,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl'
+    - name: 'Build skia-safe for i686-linux-android with features "gl"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -913,7 +913,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features "gl"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1015,7 +1015,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features vulkan'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "vulkan"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1092,7 +1092,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features vulkan'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "vulkan"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1169,7 +1169,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features vulkan'
+    - name: 'Build skia-safe for aarch64-linux-android with features "vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1246,7 +1246,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features vulkan'
+    - name: 'Build skia-safe for x86_64-linux-android with features "vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1323,7 +1323,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features vulkan'
+    - name: 'Build skia-safe for i686-linux-android with features "vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1395,83 +1395,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features vulkan'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "vulkan" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "vulkan" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "vulkan" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "vulkan" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-textlayout:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -1502,7 +1425,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features textlayout'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "textlayout"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1579,7 +1502,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features textlayout'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "textlayout"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1656,7 +1579,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features textlayout'
+    - name: 'Build skia-safe for aarch64-linux-android with features "textlayout"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1733,7 +1656,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features textlayout'
+    - name: 'Build skia-safe for x86_64-linux-android with features "textlayout"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1810,7 +1733,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features textlayout'
+    - name: 'Build skia-safe for i686-linux-android with features "textlayout"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -1887,7 +1810,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features textlayout'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features "textlayout"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -1989,7 +1912,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl,textlayout"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2066,7 +1989,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl,textlayout"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2143,7 +2066,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,textlayout'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,textlayout"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2220,7 +2143,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,textlayout'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,textlayout"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2297,7 +2220,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,textlayout'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,textlayout"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2374,7 +2297,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features "gl,textlayout"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2476,7 +2399,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "textlayout,vulkan"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2553,7 +2476,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "textlayout,vulkan"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -2630,7 +2553,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-linux-android with features "textlayout,vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2707,7 +2630,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-linux-android with features "textlayout,vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2784,7 +2707,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features textlayout,vulkan'
+    - name: 'Build skia-safe for i686-linux-android with features "textlayout,vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -2856,83 +2779,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features textlayout,vulkan'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "textlayout,vulkan" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "textlayout,vulkan" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "textlayout,vulkan" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "textlayout,vulkan" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-gl-textlayout-vulkan:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -2963,7 +2809,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl,textlayout,vulkan"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3040,7 +2886,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl,textlayout,vulkan"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3117,7 +2963,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,textlayout,vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3194,7 +3040,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,textlayout,vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3271,7 +3117,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,textlayout,vulkan'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,textlayout,vulkan"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3343,83 +3189,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,vulkan'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "gl,textlayout,vulkan" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "gl,textlayout,vulkan" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "gl,textlayout,vulkan" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "gl,textlayout,vulkan" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-gl-x11:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -3450,7 +3219,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3527,7 +3296,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -3604,7 +3373,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3681,7 +3450,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3758,7 +3527,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,x11'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -3830,83 +3599,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,x11'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "gl,x11" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "gl,x11" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "gl,x11" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "gl,x11" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-gl-textlayout-x11:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -3937,7 +3629,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl,textlayout,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4014,7 +3706,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl,textlayout,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4091,7 +3783,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,textlayout,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4168,7 +3860,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,textlayout,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4245,7 +3937,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,textlayout,x11'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,textlayout,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4317,83 +4009,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,textlayout,x11'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "gl,textlayout,x11" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "gl,textlayout,x11" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "gl,textlayout,x11" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "gl,textlayout,x11" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-egl-gl-svg-textlayout-vulkan-wayland-webp-x11:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -4424,7 +4039,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4501,7 +4116,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4578,7 +4193,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4655,7 +4270,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4732,7 +4347,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+    - name: 'Build skia-safe for i686-linux-android with features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -4804,83 +4419,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "egl,gl,svg,textlayout,vulkan,wayland,webp,x11" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-gl-svg-textlayout-x11:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -4911,7 +4449,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl,svg,textlayout,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -4988,7 +4526,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl,svg,textlayout,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5065,7 +4603,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,svg,textlayout,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5142,7 +4680,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,svg,textlayout,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5219,7 +4757,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,svg,textlayout,x11'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,svg,textlayout,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5291,83 +4829,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,svg,textlayout,x11'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,x11" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "gl,svg,textlayout,x11" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "gl,svg,textlayout,x11" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "gl,svg,textlayout,x11" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-gl-svg-textlayout-wayland-x11:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -5398,7 +4859,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl,svg,textlayout,wayland,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5475,7 +4936,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl,svg,textlayout,wayland,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5552,7 +5013,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,svg,textlayout,wayland,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5629,7 +5090,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,svg,textlayout,wayland,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5706,7 +5167,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,svg,textlayout,wayland,x11'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,svg,textlayout,wayland,x11"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -5778,83 +5239,6 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
-    - name: 'Install Rust target wasm32-unknown-emscripten'
-      shell: bash
-      run: |
-        rustup target add wasm32-unknown-emscripten
-
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,svg,textlayout,wayland,x11'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=wasm32-unknown-emscripten
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=wasm32-unknown-emscripten26-clang
-          export CXX_${TARGET}=wasm32-unknown-emscripten26-clang++
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=wasm32-unknown-emscripten26-clang
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "true" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,wayland,x11" --target wasm32-unknown-emscripten
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: false
-      run: |
-        cargo clippy --release --features "gl,svg,textlayout,wayland,x11" --all-targets --target wasm32-unknown-emscripten -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: false
-      run: |
-        cargo test --all --release --features "gl,svg,textlayout,wayland,x11" --all-targets --target wasm32-unknown-emscripten -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "gl,svg,textlayout,wayland,x11" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-wasm32-unknown-emscripten
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: true
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: true
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
   linux-release-release-svg-textlayout-vulkan-webp:
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
@@ -5885,7 +5269,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "svg,textlayout,vulkan,webp"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -5962,7 +5346,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "svg,textlayout,vulkan,webp"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -6039,7 +5423,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for aarch64-linux-android with features "svg,textlayout,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -6116,7 +5500,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for x86_64-linux-android with features "svg,textlayout,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -6193,7 +5577,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for i686-linux-android with features "svg,textlayout,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -6265,12 +5649,422 @@ jobs:
         artifactErrorsFailBuild: true
         token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
         prerelease: true
+  linux-release-release-gl-svg-textlayout:
+    runs-on: ubuntu-22.04
+    container: ghcr.io/pragmatrix/rust-skia-linux:latest
+    env: 
+      SKIA_DEBUG: 0
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Fix git dubious ownership errors when synchronizing Skia dependencies
+      run: git config --global --add safe.directory '*'
+
+    - name: Prepare Rustup
+      run: (cd /github/home && ln -s /root/.cargo)
+
+    - name: Update Rustup and Rust
+      run: rustup update
+
+    - name: Configure Rust Toolchain
+      run: rustup default stable
+
+    - name: Install Clippy
+      run: rustup component add clippy
+    - name: 'Install Rust target x86_64-unknown-linux-gnu'
+      shell: bash
+      run: |
+        rustup target add x86_64-unknown-linux-gnu
+
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "gl,svg,textlayout"'
+      shell: bash
+      run: |
+        if [ "false" == "true" ]; then
+          TARGET=x86_64-unknown-linux-gnu
+          TARGET=${TARGET//-/_}
+          export CC_${TARGET}=x86_64-unknown-linux-gnu26-clang
+          export CXX_${TARGET}=x86_64-unknown-linux-gnu26-clang++
+          export AR_${TARGET}=llvm-ar
+          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-unknown-linux-gnu26-clang
+          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+        fi
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
+        cargo clean
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target x86_64-unknown-linux-gnu
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+      env:
+        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    - name: 'Run Clippy'
+      shell: bash
+      if: true
+      run: |
+        cargo clippy --release --features "gl,svg,textlayout" --all-targets --target x86_64-unknown-linux-gnu -- -D warnings
+
+    - name: 'Test all workspace projects'
+      shell: bash
+      if: true
+      run: |
+        cargo test --all --release --features "gl,svg,textlayout" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
+
+    - name: 'Generate skia-org example images'
+      shell: bash
+      if: false
+      run: |
+        cargo run --release --features "gl,svg,textlayout" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+
+    - name: 'Upload skia-org example images'
+      if: false
+      uses: actions/upload-artifact@v4.6.0
+      with:
+        name: skia-org-images-x86_64-unknown-linux-gnu
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
+
+    - name: 'Compress binaries'
+      if: true
+      uses: a7ul/tar-action@v1.1.2
+      with:
+        command: c
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
+        files: 'skia-binaries'
+        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+
+    - name: 'Release binaries'
+      if: true
+      uses: pragmatrix/release-action@v1.11.1-rs
+      with:
+        owner: rust-skia
+        repo: skia-binaries
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
+        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
+        prerelease: true
+    - name: 'Install Rust target aarch64-unknown-linux-gnu'
+      shell: bash
+      run: |
+        rustup target add aarch64-unknown-linux-gnu
+
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "gl,svg,textlayout"'
+      shell: bash
+      run: |
+        if [ "false" == "true" ]; then
+          TARGET=aarch64-unknown-linux-gnu
+          TARGET=${TARGET//-/_}
+          export CC_${TARGET}=aarch64-unknown-linux-gnu26-clang
+          export CXX_${TARGET}=aarch64-unknown-linux-gnu26-clang++
+          export AR_${TARGET}=llvm-ar
+          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-unknown-linux-gnu26-clang
+          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+        fi
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
+        cargo clean
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target aarch64-unknown-linux-gnu
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+      env:
+        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features "gl,svg,textlayout" --all-targets --target aarch64-unknown-linux-gnu -- -D warnings
+
+    - name: 'Test all workspace projects'
+      shell: bash
+      if: false
+      run: |
+        cargo test --all --release --features "gl,svg,textlayout" --all-targets --target aarch64-unknown-linux-gnu -- --nocapture
+
+    - name: 'Generate skia-org example images'
+      shell: bash
+      if: false
+      run: |
+        cargo run --release --features "gl,svg,textlayout" --target aarch64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+
+    - name: 'Upload skia-org example images'
+      if: false
+      uses: actions/upload-artifact@v4.6.0
+      with:
+        name: skia-org-images-aarch64-unknown-linux-gnu
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
+
+    - name: 'Compress binaries'
+      if: true
+      uses: a7ul/tar-action@v1.1.2
+      with:
+        command: c
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
+        files: 'skia-binaries'
+        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+
+    - name: 'Release binaries'
+      if: true
+      uses: pragmatrix/release-action@v1.11.1-rs
+      with:
+        owner: rust-skia
+        repo: skia-binaries
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
+        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
+        prerelease: true
+    - name: 'Install Rust target aarch64-linux-android'
+      shell: bash
+      run: |
+        rustup target add aarch64-linux-android
+
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,svg,textlayout"'
+      shell: bash
+      run: |
+        if [ "true" == "true" ]; then
+          TARGET=aarch64-linux-android
+          TARGET=${TARGET//-/_}
+          export CC_${TARGET}=aarch64-linux-android26-clang
+          export CXX_${TARGET}=aarch64-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
+          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=aarch64-linux-android26-clang
+          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+        fi
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
+        cargo clean
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target aarch64-linux-android
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+      env:
+        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features "gl,svg,textlayout" --all-targets --target aarch64-linux-android -- -D warnings
+
+    - name: 'Test all workspace projects'
+      shell: bash
+      if: false
+      run: |
+        cargo test --all --release --features "gl,svg,textlayout" --all-targets --target aarch64-linux-android -- --nocapture
+
+    - name: 'Generate skia-org example images'
+      shell: bash
+      if: false
+      run: |
+        cargo run --release --features "gl,svg,textlayout" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+
+    - name: 'Upload skia-org example images'
+      if: false
+      uses: actions/upload-artifact@v4.6.0
+      with:
+        name: skia-org-images-aarch64-linux-android
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
+
+    - name: 'Compress binaries'
+      if: true
+      uses: a7ul/tar-action@v1.1.2
+      with:
+        command: c
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
+        files: 'skia-binaries'
+        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+
+    - name: 'Release binaries'
+      if: true
+      uses: pragmatrix/release-action@v1.11.1-rs
+      with:
+        owner: rust-skia
+        repo: skia-binaries
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
+        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
+        prerelease: true
+    - name: 'Install Rust target x86_64-linux-android'
+      shell: bash
+      run: |
+        rustup target add x86_64-linux-android
+
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,svg,textlayout"'
+      shell: bash
+      run: |
+        if [ "true" == "true" ]; then
+          TARGET=x86_64-linux-android
+          TARGET=${TARGET//-/_}
+          export CC_${TARGET}=x86_64-linux-android26-clang
+          export CXX_${TARGET}=x86_64-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
+          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-linux-android26-clang
+          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+        fi
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
+        cargo clean
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target x86_64-linux-android
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+      env:
+        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features "gl,svg,textlayout" --all-targets --target x86_64-linux-android -- -D warnings
+
+    - name: 'Test all workspace projects'
+      shell: bash
+      if: false
+      run: |
+        cargo test --all --release --features "gl,svg,textlayout" --all-targets --target x86_64-linux-android -- --nocapture
+
+    - name: 'Generate skia-org example images'
+      shell: bash
+      if: false
+      run: |
+        cargo run --release --features "gl,svg,textlayout" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+
+    - name: 'Upload skia-org example images'
+      if: false
+      uses: actions/upload-artifact@v4.6.0
+      with:
+        name: skia-org-images-x86_64-linux-android
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
+
+    - name: 'Compress binaries'
+      if: true
+      uses: a7ul/tar-action@v1.1.2
+      with:
+        command: c
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
+        files: 'skia-binaries'
+        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+
+    - name: 'Release binaries'
+      if: true
+      uses: pragmatrix/release-action@v1.11.1-rs
+      with:
+        owner: rust-skia
+        repo: skia-binaries
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
+        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
+        prerelease: true
+    - name: 'Install Rust target i686-linux-android'
+      shell: bash
+      run: |
+        rustup target add i686-linux-android
+
+    - name: 'Build skia-safe for i686-linux-android with features "gl,svg,textlayout"'
+      shell: bash
+      run: |
+        if [ "true" == "true" ]; then
+          TARGET=i686-linux-android
+          TARGET=${TARGET//-/_}
+          export CC_${TARGET}=i686-linux-android26-clang
+          export CXX_${TARGET}=i686-linux-android26-clang++
+          export AR_${TARGET}=llvm-ar
+          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=i686-linux-android26-clang
+          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
+        fi
+        if [ "false" == "true" ]; then
+          source /emsdk/emsdk_env.sh
+        fi
+        cargo clean
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target i686-linux-android
+        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
+        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
+      env:
+        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
+        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    - name: 'Run Clippy'
+      shell: bash
+      if: false
+      run: |
+        cargo clippy --release --features "gl,svg,textlayout" --all-targets --target i686-linux-android -- -D warnings
+
+    - name: 'Test all workspace projects'
+      shell: bash
+      if: false
+      run: |
+        cargo test --all --release --features "gl,svg,textlayout" --all-targets --target i686-linux-android -- --nocapture
+
+    - name: 'Generate skia-org example images'
+      shell: bash
+      if: false
+      run: |
+        cargo run --release --features "gl,svg,textlayout" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+
+    - name: 'Upload skia-org example images'
+      if: false
+      uses: actions/upload-artifact@v4.6.0
+      with:
+        name: skia-org-images-i686-linux-android
+        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
+
+    - name: 'Compress binaries'
+      if: true
+      uses: a7ul/tar-action@v1.1.2
+      with:
+        command: c
+        cwd: '${{ env.SKIA_STAGING_PATH }}'
+        files: 'skia-binaries'
+        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+
+    - name: 'Release binaries'
+      if: true
+      uses: pragmatrix/release-action@v1.11.1-rs
+      with:
+        owner: rust-skia
+        repo: skia-binaries
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: '${{ env.SKIA_BINARIES_TAG }}'
+        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
+        artifactErrorsFailBuild: true
+        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
+        prerelease: true
     - name: 'Install Rust target wasm32-unknown-emscripten'
       shell: bash
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features svg,textlayout,vulkan,webp'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features "gl,svg,textlayout"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -6287,7 +6081,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "svg,textlayout,vulkan,webp" --target wasm32-unknown-emscripten
+        cargo build -p skia-safe --release --features "gl,svg,textlayout" --target wasm32-unknown-emscripten
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -6299,19 +6093,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "svg,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout" --all-targets --target wasm32-unknown-emscripten -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "svg,textlayout,vulkan,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout" --all-targets --target wasm32-unknown-emscripten -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "svg,textlayout,vulkan,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
