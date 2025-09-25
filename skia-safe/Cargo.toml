@@ -57,16 +57,10 @@ save-svg-images = []
 # implied only, do not use
 gpu = []
 
-# vulkan-window example
-vulkan-window = ["dep:ash", "dep:vulkano", "winit/rwh_05"]
-
 [dependencies]
 bitflags = "2.0"
 skia-bindings = { version = "=0.89.0", path = "../skia-bindings", default-features = false }
 
-# vulkan-window example
-ash = { version = "^0.38.0", optional = true }
-vulkano = { version = "0.35", optional = true }
 
 # D3D types & ComPtr
 windows = { version = "0.62.0", features = [
@@ -86,16 +80,21 @@ percent-encoding = { version = "2.3.1", optional = true }
 skia-svg-macros = { version = "0.1.0", path = "../skia-svg-macros", optional = true }
 
 [dev-dependencies]
+
 serial_test = "3.0"
 static_assertions = "1.1"
 winit = "0.30.2"
 
-# gl-window
+# gl-window & vulkan-window
 [target.'cfg(all(not(target_os = "android"), not(target_os = "emscripten"), not(target_os = "ios")))'.dev-dependencies]
 glutin = "0.32.0"
 glutin-winit = "0.5.0"
 raw-window-handle = "0.6.0"
 gl-rs = { version = "0.14.0", package = "gl" }
+
+# vulkan-window example
+ash = { version = "^0.38.0" }
+vulkano = { version = "0.35" }
 
 # metal-window
 [target.'cfg(target_os = "macos")'.dev-dependencies]

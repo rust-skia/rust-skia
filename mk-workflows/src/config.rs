@@ -53,7 +53,7 @@ pub fn jobs(workflow: &Workflow) -> Vec<Job> {
 }
 
 pub fn qa_jobs() -> Vec<Job> {
-    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp,vulkan-window";
+    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp";
     [
         Job {
             name: "stable-all-features".into(),
@@ -116,6 +116,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
     jobs.extend(freya_release_jobs(workflow));
     jobs.extend(vizia_release_jobs(workflow));
     jobs.extend(skia_canvas_release_jobs(workflow));
+    jobs.extend(grida_canvas_release_jobs(workflow));
 
     jobs
 }
@@ -180,6 +181,19 @@ fn skia_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::Linux => {
             vec![release_job("vulkan,textlayout,webp,svg")]
         }
+    }
+}
+
+// <https://github.com/rust-skia/rust-skia/issues/1205>
+//
+// This is actually only used for the wasm32-unknown-enscripten target. But right now we
+// can't be this specific.
+fn grida_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
+    match workflow.host_os {
+        HostOS::Linux => {
+            vec![release_job("gl,textlayout,svg")]
+        }
+        _ => Vec::new(),
     }
 }
 
@@ -250,5 +264,5 @@ fn android_targets() -> Vec<TargetConf> {
 fn wasm_targets() -> Vec<TargetConf> {
     // Compiling ureq-proto v0.3.0
     //   error[E0277]: the trait bound `SystemRandom: ring::rand::SecureRandom` is not satisfied
-    [TargetConf::new("wasm32-unknown-emscripten", "").disable("ureq")].into()
+    [TargetConf::new("wasm32-unknown-emscripten", "").disable("ureq,x11,wayland,vulkan")].into()
 }

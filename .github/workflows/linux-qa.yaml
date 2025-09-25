@@ -46,7 +46,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -63,7 +63,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target x86_64-unknown-linux-gnu
+        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -75,19 +75,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- -D warnings
+        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
+        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: true
       run: |
-        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" --driver cpu --driver pdf --driver svg
+        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" --driver cpu --driver pdf --driver svg
 
     - name: 'Upload skia-org example images'
       if: true
@@ -123,7 +123,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -140,7 +140,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target aarch64-unknown-linux-gnu
+        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target aarch64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -152,19 +152,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- -D warnings
+        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- --nocapture
+        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target aarch64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target aarch64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -200,7 +200,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -217,7 +217,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target aarch64-linux-android
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -229,19 +229,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target aarch64-linux-android -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target aarch64-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target aarch64-linux-android -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target aarch64-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -277,7 +277,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -294,7 +294,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-linux-android
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -306,19 +306,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-linux-android -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-linux-android -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -354,7 +354,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -371,7 +371,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target i686-linux-android
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -383,19 +383,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target i686-linux-android -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target i686-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target i686-linux-android -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target i686-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -431,7 +431,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,svg,textlayout,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features "gl,svg,textlayout,webp"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -448,7 +448,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,webp" --target wasm32-unknown-emscripten
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -460,19 +460,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -533,7 +533,7 @@ jobs:
       run: |
         rustup target add x86_64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11'
+    - name: 'Build skia-safe for x86_64-unknown-linux-gnu with features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -550,7 +550,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target x86_64-unknown-linux-gnu
+        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -562,19 +562,19 @@ jobs:
       shell: bash
       if: true
       run: |
-        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- -D warnings
+        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: true
       run: |
-        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
+        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target x86_64-unknown-linux-gnu -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target x86_64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -610,7 +610,7 @@ jobs:
       run: |
         rustup target add aarch64-unknown-linux-gnu
 
-    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11'
+    - name: 'Build skia-safe for aarch64-unknown-linux-gnu with features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -627,7 +627,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target aarch64-unknown-linux-gnu
+        cargo build -p skia-safe --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target aarch64-unknown-linux-gnu
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -639,19 +639,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- -D warnings
+        cargo clippy --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- --nocapture
+        cargo test --all --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --all-targets --target aarch64-unknown-linux-gnu -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,vulkan-window,wayland,webp,x11" --target aarch64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "egl,gl,svg,textlayout,ureq,vulkan,wayland,webp,x11" --target aarch64-unknown-linux-gnu "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -687,7 +687,7 @@ jobs:
       run: |
         rustup target add aarch64-linux-android
 
-    - name: 'Build skia-safe for aarch64-linux-android with features gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for aarch64-linux-android with features "gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -704,7 +704,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target aarch64-linux-android
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target aarch64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -716,19 +716,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target aarch64-linux-android -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target aarch64-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target aarch64-linux-android -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target aarch64-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target aarch64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -764,7 +764,7 @@ jobs:
       run: |
         rustup target add x86_64-linux-android
 
-    - name: 'Build skia-safe for x86_64-linux-android with features gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for x86_64-linux-android with features "gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -781,7 +781,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-linux-android
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -793,19 +793,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-linux-android -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target x86_64-linux-android -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -841,7 +841,7 @@ jobs:
       run: |
         rustup target add i686-linux-android
 
-    - name: 'Build skia-safe for i686-linux-android with features gl,svg,textlayout,ureq,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for i686-linux-android with features "gl,svg,textlayout,ureq,vulkan,webp"'
       shell: bash
       run: |
         if [ "true" == "true" ]; then
@@ -858,7 +858,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target i686-linux-android
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target i686-linux-android
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -870,19 +870,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target i686-linux-android -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target i686-linux-android -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --all-targets --target i686-linux-android -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target i686-linux-android -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,vulkan-window,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,ureq,vulkan,webp" --target i686-linux-android "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
@@ -918,7 +918,7 @@ jobs:
       run: |
         rustup target add wasm32-unknown-emscripten
 
-    - name: 'Build skia-safe for wasm32-unknown-emscripten with features gl,svg,textlayout,vulkan,vulkan-window,webp'
+    - name: 'Build skia-safe for wasm32-unknown-emscripten with features "gl,svg,textlayout,webp"'
       shell: bash
       run: |
         if [ "false" == "true" ]; then
@@ -935,7 +935,7 @@ jobs:
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten
+        cargo build -p skia-safe --release --features "gl,svg,textlayout,webp" --target wasm32-unknown-emscripten
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -947,19 +947,19 @@ jobs:
       shell: bash
       if: false
       run: |
-        cargo clippy --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
+        cargo clippy --release --features "gl,svg,textlayout,webp" --all-targets --target wasm32-unknown-emscripten -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
       if: false
       run: |
-        cargo test --all --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
+        cargo test --all --release --features "gl,svg,textlayout,webp" --all-targets --target wasm32-unknown-emscripten -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
       if: false
       run: |
-        cargo run --release --features "gl,svg,textlayout,vulkan,vulkan-window,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
+        cargo run --release --features "gl,svg,textlayout,webp" --target wasm32-unknown-emscripten "${{ env.SKIA_STAGING_PATH }}/skia-org" 
 
     - name: 'Upload skia-org example images'
       if: false
