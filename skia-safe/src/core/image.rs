@@ -830,8 +830,8 @@ impl Image {
     /// Returns: [`ColorSpace`] in [`Image`], or `None`, wrapped in a smart pointer
     ///
     /// example: <https://fiddle.skia.org/c/@Image_refColorSpace>
-    pub fn color_space(&self) -> ColorSpace {
-        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() }).unwrap()
+    pub fn color_space(&self) -> Option<ColorSpace> {
+        ColorSpace::from_unshared_ptr(unsafe { self.native().colorSpace() })
     }
 
     /// Returns `true` if [`Image`] pixels represent transparency only. If `true`, each pixel
