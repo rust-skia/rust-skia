@@ -1747,7 +1747,10 @@ extern "C" void C_SkFont_getWidthBounds(
     const SkGlyphID* glyphs, size_t glyphCount,
     SkScalar* widths, SkRect* bounds,
     const SkPaint* paint) {
-    self->getWidthsBounds(SkSpan(glyphs, glyphCount), SkSpan(widths, glyphCount), SkSpan(bounds, glyphCount), paint);
+    self->getWidthsBounds(
+        SkSpan(glyphs, glyphCount),
+        SkSpan(widths, widths ? glyphCount : 0),
+        SkSpan(bounds, bounds ? glyphCount : 0), paint);
 }
 
 extern "C" void C_SkFont_getPos(
