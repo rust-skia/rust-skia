@@ -75,7 +75,9 @@ fn download_dependencies() {
         // Download
         let archive_url = &format!("{repo_url}/{short_hash}");
         println!("DOWNLOADING: {archive_url}");
-        let archive = utils::download_with_resume_and_cache(archive_url)
+        // Codeload does not support resuming downloads.
+        // See <https://github.com/rust-skia/rust-skia/issues/1213>
+        let archive = utils::download(archive_url, false)
             .unwrap_or_else(|err| panic!("Failed to download {archive_url} ({err})"));
 
         // Unpack
@@ -109,7 +111,7 @@ fn dir_not_empty(dir_path: &Path) -> bool {
         .unwrap_or(false)
 }
 
-// Specifies where to download Skia and Depot Tools archives from.
+// Specifies where to download Skia archives from.
 //
 // Using `codeload.github.com`, otherwise the short hash will be expanded to a full hash as the root
 // directory inside the `tar.gz`, and we run into filesystem path length restrictions with Skia.
@@ -190,7 +192,7 @@ fn should_try_download_binaries(
 }
 
 fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
-    let archive = utils::download_with_resume_and_cache(url)?;
+    let archive = utils::download(url, true)?;
     println!(
         "UNPACKING ARCHIVE INTO: {}",
         output_directory.to_str().unwrap()
