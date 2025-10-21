@@ -639,10 +639,10 @@ extern "C" void C_SkPathIter_destruct(SkPathIter* self) {
     self->~SkPathIter();
 }
 
-extern "C" bool C_SkPathIter_next(SkPathIter* self, SkPathIter::Rec* unitialized) {
+extern "C" bool C_SkPathIter_next(SkPathIter* self, SkPathIter::Rec* uninitialized) {
     auto r = self->next();
     if (r.has_value()) {
-        new (unitialized) SkPathIter::Rec(*r);
+        new (uninitialized) SkPathIter::Rec(std::move(*r));
         return true;
     }
     return false;
@@ -669,10 +669,10 @@ extern "C" void C_SkPathContourIter_destruct(SkPathContourIter* self) {
     self->~SkPathContourIter();
 }
 
-extern "C" bool C_SkPathContourIter_next(SkPathContourIter* self, SkPathContourIter::Rec* unitialized) {
+extern "C" bool C_SkPathContourIter_next(SkPathContourIter* self, SkPathContourIter::Rec* uninitialized) {
     auto r = self->next();
     if (r.has_value()) {
-        new (unitialized) SkPathContourIter::Rec(*r);
+        new (uninitialized) SkPathContourIter::Rec(std::move(*r));
         return true;
     }
     return false;
@@ -692,7 +692,7 @@ extern "C" void C_SkPath_Raw(SkPath* uninitialized,
     const SkPathVerb vbs[], size_t verbCount,
     const SkScalar ws[], size_t wCount,
     SkPathFillType ft, bool isVolatile) {
-    new(uninitialized) SkPath(SkPath::Raw(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
+    new (uninitialized) SkPath(SkPath::Raw(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
 }
 
 extern "C" void C_SkPath_Make(SkPath* uninitialized, 
@@ -700,44 +700,44 @@ extern "C" void C_SkPath_Make(SkPath* uninitialized,
     const uint8_t vbs[], size_t verbCount,
     const SkScalar ws[], size_t wCount,
     SkPathFillType ft, bool isVolatile) {
-    new(uninitialized) SkPath(SkPath::Make(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
+    new (uninitialized) SkPath(SkPath::Make(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
 }
 
 extern "C" void C_SkPath_Rect(SkPath* uninitialized,
     const SkRect& r, SkPathDirection dir) {
-    new(uninitialized) SkPath(SkPath::Rect(r, dir));
+    new (uninitialized) SkPath(SkPath::Rect(r, dir));
 }
 
 extern "C" void C_SkPath_Oval(SkPath* uninitialized,
     const SkRect& r, SkPathDirection dir) {
-    new(uninitialized) SkPath(SkPath::Oval(r, dir));
+    new (uninitialized) SkPath(SkPath::Oval(r, dir));
 }
 
 extern "C" void C_SkPath_OvalWithStartIndex(SkPath* uninitialized,
     const SkRect& r, SkPathDirection dir, unsigned int startIndex) {
-    new(uninitialized) SkPath(SkPath::Oval(r, dir, startIndex));
+    new (uninitialized) SkPath(SkPath::Oval(r, dir, startIndex));
 }
 
 extern "C" void C_SkPath_Circle(SkPath* uninitialized,
     SkScalar x, SkScalar y, SkScalar r, SkPathDirection dir) {
-    new(uninitialized) SkPath(SkPath::Circle(x, y, r, dir));
+    new (uninitialized) SkPath(SkPath::Circle(x, y, r, dir));
 }
 
 extern "C" void C_SkPath_RRect(SkPath* uninitialized,
     const SkRRect& rr, SkPathDirection dir) {
-    new(uninitialized) SkPath(SkPath::RRect(rr, dir));
+    new (uninitialized) SkPath(SkPath::RRect(rr, dir));
 }
 
 extern "C" void C_SkPath_RRectWithStartIndex(SkPath* uninitialized,
     const SkRRect& r, SkPathDirection dir, unsigned startIndex) {
-    new(uninitialized) SkPath(SkPath::RRect(r, dir, startIndex));
+    new (uninitialized) SkPath(SkPath::RRect(r, dir, startIndex));
 }
 
 extern "C" void C_SkPath_Polygon(SkPath* uninitialized,
     const SkPoint pts[], size_t count, bool isClosed,
     SkPathFillType ft,
     bool isVolatile) {
-    new(uninitialized) SkPath(SkPath::Polygon(SkSpan(pts, count), isClosed, ft, isVolatile));
+    new (uninitialized) SkPath(SkPath::Polygon(SkSpan(pts, count), isClosed, ft, isVolatile));
 }
 
 extern "C" void C_SkPath_destruct(const SkPath* self) {
@@ -1047,7 +1047,7 @@ extern "C" void C_SkCanvas_drawAtlas(
 //
 
 extern "C" void C_SkAutoCanvasRestore_Construct(SkAutoCanvasRestore* uninitialized, SkCanvas* canvas, bool doSave) {
-    new(uninitialized) SkAutoCanvasRestore(canvas, doSave);
+    new (uninitialized) SkAutoCanvasRestore(canvas, doSave);
 }
 
 extern "C" void C_SkAutoCanvasRestore_destruct(const SkAutoCanvasRestore* self) {
@@ -1222,19 +1222,19 @@ extern "C" bool C_SkM44_equals(const SkM44 *self, const SkM44 *other) {
 }
 
 extern "C" void C_SkM44_RectToRect(const SkRect* src, const SkRect* dst, SkM44* uninitialized) {
-    new(uninitialized) SkM44(SkM44::RectToRect(*src, *dst));
+    new (uninitialized) SkM44(SkM44::RectToRect(*src, *dst));
 }
 
 extern "C" void C_SkM44_LookAt(const SkV3* eye, const SkV3* center, const SkV3* up, SkM44* uninitialized) {
-    new(uninitialized) SkM44(SkM44::LookAt(*eye, *center, *up));
+    new (uninitialized) SkM44(SkM44::LookAt(*eye, *center, *up));
 }
 
 extern "C" void C_SkM44_Perspective(float near, float far, float angle, SkM44* uninitialized) {
-    new(uninitialized) SkM44(SkM44::Perspective(near, far, angle));
+    new (uninitialized) SkM44(SkM44::Perspective(near, far, angle));
 }
 
 extern "C" void C_SkM44_transpose(const SkM44* self, SkM44* uninitialized) {
-    new(uninitialized) SkM44(self->transpose());
+    new (uninitialized) SkM44(self->transpose());
 }
 
 extern "C" SkV4 C_SkM44_map(const SkM44* self, float x, float y, float z, float w) {
@@ -1453,7 +1453,7 @@ extern "C" SkShader *C_SkPicture_makeShader(
 //
 
 extern "C" void C_SkRRect_Construct(SkRRect* uninitialized) {
-    new(uninitialized) SkRRect();
+    new (uninitialized) SkRRect();
 }
 
 extern "C" SkRRect::Type C_SkRRect_getType(const SkRRect* self) {
@@ -1493,7 +1493,7 @@ extern "C" bool C_SkRegion_quickContains(const SkRegion* self, const SkIRect* r)
 }
 
 extern "C" void C_SkRegion_Iterator_Construct(SkRegion::Iterator* uninitialized) {
-    new(uninitialized) SkRegion::Iterator();
+    new (uninitialized) SkRegion::Iterator();
 }
 
 extern "C" void C_SkRegion_Iterator_destruct(SkRegion::Iterator* self) {
@@ -1517,11 +1517,11 @@ extern "C" void C_SkRegion_Spanerator_destruct(SkRegion::Spanerator* self) {
 //
 
 extern "C" void C_SkFontStyle_Construct(SkFontStyle* uninitialized) {
-    new(uninitialized) SkFontStyle();
+    new (uninitialized) SkFontStyle();
 }
 
 extern "C" void C_SkFontStyle_Construct2(SkFontStyle* uninitialized, int weight, int width, SkFontStyle::Slant slant) {
-    new(uninitialized) SkFontStyle(weight, width, slant);
+    new (uninitialized) SkFontStyle(weight, width, slant);
 }
 
 extern "C" bool C_SkFontStyle_Equals(const SkFontStyle* lhs, const SkFontStyle* rhs) {
@@ -1684,19 +1684,19 @@ extern "C" SkData* C_SkFlattenable_serialize(const SkFlattenable* self) {
 //
 
 extern "C" void C_SkFont_ConstructFromTypeface(SkFont* uninitialized, SkTypeface* typeface_) {
-    new(uninitialized) SkFont(sp(typeface_));
+    new (uninitialized) SkFont(sp(typeface_));
 }
 
 extern "C" void C_SkFont_ConstructFromTypefaceWithSize(SkFont* uninitialized, SkTypeface* typeface_, SkScalar size) {
-    new(uninitialized) SkFont(sp(typeface_), size);
+    new (uninitialized) SkFont(sp(typeface_), size);
 }
 
 extern "C" void C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(SkFont* uninitialized, SkTypeface* typeface_, SkScalar size, SkScalar scaleX, SkScalar skewX) {
-    new(uninitialized) SkFont(sp(typeface_), size, scaleX, skewX);
+    new (uninitialized) SkFont(sp(typeface_), size, scaleX, skewX);
 }
 
 extern "C" void C_SkFont_CopyConstruct(SkFont* uninitialized, const SkFont* font) {
-    new(uninitialized) SkFont(*font);
+    new (uninitialized) SkFont(*font);
 }
 
 extern "C" void C_SkFont_destruct(SkFont* self) {
@@ -1795,7 +1795,7 @@ extern "C" bool C_SkFont_getPath(const SkFont* self, SkGlyphID glyphID, SkPath* 
 //
 
 extern "C" void C_SkFontArguments_construct(SkFontArguments* uninitialized) {
-    new(uninitialized) SkFontArguments();
+    new (uninitialized) SkFontArguments();
 }
 
 extern "C" void C_SkFontArguments_destruct(SkFontArguments* self) {
@@ -2006,7 +2006,7 @@ extern "C" SkVertices* C_SkVertices_Builder_detach(SkVertices::Builder* builder)
 //
 
 extern "C" void C_SkPictureRecorder_Construct(SkPictureRecorder *uninitialized) {
-    new(uninitialized) SkPictureRecorder();
+    new (uninitialized) SkPictureRecorder();
 }
 
 extern "C" void C_SkPictureRecorder_destruct(SkPictureRecorder *self) {
@@ -2405,7 +2405,7 @@ extern "C" const char* C_SkString_c_str_size(const SkString* self, size_t* size)
 
 extern "C" {
     void C_SkStrings_construct(SkStrings *uninitialized, SkString *string, size_t count) {
-        new(uninitialized) SkStrings{
+        new (uninitialized) SkStrings{
                 std::vector<SkString>(std::make_move_iterator(string), std::make_move_iterator(string + count))
         };
     }
@@ -2603,7 +2603,7 @@ extern "C" SkMemoryStream* C_SkMemoryStream_MakeDirect(const void* data, size_t 
 }
 
 extern "C" void C_SkDynamicMemoryWStream_Construct(SkDynamicMemoryWStream* uninitialized) {
-    new(uninitialized) SkDynamicMemoryWStream();
+    new (uninitialized) SkDynamicMemoryWStream();
 }
 
 extern "C" SkData* C_SkDynamicMemoryWStream_detachAsData(SkDynamicMemoryWStream* self) {
@@ -2641,7 +2641,7 @@ extern "C" void C_SkTiledImageUtils_GetImageKeyValues(
 //
 
 extern "C" void C_SkYUVAInfo_Construct(SkYUVAInfo* uninitialized) {
-    new(uninitialized) SkYUVAInfo();
+    new (uninitialized) SkYUVAInfo();
 }
 
 extern "C" void C_SkYUVAInfo_destruct(SkYUVAInfo* self) {
@@ -2673,11 +2673,11 @@ extern "C" bool C_SkYUVAInfo_equals(const SkYUVAInfo* a, const SkYUVAInfo* b) {
 }
 
 extern "C" void C_SkYUVAInfo_makeSubsampling(const SkYUVAInfo* self, SkYUVAInfo::Subsampling subsampling, SkYUVAInfo* uninitialized) {
-    new(uninitialized) SkYUVAInfo(self->makeSubsampling(subsampling));
+    new (uninitialized) SkYUVAInfo(self->makeSubsampling(subsampling));
 }
 
 extern "C" void C_SkYUVAInfo_makeDimensions(const SkYUVAInfo* self, const SkISize* dimensions, SkYUVAInfo* uninitialized) {
-    new(uninitialized) SkYUVAInfo(self->makeDimensions(*dimensions));
+    new (uninitialized) SkYUVAInfo(self->makeDimensions(*dimensions));
 }
 
 //
@@ -2685,7 +2685,7 @@ extern "C" void C_SkYUVAInfo_makeDimensions(const SkYUVAInfo* self, const SkISiz
 //
 
 extern "C" void C_SkYUVAPixmapInfo_Construct(SkYUVAPixmapInfo* uninitialized) {
-    new(uninitialized) SkYUVAPixmapInfo();
+    new (uninitialized) SkYUVAPixmapInfo();
 }
 
 extern "C" void C_SkYUVAPixmapInfo_destruct(SkYUVAPixmapInfo* self) {
@@ -2709,7 +2709,7 @@ extern "C" bool C_SkYUVAPixmapInfo_isValid(const SkYUVAPixmapInfo* self) {
 }
 
 extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_Construct(SkYUVAPixmapInfo::SupportedDataTypes* uninitialized) {
-    new(uninitialized) SkYUVAPixmapInfo::SupportedDataTypes();
+    new (uninitialized) SkYUVAPixmapInfo::SupportedDataTypes();
 }
 
 extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_destruct(SkYUVAPixmapInfo::SupportedDataTypes* self) {
@@ -2717,7 +2717,7 @@ extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_destruct(SkYUVAPixmapInfo:
 }
 
 extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_All(SkYUVAPixmapInfo::SupportedDataTypes* uninitialized) {
-    new(uninitialized) SkYUVAPixmapInfo::SupportedDataTypes(SkYUVAPixmapInfo::SupportedDataTypes::All());
+    new (uninitialized) SkYUVAPixmapInfo::SupportedDataTypes(SkYUVAPixmapInfo::SupportedDataTypes::All());
 }
 
 extern "C" bool C_SkYUVAPixmapInfo_SupportedDataTypes_supported(
@@ -2738,7 +2738,7 @@ extern "C" int C_SkYUVAPixmapInfo_NumChannelsAndDataType(SkColorType colorType, 
 }
 
 extern "C" void C_SkYUVAPixmaps_Construct(SkYUVAPixmaps* uninitialized) {
-    new(uninitialized) SkYUVAPixmaps();
+    new (uninitialized) SkYUVAPixmaps();
 }
 
 extern "C" void C_SkYUVAPixmaps_destruct(SkYUVAPixmaps* self) {
@@ -2746,27 +2746,27 @@ extern "C" void C_SkYUVAPixmaps_destruct(SkYUVAPixmaps* self) {
 }
 
 extern "C" void C_SkYUVAPixmaps_MakeCopy(const SkYUVAPixmaps* self, SkYUVAPixmaps* uninitialized) {
-    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::MakeCopy(*self));
+    new (uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::MakeCopy(*self));
 }
 
 extern "C" void C_SkYUVAPixmaps_Allocate(SkYUVAPixmaps* uninitialized, const SkYUVAPixmapInfo* yuvaPixmapInfo) {
-    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::Allocate(*yuvaPixmapInfo));
+    new (uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::Allocate(*yuvaPixmapInfo));
 }
 
 extern "C" void C_SkYUVAPixmaps_FromData(SkYUVAPixmaps* uninitialized, const SkYUVAPixmapInfo* yuvaPixmapInfo, SkData* data) {
-    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromData(*yuvaPixmapInfo, sp(data)));
+    new (uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromData(*yuvaPixmapInfo, sp(data)));
 }
 
 extern "C" void C_SkYUVAPixmaps_FromExternalMemory(SkYUVAPixmaps* uninitialized, const SkYUVAPixmapInfo* yuvaPixmapInfo, void* memory) {
-    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromExternalMemory(*yuvaPixmapInfo, memory));
+    new (uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromExternalMemory(*yuvaPixmapInfo, memory));
 }
 
 extern "C" void C_SkYUVAPixmaps_FromExternalPixmaps(SkYUVAPixmaps* uninitialized, const SkYUVAInfo* yuvaInfo, const SkPixmap pixmaps[SkYUVAPixmaps::kMaxPlanes]) {
-    new(uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromExternalPixmaps(*yuvaInfo, pixmaps));
+    new (uninitialized) SkYUVAPixmaps(SkYUVAPixmaps::FromExternalPixmaps(*yuvaInfo, pixmaps));
 }
 
 extern "C" void C_SkYUVAPixmaps_pixmapsInfo(const SkYUVAPixmaps* self, SkYUVAPixmapInfo* uninitialized) {
-    new(uninitialized) SkYUVAPixmapInfo(self->pixmapsInfo());
+    new (uninitialized) SkYUVAPixmapInfo(self->pixmapsInfo());
 }
 
 extern "C" const SkPixmap* C_SkYUVAPixmaps_planes(const SkYUVAPixmaps* self) {
@@ -2869,7 +2869,7 @@ extern "C" SkPathEffect* C_SkPath2DPathEffect_Make(const SkMatrix* matrix, const
 //
 
 extern "C" void C_SkColorMatrix_Construct(SkColorMatrix* uninitialized) {
-    new(uninitialized)SkColorMatrix();
+    new (uninitialized)SkColorMatrix();
 }
 
 extern "C" void C_SkColorMatrix_Construct2(SkColorMatrix* uninitialized, 
@@ -2877,7 +2877,7 @@ extern "C" void C_SkColorMatrix_Construct2(SkColorMatrix* uninitialized,
                                            float m10, float m11, float m12, float m13, float m14,
                                            float m20, float m21, float m22, float m23, float m24,
                                            float m30, float m31, float m32, float m33, float m34) {
-    new(uninitialized)SkColorMatrix(m00, m01, m02, m03, m04,
+    new (uninitialized)SkColorMatrix(m00, m01, m02, m03, m04,
                                     m10, m11, m12, m13, m14,
                                     m20, m21, m22, m23, m24,
                                     m30, m31, m32, m33, m34);
@@ -3482,7 +3482,7 @@ extern "C" size_t C_SkPDF_StructureElementNode_getChildVector(const SkPDF::Struc
 }
 
 extern "C" void C_SkPDF_Metadata_Construct(SkPDF::Metadata* uninitialized) {
-    new(uninitialized)SkPDF::Metadata();
+    new (uninitialized)SkPDF::Metadata();
 }
 
 extern "C" void C_SkPDF_Metadata_destruct(SkPDF::Metadata* self) {
@@ -3506,11 +3506,31 @@ extern "C" void C_SkPDF_SetNodeId(SkCanvas* dst, int nodeID) {
 //
 
 extern "C" void C_SkOpBuilder_Construct(SkOpBuilder* uninitialized) {
-    new(uninitialized) SkOpBuilder();
+    new (uninitialized) SkOpBuilder();
 }
 
 extern "C" void C_SkOpBuilder_destruct(SkOpBuilder* self) {
     self->~SkOpBuilder();
+}
+
+extern "C" bool C_SkOpBuilder_resolve(SkOpBuilder* self, SkPath* uninitialized) {
+    if (auto res = self->resolve()) { new (uninitialized) SkPath(); uninitialized->swap(*res); return true; }
+    return false;
+}
+
+extern "C" bool C_SkPathOps_Op(const SkPath* one, const SkPath* two, SkPathOp op, SkPath* uninitialized) {
+    if (auto res = Op(*one, *two, op)) { new (uninitialized) SkPath(); uninitialized->swap(*res); return true; }
+    return false;
+}
+
+extern "C" bool C_SkPathOps_Simplify(const SkPath* path, SkPath* uninitialized) {
+    if (auto res = Simplify(*path)) { new (uninitialized) SkPath(); uninitialized->swap(*res); return true; }
+    return false;
+}
+
+extern "C" bool C_SkPathOps_AsWinding(const SkPath* path, SkPath* uninitialized) {
+    if (auto res = AsWinding(*path)) { new (uninitialized) SkPath(); uninitialized->swap(*res); return true; }
+    return false;
 }
 
 //
@@ -3573,6 +3593,11 @@ extern "C" void C_SkOrderedFontMgr_append(SkOrderedFontMgr* self, SkFontMgr* fon
 
 extern "C" void C_SkParsePath_ToSVGString(const SkPath* self, SkString* uninitialized, SkParsePath::PathEncoding encoding) {
     new (uninitialized) SkString(SkParsePath::ToSVGString(*self, encoding));
+}
+
+extern "C" bool C_SkParsePath_FromSVGString(const char* str, SkPath* out) {
+    if (auto res = SkParsePath::FromSVGString(str)) { new (out) SkPath(); out->swap(*res); return true; }
+    return false;
 }
 
 //
@@ -3726,12 +3751,12 @@ public:
 };
 
 extern "C" void C_RustWStream_construct(
-    RustWStream *out,
+    RustWStream *uninitialized,
     void *data,
     bool (*write)(void *, const void *, size_t),
     void (*flush)(void *)
 ) {
-    new(out) RustWStream(data, write, flush);
+    new (uninitialized) RustWStream(data, write, flush);
 }
 
 extern "C" void C_RustWStream_destruct(RustWStream *stream) {

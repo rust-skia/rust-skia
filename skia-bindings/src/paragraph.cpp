@@ -99,8 +99,8 @@ extern "C" {
         typefaces->set(tfs);
     }
 
-    SkTypeface* C_FontCollection_defaultFallback(FontCollection* self, SkUnichar unicode, SkFontStyle fontStyle, const SkString* locale) {
-        return self->defaultFallback(unicode, fontStyle, *locale).release();
+    SkTypeface* C_FontCollection_defaultFallback(FontCollection* self, SkUnichar unicode, SkFontStyle fontStyle, const SkString* locale, const FontArguments* arguments) {
+        return self->defaultFallback(unicode, fontStyle, *locale, arguments ? std::make_optional(*arguments) : std::nullopt).release();
     }
 
     SkTypeface* C_FontCollection_defaultFallback2(FontCollection* self) {

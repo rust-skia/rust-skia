@@ -146,11 +146,12 @@ impl FontCollection {
         typefaces
     }
 
-    pub fn default_fallback_char(
+    pub fn default_fallback_char<'fa>(
         &mut self,
         unicode: Unichar,
         font_style: FontStyle,
         locale: impl AsRef<str>,
+        arguments: impl Into<Option<&'fa FontArguments>>,
     ) -> Option<Typeface> {
         let locale = interop::String::from_str(locale.as_ref());
         Typeface::from_ptr(unsafe {
@@ -159,6 +160,7 @@ impl FontCollection {
                 unicode,
                 font_style.into_native(),
                 locale.native(),
+                arguments.into().native_ptr_or_null(),
             )
         })
     }

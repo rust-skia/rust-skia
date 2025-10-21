@@ -6,8 +6,7 @@ use skia_bindings as sb;
 
 pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
     let str = CString::new(svg.as_ref()).unwrap();
-    let mut path = Path::default();
-    unsafe { sb::SkParsePath_FromSVGString(str.as_ptr(), path.native_mut()) }.then_some(path)
+    Path::try_construct(|p| unsafe { sb::C_SkParsePath_FromSVGString(str.as_ptr(), p) })
 }
 
 pub use skia_bindings::SkParsePath_PathEncoding as PathEncoding;
@@ -53,7 +52,7 @@ mod tests {
 
         let svg = Path::to_svg(&path);
         assert_eq!(svg, "M0 0L100 100L0 100L0 0Z");
-        // And back. Someone may find why they are not equal.
+        // And back. Someone should find out why they are not equal.
         let _recreated = Path::from_svg(svg).expect("Failed to parse SVG path");
     }
 }

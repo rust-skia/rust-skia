@@ -401,6 +401,7 @@ impl Path {
     ///
     /// Returns: `true` if caller will alter [`Path`] after drawing
     pub fn is_volatile(&self) -> bool {
+        // isVolatile() is inline in SkPath.h and not available via FFI; use the exposed field accessor.
         self.native().fIsVolatile() != 0
     }
 
@@ -781,8 +782,12 @@ impl Path {
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getLastPt>
     pub fn last_pt(&self) -> Option<Point> {
-        let mut last_pt = Point::default();
-        unsafe { self.native().getLastPt(last_pt.native_mut()) }.then_some(last_pt)
+        let count = self.count_points();
+        if count == 0 {
+            None
+        } else {
+            self.get_point(count - 1)
+        }
     }
 }
 
@@ -828,7 +833,9 @@ impl Path {
     ///
     /// Returns: reference to [`Path`]
     pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
-        self.native_mut().set_fIsVolatile(is_volatile as _);
+        // Use SkPath::makeIsVolatile() to avoid writing private fields directly.
+        let new_path = Path::from_native_c(unsafe { self.native().makeIsVolatile(is_volatile) });
+        let _old = self.native_mut().replace_with(new_path);
         self
     }
 
@@ -880,15 +887,19 @@ impl Path {
     /// Sets FillType, the rule used to fill [`Path`]. While there is no check
     /// that ft is legal, values outside of FillType are not supported.
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
-        self.native_mut().set_fFillType(ft as _);
+        // Use C wrapper to construct a modified copy, then replace self.
+        let new_path =
+            Path::construct(|p| unsafe { sb::C_SkPath_makeFillType(self.native(), ft, p) });
+        let _old = self.native_mut().replace_with(new_path);
         self
     }
 
     /// Replaces FillType with its inverse. The inverse of FillType describes the area
     /// unmodified by the original FillType.
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
-        let inverse = self.native().fFillType() ^ 2;
-        self.native_mut().set_fFillType(inverse);
+        // Use SkPath::makeToggleInverseFillType() to get a modified copy, then replace self.
+        let new_path = Path::from_native_c(unsafe { self.native().makeToggleInverseFillType() });
+        let _old = self.native_mut().replace_with(new_path);
         self
     }
 }
@@ -1556,7 +1567,7 @@ impl Path {
         self
     }
 
-    // No add_round_rect() wiht radii (8 of them). Decided to only provide the simpler variant of
+    // No add_round_rect() with radii (8 of them). Decided to only provide the simpler variant of
     // the two, if radii needs to be specified, add_rrect can be used.
 
     /// Adds rrect to [`Path`], creating a new closed contour. If dir is [`PathDirection::CW`], rrect
