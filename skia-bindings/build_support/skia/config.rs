@@ -161,7 +161,6 @@ impl FinalBuildConfiguration {
                     .arg("skia_enable_spirv_validation", no())
                     .arg("skia_enable_tools", no())
                     .arg("skia_enable_vulkan_debug_layers", no())
-                    .arg("skia_use_libheif", no())
                     .arg("skia_use_lua", no());
             }
 
