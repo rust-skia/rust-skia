@@ -2,7 +2,8 @@ use crate::{Bitmap, EncodedImageFormat, Pixmap};
 
 pub mod jpeg_encoder;
 pub mod png_encoder;
-pub mod png_rust_encoder;
+// TODO: May support with an optional feature, gn flag `skia_use_rust_png_encode`.
+// pub mod png_rust_encoder;
 #[cfg(feature = "webp-encode")]
 pub mod webp_encoder;
 

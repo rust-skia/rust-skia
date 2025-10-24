@@ -108,7 +108,7 @@
 
 // encode/
 #include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkPngRustEncoder.h"
+// #include "include/encode/SkPngRustEncoder.h"
 #include "include/encode/SkJpegEncoder.h"
 
 // pathops/
@@ -3425,6 +3425,7 @@ SkData* C_SkPngEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
 
 // SkPngRustEncoder
 
+/*
 bool C_SkPngRustEncoder_Encode(
     SkWStream* stream,
     const SkPixmap* pixmap,
@@ -3437,6 +3438,7 @@ bool C_SkPngRustEncoder_Encode(
 
     return SkPngRustEncoder::Encode(stream, *pixmap, options);
 }
+*/
 
 // SkJpegEncoder
 
