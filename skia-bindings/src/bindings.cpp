@@ -16,7 +16,7 @@
 #include "include/codec/SkIcoDecoder.h"
 #include "include/codec/SkJpegDecoder.h"
 #include "include/codec/SkPngDecoder.h"
-#include "include/codec/SkPngRustDecoder.h"
+// #include "include/codec/SkPngRustDecoder.h"
 #include "include/codec/SkWbmpDecoder.h"
 
 #if defined(SK_CODEC_DECODES_WEBP)
@@ -267,9 +267,11 @@ extern "C" void C_SkPngDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
     new (uninitialized) SkCodecs::Decoder(SkPngDecoder::Decoder());
 }
 
+/*
 extern "C" void C_SkPngRustDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
     new (uninitialized) SkCodecs::Decoder(SkPngRustDecoder::Decoder());
 }
+*/
 
 extern "C" void C_SkWbmpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
     new (uninitialized) SkCodecs::Decoder(SkWbmpDecoder::Decoder());
