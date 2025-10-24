@@ -208,14 +208,21 @@ pub mod named_transfer_fn {
         f: 0.0,
     };
 
-    /// Rec. ITU-R BT.709-6, value 1.
-    #[allow(clippy::excessive_precision)]
+    // Transfer function defined by ITU-T H.273, table 3. Names are given by the
+    // first specification referenced in the value's row. The equations in table 3
+    // "either indicates the reference [OETF] ... or indicates the inverse of the
+    // reference EOTF". The transfer functions provided are reference EOTFs.
+
+    /// Rec. ITU-R BT.709-6, value 1. This follows note 1, which reads: "In the cases
+    /// of [...] TransferCharacteristics equal to 1, 6, 14 or 15 [...], although the
+    /// value is defined in terms of a reference [OETF], a suggested corresponding
+    /// reference [EOTF] has been specified in Rec. ITU-R BT.1886-0."
     pub const REC709: ColorSpaceTransferFn = ColorSpaceTransferFn {
-        g: 2.222222222222,
-        a: 0.909672415686,
-        b: 0.090327584314,
-        c: 0.222222222222,
-        d: 0.081242858299,
+        g: 2.4,
+        a: 1.0,
+        b: 0.0,
+        c: 0.0,
+        d: 0.0,
         e: 0.0,
         f: 0.0,
     };

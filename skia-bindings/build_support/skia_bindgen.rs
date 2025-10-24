@@ -747,6 +747,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("CicpId", rewrite::k_xxx),
     // `SkCodec::IsAnimated`s
     ("IsAnimated", rewrite::k_xxx),
+    // m142: PngRustEncoder::CompressionLevel
+    ("CompressionLevel", rewrite::k_opt_xxx),
 ];
 
 pub(crate) mod rewrite {
@@ -764,6 +766,15 @@ pub(crate) mod rewrite {
             panic!(
                 "Variant name '{variant}' of enum type '{name}' is expected to start with a 'k'"
             );
+        }
+    }
+
+    // For enums that come with and without a `k` prefix.
+    pub fn k_opt_xxx(_name: &str, variant: &str) -> String {
+        if let Some(stripped) = variant.strip_prefix('k') {
+            stripped.into()
+        } else {
+            variant.into()
         }
     }
 

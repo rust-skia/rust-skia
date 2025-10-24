@@ -16,6 +16,7 @@
 #include "include/codec/SkIcoDecoder.h"
 #include "include/codec/SkJpegDecoder.h"
 #include "include/codec/SkPngDecoder.h"
+#include "include/codec/SkPngRustDecoder.h"
 #include "include/codec/SkWbmpDecoder.h"
 
 #if defined(SK_CODEC_DECODES_WEBP)
@@ -107,6 +108,7 @@
 
 // encode/
 #include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkPngRustEncoder.h"
 #include "include/encode/SkJpegEncoder.h"
 
 // pathops/
@@ -263,6 +265,10 @@ extern "C" void C_SkJpegDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
 
 extern "C" void C_SkPngDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
     new (uninitialized) SkCodecs::Decoder(SkPngDecoder::Decoder());
+}
+
+extern "C" void C_SkPngRustDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
+    new (uninitialized) SkCodecs::Decoder(SkPngRustDecoder::Decoder());
 }
 
 extern "C" void C_SkWbmpDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
@@ -776,8 +782,16 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
+extern "C" void C_SkPath_makeIsVolatile(const SkPath* self, bool isVolatile, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->makeIsVolatile(isVolatile));
+}
+
 extern "C" void C_SkPath_makeFillType(const SkPath* self, SkPathFillType newFillType, SkPath* uninitialized) {
     new (uninitialized) SkPath(self->makeFillType(newFillType));
+}
+
+extern "C" void C_SkPath_makeToggleInverseFillType(const SkPath* self, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->makeToggleInverseFillType());
 }
 
 extern "C" SkPoint C_SkPath_getPoint(const SkPath* self, int index) {
@@ -806,6 +820,14 @@ extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
 
 extern "C" void C_SkPath_computeTightBounds(const SkPath* self, SkRect* uninitialized) {
     new (uninitialized) SkRect(self->computeTightBounds());
+}
+
+extern "C" bool C_SkPath_getLastPt(const SkPath* self, SkPoint* point) {
+    if (auto last = self->getLastPt()) {
+        *point = *last;
+        return true;
+    }
+    return false;
 }
 
 //
@@ -838,12 +860,12 @@ extern "C" void C_SkPathBuilder_delete(SkPathBuilder* self) {
     delete self;
 }
 
-extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, SkPath* uninitialized) {
-    new (uninitialized) SkPath(self->snapshot());
+extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, const SkMatrix* mx, SkPath* out) {
+    self->snapshot(mx).swap(*out);
 }
 
-extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, SkPath* uninitialized) {
-    new (uninitialized) SkPath(self->detach());
+extern "C" void C_SkPathBuilder_detach(SkPathBuilder* self, const SkMatrix* mx, SkPath* out) {
+    self->detach(mx).swap(*out);
 }
 
 extern "C" void C_SkPathBuilder_polylineTo(SkPathBuilder* self, const SkPoint* points, size_t count) {
@@ -3363,10 +3385,12 @@ SkImageFilter *C_SkImageFilters_RuntimeShader(
 
 extern "C" {
 
+// SkPngEncoder
+
 bool C_SkPngEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
     SkDataTable* comments, SkPngEncoder::FilterFlag filterFlags, int zLibLevel) {
 
-    auto options = SkPngEncoder::Options();
+    SkPngEncoder::Options options;
     options.fComments = sp(comments);
     options.fFilterFlags = filterFlags;
     options.fZLibLevel = zLibLevel;
@@ -3374,16 +3398,47 @@ bool C_SkPngEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
     return SkPngEncoder::Encode(stream, *pixmap, options);
 }
 
+SkData* C_SkPngEncoder_EncodePixmap(
+    const SkPixmap* src,
+    SkDataTable* comments, 
+    SkPngEncoder::FilterFlag filterFlags, 
+    int zLibLevel) {
+
+    SkPngEncoder::Options options;
+    options.fComments = sp(comments);
+    options.fFilterFlags = filterFlags;
+    options.fZLibLevel = zLibLevel;
+
+    return SkPngEncoder::Encode(*src, options).release();
+}
+
 SkData* C_SkPngEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
     SkDataTable* comments, SkPngEncoder::FilterFlag filterFlags, int zLibLevel) {
 
-    auto options = SkPngEncoder::Options();
+    SkPngEncoder::Options options;
     options.fComments = sp(comments);
     options.fFilterFlags = filterFlags;
     options.fZLibLevel = zLibLevel;
 
     return SkPngEncoder::Encode(ctx, img, options).release();
 }
+
+// SkPngRustEncoder
+
+bool C_SkPngRustEncoder_Encode(
+    SkWStream* stream,
+    const SkPixmap* pixmap,
+    SkPngRustEncoder::CompressionLevel compressionLevel,
+    SkDataTable* comments) {
+
+    SkPngRustEncoder::Options options;
+    options.fCompressionLevel = compressionLevel;
+    options.fComments = sp(comments);
+
+    return SkPngRustEncoder::Encode(stream, *pixmap, options);
+}
+
+// SkJpegEncoder
 
 bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap, 
     int quality,
@@ -3392,7 +3447,7 @@ bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
     const SkData* xmpMetadata, 
     const SkEncodedOrigin* origin) {
 
-    auto options = SkJpegEncoder::Options();
+    SkJpegEncoder::Options options;
     options.fQuality = quality;
     options.fDownsample = downsample;
     options.fAlphaOption = alphaOption;
@@ -3404,6 +3459,45 @@ bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
     return SkJpegEncoder::Encode(stream, *pixmap, options);
 }
 
+bool C_SkJpegEncoder_EncodeYUVAPixmaps(SkWStream* stream, const SkYUVAPixmaps* src,
+    const SkColorSpace* srcColorSpace,
+    int quality,
+    SkJpegEncoder::Downsample downsample, 
+    SkJpegEncoder::AlphaOption alphaOption, 
+    const SkData* xmpMetadata,
+    const SkEncodedOrigin* origin) {
+
+    SkJpegEncoder::Options options;
+    options.fQuality = quality;
+    options.fDownsample = downsample;
+    options.fAlphaOption = alphaOption;
+    options.xmpMetadata = xmpMetadata;
+    if (origin) {
+        options.fOrigin = *origin;
+    }
+
+    return SkJpegEncoder::Encode(stream, *src, srcColorSpace, options);
+}
+
+SkData* C_SkJpegEncoder_EncodePixmap(const SkPixmap* src,
+    int quality,
+    SkJpegEncoder::Downsample downsample, 
+    SkJpegEncoder::AlphaOption alphaOption, 
+    const SkData* xmpMetadata,
+    const SkEncodedOrigin* origin) {
+
+    SkJpegEncoder::Options options;
+    options.fQuality = quality;
+    options.fDownsample = downsample;
+    options.fAlphaOption = alphaOption;
+    options.xmpMetadata = xmpMetadata;
+    if (origin) {
+        options.fOrigin = *origin;
+    }
+
+    return SkJpegEncoder::Encode(*src, options).release();
+}
+
 SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img, 
     int quality,
     SkJpegEncoder::Downsample downsample, 
@@ -3411,7 +3505,7 @@ SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
     const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
 
-    auto options = SkJpegEncoder::Options();
+    SkJpegEncoder::Options options;
     options.fQuality = quality;
     options.fDownsample = downsample;
     options.fAlphaOption = alphaOption;
@@ -3423,7 +3517,7 @@ SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
     return SkJpegEncoder::Encode(ctx, img, options).release();
 }
 
-}
+} // extern "C"
 
 //
 // docs/SkPDFDocument.h

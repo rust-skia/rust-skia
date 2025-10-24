@@ -782,12 +782,8 @@ impl Path {
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getLastPt>
     pub fn last_pt(&self) -> Option<Point> {
-        let count = self.count_points();
-        if count == 0 {
-            None
-        } else {
-            self.get_point(count - 1)
-        }
+        let mut p = Point::default();
+        unsafe { sb::C_SkPath_getLastPt(self.native(), p.native_mut()) }.then_some(p)
     }
 }
 
@@ -834,7 +830,9 @@ impl Path {
     /// Returns: reference to [`Path`]
     pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
         // Use SkPath::makeIsVolatile() to avoid writing private fields directly.
-        let new_path = Path::from_native_c(unsafe { self.native().makeIsVolatile(is_volatile) });
+        let new_path = Path::construct(|p| unsafe {
+            sb::C_SkPath_makeIsVolatile(self.native(), is_volatile, p)
+        });
         let _old = self.native_mut().replace_with(new_path);
         self
     }
@@ -898,7 +896,9 @@ impl Path {
     /// unmodified by the original FillType.
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         // Use SkPath::makeToggleInverseFillType() to get a modified copy, then replace self.
-        let new_path = Path::from_native_c(unsafe { self.native().makeToggleInverseFillType() });
+        let new_path = Path::construct(|p| unsafe {
+            sb::C_SkPath_makeToggleInverseFillType(self.native(), p)
+        });
         let _old = self.native_mut().replace_with(new_path);
         self
     }
