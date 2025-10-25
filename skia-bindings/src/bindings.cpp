@@ -784,10 +784,6 @@ extern "C" SkPathFillType C_SkPath_getFillType(const SkPath* self) {
     return self->getFillType();
 }
 
-extern "C" void C_SkPath_makeIsVolatile(const SkPath* self, bool isVolatile, SkPath* uninitialized) {
-    new (uninitialized) SkPath(self->makeIsVolatile(isVolatile));
-}
-
 extern "C" void C_SkPath_makeFillType(const SkPath* self, SkPathFillType newFillType, SkPath* uninitialized) {
     new (uninitialized) SkPath(self->makeFillType(newFillType));
 }
@@ -796,8 +792,8 @@ extern "C" void C_SkPath_makeToggleInverseFillType(const SkPath* self, SkPath* u
     new (uninitialized) SkPath(self->makeToggleInverseFillType());
 }
 
-extern "C" SkPoint C_SkPath_getPoint(const SkPath* self, int index) {
-    return self->getPoint(index);
+extern "C" void C_SkPath_makeIsVolatile(const SkPath* self, bool isVolatile, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->makeIsVolatile(isVolatile));
 }
 
 extern "C" size_t C_SkPath_getPoints(const SkPath* self, SkPoint* points, size_t count) {

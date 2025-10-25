@@ -322,7 +322,7 @@ impl Path {
     }
 
     pub fn with_fill_type(&self, new_fill_type: PathFillType) -> Path {
-        Path::construct(|p| unsafe { sb::C_SkPath_makeFillType(self.native(), new_fill_type, p) })
+        Self::construct(|p| unsafe { sb::C_SkPath_makeFillType(self.native(), new_fill_type, p) })
     }
 
     /// Returns if FillType describes area outside [`Path`] geometry. The inverse fill area
@@ -331,6 +331,15 @@ impl Path {
     /// Returns: `true` if FillType is `InverseWinding` or `InverseEvenOdd`
     pub fn is_inverse_fill_type(&self) -> bool {
         self.fill_type().is_inverse()
+    }
+
+    /// Creates an [`Path`] with the same properties and data, and with [`PathFillType`] replaced
+    /// with its inverse.  The inverse of [`PathFillType`] describes the area unmodified by the
+    /// original FillType.
+    pub fn with_toggle_inverse_fill_type(&self) -> Self {
+        Self::construct(|p| unsafe {
+            sb::C_SkPath_makeToggleInverseFillType(self.native(), p);
+        })
     }
 
     /// Returns `true` if the path is convex. If necessary, it will first compute the convexity.
@@ -403,6 +412,26 @@ impl Path {
     pub fn is_volatile(&self) -> bool {
         // isVolatile() is inline in SkPath.h and not available via FFI; use the exposed field accessor.
         self.native().fIsVolatile() != 0
+    }
+
+    /// Return a copy of [`Path`] with `is_volatile` indicating whether it will be altered
+    /// or discarded by the caller after it is drawn. [`Path`] by default have volatile
+    /// set `false`, allowing Skia to attach a cache of data which speeds repeated drawing.
+    ///
+    /// Mark temporary paths, discarded or modified after use, as volatile
+    /// to inform Skia that the path need not be cached.
+    ///
+    /// Mark animating [`Path`] volatile to improve performance.
+    /// Mark unchanging [`Path`] non-volatile to improve repeated rendering.
+    ///
+    /// raster surface [`Path`] draws are affected by volatile for some shadows.
+    /// GPU surface [`Path`] draws are affected by volatile for some shadows and concave geometries.
+    ///
+    /// * `is_volatile` - `true` if caller will alter [`Path`] after drawing
+    ///
+    /// Returns: [`Path`]
+    pub fn with_is_volatile(&self, is_volatile: bool) -> Self {
+        Self::construct(|p| unsafe { sb::C_SkPath_makeIsVolatile(self.native(), is_volatile, p) })
     }
 
     /// Tests if line between [`Point`] pair is degenerate.
@@ -510,19 +539,17 @@ impl Path {
 
     /// Returns [`Point`] at index in [`Point`] array. Valid range for index is
     /// 0 to `count_points()` - 1.
-    /// Returns (0, 0) if index is out of range.
+    /// Returns `None` if index is out of range.
     ///
     /// * `index` - [`Point`] array element selector
     ///
-    /// Returns: [`Point`] array value or (0, 0)
+    /// Returns: [`Point`] array value
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoint>
     pub fn get_point(&self, index: usize) -> Option<Point> {
-        let p = Point::from_native_c(unsafe {
-            sb::C_SkPath_getPoint(self.native(), index.try_into().unwrap())
-        });
-        // assuming that count_points() is somewhat slow, we
-        // check the index when a Point(0,0) is returned.
+        let p = Point::from_native_c(unsafe { self.native().getPoint(index.try_into().ok()?) });
+        // Assuming that count_points() is somewhat slow, we check the index when a Point(0,0) is
+        // returned.
         if p != Point::default() || index < self.count_points() {
             Some(p)
         } else {
@@ -829,11 +856,7 @@ impl Path {
     ///
     /// Returns: reference to [`Path`]
     pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
-        // Use SkPath::makeIsVolatile() to avoid writing private fields directly.
-        let new_path = Path::construct(|p| unsafe {
-            sb::C_SkPath_makeIsVolatile(self.native(), is_volatile, p)
-        });
-        let _old = self.native_mut().replace_with(new_path);
+        self.native_mut().set_fIsVolatile(is_volatile as _);
         self
     }
 
@@ -882,24 +905,18 @@ impl Path {
         .then_some(out)
     }
 
-    /// Sets FillType, the rule used to fill [`Path`]. While there is no check
-    /// that ft is legal, values outside of FillType are not supported.
+    /// Sets `FillType`, the rule used to fill [`Path`]. While there is no check
+    /// that `ft` is legal, values outside of `FillType` are not supported.
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
-        // Use C wrapper to construct a modified copy, then replace self.
-        let new_path =
-            Path::construct(|p| unsafe { sb::C_SkPath_makeFillType(self.native(), ft, p) });
-        let _old = self.native_mut().replace_with(new_path);
+        self.native_mut().set_fFillType(ft as _);
         self
     }
 
     /// Replaces FillType with its inverse. The inverse of FillType describes the area
     /// unmodified by the original FillType.
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
-        // Use SkPath::makeToggleInverseFillType() to get a modified copy, then replace self.
-        let new_path = Path::construct(|p| unsafe {
-            sb::C_SkPath_makeToggleInverseFillType(self.native(), p)
-        });
-        let _old = self.native_mut().replace_with(new_path);
+        let n = self.native_mut();
+        n.set_fFillType(n.fFillType() ^ 2);
         self
     }
 }
