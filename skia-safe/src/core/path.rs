@@ -410,7 +410,6 @@ impl Path {
     ///
     /// Returns: `true` if caller will alter [`Path`] after drawing
     pub fn is_volatile(&self) -> bool {
-        // isVolatile() is inline in SkPath.h and not available via FFI; use the exposed field accessor.
         self.native().fIsVolatile() != 0
     }
 
