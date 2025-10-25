@@ -37,7 +37,7 @@ impl Default for Options {
     }
 }
 
-#[deprecated(since = "0.0.0", note = "use encode::Comment")]
+#[deprecated(since = "0.90.0", note = "use encode::Comment")]
 pub type Comment = encode::Comment;
 
 pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) -> bool {
