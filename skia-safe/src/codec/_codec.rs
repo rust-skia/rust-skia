@@ -153,7 +153,8 @@ impl Codec<'_> {
         IRect::construct(|r| unsafe { sb::C_SkCodec_bounds(self.native(), r) })
     }
 
-    // TODO: getICCProfile
+    // TODO: getICCProfile()
+    // TODO: getHdrMetadata()
 
     pub fn has_high_bit_depth_encoded_data(&self) -> bool {
         unsafe { sb::C_SkCodec_hasHighBitDepthEncodedData(self.native()) }

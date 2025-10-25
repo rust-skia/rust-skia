@@ -297,7 +297,7 @@ pub(crate) fn construct<N>(construct: impl FnOnce(*mut N)) -> N {
 #[must_use]
 pub(crate) fn try_construct<N>(construct: impl FnOnce(*mut N) -> bool) -> Option<UnsafeCell<N>> {
     let mut instance = mem::MaybeUninit::uninit();
-    construct(instance.as_mut_ptr()).then_some(unsafe { instance.assume_init() }.into())
+    construct(instance.as_mut_ptr()).then(|| unsafe { instance.assume_init() }.into())
 }
 
 impl<N: NativeDrop> Drop for Handle<N> {
@@ -751,7 +751,7 @@ pub(crate) const fn assert_layout_compatible<T1, T2>() {
     );
     assert!(
         mem::align_of::<T1>() == mem::align_of::<T2>(),
-        "Type layout verficiation failed: Alignment mismatch"
+        "Type layout verification failed: Alignment mismatch"
     );
 }
 
@@ -1013,5 +1013,20 @@ pub(crate) mod safer {
             ptr
         };
         slice::from_raw_parts_mut(ptr, len)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    struct PanicOnDrop {}
+    impl Drop for PanicOnDrop {
+        fn drop(&mut self) {
+            panic!("Shall not drop")
+        }
+    }
+    #[test]
+
+    fn try_construct_does_not_drop_when_construction_attempt_fails() {
+        _ = super::try_construct::<PanicOnDrop>(|_| false);
     }
 }

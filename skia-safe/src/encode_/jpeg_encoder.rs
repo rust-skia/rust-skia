@@ -1,4 +1,6 @@
-use crate::{interop::RustWStream, prelude::*, Data, EncodedOrigin, Pixmap};
+use crate::{
+    interop::RustWStream, prelude::*, ColorSpace, Data, EncodedOrigin, Pixmap, YUVAPixmaps,
+};
 use skia_bindings::{SkJpegEncoder_AlphaOption, SkJpegEncoder_Downsample};
 use std::io;
 
@@ -29,8 +31,6 @@ pub struct Options {
     pub alpha_option: AlphaOption,
     pub xmp_metadata: Option<String>,
     pub origin: Option<EncodedOrigin>,
-    // TODO: ICCProfile
-    // TODO: ICCProfileDescription
 }
 
 impl Default for Options {
@@ -62,7 +62,43 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
     }
 }
 
-// TODO: encode YUVAPixmaps
+pub fn encode_yuva_pixmaps<W: io::Write>(
+    writer: &mut W,
+    src: &YUVAPixmaps,
+    src_color_space: Option<&ColorSpace>,
+    options: &Options,
+) -> bool {
+    let xmp_metadata = options.xmp_metadata.as_ref().map(Data::new_str);
+    let mut stream = RustWStream::new(writer);
+
+    unsafe {
+        skia_bindings::C_SkJpegEncoder_EncodeYUVAPixmaps(
+            stream.stream_mut(),
+            src.native(),
+            src_color_space.native_ptr_or_null(),
+            options.quality as _,
+            options.downsample.native(),
+            options.alpha_option,
+            xmp_metadata.as_ref().native_ptr_or_null(),
+            options.origin.as_ref().native_ptr_or_null(),
+        )
+    }
+}
+
+pub fn encode_pixmap(src: &Pixmap, options: &Options) -> Option<crate::Data> {
+    let xmp_metadata = options.xmp_metadata.as_ref().map(Data::new_str);
+
+    Data::from_ptr(unsafe {
+        skia_bindings::C_SkJpegEncoder_EncodePixmap(
+            src.native(),
+            options.quality as _,
+            options.downsample.native(),
+            options.alpha_option,
+            xmp_metadata.as_ref().native_ptr_or_null(),
+            options.origin.as_ref().native_ptr_or_null(),
+        )
+    })
+}
 
 pub fn encode_image<'a>(
     context: impl Into<Option<&'a mut crate::gpu::DirectContext>>,

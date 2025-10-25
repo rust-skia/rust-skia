@@ -275,19 +275,19 @@ impl YUVAInfo {
     /// compatible with chroma subsampling (because Y is in the same plane as UV) then the result
     /// will be `None`.
     pub fn with_subsampling(&self, subsampling: Subsampling) -> Option<Self> {
-        Self::try_construct(|info| unsafe {
-            sb::C_SkYUVAInfo_makeSubsampling(self.native(), subsampling.into_native(), info);
-            Self::native_is_valid(&*info)
-        })
+        let r = construct(|info| unsafe {
+            sb::C_SkYUVAInfo_makeSubsampling(self.native(), subsampling.into_native(), info)
+        });
+        Self::native_is_valid(&r).then(|| Self::from_native_c(r))
     }
 
     /// Returns a [YUVAInfo] that is identical to this one but with the passed dimensions. If the
     /// passed dimensions is empty then the result will be `None`.
     pub fn with_dimensions(&self, dimensions: impl Into<ISize>) -> Option<Self> {
-        Self::try_construct(|info| unsafe {
+        let r = construct(|info| unsafe {
             sb::C_SkYUVAInfo_makeDimensions(self.native(), dimensions.into().native(), info);
-            Self::native_is_valid(&*info)
-        })
+        });
+        Self::native_is_valid(&r).then(|| Self::from_native_c(r))
     }
 
     pub(crate) fn native_is_valid(info: &SkYUVAInfo) -> bool {

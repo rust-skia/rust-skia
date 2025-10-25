@@ -2,6 +2,8 @@ use crate::{Bitmap, EncodedImageFormat, Pixmap};
 
 pub mod jpeg_encoder;
 pub mod png_encoder;
+// TODO: May support with an optional feature, gn flag `skia_use_rust_png_encode`.
+// pub mod png_rust_encoder;
 #[cfg(feature = "webp-encode")]
 pub mod webp_encoder;
 
@@ -119,6 +121,39 @@ pub mod encode {
                 webp_encoder::encode_image(context, image, &opts)
             }
             _ => None,
+        }
+    }
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct Comment {
+        pub keyword: String,
+        pub text: String,
+    }
+
+    impl Comment {
+        pub fn new(keyword: impl Into<String>, text: impl Into<String>) -> Self {
+            Self {
+                keyword: keyword.into(),
+                text: text.into(),
+            }
+        }
+    }
+
+    pub(crate) mod comments {
+        use std::ffi::CString;
+
+        use crate::DataTable;
+
+        use super::Comment;
+
+        pub fn to_data_table(comments: &[Comment]) -> Option<DataTable> {
+            let mut comments_c = Vec::with_capacity(comments.len() * 2);
+            for comment in comments {
+                comments_c.push(CString::new(comment.keyword.as_str()).ok()?);
+                comments_c.push(CString::new(comment.text.as_str()).ok()?);
+            }
+            let slices: Vec<&[u8]> = comments_c.iter().map(|c| c.as_bytes_with_nul()).collect();
+            Some(DataTable::from_slices(&slices))
         }
     }
 }

@@ -68,6 +68,21 @@ pub mod png_decoder {
     }
 }
 
+#[cfg(false)]
+pub mod png_rust_decoder {
+    use std::{io, result};
+
+    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+
+    pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
+        decoder().from_stream(stream)
+    }
+
+    pub fn decoder() -> Decoder {
+        Decoder::construct(|decoder| unsafe { skia_bindings::C_SkPngRustDecoder_Decoder(decoder) })
+    }
+}
+
 pub mod wbmp_decoder {
     use std::{io, result};
 

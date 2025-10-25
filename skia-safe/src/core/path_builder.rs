@@ -44,7 +44,7 @@ impl fmt::Debug for PathBuilder {
 
 impl From<PathBuilder> for Path {
     fn from(mut value: PathBuilder) -> Self {
-        value.detach()
+        value.detach(None)
     }
 }
 
@@ -71,12 +71,28 @@ impl PathBuilder {
         Rect::construct(|r| unsafe { sb::C_SkPathBuilder_computeBounds(self.native(), r) })
     }
 
-    pub fn snapshot(&self) -> Path {
-        Path::construct(|path| unsafe { sb::C_SkPathBuilder_snapshot(self.native(), path) })
+    pub fn snapshot<'m>(&self, mx: impl Into<Option<&'m Matrix>>) -> Path {
+        let mut p = Path::default();
+        unsafe {
+            sb::C_SkPathBuilder_snapshot(
+                self.native(),
+                mx.into().native_ptr_or_null(),
+                p.native_mut(),
+            )
+        };
+        p
     }
 
-    pub fn detach(&mut self) -> Path {
-        Path::construct(|path| unsafe { sb::C_SkPathBuilder_detach(self.native_mut(), path) })
+    pub fn detach<'m>(&mut self, mx: impl Into<Option<&'m Matrix>>) -> Path {
+        let mut p = Path::default();
+        unsafe {
+            sb::C_SkPathBuilder_detach(
+                self.native_mut(),
+                mx.into().native_ptr_or_null(),
+                p.native_mut(),
+            )
+        };
+        p
     }
 
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
@@ -291,6 +307,10 @@ impl PathBuilder {
         self
     }
 
+    pub fn add_line(&mut self, a: impl Into<Point>, b: impl Into<Point>) -> &mut Self {
+        self.move_to(a).line_to(b)
+    }
+
     pub fn add_rect(
         &mut self,
         rect: impl AsRef<Rect>,
@@ -475,8 +495,8 @@ mod tests {
     #[test]
     fn test_creation_snapshot_and_detach() {
         let mut builder = PathBuilder::new();
-        let _path = builder.snapshot();
-        let _path = builder.detach();
+        let _path = builder.snapshot(None);
+        let _path = builder.detach(None);
     }
 
     #[test]
@@ -488,7 +508,7 @@ mod tests {
         let mut path = PathBuilder::new();
         path.move_to((250., 250.));
         path.cubic_to((300., 300.), (700., 700.), (750., 750.));
-        let pathsh = path.snapshot();
-        canvas.draw_path(&pathsh, &paint);
+        let path_sh = path.snapshot(None);
+        canvas.draw_path(&path_sh, &paint);
     }
 }

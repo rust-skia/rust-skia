@@ -1,6 +1,6 @@
-use std::{ffi::CString, io};
+use std::io;
 
-use crate::{interop::RustWStream, prelude::*, DataTable, Pixmap};
+use crate::{encode, interop::RustWStream, prelude::*, Pixmap};
 use skia_bindings as sb;
 
 bitflags! {
@@ -22,9 +22,8 @@ native_transmutable!(sb::SkPngEncoder_FilterFlag, FilterFlag);
 pub struct Options {
     pub filter_flags: FilterFlag,
     pub z_lib_level: i32,
-    pub comments: Vec<Comment>,
-    // TODO: ICCProfile
-    // TODO: ICCProfileDescription
+    pub comments: Vec<encode::Comment>,
+    // TODO: fHdrMetadata
     // TODO: If SkGainmapInfo get out of private/ : fGainmap fGainmapInfo
 }
 
@@ -38,35 +37,11 @@ impl Default for Options {
     }
 }
 
-impl Options {
-    fn comments_to_data_table(&self) -> Option<DataTable> {
-        let mut comments = Vec::with_capacity(self.comments.len() * 2);
-        for c in self.comments.iter() {
-            comments.push(CString::new(c.keyword.as_str()).ok()?);
-            comments.push(CString::new(c.text.as_str()).ok()?);
-        }
-        let slices: Vec<&[u8]> = comments.iter().map(|c| c.as_bytes_with_nul()).collect();
-        Some(DataTable::from_slices(&slices))
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Comment {
-    pub keyword: String,
-    pub text: String,
-}
-
-impl Comment {
-    pub fn new(keyword: impl Into<String>, text: impl Into<String>) -> Self {
-        Self {
-            keyword: keyword.into(),
-            text: text.into(),
-        }
-    }
-}
+#[deprecated(since = "0.90.0", note = "use encode::Comment")]
+pub type Comment = encode::Comment;
 
 pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) -> bool {
-    let Some(comments) = options.comments_to_data_table() else {
+    let Some(comments) = encode::comments::to_data_table(&options.comments) else {
         return false;
     };
 
@@ -83,6 +58,17 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
     }
 }
 
+pub fn encode_pixmap(src: &Pixmap, options: &Options) -> Option<crate::Data> {
+    crate::Data::from_ptr(unsafe {
+        sb::C_SkPngEncoder_EncodePixmap(
+            src.native(),
+            encode::comments::to_data_table(&options.comments)?.into_ptr(),
+            options.filter_flags.into_native(),
+            options.z_lib_level,
+        )
+    })
+}
+
 pub fn encode_image<'a>(
     context: impl Into<Option<&'a mut crate::gpu::DirectContext>>,
     img: &crate::Image,
@@ -92,7 +78,7 @@ pub fn encode_image<'a>(
         sb::C_SkPngEncoder_EncodeImage(
             context.into().native_ptr_or_null_mut(),
             img.native(),
-            options.comments_to_data_table()?.into_ptr(),
+            encode::comments::to_data_table(&options.comments)?.into_ptr(),
             options.filter_flags.into_native(),
             options.z_lib_level,
         )
