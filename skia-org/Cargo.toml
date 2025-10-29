@@ -31,7 +31,7 @@ egl = ["gl", "skia-safe/egl"]
 x11 = ["gl", "skia-safe/x11"]
 wayland = ["egl", "skia-safe/wayland"]
 vulkan = ["dep:ash", "skia-safe/vulkan"]
-metal = ["dep:metal", "dep:foreign-types-shared", "dep:cocoa", "dep:objc", "skia-safe/metal"]
+metal = ["dep:metal", "dep:foreign-types-shared", "dep:cocoa", "dep:objc", "dep:objc2", "dep:objc2-foundation", "skia-safe/metal"]
 d3d = ["skia-safe/d3d", "dep:windows"]
 textlayout = ["skia-safe/textlayout"]
 webp = ["skia-safe/webp"]
@@ -46,12 +46,15 @@ sparkle = { version = "0.1.25", optional = true }
 clap = { version = "4.0.7", features = ["derive"] }
 ash = { version = "0.38.0", optional = true }
 # need to rename the package because of the feature with the same name.
-metal = { package = "metal", version = "0.24.0", optional = true }
+metal = { package = "metal", version = "0.32.0", optional = true }
 # ... to access raw metal ptrs.
-foreign-types-shared = { version = "0.1.1", optional = true }
+foreign-types-shared = { version = "0.3.1", optional = true }
 # ... for that NSAutoReleasePool to be able to free metal devices.
 cocoa = { version = "0.26", optional = true }
 objc = { version = "0.2.4", optional = true }
+objc2 = { version = "0.6.3", optional = true }
+objc2-foundation = { version = "0.3.2", optional = true }
+
 # d3d
 windows = { version = "0.62.0", features = [
     "Win32",
