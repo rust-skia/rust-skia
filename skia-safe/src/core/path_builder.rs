@@ -44,7 +44,7 @@ impl fmt::Debug for PathBuilder {
 
 impl From<PathBuilder> for Path {
     fn from(mut value: PathBuilder) -> Self {
-        value.detach(None)
+        value.detach()
     }
 }
 
@@ -71,7 +71,11 @@ impl PathBuilder {
         Rect::construct(|r| unsafe { sb::C_SkPathBuilder_computeBounds(self.native(), r) })
     }
 
-    pub fn snapshot<'m>(&self, mx: impl Into<Option<&'m Matrix>>) -> Path {
+    pub fn snapshot(&self) -> Path {
+        self.snapshot_and_transform(None)
+    }
+
+    pub fn snapshot_and_transform<'m>(&self, mx: impl Into<Option<&'m Matrix>>) -> Path {
         let mut p = Path::default();
         unsafe {
             sb::C_SkPathBuilder_snapshot(
@@ -83,7 +87,11 @@ impl PathBuilder {
         p
     }
 
-    pub fn detach<'m>(&mut self, mx: impl Into<Option<&'m Matrix>>) -> Path {
+    pub fn detach(&mut self) -> Path {
+        self.detach_and_transform(None)
+    }
+
+    pub fn detach_and_transform<'m>(&mut self, mx: impl Into<Option<&'m Matrix>>) -> Path {
         let mut p = Path::default();
         unsafe {
             sb::C_SkPathBuilder_detach(
@@ -229,16 +237,22 @@ impl PathBuilder {
 
     pub fn r_arc_to(
         &mut self,
-        r: (scalar, scalar),
+        r: impl Into<Vector>,
         x_axis_rotate: scalar,
         large_arc: ArcSize,
         sweep: PathDirection,
         d: impl Into<Vector>,
     ) -> &mut Self {
+        let r = r.into();
         let d = d.into();
         unsafe {
-            self.native_mut()
-                .rArcTo(r.0, r.1, x_axis_rotate, large_arc, sweep, d.x, d.y);
+            self.native_mut().rArcTo(
+                r.into_native(),
+                x_axis_rotate,
+                large_arc,
+                sweep,
+                d.into_native(),
+            );
         }
         self
     }
@@ -413,11 +427,17 @@ impl PathBuilder {
         };
     }
 
-    pub fn inc_reserve(&mut self, extra_pt_count: usize, extra_verb_count: usize) {
+    pub fn inc_reserve(
+        &mut self,
+        extra_pt_count: usize,
+        extra_verb_count: usize,
+        extra_conic_count: usize,
+    ) {
         unsafe {
             self.native_mut().incReserve(
                 extra_pt_count.try_into().unwrap(),
                 extra_verb_count.try_into().unwrap(),
+                extra_conic_count.try_into().unwrap(),
             )
         }
     }
@@ -495,8 +515,8 @@ mod tests {
     #[test]
     fn test_creation_snapshot_and_detach() {
         let mut builder = PathBuilder::new();
-        let _path = builder.snapshot(None);
-        let _path = builder.detach(None);
+        let _path = builder.snapshot();
+        let _path = builder.detach();
     }
 
     #[test]
@@ -508,7 +528,7 @@ mod tests {
         let mut path = PathBuilder::new();
         path.move_to((250., 250.));
         path.cubic_to((300., 300.), (700., 700.), (750., 750.));
-        let path_sh = path.snapshot(None);
+        let path_sh = path.snapshot();
         canvas.draw_path(&path_sh, &paint);
     }
 }

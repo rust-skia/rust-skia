@@ -40,17 +40,19 @@ pub fn to_svg_with_encoding(path: &Path, encoding: PathEncoding) -> String {
 
 #[cfg(test)]
 mod tests {
+    use crate::PathBuilder;
+
     use super::Path;
 
     #[test]
     fn simple_path_to_svg_and_back() {
-        let mut path = Path::default();
+        let mut path = PathBuilder::default();
         path.move_to((0, 0));
         path.line_to((100, 100));
         path.line_to((0, 100));
         path.close();
 
-        let svg = Path::to_svg(&path);
+        let svg = Path::to_svg(&path.detach());
         assert_eq!(svg, "M0 0L100 100L0 100L0 0Z");
         // And back. Someone should find out why they are not equal.
         let _recreated = Path::from_svg(svg).expect("Failed to parse SVG path");

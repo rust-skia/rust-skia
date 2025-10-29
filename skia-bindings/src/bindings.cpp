@@ -804,10 +804,6 @@ extern "C" size_t C_SkPath_getVerbs(const SkPath* self, uint8_t* verbs, size_t c
     return self->getVerbs(SkSpan(verbs, count));
 }
 
-extern "C" void C_SkPath_addPoly(SkPath* self, const SkPoint* points, size_t count, bool close) {
-    self->addPoly(SkSpan(points, count), close);
-}
-
 extern "C" void C_SkPath_iter(const SkPath* self, SkPathIter* uninitialized) {
     new (uninitialized) SkPathIter(self->iter());
 }

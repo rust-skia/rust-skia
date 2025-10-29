@@ -1,7 +1,7 @@
 use std::path;
 
 use skia_safe::{
-    paint, scalar, BlendMode, Canvas, Color, Font, Paint, Path, RRect, Rect, TextBlob,
+    paint, scalar, BlendMode, Canvas, Color, Font, Paint, PathBuilder, RRect, Rect, TextBlob,
 };
 
 use crate::{helper::default_typeface, resources, DrawingDriver};
@@ -18,7 +18,7 @@ fn draw_heptagram(canvas: &Canvas) {
     const R: scalar = 0.45 * SCALE;
     #[allow(clippy::excessive_precision)]
     const TAU: scalar = std::f32::consts::TAU;
-    let mut path = Path::default();
+    let mut path = PathBuilder::default();
     path.move_to((R, 0.0));
     for i in 1..7 {
         let theta = 3.0 * (i as scalar) * TAU / 7.0;
@@ -26,6 +26,7 @@ fn draw_heptagram(canvas: &Canvas) {
     }
 
     path.close();
+    let path = path.detach();
     let mut p = Paint::default();
     p.set_anti_alias(true);
     canvas
@@ -69,10 +70,10 @@ fn draw_hello_skia(canvas: &Canvas) {
     paint.set_color(Color::YELLOW);
     canvas.draw_round_rect(rect, 10.0, 10.0, &paint);
 
-    let mut path = Path::default();
+    let mut path = PathBuilder::default();
     path.cubic_to((768.0, 0.0), (-512.0, 256.0), (256.0, 256.0));
     paint.set_color(Color::GREEN);
-    canvas.draw_path(&path, &paint);
+    canvas.draw_path(&path.detach(), &paint);
 
     canvas.draw_image(&image, (128.0, 128.0), Some(&paint));
 
