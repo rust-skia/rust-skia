@@ -1,10 +1,9 @@
-#![allow(deprecated)]
-
 use std::path::Path;
 
-use cocoa::foundation::NSAutoreleasePool;
 use foreign_types_shared::ForeignType;
 use metal::{CommandQueue, Device};
+use objc2::rc::{autoreleasepool, Retained};
+use objc2_foundation::NSAutoreleasePool;
 
 use crate::{artifact, drivers::DrawingDriver, Driver};
 use skia_safe::{
@@ -18,14 +17,14 @@ pub struct Metal {
     context: gpu::DirectContext,
     queue: CommandQueue,
     device: Device,
-    pool: AutoreleasePool,
+    pool: Retained<NSAutoreleasePool>,
 }
 
 impl DrawingDriver for Metal {
     const DRIVER: Driver = Driver::Metal;
 
     fn new() -> Self {
-        let pool = AutoreleasePool::new();
+        let pool = unsafe { NSAutoreleasePool::new() };
 
         let device = Device::system_default().expect("no Metal device");
         let queue = device.new_command_queue();
@@ -54,39 +53,21 @@ impl DrawingDriver for Metal {
         name: &str,
         func: impl Fn(&Canvas),
     ) {
-        let _image_pool = AutoreleasePool::new();
+        autoreleasepool(|_| {
+            let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
+            let mut surface = gpu::surfaces::render_target(
+                &mut self.context,
+                gpu::Budgeted::Yes,
+                &image_info,
+                None,
+                gpu::SurfaceOrigin::TopLeft,
+                None,
+                false,
+                None,
+            )
+            .unwrap();
 
-        let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
-        let mut surface = gpu::surfaces::render_target(
-            &mut self.context,
-            gpu::Budgeted::Yes,
-            &image_info,
-            None,
-            gpu::SurfaceOrigin::TopLeft,
-            None,
-            false,
-            None,
-        )
-        .unwrap();
-
-        artifact::draw_image_on_surface(&mut surface, path, name, func);
-    }
-}
-
-struct AutoreleasePool(*mut objc::runtime::Object);
-
-impl AutoreleasePool {
-    fn new() -> Self {
-        Self(unsafe { NSAutoreleasePool::new(cocoa::base::nil) })
-    }
-}
-
-impl Drop for AutoreleasePool {
-    fn drop(&mut self) {
-        unsafe {
-            #[allow(unexpected_cfgs)]
-            // The unit value here is needed to type the return of msg_send().
-            let () = msg_send![self.0, release];
-        }
+            artifact::draw_image_on_surface(&mut surface, path, name, func);
+        })
     }
 }

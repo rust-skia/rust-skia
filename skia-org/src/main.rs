@@ -8,10 +8,6 @@ use offscreen_gl_context::{GLContext, GLVersion, NativeGLContext};
 #[cfg(feature = "vulkan")]
 extern crate ash;
 
-#[cfg(feature = "metal")]
-#[macro_use]
-extern crate objc;
-
 // TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
 
 mod artifact;

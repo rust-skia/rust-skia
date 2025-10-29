@@ -98,12 +98,12 @@ vulkano = { version = "0.35" }
 
 # metal-window
 [target.'cfg(target_os = "macos")'.dev-dependencies]
-metal-rs = { package = "metal", version = "0.24.0" }
+metal-rs = { package = "metal", version = "0.32.0" }
 raw-window-handle = "0.6.0"
 objc = "0.2.7"
 cocoa = "0.26.0"
-core-graphics-types = "0.1.1"
-foreign-types-shared = "0.1.1"
+core-graphics-types = "0.2.0"
+foreign-types-shared = "0.3.1"
 
 # d3d-window
 [target.'cfg(target_os = "windows")'.dev-dependencies]
