@@ -11,7 +11,9 @@ impl PlatformDetails for Linux {
     }
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        gn_args(config, builder);
+        generic::gn_args(config, builder);
+        // This makes it possible for clang++ to locate the C++ includes.
+        builder.target_str = Some(linux_shortened_target_str(&config.target));
 
         let target = &config.target;
         builder.cflags(flags(target));
@@ -24,10 +26,6 @@ impl PlatformDetails for Linux {
     fn link_libraries(&self, features: &Features) -> Vec<String> {
         link_libraries(features)
     }
-}
-
-pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-    generic::gn_args(config, builder);
 }
 
 pub fn link_libraries(features: &Features) -> Vec<String> {
@@ -98,7 +96,9 @@ fn flags(target: &Target) -> Vec<String> {
         // For cross-compilation.
         // The default "7" is specific to Ubuntu 18+.
         let stdlib_version = get_stdlib_version().unwrap_or("7".into());
-        let target_path_component = target.include_path_component();
+        // TODO: Do we need this anymore (we since changed the target to linux_target_str, clang /
+        // clang++ should be able to locate the include paths).
+        let target_path_component = linux_shortened_target_str(target);
         [
             format!("-I/usr/{target_path_component}/include/c++/{stdlib_version}/{target_path_component}"),
             format!("-I/usr/{target_path_component}/include"),
@@ -120,4 +120,14 @@ pub fn get_stdlib_version() -> Option<String> {
         "" => None,
         v => Some(v.into()),
     }
+}
+
+// A target for building on Linux, separated by `-` without vendor. Also used for include path components.
+pub fn linux_shortened_target_str(target: &Target) -> String {
+    let abi = target
+        .abi
+        .as_deref()
+        .map(|abi| format!("-{abi}"))
+        .unwrap_or_default();
+    format!("{}-{}{}", target.architecture, target.system, abi)
 }

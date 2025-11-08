@@ -1,4 +1,4 @@
-use super::{linux, prelude::*};
+use super::{generic, linux, prelude::*};
 
 pub struct Musl;
 
@@ -8,7 +8,7 @@ impl PlatformDetails for Musl {
     }
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        linux::gn_args(config, builder);
+        generic::gn_args(config, builder);
         let target = &config.target;
 
         builder.cflags(flags(target));
