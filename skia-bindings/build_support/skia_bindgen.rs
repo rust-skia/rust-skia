@@ -11,6 +11,9 @@ use crate::build_support::{
     platform::{self, prelude::feature},
 };
 
+// 20: Since m143
+const CPP_VERSION: &str = "20";
+
 pub mod env {
     use crate::build_support::cargo;
 
@@ -146,7 +149,7 @@ pub fn generate_bindings(
         .allowlist_var("SK_Color.*")
         .allowlist_var("kAll_GrBackendState")
         .use_core()
-        .clang_arg("-std=c++17")
+        .clang_arg(format!("-std=c++{CPP_VERSION}"))
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
 
@@ -220,13 +223,12 @@ pub fn generate_bindings(
     cc_build.cpp(true).out_dir(output_directory);
 
     {
-        let cpp17 = if target.builds_with_msvc() {
-            // m100: See also skia/BUILD.gn `config("cpp17")`
-            "/std:c++17"
+        let std_cpp_arg = if target.builds_with_msvc() {
+            format!("/std:c++{CPP_VERSION}")
         } else {
-            "-std=c++17"
+            format!("-std=c++{CPP_VERSION}")
         };
-        cc_args.push(cpp17.into());
+        cc_args.push(std_cpp_arg);
     }
 
     // Disable RTTI. Otherwise RustWStream may cause compilation errors.

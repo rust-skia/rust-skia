@@ -1,5 +1,3 @@
-use std::mem;
-
 use skia_safe::{
     surfaces, Color, Data, EncodedImageFormat, Paint, PaintStyle, Path, PathBuilder, Surface,
 };

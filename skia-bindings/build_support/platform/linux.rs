@@ -1,3 +1,5 @@
+use std::process::{Command, Stdio};
+
 use super::{generic, prelude::*};
 use pkg_config;
 
@@ -92,17 +94,30 @@ fn add_pkg_config_libs(libs: &mut Vec<String>, pkg_name: &str, fallback_libs: &[
 }
 
 fn flags(target: &Target) -> Vec<String> {
-    // Set additional includes when cross-compiling.
-    // TODO: Resolve the C++ version. This is specific to Ubuntu 18.
     if *target != cargo::host() {
-        let cpp = "7";
+        // For cross-compilation.
+        // The default "7" is specific to Ubuntu 18+.
+        let stdlib_version = get_stdlib_version().unwrap_or("7".into());
         let target_path_component = target.include_path_component();
         [
-            format!("-I/usr/{target_path_component}/include/c++/{cpp}/{target_path_component}"),
+            format!("-I/usr/{target_path_component}/include/c++/{stdlib_version}/{target_path_component}"),
             format!("-I/usr/{target_path_component}/include"),
         ]
         .into()
     } else {
         Vec::new()
+    }
+}
+
+pub fn get_stdlib_version() -> Option<String> {
+    let mut cmd = Command::new("g++");
+    cmd.arg("-dumpversion");
+    let output = cmd.stderr(Stdio::inherit()).output().ok()?;
+    if output.status.code() != Some(0) {
+        return None;
+    }
+    match String::from_utf8(output.stdout).ok()?.trim() {
+        "" => None,
+        v => Some(v.into()),
     }
 }

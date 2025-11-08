@@ -1,5 +1,5 @@
 use crate::DrawingDriver;
-use skia_safe::{paint, Canvas, Color, Font, Paint, Path, PathBuilder};
+use skia_safe::{paint, Canvas, Color, Font, Paint, PathBuilder};
 use std::path;
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
