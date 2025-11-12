@@ -20,7 +20,7 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
 - [ ] Skia Modules
   - [x] Text shaping with [Harfbuzz](https://www.freedesktop.org/wiki/Software/HarfBuzz/) and [ICU](http://site.icu-project.org/home).
   - [x] Text layout (skparagraph)
-  - [ ] Animation via [Skottie](https://skia.org/user/modules/skottie)
+  - [ ] Animation via [Skottie](https://skia.org/docs/user/modules/skottie/)
 - [x] GPU Backends
   - [x] Vulkan
   - [x] OpenGL
