@@ -470,6 +470,8 @@ const OPAQUE_TYPES: &[&str] = &[
     // LLVM21
     "std::basic_string.*",
     "std::__tree.*",
+    // libstdc++ 10 on Linux (since m143, c++20)
+    "std::strong_ordering",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
