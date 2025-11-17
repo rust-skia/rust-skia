@@ -1,4 +1,4 @@
-use std::{fmt, mem};
+use std::fmt;
 
 use crate::{
     path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, PathVerb, Point, RRect,
@@ -19,6 +19,12 @@ unsafe_send_sync!(PathBuilder);
 impl NativeDrop for SkPathBuilder {
     fn drop(&mut self) {
         unsafe { sb::C_SkPathBuilder_delete(self) }
+    }
+}
+
+impl NativePartialEq for SkPathBuilder {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe { sb::C_SkPathBuilder_equals(self, rhs) }
     }
 }
 
@@ -53,11 +59,9 @@ impl PathBuilder {
         Self::from_ptr(unsafe { sb::C_SkPathBuilder_new() }).unwrap()
     }
 
-    /* m87: No Implementation.
-    pub fn new_fill_type(fill_type: PathFillType) -> Self {
-        Self::construct(|pb| unsafe { sb::C_SkPathBuilder_Construct2(pb, fill_type) })
+    pub fn new_with_fill_type(fill_type: PathFillType) -> Self {
+        Self::from_ptr(unsafe { sb::C_SkPathBuilder_newWithFillType(fill_type) }).unwrap()
     }
-    */
 
     pub fn new_path(path: &Path) -> Self {
         Self::from_ptr(unsafe { sb::C_SkPathBuilder_newFromPath(path.native()) }).unwrap()
@@ -67,8 +71,41 @@ impl PathBuilder {
         self.native().fFillType
     }
 
+    /// Returns minimum and maximum axes values of `Point` array.
+    /// Returns `None` if `PathBuilder` contains no points.
+    ///
+    /// `Rect` returned includes all `Point` added to `PathBuilder`, including `Point` associated
+    /// with `kMove_Verb` that define empty contours.
+    ///
+    /// If any of the points are non-finite, returns `None`.
+    ///
+    /// # Returns
+    /// Bounds of all `Point` in `Point` array, or `None`.
+    pub fn compute_finite_bounds(&self) -> Option<Rect> {
+        let mut rect = Rect::default();
+        unsafe { sb::C_SkPathBuilder_computeFiniteBounds(self.native(), rect.native_mut()) }
+            .then_some(rect)
+    }
+
+    /// Like `compute_finite_bounds()` but returns a 'tight' bounds, meaning when there are curve
+    /// segments, this computes the X/Y limits of the curve itself, not the curve's control
+    /// point(s). For a polygon, this returns the same as `compute_finite_bounds()`.
+    pub fn compute_tight_bounds(&self) -> Option<Rect> {
+        let mut rect = Rect::default();
+        unsafe { sb::C_SkPathBuilder_computeTightBounds(self.native(), rect.native_mut()) }
+            .then_some(rect)
+    }
+
+    /// Returns minimum and maximum axes values of `Point` array.
+    ///
+    /// # Returns
+    /// Bounds of all `Point` in `Point` array, or an empty `Rect` if the bounds are non-finite.
+    ///
+    /// # Deprecated
+    /// Use `compute_finite_bounds()` instead, which returns `None` when the bounds are non-finite.
+    #[deprecated(since = "0.0.0", note = "Use compute_finite_bounds() instead")]
     pub fn compute_bounds(&self) -> Rect {
-        Rect::construct(|r| unsafe { sb::C_SkPathBuilder_computeBounds(self.native(), r) })
+        self.compute_finite_bounds().unwrap_or_else(Rect::new_empty)
     }
 
     pub fn snapshot(&self) -> Path {
@@ -241,10 +278,10 @@ impl PathBuilder {
         x_axis_rotate: scalar,
         large_arc: ArcSize,
         sweep: PathDirection,
-        d: impl Into<Vector>,
+        dxdy: impl Into<Vector>,
     ) -> &mut Self {
         let r = r.into();
-        let d = d.into();
+        let d = dxdy.into();
         unsafe {
             self.native_mut().rArcTo(
                 r.into_native(),
@@ -463,7 +500,7 @@ impl PathBuilder {
 
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         let n = self.native_mut();
-        n.fFillType = unsafe { mem::transmute::<u8, sb::SkPathFillType>(n.fFillType as u8 ^ 2) };
+        n.fFillType = n.fFillType.toggle_inverse();
         self
     }
 
@@ -476,6 +513,11 @@ impl PathBuilder {
         unsafe { sb::C_SkPathBuilder_getLastPt(self.native(), p.native_mut()) }.then_some(p)
     }
 
+    pub fn set_point(&mut self, index: usize, p: impl Into<Point>) {
+        let p = p.into();
+        unsafe { sb::C_SkPathBuilder_setPoint(self.native_mut(), index, *p.native()) }
+    }
+
     pub fn set_last_pt(&mut self, p: impl Into<Point>) {
         let p = p.into();
         unsafe { self.native_mut().setLastPt(p.x, p.y) };
@@ -486,7 +528,7 @@ impl PathBuilder {
     }
 
     pub fn is_inverse_fill_type(&self) -> bool {
-        PathFillType::is_inverse(self.fill_type())
+        self.fill_type().is_inverse()
     }
 
     pub fn points(&self) -> &[Point] {
@@ -503,6 +545,50 @@ impl PathBuilder {
             let verbs = sb::C_SkPathBuilder_verbs(self.native(), &mut len);
             safer::from_raw_parts(verbs, len)
         }
+    }
+
+    pub fn conic_weights(&self) -> &[scalar] {
+        unsafe {
+            let mut len = 0;
+            let weights = sb::C_SkPathBuilder_conicWeights(self.native(), &mut len);
+            safer::from_raw_parts(weights, len)
+        }
+    }
+}
+
+pub use skia_bindings::SkPathBuilder_DumpFormat as DumpFormat;
+variant_name!(DumpFormat::Hex);
+
+impl PathBuilder {
+    /// Dumps the path to a string using the specified format.
+    ///
+    /// # Arguments
+    /// * `format` - The format to use for dumping (Decimal or Hex)
+    ///
+    /// # Returns
+    /// A string representation of the path
+    pub fn dump_to_string(&self, format: DumpFormat) -> String {
+        let mut str = crate::interop::String::default();
+        unsafe {
+            sb::C_SkPathBuilder_dumpToString(self.native(), format, str.native_mut());
+        }
+        str.as_str().to_owned()
+    }
+
+    /// Dumps the path to stdout using the specified format.
+    ///
+    /// # Arguments
+    /// * `format` - The format to use for dumping (Decimal or Hex)
+    pub fn dump(&self, format: DumpFormat) {
+        unsafe {
+            sb::C_SkPathBuilder_dump(self.native(), format);
+        }
+    }
+}
+
+impl PathBuilder {
+    pub fn contains(&self, point: impl Into<Point>) -> bool {
+        unsafe { self.native().contains(point.into().into_native()) }
     }
 }
 
@@ -530,5 +616,115 @@ mod tests {
         path.cubic_to((300., 300.), (700., 700.), (750., 750.));
         let path_sh = path.snapshot();
         canvas.draw_path(&path_sh, &paint);
+    }
+
+    #[test]
+    fn test_equality() {
+        let mut a = PathBuilder::new();
+        let mut b = PathBuilder::new();
+
+        // Empty builders should be equal
+        assert_eq!(a, b);
+
+        // Different paths should not be equal
+        a.move_to((0., 0.));
+        assert_ne!(a, b);
+
+        // Same paths should be equal
+        b.move_to((0., 0.));
+        assert_eq!(a, b);
+
+        // Different fill types should not be equal
+        b.set_fill_type(PathFillType::EvenOdd);
+        assert_ne!(a, b);
+
+        a.set_fill_type(PathFillType::EvenOdd);
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn test_compute_bounds() {
+        let mut builder = PathBuilder::new();
+
+        // Empty builder should return empty rect (0, 0, 0, 0), not None
+        let empty_bounds = builder.compute_finite_bounds().unwrap();
+        assert!(empty_bounds.is_empty());
+        assert_eq!(empty_bounds, Rect::new(0., 0., 0., 0.));
+
+        let empty_tight = builder.compute_tight_bounds().unwrap();
+        assert!(empty_tight.is_empty());
+
+        // Deprecated method should also return empty rect
+        #[allow(deprecated)]
+        let bounds = builder.compute_bounds();
+        assert!(bounds.is_empty());
+
+        // Add a simple rectangle
+        builder.move_to((10., 20.));
+        builder.line_to((100., 20.));
+        builder.line_to((100., 80.));
+        builder.line_to((10., 80.));
+        builder.close();
+
+        let finite_bounds = builder.compute_finite_bounds().unwrap();
+        assert_eq!(finite_bounds.left, 10.);
+        assert_eq!(finite_bounds.top, 20.);
+        assert_eq!(finite_bounds.right, 100.);
+        assert_eq!(finite_bounds.bottom, 80.);
+
+        // For a polygon, tight bounds should equal finite bounds
+        let tight_bounds = builder.compute_tight_bounds().unwrap();
+        assert_eq!(finite_bounds, tight_bounds);
+
+        // Test with curves - finite bounds includes control points
+        let mut curve_builder = PathBuilder::new();
+        curve_builder.move_to((0., 0.));
+        curve_builder.cubic_to((50., 100.), (150., 100.), (200., 0.));
+
+        let finite = curve_builder.compute_finite_bounds().unwrap();
+        let tight = curve_builder.compute_tight_bounds().unwrap();
+
+        // Finite bounds should include control points
+        assert_eq!(finite.left, 0.);
+        assert_eq!(finite.right, 200.);
+        assert_eq!(finite.top, 0.);
+        assert_eq!(finite.bottom, 100.);
+
+        // Tight bounds should be smaller (not including full extent of control points)
+        assert!(tight.bottom < finite.bottom);
+    }
+
+    #[test]
+    fn test_dump_to_string() {
+        let mut builder = PathBuilder::new();
+        builder.move_to((10.5, 20.25));
+        builder.line_to((100.0, 50.0));
+        builder.cubic_to((30.0, 40.0), (70.0, 80.0), (90.0, 100.0));
+        builder.close();
+
+        // Test decimal format
+        let decimal = builder.dump_to_string(DumpFormat::Decimal);
+        println!("Decimal format:\n{}", decimal);
+        assert!(decimal.contains("10.5"));
+        assert!(decimal.contains("20.25"));
+
+        // Test hex format
+        let hex = builder.dump_to_string(DumpFormat::Hex);
+        println!("Hex format:\n{}", hex);
+        assert!(hex.contains("0x"));
+
+        // Both should contain verb information
+        assert!(decimal.contains("path") || decimal.contains("move") || decimal.contains("line"));
+    }
+
+    #[test]
+    fn test_contains() {
+        let mut builder = PathBuilder::new();
+        builder.add_rect(Rect::new(10., 10., 100., 100.), None, None);
+
+        assert!(builder.contains((50., 50.)));
+        assert!(builder.contains((10., 10.)));
+        assert!(!builder.contains((5., 5.)));
+        assert!(!builder.contains((150., 150.)));
     }
 }

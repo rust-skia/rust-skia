@@ -625,6 +625,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     // SkPath_*
     ("ArcSize", rewrite::k_xxx_name),
     ("AddPathMode", rewrite::k_xxx_name),
+    // SkPathBuilder_*
+    ("DumpFormat", rewrite::k_xxx),
     // SkRegion_Op
     // TODO: remove kLastOp?
     ("Op", rewrite::k_xxx_name_opt),

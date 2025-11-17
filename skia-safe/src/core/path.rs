@@ -196,10 +196,23 @@ impl Path {
         })
     }
 
-    pub fn rect(rect: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
+    pub fn rect_with_fill_type(
+        rect: impl AsRef<Rect>,
+        fill_type: PathFillType,
+        dir: impl Into<Option<PathDirection>>,
+    ) -> Self {
         Self::construct(|path| unsafe {
-            sb::C_SkPath_Rect(path, rect.as_ref().native(), dir.into().unwrap_or_default())
+            sb::C_SkPath_Rect(
+                path,
+                rect.as_ref().native(),
+                fill_type,
+                dir.into().unwrap_or_default(),
+            )
         })
+    }
+
+    pub fn rect(rect: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
+        Self::rect_with_fill_type(rect, PathFillType::default(), dir)
     }
 
     pub fn oval(oval: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
@@ -284,13 +297,16 @@ impl Path {
     }
 
     /// Constructs an empty [`Path`]. By default, [`Path`] has no verbs, no [`Point`], and no weights.
-    /// FillType is set to `Winding`.
     ///
     /// Returns: empty [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_empty_constructor>
+    pub fn new_with_fill_type(fill_type: PathFillType) -> Self {
+        Self::construct(|path| unsafe { sb::C_SkPath_Construct(path, fill_type) })
+    }
+
     pub fn new() -> Self {
-        Self::construct(|path| unsafe { sb::C_SkPath_Construct(path) })
+        Self::new_with_fill_type(PathFillType::default())
     }
 
     /// Returns a copy of this path in the current state.
@@ -312,6 +328,60 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_isInterpolatable>
     pub fn is_interpolatable(&self, compare: &Path) -> bool {
         unsafe { self.native().isInterpolatable(compare.native()) }
+    }
+
+    /// Interpolates between [`Path`] with [`Point`] array of equal size.
+    /// Copy verb array and weights to out, and set out [`Point`] array to a weighted
+    /// average of this [`Point`] array and ending [`Point`] array, using the formula:
+    /// (Path Point * weight) + ending Point * (1 - weight).
+    ///
+    /// weight is most useful when between zero (ending [`Point`] array) and
+    /// one (this Point_Array); will work with values outside of this
+    /// range.
+    ///
+    /// `interpolate()` returns an empty [`Path`] if [`Point`] array is not the same size
+    /// as ending [`Point`] array. Call `is_interpolatable()` to check [`Path`] compatibility
+    /// prior to calling `make_interpolate`().
+    ///
+    /// * `ending` - [`Point`] array averaged with this [`Point`] array
+    /// * `weight` - contribution of this [`Point`] array, and
+    ///                one minus contribution of ending [`Point`] array
+    ///
+    /// Returns: [`Path`] replaced by interpolated averages
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_interpolate>
+    pub fn interpolate(&self, ending: &Path, weight: scalar) -> Option<Self> {
+        let mut out = Path::default();
+        self.interpolate_inplace(ending, weight, &mut out)
+            .then_some(out)
+    }
+
+    /// Interpolates between [`Path`] with [`Point`] array of equal size.
+    /// Copy verb array and weights to out, and set out [`Point`] array to a weighted
+    /// average of this [`Point`] array and ending [`Point`] array, using the formula:
+    /// `(Path Point * weight) + ending Point * (1 - weight)`.
+    ///
+    /// `weight` is most useful when between zero (ending [`Point`] array) and
+    /// one (this Point_Array); will work with values outside of this
+    /// range.
+    ///
+    /// `interpolate_inplace()` returns `false` and leaves out unchanged if [`Point`] array is not
+    /// the same size as ending [`Point`] array. Call `is_interpolatable()` to check [`Path`]
+    /// compatibility prior to calling `interpolate_inplace()`.
+    ///
+    /// * `ending` - [`Point`] array averaged with this [`Point`] array
+    /// * `weight` - contribution of this [`Point`] array, and
+    ///                one minus contribution of ending [`Point`] array
+    /// * `out` - [`Path`] replaced by interpolated averages
+    ///
+    /// Returns: `true` if [`Path`] contain same number of [`Point`]
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_interpolate>
+    pub fn interpolate_inplace(&self, ending: &Path, weight: scalar, out: &mut Path) -> bool {
+        unsafe {
+            self.native()
+                .interpolate(ending.native(), weight, out.native_mut())
+        }
     }
 
     /// Returns [`PathFillType`], the rule used to fill [`Path`].
@@ -526,6 +596,7 @@ impl Path {
             .then_some((line[0], line[1]))
     }
 
+    /// Return a read-only view into the path's points.
     pub fn points(&self) -> &[Point] {
         unsafe {
             let mut len = 0;
@@ -534,6 +605,7 @@ impl Path {
         }
     }
 
+    /// Return a read-only view into the path's verbs.
     pub fn verbs(&self) -> &[PathVerb] {
         unsafe {
             let mut len = 0;
@@ -542,6 +614,7 @@ impl Path {
         }
     }
 
+    /// Return a read-only view into the path's conic-weights.
     pub fn conic_weights(&self) -> &[scalar] {
         unsafe {
             let mut len = 0;
@@ -550,25 +623,37 @@ impl Path {
         }
     }
 
-    /// Returns the number of points in [`Path`].
-    /// [`Point`] count is initially zero.
-    ///
-    /// Returns: [`Path`] [`Point`] array length
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_countPoints>
     pub fn count_points(&self) -> usize {
         self.points().len()
     }
 
+    pub fn count_verbs(&self) -> usize {
+        self.verbs().len()
+    }
+
+    /// Return the last point, or `None`
+    ///
+    /// Returns: The last if the path contains one or more [`Point`], else returns `None`
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_getLastPt>
+    pub fn last_pt(&self) -> Option<Point> {
+        let mut p = Point::default();
+        unsafe { sb::C_SkPath_getLastPt(self.native(), p.native_mut()) }.then_some(p)
+    }
+}
+
+impl Path {
     /// Returns [`Point`] at index in [`Point`] array. Valid range for index is
     /// 0 to `count_points()` - 1.
     /// Returns `None` if index is out of range.
+    /// DEPRECATED
     ///
     /// * `index` - [`Point`] array element selector
     ///
     /// Returns: [`Point`] array value
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoint>
+    #[deprecated(since = "0.0.0", note = "use points()")]
     pub fn get_point(&self, index: usize) -> Option<Point> {
         let p = Point::from_native_c(unsafe { self.native().getPoint(index.try_into().ok()?) });
         // Assuming that count_points() is somewhat slow, we check the index when a Point(0,0) is
@@ -582,12 +667,13 @@ impl Path {
 
     /// Returns number of points in [`Path`].
     /// Copies N points from the path into the span, where N = min(#points, span capacity)
-    ///
+    /// DEPRECATED
     /// * `points` - span to receive the points. may be empty
     ///
     /// Returns: the number of points in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoints>
+    #[deprecated(since = "0.0.0")]
     pub fn get_points(&self, points: &mut [Point]) -> usize {
         unsafe {
             sb::C_SkPath_getPoints(
@@ -598,28 +684,22 @@ impl Path {
         }
     }
 
-    /// Returns the number of verbs: [`Verb::Move`], [`Verb::Line`], [`Verb::Quad`], [`Verb::Conic`],
-    /// [`Verb::Cubic`], and [`Verb::Close`]; added to [`Path`].
-    ///
-    /// Returns: length of verb array
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_countVerbs>
-    pub fn count_verbs(&self) -> usize {
-        self.verbs().len()
-    }
-
     /// Returns number of points in [`Path`].
     /// Copies N points from the path into the span, where N = min(#points, span capacity)
+    /// DEPRECATED
     ///
     /// * `verbs` - span to store the verbs. may be empty.
     ///
     /// Returns: the number of verbs in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getVerbs>
+    #[deprecated(since = "0.0.0")]
     pub fn get_verbs(&self, verbs: &mut [u8]) -> usize {
         unsafe { sb::C_SkPath_getVerbs(self.native(), verbs.as_mut_ptr(), verbs.len()) }
     }
+}
 
+impl Path {
     /// Returns the approximate byte size of the [`Path`] in memory.
     ///
     /// Returns: approximate size
@@ -785,24 +865,47 @@ pub use sb::SkPath_AddPathMode as AddPathMode;
 variant_name!(AddPathMode::Append);
 
 impl Path {
-    /// Offsets [`Point`] array by `(d.x, d.y)`.
+    /// Return a copy of [`Path`] with verb array, [`Point`] array, and weight transformed
+    /// by matrix. `try_make_transform` may change verbs and increase their number.
     ///
-    /// * `dx` - offset added to [`Point`] array x-axis coordinates
-    /// * `dy` - offset added to [`Point`] array y-axis coordinates
-    ///
-    /// Returns: overwritten, translated copy of [`Path`]; may be `None`
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_offset>
-    // #[must_use]
-    pub fn with_offset(&self, d: impl Into<Vector>) -> Path {
-        let d = d.into();
-        Path::construct(|path| unsafe { sb::C_SkPath_makeOffset(self.native(), d.x, d.y, path) })
-    }
-
-    /// Transforms verb array, [`Point`] array, and weight by matrix.
-    /// transform may change verbs and increase their number.
+    /// If the resulting path has any non-finite values, returns `None`.
     ///
     /// * `matrix` - [`Matrix`] to apply to [`Path`]
+    ///
+    /// Returns: [`Path`] if finite, or `None`
+    pub fn try_make_transform(&self, matrix: &Matrix) -> Option<Path> {
+        Path::try_construct(|path| unsafe {
+            sb::C_SkPath_tryMakeTransform(self.native(), matrix.native(), path)
+        })
+    }
+
+    pub fn try_make_offset(&self, d: impl Into<Vector>) -> Option<Path> {
+        let d = d.into();
+        Path::try_construct(|path| unsafe {
+            sb::C_SkPath_tryMakeOffset(self.native(), d.x, d.y, path)
+        })
+    }
+
+    pub fn try_make_scale(&self, (sx, sy): (scalar, scalar)) -> Option<Path> {
+        Path::try_construct(|path| unsafe {
+            sb::C_SkPath_tryMakeScale(self.native(), sx, sy, path)
+        })
+    }
+
+    // TODO: I think we should keep only the make_ variants.
+
+    /// Return a copy of [`Path`] with verb array, [`Point`] array, and weight transformed
+    /// by matrix. `with_transform` may change verbs and increase their number.
+    ///
+    /// If the resulting path has any non-finite values, this will still return a path
+    /// but that path will return `true` for `is_finite()`.
+    ///
+    /// The newer pattern is to call [`try_make_transform`](Self::try_make_transform) which will only return a
+    /// path if the result is finite.
+    ///
+    /// * `matrix` - [`Matrix`] to apply to [`Path`]
+    ///
+    /// Returns: [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_transform>
     #[must_use]
@@ -817,21 +920,27 @@ impl Path {
         self.with_transform(m)
     }
 
+    /// Returns [`Path`] with [`Point`] array offset by `(d.x, d.y)`.
+    ///
+    /// * `d` - offset added to [`Point`] array coordinates
+    ///
+    /// Returns: [`Path`]
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_offset>
+    #[must_use]
+    pub fn with_offset(&self, d: impl Into<Vector>) -> Path {
+        let d = d.into();
+        Path::construct(|path| unsafe { sb::C_SkPath_makeOffset(self.native(), d.x, d.y, path) })
+    }
+
+    #[must_use]
+    pub fn make_offset(&self, d: impl Into<Vector>) -> Path {
+        self.with_offset(d)
+    }
+
     #[must_use]
     pub fn make_scale(&self, (sx, sy): (scalar, scalar)) -> Path {
         self.make_transform(&Matrix::scale((sx, sy)))
-    }
-
-    /// Returns last point on [`Path`]. Returns `None` if [`Point`] array is empty,
-    /// storing `(0, 0)` if `last_pt` is not `None`.
-    ///
-    /// Returns final [`Point`] in [`Point`] array; may be `None`
-    /// Returns: `Some` if [`Point`] array contains one or more [`Point`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_getLastPt>
-    pub fn last_pt(&self) -> Option<Point> {
-        let mut p = Point::default();
-        unsafe { sb::C_SkPath_getLastPt(self.native(), p.native_mut()) }.then_some(p)
     }
 }
 
@@ -897,35 +1006,6 @@ impl Path {
         self
     }
 
-    /// Interpolates between [`Path`] with [`Point`] array of equal size.
-    /// Copy verb array and weights to out, and set out [`Point`] array to a weighted
-    /// average of this [`Point`] array and ending [`Point`] array, using the formula:
-    /// (Path Point * weight) + ending Point * (1 - weight).
-    ///
-    /// weight is most useful when between zero (ending [`Point`] array) and
-    /// one (this Point_Array); will work with values outside of this
-    /// range.
-    ///
-    /// `interpolate()` returns an empty [`Path`] if [`Point`] array is not the same size
-    /// as ending [`Point`] array. Call `is_interpolatable()` to check [`Path`] compatibility
-    /// prior to calling `make_interpolate`().
-    ///
-    /// * `ending` - [`Point`] array averaged with this [`Point`] array
-    /// * `weight` - contribution of this [`Point`] array, and
-    ///                one minus contribution of ending [`Point`] array
-    ///
-    /// Returns: [`Path`] replaced by interpolated averages
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_interpolate>
-    pub fn interpolate(&self, ending: &Path, weight: scalar) -> Option<Self> {
-        let mut out = Path::default();
-        unsafe {
-            self.native()
-                .interpolate(ending.native(), weight, out.native_mut())
-        }
-        .then_some(out)
-    }
-
     /// Sets `FillType`, the rule used to fill [`Path`]. While there is no check
     /// that `ft` is legal, values outside of `FillType` are not supported.
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
@@ -940,15 +1020,6 @@ impl Path {
         n.fFillType = n.fFillType.toggle_inverse();
         self
     }
-}
-
-impl Path {
-    /// Returns a copy of this path in the current state, and resets the path to empty.
-    pub fn detach(&mut self) -> Self {
-        let result = self.clone();
-        self.reset();
-        result
-    }
 
     /// Sets [`Path`] to its initial state.
     /// Removes verb array, [`Point`] array, and weights, and sets FillType to `Winding`.
@@ -960,6 +1031,15 @@ impl Path {
     pub fn reset(&mut self) -> &mut Self {
         unsafe { self.native_mut().reset() };
         self
+    }
+}
+
+impl Path {
+    /// Returns a copy of this path in the current state, and resets the path to empty.
+    pub fn detach(&mut self) -> Self {
+        let result = self.clone();
+        self.reset();
+        result
     }
 
     pub fn iter(&self) -> PathIter {
@@ -1180,18 +1260,17 @@ impl Iterator for RawIter<'_> {
 }
 
 impl Path {
-    /// Returns `true` if the point `(p.x, p.y)` is contained by [`Path`], taking into
+    /// Returns `true` if the point is contained by [`Path`], taking into
     /// account [`PathFillType`].
     ///
-    /// * `p.x` - x-axis value of containment test
-    /// * `p.y` - y-axis value of containment test
+    /// * `point` - the point to test
     ///
     /// Returns: `true` if [`Point`] is in [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_contains>
-    pub fn contains(&self, p: impl Into<Point>) -> bool {
-        let p = p.into();
-        unsafe { self.native().contains(p.into_native()) }
+    pub fn contains(&self, point: impl Into<Point>) -> bool {
+        let point = point.into();
+        unsafe { self.native().contains(point.into_native()) }
     }
 
     /// Writes text representation of [`Path`] to [`Data`].
@@ -1219,21 +1298,6 @@ impl Path {
     pub fn dump_hex(&self) {
         unsafe { self.native().dump(ptr::null_mut(), true) }
     }
-
-    // Like [`Path::dump()`], but outputs for the [`Path::make()`] factory
-    // pub fn dump_arrays_as_data(&self, dump_as_hex: bool) -> Data {
-    //     let mut stream = DynamicMemoryWStream::new();
-    //     unsafe {
-    //         self.native()
-    //             .dumpArrays(stream.native_mut().base_mut(), dump_as_hex);
-    //     }
-    //     stream.detach_as_data()
-    // }
-
-    // Like [`Path::dump()`], but outputs for the [`Path::make()`] factory
-    // pub fn dump_arrays(&self) {
-    //     unsafe { self.native().dumpArrays(ptr::null_mut(), false) }
-    // }
 
     // TODO: writeToMemory()?
 
@@ -1363,5 +1427,48 @@ mod tests {
         let transformed = path.with_transform(&matrix);
 
         assert_eq!(*transformed.bounds(), Rect::new(0.0, 0.0, 20.0, 20.0));
+    }
+
+    #[test]
+    fn test_try_make_transform() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test with finite transform
+        let matrix = Matrix::scale((2.0, 2.0));
+        let result = path.try_make_transform(&matrix);
+        assert!(result.is_some());
+        let transformed = result.unwrap();
+        assert_eq!(*transformed.bounds(), Rect::new(0.0, 0.0, 20.0, 20.0));
+
+        // Test with extreme scale that might produce non-finite values
+        let extreme_matrix = Matrix::scale((f32::MAX, f32::MAX));
+        let result = path.try_make_transform(&extreme_matrix);
+        // The result depends on whether the transform produces finite values
+        // This test documents the behavior
+        if let Some(transformed) = result {
+            assert!(transformed.is_finite());
+        }
+    }
+
+    #[test]
+    fn test_try_make_offset() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test with finite offset
+        let result = path.try_make_offset((5.0, 5.0));
+        assert!(result.is_some());
+        let offset_path = result.unwrap();
+        assert_eq!(*offset_path.bounds(), Rect::new(5.0, 5.0, 15.0, 15.0));
+    }
+
+    #[test]
+    fn test_try_make_scale() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test with finite scale
+        let result = path.try_make_scale((3.0, 3.0));
+        assert!(result.is_some());
+        let scaled = result.unwrap();
+        assert_eq!(*scaled.bounds(), Rect::new(0.0, 0.0, 30.0, 30.0));
     }
 }

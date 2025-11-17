@@ -691,8 +691,8 @@ extern "C" bool C_SkPathContourIter_next(SkPathContourIter* self, SkPathContourI
 // core/SkPath.h
 //
 
-extern "C" void C_SkPath_Construct(SkPath* uninitialized) {
-    new(uninitialized) SkPath();
+extern "C" void C_SkPath_Construct(SkPath* uninitialized, SkPathFillType fillType) {
+    new(uninitialized) SkPath(fillType);
 }
 
 extern "C" void C_SkPath_Raw(SkPath* uninitialized, 
@@ -712,8 +712,8 @@ extern "C" void C_SkPath_Make(SkPath* uninitialized,
 }
 
 extern "C" void C_SkPath_Rect(SkPath* uninitialized,
-    const SkRect& r, SkPathDirection dir) {
-    new (uninitialized) SkPath(SkPath::Rect(r, dir));
+    const SkRect& r, SkPathFillType fillType, SkPathDirection dir) {
+    new (uninitialized) SkPath(SkPath::Rect(r, fillType, dir));
 }
 
 extern "C" void C_SkPath_Oval(SkPath* uninitialized,
@@ -834,6 +834,21 @@ extern "C" void C_SkPath_computeTightBounds(const SkPath* self, SkRect* uninitia
     new (uninitialized) SkRect(self->computeTightBounds());
 }
 
+extern "C" bool C_SkPath_tryMakeTransform(const SkPath* self, const SkMatrix* matrix, SkPath* uninitialized) {
+    if (auto res = self->tryMakeTransform(*matrix)) { new (uninitialized) SkPath(); uninitialized->swap(*res); return true; }
+    return false;
+}
+
+extern "C" bool C_SkPath_tryMakeOffset(const SkPath* self, float dx, float dy, SkPath* uninitialized) {
+    if (auto res = self->tryMakeOffset(dx, dy)) { new (uninitialized) SkPath(); uninitialized->swap(*res); return true; }
+    return false;
+}
+
+extern "C" bool C_SkPath_tryMakeScale(const SkPath* self, float sx, float sy, SkPath* uninitialized) {
+    if (auto res = self->tryMakeScale(sx, sy)) { new (uninitialized) SkPath(); uninitialized->swap(*res); return true; }
+    return false;
+}
+
 extern "C" void C_SkPath_makeOffset(const SkPath* self, float dx, float dy, SkPath* uninitialized) {
     new (uninitialized) SkPath(self->makeOffset(dx, dy));
 }
@@ -858,18 +873,28 @@ extern "C" SkPathBuilder* C_SkPathBuilder_new() {
     return new SkPathBuilder();
 }
 
-/* m87: Implementation is missing.
-extern "C" void C_SkPathBuilder_Construct2(SkPathBuilder* uninitialized, SkPathFillType fillType) {
-    new(uninitialized) SkPathBuilder(fillType);
+extern "C" SkPathBuilder* C_SkPathBuilder_newWithFillType(SkPathFillType fillType) {
+    return new SkPathBuilder(fillType);
 }
-*/
 
 extern "C" SkPathBuilder* C_SkPathBuilder_newFromPath(const SkPath& path) {
      return new SkPathBuilder(path);
 }
 
-extern "C" void C_SkPathBuilder_computeBounds(const SkPathBuilder* self, SkRect* uninitialized) {
-    new (uninitialized) SkRect(self->computeBounds());
+extern "C" bool C_SkPathBuilder_computeFiniteBounds(const SkPathBuilder* self, SkRect* rect) {
+    if (auto bounds = self->computeFiniteBounds()) {
+        *rect = *bounds;
+        return true;
+    }
+    return false;
+}
+
+extern "C" bool C_SkPathBuilder_computeTightBounds(const SkPathBuilder* self, SkRect* rect) {
+    if (auto bounds = self->computeTightBounds()) {
+        *rect = *bounds;
+        return true;
+    }
+    return false;
 }
 
 extern "C" SkPathBuilder* C_SkPathBuilder_clone(const SkPathBuilder* pathBuilder) {
@@ -878,6 +903,10 @@ extern "C" SkPathBuilder* C_SkPathBuilder_clone(const SkPathBuilder* pathBuilder
 
 extern "C" void C_SkPathBuilder_delete(SkPathBuilder* self) {
     delete self;
+}
+
+extern "C" bool C_SkPathBuilder_equals(const SkPathBuilder* self, const SkPathBuilder* other) {
+    return *self == *other;
 }
 
 extern "C" void C_SkPathBuilder_snapshot(const SkPathBuilder* self, const SkMatrix* mx, SkPath* out) {
@@ -908,6 +937,10 @@ extern "C" bool C_SkPathBuilder_getLastPt(const SkPathBuilder* self, SkPoint* po
     return false;
 }
 
+extern "C" void C_SkPathBuilder_setPoint(SkPathBuilder* self, size_t index, SkPoint p) {
+    self->setPoint(index, p);
+}
+
 extern "C" size_t C_SkPathBuilder_countPoints(const SkPathBuilder* self) {
     return self->countPoints();
 }
@@ -922,6 +955,20 @@ extern "C" const SkPathVerb* C_SkPathBuilder_verbs(const SkPathBuilder* self, si
     auto span = self->verbs();
     *count = span.size();
     return span.begin();
+}
+
+extern "C" const float* C_SkPathBuilder_conicWeights(const SkPathBuilder* self, size_t* count) {
+    auto span = self->conicWeights();
+    *count = span.size();
+    return span.begin();
+}
+
+extern "C" void C_SkPathBuilder_dumpToString(const SkPathBuilder* self, SkPathBuilder::DumpFormat format, SkString* str) {
+    *str = self->dumpToString(format);
+}
+
+extern "C" void C_SkPathBuilder_dump(const SkPathBuilder* self, SkPathBuilder::DumpFormat format) {
+    self->dump(format);
 }
 
 //
