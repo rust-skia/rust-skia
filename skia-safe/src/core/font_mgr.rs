@@ -113,6 +113,13 @@ impl FontMgr {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefEmpty() }).unwrap()
     }
 
+    // Custom empty manager. This avoids scanning system fonts when they are not
+    // required. Note this falls back to the system manager on platforms where
+    // Skia is not compiled with freetype (e.g. Windows)
+    pub fn custom_empty() -> Self {
+        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_NewCustomEmpty() }).unwrap()
+    }
+
     pub fn count_families(&self) -> usize {
         unsafe { self.native().countFamilies().try_into().unwrap() }
     }
