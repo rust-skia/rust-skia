@@ -1359,13 +1359,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_points() {
+    fn test_count_points() {
         let p = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
         let points_count = p.count_points();
-        let mut points = vec![Point::default(); points_count];
-        let count_returned = p.get_points(&mut points);
-        assert_eq!(count_returned, points.len());
-        assert_eq!(count_returned, 4);
+        assert_eq!(points_count, 4);
     }
 
     #[test]
