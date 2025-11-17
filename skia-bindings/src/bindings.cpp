@@ -796,6 +796,24 @@ extern "C" void C_SkPath_makeIsVolatile(const SkPath* self, bool isVolatile, SkP
     new (uninitialized) SkPath(self->makeIsVolatile(isVolatile));
 }
 
+extern "C" const SkPoint* C_SkPath_points(const SkPath* self, size_t* count) {
+    auto span = self->points();
+    *count = span.size();
+    return span.begin();
+}
+
+extern "C" const SkPathVerb* C_SkPath_verbs(const SkPath* self, size_t* count) {
+    auto span = self->verbs();
+    *count = span.size();
+    return span.begin();
+}
+
+extern "C" const float* C_SkPath_conicWeights(const SkPath* self, size_t* count) {
+    auto span = self->conicWeights();
+    *count = span.size();
+    return span.begin();
+}
+
 extern "C" size_t C_SkPath_getPoints(const SkPath* self, SkPoint* points, size_t count) {
     return self->getPoints(SkSpan(points, count));
 }
@@ -814,6 +832,14 @@ extern "C" const SkRect* C_SkPath_getBounds(const SkPath* self) {
 
 extern "C" void C_SkPath_computeTightBounds(const SkPath* self, SkRect* uninitialized) {
     new (uninitialized) SkRect(self->computeTightBounds());
+}
+
+extern "C" void C_SkPath_makeOffset(const SkPath* self, float dx, float dy, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->makeOffset(dx, dy));
+}
+
+extern "C" void C_SkPath_makeTransform(const SkPath* self, const SkMatrix* matrix, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->makeTransform(*matrix));
 }
 
 extern "C" bool C_SkPath_getLastPt(const SkPath* self, SkPoint* point) {

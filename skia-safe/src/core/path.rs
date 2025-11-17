@@ -527,15 +527,27 @@ impl Path {
     }
 
     pub fn points(&self) -> &[Point] {
-        todo!()
+        unsafe {
+            let mut len = 0;
+            let points = sb::C_SkPath_points(self.native(), &mut len);
+            safer::from_raw_parts(Point::from_native_ptr(points), len)
+        }
     }
 
     pub fn verbs(&self) -> &[PathVerb] {
-        todo!()
+        unsafe {
+            let mut len = 0;
+            let verbs = sb::C_SkPath_verbs(self.native(), &mut len);
+            safer::from_raw_parts(verbs, len)
+        }
     }
 
     pub fn conic_weights(&self) -> &[scalar] {
-        todo!()
+        unsafe {
+            let mut len = 0;
+            let weights = sb::C_SkPath_conicWeights(self.native(), &mut len);
+            safer::from_raw_parts(weights, len)
+        }
     }
 
     /// Returns the number of points in [`Path`].
@@ -784,10 +796,7 @@ impl Path {
     // #[must_use]
     pub fn with_offset(&self, d: impl Into<Vector>) -> Path {
         let d = d.into();
-        let mut path = Path::default();
-        todo!();
-        // unsafe { self.native().offset(d.x, d.y, path.native_mut()) };
-        path
+        Path::construct(|path| unsafe { sb::C_SkPath_makeOffset(self.native(), d.x, d.y, path) })
     }
 
     /// Transforms verb array, [`Point`] array, and weight by matrix.
@@ -798,10 +807,9 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_transform>
     #[must_use]
     pub fn with_transform(&self, matrix: &Matrix) -> Path {
-        let mut path = Path::default();
-        todo!();
-        // unsafe { self.native().transform(matrix.native(), path.native_mut()) };
-        path
+        Path::construct(|path| unsafe {
+            sb::C_SkPath_makeTransform(self.native(), matrix.native(), path)
+        })
     }
 
     #[must_use]
@@ -1321,5 +1329,39 @@ mod tests {
         let r = Rect::new(0.0, 0.0, 100.0, 100.0);
         let path = Path::rect(r, None);
         assert_eq!(*path.bounds(), r);
+    }
+
+    #[test]
+    fn test_points_verbs_conic_weights() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test points()
+        let points = path.points();
+        assert_eq!(points.len(), 4);
+
+        // Test verbs()
+        let verbs = path.verbs();
+        assert_eq!(verbs.len(), 5); // Move + 4 Lines + Close
+
+        // Test conic_weights()
+        let weights = path.conic_weights();
+        assert_eq!(weights.len(), 0); // Rectangle has no conics
+    }
+
+    #[test]
+    fn test_with_offset() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+        let offset_path = path.with_offset((5.0, 5.0));
+
+        assert_eq!(*offset_path.bounds(), Rect::new(5.0, 5.0, 15.0, 15.0));
+    }
+
+    #[test]
+    fn test_with_transform() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+        let matrix = Matrix::scale((2.0, 2.0));
+        let transformed = path.with_transform(&matrix);
+
+        assert_eq!(*transformed.bounds(), Rect::new(0.0, 0.0, 20.0, 20.0));
     }
 }
