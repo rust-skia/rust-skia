@@ -1,5 +1,5 @@
 use skia_safe::{
-    surfaces, Color, Data, EncodedImageFormat, Paint, PaintStyle, Path, PathBuilder, Surface,
+    surfaces, Color, Data, EncodedImageFormat, Paint, PaintStyle, PathBuilder, Surface,
 };
 
 pub struct Canvas {
