@@ -1534,6 +1534,10 @@ extern "C" bool C_SkRegion_quickContains(const SkRegion* self, const SkIRect* r)
     return self->quickContains(*r);
 }
 
+extern "C" void C_SkRegion_getBoundaryPath(const SkRegion* self, SkPath* uninitialized) {
+    new (uninitialized) SkPath(self->getBoundaryPath());
+}
+
 extern "C" void C_SkRegion_Iterator_Construct(SkRegion::Iterator* uninitialized) {
     new (uninitialized) SkRegion::Iterator();
 }
