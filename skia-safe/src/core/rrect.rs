@@ -128,6 +128,12 @@ impl RRect {
         rr
     }
 
+    pub fn new_rect_radii(rect: impl AsRef<Rect>, radii: &[Vector; 4]) -> Self {
+        let mut rr = Self::default();
+        rr.set_rect_radii(rect, radii);
+        rr
+    }
+
     pub fn new_nine_patch(
         rect: impl AsRef<Rect>,
         left_rad: scalar,
@@ -136,24 +142,7 @@ impl RRect {
         bottom_rad: scalar,
     ) -> Self {
         let mut r = Self::default();
-        unsafe {
-            r.native_mut().setNinePatch(
-                rect.as_ref().native(),
-                left_rad,
-                top_rad,
-                right_rad,
-                bottom_rad,
-            )
-        }
-        r
-    }
-
-    pub fn new_rect_radii(rect: impl AsRef<Rect>, radii: &[Vector; 4]) -> Self {
-        let mut r = Self::default();
-        unsafe {
-            r.native_mut()
-                .setRectRadii(rect.as_ref().native(), radii.native().as_ptr())
-        }
+        r.set_nine_patch(rect, left_rad, top_rad, right_rad, bottom_rad);
         r
     }
 
