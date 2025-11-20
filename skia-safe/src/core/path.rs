@@ -653,7 +653,7 @@ impl Path {
     /// Returns: [`Point`] array value
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoint>
-    #[deprecated(since = "0.0.0", note = "use points()")]
+    #[deprecated(since = "0.91.0", note = "use points()")]
     pub fn get_point(&self, index: usize) -> Option<Point> {
         let p = Point::from_native_c(unsafe { self.native().getPoint(index.try_into().ok()?) });
         // Assuming that count_points() is somewhat slow, we check the index when a Point(0,0) is
@@ -673,7 +673,7 @@ impl Path {
     /// Returns: the number of points in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoints>
-    #[deprecated(since = "0.0.0")]
+    #[deprecated(since = "0.91.0")]
     pub fn get_points(&self, points: &mut [Point]) -> usize {
         unsafe {
             sb::C_SkPath_getPoints(
@@ -693,7 +693,7 @@ impl Path {
     /// Returns: the number of verbs in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getVerbs>
-    #[deprecated(since = "0.0.0")]
+    #[deprecated(since = "0.91.0")]
     pub fn get_verbs(&self, verbs: &mut [u8]) -> usize {
         unsafe { sb::C_SkPath_getVerbs(self.native(), verbs.as_mut_ptr(), verbs.len()) }
     }

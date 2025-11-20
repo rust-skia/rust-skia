@@ -103,7 +103,7 @@ impl PathBuilder {
     ///
     /// # Deprecated
     /// Use `compute_finite_bounds()` instead, which returns `None` when the bounds are non-finite.
-    #[deprecated(since = "0.0.0", note = "Use compute_finite_bounds() instead")]
+    #[deprecated(since = "0.91.0", note = "Use compute_finite_bounds() instead")]
     pub fn compute_bounds(&self) -> Rect {
         self.compute_finite_bounds().unwrap_or_else(Rect::new_empty)
     }

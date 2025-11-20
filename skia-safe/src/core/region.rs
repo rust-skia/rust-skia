@@ -85,7 +85,7 @@ impl Region {
         unsafe { self.native().addBoundaryPath(path.native_mut()) }
     }
 
-    #[deprecated(since = "0.0.0", note = "Use boundary_path()")]
+    #[deprecated(since = "0.91.0", note = "Use boundary_path()")]
     pub fn get_boundary_path(&self, path: &mut Path) -> bool {
         unsafe { sb::C_SkRegion_getBoundaryPath(self.native(), path.native_mut()) };
         !path.is_empty()
