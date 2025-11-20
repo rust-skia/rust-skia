@@ -1971,6 +1971,14 @@ extern "C" SkFontMgr* C_SkFontMgr_RefEmpty() {
     return SkFontMgr::RefEmpty().release();
 }
 
+extern "C" SkFontMgr* C_SkFontMgr_NewCustomEmpty() {
+#if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
+    return SkFontMgr_New_Custom_Empty().release();
+#else
+    return nullptr;
+#endif
+}
+
 //
 // core/SkFontParameters.h
 //
