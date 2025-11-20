@@ -1973,10 +1973,9 @@ extern "C" SkFontMgr* C_SkFontMgr_RefEmpty() {
 
 extern "C" SkFontMgr* C_SkFontMgr_NewCustomEmpty() {
 #if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
-    auto mgr = SkFontMgr_New_Custom_Empty();
-    return mgr.release();
+    return SkFontMgr_New_Custom_Empty().release();
 #else
-    return C_SkFontMgr_NewSystem();
+    return nullptr;
 #endif
 }
 
