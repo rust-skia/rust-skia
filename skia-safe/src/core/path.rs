@@ -1465,4 +1465,14 @@ mod tests {
         let scaled = result.unwrap();
         assert_eq!(*scaled.bounds(), Rect::new(0.0, 0.0, 30.0, 30.0));
     }
+
+    #[test]
+    fn test_serialize_deserialize() {
+        let path = Path::rect(Rect::new(10.0, 10.0, 20.0, 20.0), None);
+
+        let data = path.serialize();
+        let deserialized = Path::deserialize(&data).unwrap();
+
+        assert_eq!(path, deserialized);
+    }
 }
