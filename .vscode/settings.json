@@ -55,6 +55,7 @@
         "rasterizing",
         "RGBX",
         "SDKTARGETSYSROOT",
+        "skbug",
         "skcanvas",
         "skcpu",
         "skgpu",

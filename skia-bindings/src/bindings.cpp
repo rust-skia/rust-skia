@@ -760,6 +760,15 @@ extern "C" SkData* C_SkPath_serialize(const SkPath* self) {
     return self->serialize().release();
 }
 
+extern "C" bool C_SkPath_ReadFromMemory(SkPath* out, const void* buffer, size_t length) {
+    auto path = SkPath::ReadFromMemory(buffer, length);
+    if (path) {
+        path->swap(*out);
+        return true;
+    }
+    return false;
+}
+
 extern "C" void C_SkPath_Iter_destruct(SkPath::Iter* self) {
     self->~Iter();
 }

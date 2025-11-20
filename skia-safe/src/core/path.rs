@@ -1316,18 +1316,15 @@ impl Path {
         Data::from_ptr(unsafe { sb::C_SkPath_serialize(self.native()) }).unwrap()
     }
 
-    // TODO: readFromMemory()?
+    // TODO: ReadFromMemory
 
-    // pub fn deserialize(data: &Data) -> Option<Path> {
-    //     let mut path = Path::default();
-    //     let bytes = data.as_bytes();
-    //     unsafe {
-    //         path.native_mut()
-    //             .readFromMemory(bytes.as_ptr() as _, bytes.len())
-    //             > 0
-    //     }
-    //     .then_some(path)
-    // }
+    pub fn deserialize(data: &Data) -> Option<Path> {
+        let mut path = Path::default();
+        let bytes = data.as_bytes();
+        unsafe { sb::C_SkPath_ReadFromMemory(path.native_mut(), bytes.as_ptr() as _, bytes.len()) }
+            .then_some(path)
+    }
+
     /// (See skbug.com/40032862)
     /// Returns a non-zero, globally unique value. A different value is returned
     /// if verb array, [`Point`] array, or conic weight changes.
