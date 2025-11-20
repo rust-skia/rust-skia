@@ -8,6 +8,7 @@
 #include "include/gpu/vk/VulkanBackendContext.h"
 #include "include/gpu/vk/VulkanExtensions.h"
 #include "include/gpu/vk/VulkanMutableTextureState.h"
+#include "include/gpu/vk/VulkanTypes.h"
 
 // Additional types not referenced.
 extern "C" void C_GrVkTypes(GrVkSurfaceInfo*, VkQueue*, VkPhysicalDevice*) {};
@@ -177,3 +178,36 @@ extern "C" VkImageLayout C_MutableTextureStates_getVkImageLayout(const skgpu::Mu
 extern "C" uint32_t C_MutableTextureStates_getVkQueueFamilyIndex(const skgpu::MutableTextureState* self) {
     return skgpu::MutableTextureStates::GetVkQueueFamilyIndex(self);
 }
+
+// VulkanTypes.h
+
+extern "C" void C_VulkanYcbcrConversionInfo_Construct_ExternalFormat(
+    skgpu::VulkanYcbcrConversionInfo* uninitialized, 
+    uint64_t externalFormat,
+    VkSamplerYcbcrModelConversion ycbcrModel,
+    VkSamplerYcbcrRange ycbcrRange,
+    VkChromaLocation xChromaOffset,
+    VkChromaLocation yChromaOffset,
+    VkFilter chromaFilter,
+    VkBool32 forceExplicitReconstruction,
+    VkComponentMapping components,
+    VkFormatFeatureFlags formatFeatures) {
+    new (uninitialized) skgpu::VulkanYcbcrConversionInfo(
+        externalFormat, ycbcrModel, ycbcrRange, xChromaOffset, yChromaOffset, chromaFilter, forceExplicitReconstruction, components, formatFeatures);
+}
+
+extern "C" void C_VulkanYcbcrConversionInfo_Construct_Format(
+    skgpu::VulkanYcbcrConversionInfo* uninitialized, 
+    VkFormat format,
+    VkSamplerYcbcrModelConversion ycbcrModel,
+    VkSamplerYcbcrRange ycbcrRange,
+    VkChromaLocation xChromaOffset,
+    VkChromaLocation yChromaOffset,
+    VkFilter chromaFilter,
+    VkBool32 forceExplicitReconstruction,
+    VkComponentMapping components,
+    VkFormatFeatureFlags formatFeatures) {
+    new (uninitialized) skgpu::VulkanYcbcrConversionInfo(
+        format, ycbcrModel, ycbcrRange, xChromaOffset, yChromaOffset, chromaFilter, forceExplicitReconstruction, components, formatFeatures);
+}
+
