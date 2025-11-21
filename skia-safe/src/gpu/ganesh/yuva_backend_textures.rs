@@ -90,9 +90,8 @@ impl YUVABackendTextureInfo {
 
     /// Format of the ith plane, or `None` if `i >= Self::num_planes()`
     pub fn plane_format(&self, i: usize) -> Option<&BackendFormat> {
-        (i < self.num_planes()).then_some(BackendFormat::from_native_ref(
-            &self.native().fPlaneFormats[i],
-        ))
+        (i < self.num_planes())
+            .then(|| BackendFormat::from_native_ref(&self.native().fPlaneFormats[i]))
     }
 
     /// All plane formats.

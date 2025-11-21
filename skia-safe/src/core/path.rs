@@ -1255,7 +1255,7 @@ impl Iterator for RawIter<'_> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
 
         let verb = unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) };
-        (verb != Verb::Done).then_some((verb, points[0..verb.points()].into()))
+        (verb != Verb::Done).then(|| (verb, points[0..verb.points()].into()))
     }
 }
 

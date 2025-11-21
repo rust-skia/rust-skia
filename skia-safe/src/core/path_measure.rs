@@ -146,7 +146,7 @@ impl PathMeasure {
             self.native_mut()
                 .getSegment(start_d, stop_d, p.native_mut(), start_with_move_to)
         }
-        .then_some(p.detach())
+        .then(|| p.detach())
     }
 
     pub fn get_segment(
