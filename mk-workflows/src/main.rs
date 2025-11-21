@@ -279,7 +279,10 @@ fn render_generic_steps(workflow: &Workflow, _job: &Job) -> String {
         ("target", "${{ matrix.target }}"),
         ("androidEnv", "${{ matrix.androidEnv }}"),
         ("emscriptenEnv", "${{ matrix.emscriptenEnv }}"),
-        ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL.to_string()),
+        (
+            "androidAPILevel",
+            &config::DEFAULT_ANDROID_API_LEVEL.to_string(),
+        ),
         ("features", "${{ matrix.features }}"),
         ("runTests", "${{ matrix.runTests }}"),
         ("runClippy", "${{ matrix.runClippy }}"),
