@@ -85,12 +85,20 @@ impl SkPathFillType {
 
     #[must_use]
     pub fn to_non_inverse(self) -> Self {
-        use SkPathFillType::*;
         match self {
-            Winding => self,
-            EvenOdd => self,
-            InverseWinding => Winding,
-            InverseEvenOdd => EvenOdd,
+            Self::Winding => self,
+            Self::EvenOdd => self,
+            Self::InverseWinding => Self::Winding,
+            Self::InverseEvenOdd => Self::EvenOdd,
+        }
+    }
+
+    pub fn toggle_inverse(self) -> Self {
+        match self {
+            Self::Winding => Self::InverseWinding,
+            Self::EvenOdd => Self::InverseEvenOdd,
+            Self::InverseWinding => Self::Winding,
+            Self::InverseEvenOdd => Self::EvenOdd,
         }
     }
 }

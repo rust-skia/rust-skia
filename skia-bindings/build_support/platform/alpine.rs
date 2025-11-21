@@ -1,6 +1,4 @@
-use std::process::{Command, Stdio};
-
-use super::{linux, prelude::*};
+use super::{generic, linux, prelude::*};
 
 pub struct Musl;
 
@@ -10,7 +8,7 @@ impl PlatformDetails for Musl {
     }
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        linux::gn_args(config, builder);
+        generic::gn_args(config, builder);
         let target = &config.target;
 
         builder.cflags(flags(target));
@@ -25,29 +23,16 @@ impl PlatformDetails for Musl {
     }
 }
 
-fn get_stdlib_version() -> Option<String> {
-    let mut cmd = Command::new("g++");
-    cmd.arg("-dumpversion");
-    let output = cmd.stderr(Stdio::inherit()).output().ok()?;
-    if output.status.code() != Some(0) {
-        return None;
-    }
-    match String::from_utf8(output.stdout).unwrap().trim() {
-        "" => None,
-        v => Some(String::from(v)),
-    }
-}
-
 fn flags(target: &Target) -> Vec<String> {
     let arch = &target.architecture;
-    match get_stdlib_version() {
+    match linux::get_stdlib_version() {
         None => {
             cargo::warning("unable to determine g++ stdlib version");
             vec![]
         }
-        Some(cpp) => vec![
-            format!("-I/usr/include/c++/{cpp}"),
-            format!("-I/usr/include/c++/{cpp}/{arch}-alpine-linux-musl"),
+        Some(stdlib_version) => vec![
+            format!("-I/usr/include/c++/{stdlib_version}"),
+            format!("-I/usr/include/c++/{stdlib_version}/{arch}-alpine-linux-musl"),
         ],
     }
 }

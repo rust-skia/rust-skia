@@ -1,3 +1,5 @@
+use std::process::{Command, Stdio};
+
 use super::{generic, prelude::*};
 use pkg_config;
 
@@ -9,7 +11,9 @@ impl PlatformDetails for Linux {
     }
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        gn_args(config, builder);
+        generic::gn_args(config, builder);
+        // This makes it possible for clang++ to locate the C++ includes.
+        builder.target_str = Some(linux_shortened_target_str(&config.target));
 
         let target = &config.target;
         builder.cflags(flags(target));
@@ -22,10 +26,6 @@ impl PlatformDetails for Linux {
     fn link_libraries(&self, features: &Features) -> Vec<String> {
         link_libraries(features)
     }
-}
-
-pub fn gn_args(config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-    generic::gn_args(config, builder);
 }
 
 pub fn link_libraries(features: &Features) -> Vec<String> {
@@ -92,17 +92,42 @@ fn add_pkg_config_libs(libs: &mut Vec<String>, pkg_name: &str, fallback_libs: &[
 }
 
 fn flags(target: &Target) -> Vec<String> {
-    // Set additional includes when cross-compiling.
-    // TODO: Resolve the C++ version. This is specific to Ubuntu 18.
     if *target != cargo::host() {
-        let cpp = "7";
-        let target_path_component = target.include_path_component();
+        // For cross-compilation.
+        // The default "7" is specific to Ubuntu 18+.
+        let stdlib_version = get_stdlib_version().unwrap_or("7".into());
+        // TODO: Do we need this anymore (we since changed the target to linux_target_str, clang /
+        // clang++ should be able to locate the include paths).
+        let target_path_component = linux_shortened_target_str(target);
         [
-            format!("-I/usr/{target_path_component}/include/c++/{cpp}/{target_path_component}"),
+            format!("-I/usr/{target_path_component}/include/c++/{stdlib_version}/{target_path_component}"),
             format!("-I/usr/{target_path_component}/include"),
         ]
         .into()
     } else {
         Vec::new()
     }
+}
+
+pub fn get_stdlib_version() -> Option<String> {
+    let mut cmd = Command::new("g++");
+    cmd.arg("-dumpversion");
+    let output = cmd.stderr(Stdio::inherit()).output().ok()?;
+    if output.status.code() != Some(0) {
+        return None;
+    }
+    match String::from_utf8(output.stdout).ok()?.trim() {
+        "" => None,
+        v => Some(v.into()),
+    }
+}
+
+// A target for building on Linux, separated by `-` without vendor. Also used for include path components.
+pub fn linux_shortened_target_str(target: &Target) -> String {
+    let abi = target
+        .abi
+        .as_deref()
+        .map(|abi| format!("-{abi}"))
+        .unwrap_or_default();
+    format!("{}-{}{}", target.architecture, target.system, abi)
 }

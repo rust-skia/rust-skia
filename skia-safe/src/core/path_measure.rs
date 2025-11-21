@@ -146,7 +146,7 @@ impl PathMeasure {
             self.native_mut()
                 .getSegment(start_d, stop_d, p.native_mut(), start_with_move_to)
         }
-        .then_some(p.detach(None))
+        .then(|| p.detach())
     }
 
     pub fn get_segment(
@@ -179,16 +179,14 @@ impl PathMeasure {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Path, PathMeasure, Point};
+    use crate::{Path, PathBuilder, PathMeasure};
 
     #[test]
     fn current_measure() {
-        let mut path = Path::circle((0., 0.), 10.0, None);
-        path.add_path(
-            &Path::circle((100., 100.), 27.0, None),
-            Point::default(),
-            None,
-        );
+        let mut builder = PathBuilder::new_path(&Path::circle((0., 0.), 10.0, None));
+        builder.add_path(&Path::circle((100., 100.), 27.0, None));
+        let path = builder.detach();
+
         let mut measure = PathMeasure::new(&path, false, None);
         while measure.next_contour() {
             eprintln!("contour: {:?}", measure.current_measure());

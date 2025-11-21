@@ -4,7 +4,7 @@ use skia_safe::{
     color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar, shaders,
     AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter, Matrix, Paint, Path,
-    PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
+    PathBuilder, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
 };
 
 use crate::{helper::default_typeface, resources, DrawingDriver};
@@ -364,7 +364,7 @@ fn draw_color_table_color_filter(canvas: &Canvas) {
 
 fn draw_path_2d_effect(canvas: &Canvas) {
     let scale = 10.0;
-    let path = &mut Path::default();
+    let mut path = PathBuilder::new();
     let pts: [i8; 28] = [
         2, 2, 1, 3, 0, 3, 2, 1, 3, 1, 4, 0, 4, 1, 5, 1, 4, 2, 4, 3, 2, 5, 2, 4, 3, 3, 2, 3,
     ];
@@ -379,7 +379,7 @@ fn draw_path_2d_effect(canvas: &Canvas) {
     let matrix = &Matrix::scale((4.0 * scale, 4.0 * scale));
     let paint = &mut Paint::default();
     paint
-        .set_path_effect(path_2d_path_effect::new(matrix, path))
+        .set_path_effect(path_2d_path_effect::new(matrix, &path.detach()))
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
     let bounds = Rect::new(-4.0 * scale, -4.0 * scale, 256.0, 256.0);
@@ -400,11 +400,10 @@ fn draw_line_2d_effect(canvas: &Canvas) {
 
 fn draw_path_1d_effect(canvas: &Canvas) {
     let paint = &mut Paint::default();
-    let path = &mut Path::default();
-    path.add_oval(Rect::from_size((16.0, 6.0)), None);
+    let path = Path::oval(Rect::from_size((16.0, 6.0)), None);
     paint
         .set_path_effect(path_1d_path_effect::new(
-            path,
+            &path,
             32.0,
             0.0,
             path_1d_path_effect::Style::Rotate,
@@ -417,7 +416,7 @@ fn draw_path_1d_effect(canvas: &Canvas) {
 fn star() -> Path {
     const R: scalar = 115.2;
     const C: scalar = 128.0;
-    let mut path = Path::default();
+    let mut path = PathBuilder::new();
     path.move_to((C + R, C));
     for i in 1..8 {
         #[allow(clippy::excessive_precision)]
@@ -425,7 +424,7 @@ fn star() -> Path {
         path.line_to((C + R * a.cos(), C + R * a.sin()));
     }
     path.close();
-    path
+    path.detach()
 }
 
 fn draw_corner_path_effect(canvas: &Canvas) {

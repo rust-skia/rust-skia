@@ -196,10 +196,23 @@ impl Path {
         })
     }
 
-    pub fn rect(rect: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
+    pub fn rect_with_fill_type(
+        rect: impl AsRef<Rect>,
+        fill_type: PathFillType,
+        dir: impl Into<Option<PathDirection>>,
+    ) -> Self {
         Self::construct(|path| unsafe {
-            sb::C_SkPath_Rect(path, rect.as_ref().native(), dir.into().unwrap_or_default())
+            sb::C_SkPath_Rect(
+                path,
+                rect.as_ref().native(),
+                fill_type,
+                dir.into().unwrap_or_default(),
+            )
         })
+    }
+
+    pub fn rect(rect: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
+        Self::rect_with_fill_type(rect, PathFillType::default(), dir)
     }
 
     pub fn oval(oval: impl AsRef<Rect>, dir: impl Into<Option<PathDirection>>) -> Self {
@@ -284,13 +297,16 @@ impl Path {
     }
 
     /// Constructs an empty [`Path`]. By default, [`Path`] has no verbs, no [`Point`], and no weights.
-    /// FillType is set to `Winding`.
     ///
     /// Returns: empty [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_empty_constructor>
+    pub fn new_with_fill_type(fill_type: PathFillType) -> Self {
+        Self::construct(|path| unsafe { sb::C_SkPath_Construct(path, fill_type) })
+    }
+
     pub fn new() -> Self {
-        Self::construct(|path| unsafe { sb::C_SkPath_Construct(path) })
+        Self::new_with_fill_type(PathFillType::default())
     }
 
     /// Returns a copy of this path in the current state.
@@ -312,6 +328,60 @@ impl Path {
     /// example: <https://fiddle.skia.org/c/@Path_isInterpolatable>
     pub fn is_interpolatable(&self, compare: &Path) -> bool {
         unsafe { self.native().isInterpolatable(compare.native()) }
+    }
+
+    /// Interpolates between [`Path`] with [`Point`] array of equal size.
+    /// Copy verb array and weights to out, and set out [`Point`] array to a weighted
+    /// average of this [`Point`] array and ending [`Point`] array, using the formula:
+    /// (Path Point * weight) + ending Point * (1 - weight).
+    ///
+    /// weight is most useful when between zero (ending [`Point`] array) and
+    /// one (this Point_Array); will work with values outside of this
+    /// range.
+    ///
+    /// `interpolate()` returns an empty [`Path`] if [`Point`] array is not the same size
+    /// as ending [`Point`] array. Call `is_interpolatable()` to check [`Path`] compatibility
+    /// prior to calling `make_interpolate`().
+    ///
+    /// * `ending` - [`Point`] array averaged with this [`Point`] array
+    /// * `weight` - contribution of this [`Point`] array, and
+    ///                one minus contribution of ending [`Point`] array
+    ///
+    /// Returns: [`Path`] replaced by interpolated averages
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_interpolate>
+    pub fn interpolate(&self, ending: &Path, weight: scalar) -> Option<Self> {
+        let mut out = Path::default();
+        self.interpolate_inplace(ending, weight, &mut out)
+            .then_some(out)
+    }
+
+    /// Interpolates between [`Path`] with [`Point`] array of equal size.
+    /// Copy verb array and weights to out, and set out [`Point`] array to a weighted
+    /// average of this [`Point`] array and ending [`Point`] array, using the formula:
+    /// `(Path Point * weight) + ending Point * (1 - weight)`.
+    ///
+    /// `weight` is most useful when between zero (ending [`Point`] array) and
+    /// one (this Point_Array); will work with values outside of this
+    /// range.
+    ///
+    /// `interpolate_inplace()` returns `false` and leaves out unchanged if [`Point`] array is not
+    /// the same size as ending [`Point`] array. Call `is_interpolatable()` to check [`Path`]
+    /// compatibility prior to calling `interpolate_inplace()`.
+    ///
+    /// * `ending` - [`Point`] array averaged with this [`Point`] array
+    /// * `weight` - contribution of this [`Point`] array, and
+    ///                one minus contribution of ending [`Point`] array
+    /// * `out` - [`Path`] replaced by interpolated averages
+    ///
+    /// Returns: `true` if [`Path`] contain same number of [`Point`]
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_interpolate>
+    pub fn interpolate_inplace(&self, ending: &Path, weight: scalar, out: &mut Path) -> bool {
+        unsafe {
+            self.native()
+                .interpolate(ending.native(), weight, out.native_mut())
+        }
     }
 
     /// Returns [`PathFillType`], the rule used to fill [`Path`].
@@ -410,7 +480,7 @@ impl Path {
     ///
     /// Returns: `true` if caller will alter [`Path`] after drawing
     pub fn is_volatile(&self) -> bool {
-        self.native().fIsVolatile() != 0
+        self.native().fIsVolatile
     }
 
     /// Return a copy of [`Path`] with `is_volatile` indicating whether it will be altered
@@ -526,25 +596,64 @@ impl Path {
             .then_some((line[0], line[1]))
     }
 
-    /// Returns the number of points in [`Path`].
-    /// [`Point`] count is initially zero.
-    ///
-    /// Returns: [`Path`] [`Point`] array length
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_countPoints>
-    pub fn count_points(&self) -> usize {
-        unsafe { self.native().countPoints().try_into().unwrap() }
+    /// Return a read-only view into the path's points.
+    pub fn points(&self) -> &[Point] {
+        unsafe {
+            let mut len = 0;
+            let points = sb::C_SkPath_points(self.native(), &mut len);
+            safer::from_raw_parts(Point::from_native_ptr(points), len)
+        }
     }
 
+    /// Return a read-only view into the path's verbs.
+    pub fn verbs(&self) -> &[PathVerb] {
+        unsafe {
+            let mut len = 0;
+            let verbs = sb::C_SkPath_verbs(self.native(), &mut len);
+            safer::from_raw_parts(verbs, len)
+        }
+    }
+
+    /// Return a read-only view into the path's conic-weights.
+    pub fn conic_weights(&self) -> &[scalar] {
+        unsafe {
+            let mut len = 0;
+            let weights = sb::C_SkPath_conicWeights(self.native(), &mut len);
+            safer::from_raw_parts(weights, len)
+        }
+    }
+
+    pub fn count_points(&self) -> usize {
+        self.points().len()
+    }
+
+    pub fn count_verbs(&self) -> usize {
+        self.verbs().len()
+    }
+
+    /// Return the last point, or `None`
+    ///
+    /// Returns: The last if the path contains one or more [`Point`], else returns `None`
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_getLastPt>
+    pub fn last_pt(&self) -> Option<Point> {
+        let mut p = Point::default();
+        unsafe { sb::C_SkPath_getLastPt(self.native(), p.native_mut()) }.then_some(p)
+    }
+}
+
+impl Path {
     /// Returns [`Point`] at index in [`Point`] array. Valid range for index is
     /// 0 to `count_points()` - 1.
     /// Returns `None` if index is out of range.
+    /// DEPRECATED
     ///
     /// * `index` - [`Point`] array element selector
     ///
     /// Returns: [`Point`] array value
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoint>
+    #[deprecated(since = "0.91.0", note = "use points()")]
     pub fn get_point(&self, index: usize) -> Option<Point> {
         let p = Point::from_native_c(unsafe { self.native().getPoint(index.try_into().ok()?) });
         // Assuming that count_points() is somewhat slow, we check the index when a Point(0,0) is
@@ -558,12 +667,13 @@ impl Path {
 
     /// Returns number of points in [`Path`].
     /// Copies N points from the path into the span, where N = min(#points, span capacity)
-    ///
+    /// DEPRECATED
     /// * `points` - span to receive the points. may be empty
     ///
     /// Returns: the number of points in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoints>
+    #[deprecated(since = "0.91.0")]
     pub fn get_points(&self, points: &mut [Point]) -> usize {
         unsafe {
             sb::C_SkPath_getPoints(
@@ -574,28 +684,22 @@ impl Path {
         }
     }
 
-    /// Returns the number of verbs: [`Verb::Move`], [`Verb::Line`], [`Verb::Quad`], [`Verb::Conic`],
-    /// [`Verb::Cubic`], and [`Verb::Close`]; added to [`Path`].
-    ///
-    /// Returns: length of verb array
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_countVerbs>
-    pub fn count_verbs(&self) -> usize {
-        unsafe { self.native().countVerbs() }.try_into().unwrap()
-    }
-
     /// Returns number of points in [`Path`].
     /// Copies N points from the path into the span, where N = min(#points, span capacity)
+    /// DEPRECATED
     ///
     /// * `verbs` - span to store the verbs. may be empty.
     ///
     /// Returns: the number of verbs in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getVerbs>
+    #[deprecated(since = "0.91.0")]
     pub fn get_verbs(&self, verbs: &mut [u8]) -> usize {
         unsafe { sb::C_SkPath_getVerbs(self.native(), verbs.as_mut_ptr(), verbs.len()) }
     }
+}
 
+impl Path {
     /// Returns the approximate byte size of the [`Path`] in memory.
     ///
     /// Returns: approximate size
@@ -761,33 +865,54 @@ pub use sb::SkPath_AddPathMode as AddPathMode;
 variant_name!(AddPathMode::Append);
 
 impl Path {
-    /// Offsets [`Point`] array by `(d.x, d.y)`.
+    /// Return a copy of [`Path`] with verb array, [`Point`] array, and weight transformed
+    /// by matrix. `try_make_transform` may change verbs and increase their number.
     ///
-    /// * `dx` - offset added to [`Point`] array x-axis coordinates
-    /// * `dy` - offset added to [`Point`] array y-axis coordinates
-    ///
-    /// Returns: overwritten, translated copy of [`Path`]; may be `None`
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_offset>
-    #[must_use]
-    pub fn with_offset(&self, d: impl Into<Vector>) -> Path {
-        let d = d.into();
-        let mut path = Path::default();
-        unsafe { self.native().offset(d.x, d.y, path.native_mut()) };
-        path
-    }
-
-    /// Transforms verb array, [`Point`] array, and weight by matrix.
-    /// transform may change verbs and increase their number.
+    /// If the resulting path has any non-finite values, returns `None`.
     ///
     /// * `matrix` - [`Matrix`] to apply to [`Path`]
+    ///
+    /// Returns: [`Path`] if finite, or `None`
+    pub fn try_make_transform(&self, matrix: &Matrix) -> Option<Path> {
+        Path::try_construct(|path| unsafe {
+            sb::C_SkPath_tryMakeTransform(self.native(), matrix.native(), path)
+        })
+    }
+
+    pub fn try_make_offset(&self, d: impl Into<Vector>) -> Option<Path> {
+        let d = d.into();
+        Path::try_construct(|path| unsafe {
+            sb::C_SkPath_tryMakeOffset(self.native(), d.x, d.y, path)
+        })
+    }
+
+    pub fn try_make_scale(&self, (sx, sy): (scalar, scalar)) -> Option<Path> {
+        Path::try_construct(|path| unsafe {
+            sb::C_SkPath_tryMakeScale(self.native(), sx, sy, path)
+        })
+    }
+
+    // TODO: I think we should keep only the make_ variants.
+
+    /// Return a copy of [`Path`] with verb array, [`Point`] array, and weight transformed
+    /// by matrix. `with_transform` may change verbs and increase their number.
+    ///
+    /// If the resulting path has any non-finite values, this will still return a path
+    /// but that path will return `true` for `is_finite()`.
+    ///
+    /// The newer pattern is to call [`try_make_transform`](Self::try_make_transform) which will only return a
+    /// path if the result is finite.
+    ///
+    /// * `matrix` - [`Matrix`] to apply to [`Path`]
+    ///
+    /// Returns: [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_transform>
     #[must_use]
     pub fn with_transform(&self, matrix: &Matrix) -> Path {
-        let mut path = Path::default();
-        unsafe { self.native().transform(matrix.native(), path.native_mut()) };
-        path
+        Path::construct(|path| unsafe {
+            sb::C_SkPath_makeTransform(self.native(), matrix.native(), path)
+        })
     }
 
     #[must_use]
@@ -795,21 +920,27 @@ impl Path {
         self.with_transform(m)
     }
 
+    /// Returns [`Path`] with [`Point`] array offset by `(d.x, d.y)`.
+    ///
+    /// * `d` - offset added to [`Point`] array coordinates
+    ///
+    /// Returns: [`Path`]
+    ///
+    /// example: <https://fiddle.skia.org/c/@Path_offset>
+    #[must_use]
+    pub fn with_offset(&self, d: impl Into<Vector>) -> Path {
+        let d = d.into();
+        Path::construct(|path| unsafe { sb::C_SkPath_makeOffset(self.native(), d.x, d.y, path) })
+    }
+
+    #[must_use]
+    pub fn make_offset(&self, d: impl Into<Vector>) -> Path {
+        self.with_offset(d)
+    }
+
     #[must_use]
     pub fn make_scale(&self, (sx, sy): (scalar, scalar)) -> Path {
         self.make_transform(&Matrix::scale((sx, sy)))
-    }
-
-    /// Returns last point on [`Path`]. Returns `None` if [`Point`] array is empty,
-    /// storing `(0, 0)` if `last_pt` is not `None`.
-    ///
-    /// Returns final [`Point`] in [`Point`] array; may be `None`
-    /// Returns: `Some` if [`Point`] array contains one or more [`Point`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_getLastPt>
-    pub fn last_pt(&self) -> Option<Point> {
-        let mut p = Point::default();
-        unsafe { sb::C_SkPath_getLastPt(self.native(), p.native_mut()) }.then_some(p)
     }
 }
 
@@ -855,7 +986,7 @@ impl Path {
     ///
     /// Returns: reference to [`Path`]
     pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
-        self.native_mut().set_fIsVolatile(is_volatile as _);
+        self.native_mut().fIsVolatile = is_volatile;
         self
     }
 
@@ -875,39 +1006,10 @@ impl Path {
         self
     }
 
-    /// Interpolates between [`Path`] with [`Point`] array of equal size.
-    /// Copy verb array and weights to out, and set out [`Point`] array to a weighted
-    /// average of this [`Point`] array and ending [`Point`] array, using the formula:
-    /// (Path Point * weight) + ending Point * (1 - weight).
-    ///
-    /// weight is most useful when between zero (ending [`Point`] array) and
-    /// one (this Point_Array); will work with values outside of this
-    /// range.
-    ///
-    /// `interpolate()` returns an empty [`Path`] if [`Point`] array is not the same size
-    /// as ending [`Point`] array. Call `is_interpolatable()` to check [`Path`] compatibility
-    /// prior to calling `make_interpolate`().
-    ///
-    /// * `ending` - [`Point`] array averaged with this [`Point`] array
-    /// * `weight` - contribution of this [`Point`] array, and
-    ///                one minus contribution of ending [`Point`] array
-    ///
-    /// Returns: [`Path`] replaced by interpolated averages
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_interpolate>
-    pub fn interpolate(&self, ending: &Path, weight: scalar) -> Option<Self> {
-        let mut out = Path::default();
-        unsafe {
-            self.native()
-                .interpolate(ending.native(), weight, out.native_mut())
-        }
-        .then_some(out)
-    }
-
     /// Sets `FillType`, the rule used to fill [`Path`]. While there is no check
     /// that `ft` is legal, values outside of `FillType` are not supported.
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
-        self.native_mut().set_fFillType(ft as _);
+        self.native_mut().fFillType = ft;
         self
     }
 
@@ -915,17 +1017,8 @@ impl Path {
     /// unmodified by the original FillType.
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         let n = self.native_mut();
-        n.set_fFillType(n.fFillType() ^ 2);
+        n.fFillType = n.fFillType.toggle_inverse();
         self
-    }
-}
-
-impl Path {
-    /// Returns a copy of this path in the current state, and resets the path to empty.
-    pub fn detach(&mut self) -> Self {
-        let result = self.clone();
-        self.reset();
-        result
     }
 
     /// Sets [`Path`] to its initial state.
@@ -939,797 +1032,14 @@ impl Path {
         unsafe { self.native_mut().reset() };
         self
     }
-
-    /// Sets [`Path`] to its initial state, preserving internal storage.
-    /// Removes verb array, [`Point`] array, and weights, and sets FillType to `Winding`.
-    /// Internal storage associated with [`Path`] is retained.
-    ///
-    /// Use `rewind()` instead of `reset()` if [`Path`] storage will be reused and performance
-    /// is critical.
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_rewind>
-    ///
-    pub fn rewind(&mut self) -> &mut Self {
-        unsafe { self.native_mut().rewind() };
-        self
-    }
-
-    /// Grows [`Path`] verb array and [`Point`] array to contain `extra_pt_count` additional [`Point`].
-    /// May improve performance and use less memory by
-    /// reducing the number and size of allocations when creating [`Path`].
-    ///
-    /// * `extra_pt_count` - number of additional [`Point`] to allocate
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_incReserve>
-    pub fn inc_reserve(&mut self, extra_pt_count: usize) -> &mut Self {
-        self.inc_reserve_with_verb_and_conic(extra_pt_count, None, None);
-        self
-    }
-
-    /// Grows [`Path`] verb array and [`Point`] array to contain `extra_pt_count` additional [`Point`].
-    /// May improve performance and use less memory by
-    /// reducing the number and size of allocations when creating [`Path`].
-    ///
-    /// * `extra_pt_count` - number of additional [`Point`] to allocate
-    /// * `extra_verb_count` - number of additional verbs
-    /// * `extra_conic_count` - number of additional conics
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_incReserve>
-    pub fn inc_reserve_with_verb_and_conic(
-        &mut self,
-        extra_pt_count: usize,
-        extra_verb_count: impl Into<Option<usize>>,
-        extract_conic_count: impl Into<Option<usize>>,
-    ) -> &mut Self {
-        let extra_verb_count = extra_verb_count.into().unwrap_or_default();
-        let extra_conic_count = extract_conic_count.into().unwrap_or_default();
-
-        unsafe {
-            self.native_mut().incReserve(
-                extra_pt_count.try_into().unwrap(),
-                extra_verb_count.try_into().unwrap(),
-                extra_conic_count.try_into().unwrap(),
-            )
-        }
-
-        self
-    }
-
-    /// Specifies the beginning of contour. If the previous verb was a "move" verb, then this just
-    /// replaces the point value of that move, otherwise it appends a new "move" verb to the path
-    /// using the point.
-    ///
-    /// Thus, each contour can only have 1 move verb in it (the last one specified).
-    pub fn move_to(&mut self, p: impl Into<Point>) -> &mut Self {
-        let p = p.into();
-        unsafe {
-            self.native_mut().moveTo(p.x, p.y);
-        }
-        self
-    }
-
-    /// Adds beginning of contour relative to last point.
-    /// If [`Path`] is empty, starts contour at (dx, dy).
-    /// Otherwise, start contour at last point offset by (dx, dy).
-    /// Function name stands for "relative move to".
-    ///
-    /// * `dx` - offset from last point to contour start on x-axis
-    /// * `dy` - offset from last point to contour start on y-axis
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_rMoveTo>
-    pub fn r_move_to(&mut self, d: impl Into<Vector>) -> &mut Self {
-        let d = d.into();
-        unsafe {
-            self.native_mut().rMoveTo(d.x, d.y);
-        }
-        self
-    }
-
-    /// Adds line from last point to (x, y). If [`Path`] is empty, or last [`Verb`] is
-    /// [`Verb::Close`], last point is set to (0, 0) before adding line.
-    ///
-    /// `line_to()` appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed.
-    /// `line_to()` then appends [`Verb::Line`] to verb array and (x, y) to [`Point`] array.
-    ///
-    /// * `x` - end of added line on x-axis
-    /// * `y` - end of added line on y-axis
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_lineTo>
-    pub fn line_to(&mut self, p: impl Into<Point>) -> &mut Self {
-        let p = p.into();
-        unsafe {
-            self.native_mut().lineTo(p.x, p.y);
-        }
-        self
-    }
-
-    /// Adds line from last point to vector (dx, dy). If [`Path`] is empty, or last [`Verb`] is
-    /// [`Verb::Close`], last point is set to (0, 0) before adding line.
-    ///
-    /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed;
-    /// then appends [`Verb::Line`] to verb array and line end to [`Point`] array.
-    /// Line end is last point plus vector (dx, dy).
-    /// Function name stands for "relative line to".
-    ///
-    /// * `dx` - offset from last point to line end on x-axis
-    /// * `dy` - offset from last point to line end on y-axis
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_rLineTo>
-    /// example: <https://fiddle.skia.org/c/@Quad_a>
-    /// example: <https://fiddle.skia.org/c/@Quad_b>
-    pub fn r_line_to(&mut self, d: impl Into<Vector>) -> &mut Self {
-        let d = d.into();
-        unsafe {
-            self.native_mut().rLineTo(d.x, d.y);
-        }
-        self
-    }
-
-    /// Adds quad from last point towards (x1, y1), to (x2, y2).
-    /// If [`Path`] is empty, or last [`Verb`] is [`Verb::Close`], last point is set to (0, 0)
-    /// before adding quad.
-    ///
-    /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed;
-    /// then appends [`Verb::Quad`] to verb array; and (x1, y1), (x2, y2)
-    /// to [`Point`] array.
-    ///
-    /// * `x1` - control [`Point`] of quad on x-axis
-    /// * `y1` - control [`Point`] of quad on y-axis
-    /// * `x2` - end [`Point`] of quad on x-axis
-    /// * `y2` - end [`Point`] of quad on y-axis
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_quadTo>
-    pub fn quad_to(&mut self, p1: impl Into<Point>, p2: impl Into<Point>) -> &mut Self {
-        let p1 = p1.into();
-        let p2 = p2.into();
-        unsafe {
-            self.native_mut().quadTo(p1.x, p1.y, p2.x, p2.y);
-        }
-        self
-    }
-
-    /// Adds quad from last point towards vector (dx1, dy1), to vector (dx2, dy2).
-    /// If [`Path`] is empty, or last [`Verb`]
-    /// is [`Verb::Close`], last point is set to (0, 0) before adding quad.
-    ///
-    /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array,
-    /// if needed; then appends [`Verb::Quad`] to verb array; and appends quad
-    /// control and quad end to [`Point`] array.
-    /// Quad control is last point plus vector (dx1, dy1).
-    /// Quad end is last point plus vector (dx2, dy2).
-    /// Function name stands for "relative quad to".
-    ///
-    /// * `dx1` - offset from last point to quad control on x-axis
-    /// * `dy1` - offset from last point to quad control on y-axis
-    /// * `dx2` - offset from last point to quad end on x-axis
-    /// * `dy2` - offset from last point to quad end on y-axis
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Conic_Weight_a>
-    /// example: <https://fiddle.skia.org/c/@Conic_Weight_b>
-    /// example: <https://fiddle.skia.org/c/@Conic_Weight_c>
-    /// example: <https://fiddle.skia.org/c/@Path_rQuadTo>
-    pub fn r_quad_to(&mut self, dx1: impl Into<Vector>, dx2: impl Into<Vector>) -> &mut Self {
-        let (dx1, dx2) = (dx1.into(), dx2.into());
-        unsafe {
-            self.native_mut().rQuadTo(dx1.x, dx1.y, dx2.x, dx2.y);
-        }
-        self
-    }
-
-    /// Adds conic from last point towards (x1, y1), to (x2, y2), weighted by w.
-    /// If [`Path`] is empty, or last [`Verb`] is [`Verb::Close`], last point is set to (0, 0)
-    /// before adding conic.
-    ///
-    /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed.
-    ///
-    /// If w is finite and not one, appends [`Verb::Conic`] to verb array;
-    /// and (x1, y1), (x2, y2) to [`Point`] array; and w to conic weights.
-    ///
-    /// If w is one, appends [`Verb::Quad`] to verb array, and
-    /// (x1, y1), (x2, y2) to [`Point`] array.
-    ///
-    /// If w is not finite, appends [`Verb::Line`] twice to verb array, and
-    /// (x1, y1), (x2, y2) to [`Point`] array.
-    ///
-    /// * `x1` - control [`Point`] of conic on x-axis
-    /// * `y1` - control [`Point`] of conic on y-axis
-    /// * `x2` - end [`Point`] of conic on x-axis
-    /// * `y2` - end [`Point`] of conic on y-axis
-    /// * `w` - weight of added conic
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn conic_to(&mut self, p1: impl Into<Point>, p2: impl Into<Point>, w: scalar) -> &mut Self {
-        let p1 = p1.into();
-        let p2 = p2.into();
-        unsafe {
-            self.native_mut().conicTo(p1.x, p1.y, p2.x, p2.y, w);
-        }
-        self
-    }
-
-    /// Adds conic from last point towards vector (dx1, dy1), to vector (dx2, dy2),
-    /// weighted by w. If [`Path`] is empty, or last [`Verb`]
-    /// is [`Verb::Close`], last point is set to (0, 0) before adding conic.
-    ///
-    /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array,
-    /// if needed.
-    ///
-    /// If w is finite and not one, next appends [`Verb::Conic`] to verb array,
-    /// and w is recorded as conic weight; otherwise, if w is one, appends
-    /// [`Verb::Quad`] to verb array; or if w is not finite, appends [`Verb::Line`]
-    /// twice to verb array.
-    ///
-    /// In all cases appends [`Point`] control and end to [`Point`] array.
-    /// control is last point plus vector (dx1, dy1).
-    /// end is last point plus vector (dx2, dy2).
-    ///
-    /// Function name stands for "relative conic to".
-    ///
-    /// * `dx1` - offset from last point to conic control on x-axis
-    /// * `dy1` - offset from last point to conic control on y-axis
-    /// * `dx2` - offset from last point to conic end on x-axis
-    /// * `dy2` - offset from last point to conic end on y-axis
-    /// * `w` - weight of added conic
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn r_conic_to(
-        &mut self,
-        d1: impl Into<Vector>,
-        d2: impl Into<Vector>,
-        w: scalar,
-    ) -> &mut Self {
-        let (d1, d2) = (d1.into(), d2.into());
-        unsafe {
-            self.native_mut().rConicTo(d1.x, d1.y, d2.x, d2.y, w);
-        }
-        self
-    }
-
-    /// Adds cubic from last point towards (x1, y1), then towards (x2, y2), ending at
-    /// (x3, y3). If [`Path`] is empty, or last [`Verb`] is [`Verb::Close`], last point is set to
-    /// (0, 0) before adding cubic.
-    ///
-    /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array, if needed;
-    /// then appends [`Verb::Cubic`] to verb array; and (x1, y1), (x2, y2), (x3, y3)
-    /// to [`Point`] array.
-    ///
-    /// * `x1` - first control [`Point`] of cubic on x-axis
-    /// * `y1` - first control [`Point`] of cubic on y-axis
-    /// * `x2` - second control [`Point`] of cubic on x-axis
-    /// * `y2` - second control [`Point`] of cubic on y-axis
-    /// * `x3` - end [`Point`] of cubic on x-axis
-    /// * `y3` - end [`Point`] of cubic on y-axis
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn cubic_to(
-        &mut self,
-        p1: impl Into<Point>,
-        p2: impl Into<Point>,
-        p3: impl Into<Point>,
-    ) -> &mut Self {
-        let (p1, p2, p3) = (p1.into(), p2.into(), p3.into());
-        unsafe {
-            self.native_mut()
-                .cubicTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
-        }
-        self
-    }
-
-    /// Adds cubic from last point towards vector (dx1, dy1), then towards
-    /// vector (dx2, dy2), to vector (dx3, dy3).
-    /// If [`Path`] is empty, or last [`Verb`]
-    /// is [`Verb::Close`], last point is set to (0, 0) before adding cubic.
-    ///
-    /// Appends [`Verb::Move`] to verb array and (0, 0) to [`Point`] array,
-    /// if needed; then appends [`Verb::Cubic`] to verb array; and appends cubic
-    /// control and cubic end to [`Point`] array.
-    /// Cubic control is last point plus vector (dx1, dy1).
-    /// Cubic end is last point plus vector (dx2, dy2).
-    /// Function name stands for "relative cubic to".
-    ///
-    /// * `dx1` - offset from last point to first cubic control on x-axis
-    /// * `dy1` - offset from last point to first cubic control on y-axis
-    /// * `dx2` - offset from last point to second cubic control on x-axis
-    /// * `dy2` - offset from last point to second cubic control on y-axis
-    /// * `dx3` - offset from last point to cubic end on x-axis
-    /// * `dy3` - offset from last point to cubic end on y-axis
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn r_cubic_to(
-        &mut self,
-        d1: impl Into<Vector>,
-        d2: impl Into<Vector>,
-        d3: impl Into<Vector>,
-    ) -> &mut Self {
-        let (d1, d2, d3) = (d1.into(), d2.into(), d3.into());
-        unsafe {
-            self.native_mut()
-                .rCubicTo(d1.x, d1.y, d2.x, d2.y, d3.x, d3.y);
-        }
-        self
-    }
-
-    /// Appends arc to [`Path`]. Arc added is part of ellipse
-    /// bounded by oval, from `start_angle` through `sweep_angle`. Both `start_angle` and
-    /// `sweep_angle` are measured in degrees, where zero degrees is aligned with the
-    /// positive x-axis, and positive sweeps extends arc clockwise.
-    ///
-    /// `arc_to()` adds line connecting [`Path`] last [`Point`] to initial arc [`Point`] if `force_move_to`
-    /// is `false` and [`Path`] is not empty. Otherwise, added contour begins with first point
-    /// of arc. Angles greater than -360 and less than 360 are treated modulo 360.
-    ///
-    /// * `oval` - bounds of ellipse containing arc
-    /// * `start_angle` - starting angle of arc in degrees
-    /// * `sweep_angle` - sweep, in degrees. Positive is clockwise; treated modulo 360
-    /// * `force_move_to` - `true` to start a new contour with arc
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_arcTo>
-    pub fn arc_to(
-        &mut self,
-        oval: impl AsRef<Rect>,
-        start_angle: scalar,
-        sweep_angle: scalar,
-        force_move_to: bool,
-    ) -> &mut Self {
-        unsafe {
-            self.native_mut().arcTo(
-                oval.as_ref().native(),
-                start_angle,
-                sweep_angle,
-                force_move_to,
-            );
-        }
-        self
-    }
-
-    /// Appends arc to [`Path`], after appending line if needed. Arc is implemented by conic
-    /// weighted to describe part of circle. Arc is contained by tangent from
-    /// last [`Path`] point to (x1, y1), and tangent from (x1, y1) to (x2, y2). Arc
-    /// is part of circle sized to radius, positioned so it touches both tangent lines.
-    ///
-    /// If last Path Point does not start Arc, `arc_to` appends connecting Line to Path.
-    /// The length of Vector from (x1, y1) to (x2, y2) does not affect Arc.
-    ///
-    /// Arc sweep is always less than 180 degrees. If radius is zero, or if
-    /// tangents are nearly parallel, `arc_to` appends Line from last Path Point to (x1, y1).
-    ///
-    /// `arc_to_tangent` appends at most one Line and one conic.
-    /// `arc_to_tangent` implements the functionality of PostScript arct and HTML Canvas `arc_to`.
-    ///
-    /// * `p1.x` - x-axis value common to pair of tangents
-    /// * `p1.y` - y-axis value common to pair of tangents
-    /// * `p2.x` - x-axis value end of second tangent
-    /// * `p2.y` - y-axis value end of second tangent
-    /// * `radius` - distance from arc to circle center
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_arcTo_2_a>
-    /// example: <https://fiddle.skia.org/c/@Path_arcTo_2_b>
-    /// example: <https://fiddle.skia.org/c/@Path_arcTo_2_c>
-    pub fn arc_to_tangent(
-        &mut self,
-        p1: impl Into<Point>,
-        p2: impl Into<Point>,
-        radius: scalar,
-    ) -> &mut Self {
-        let (p1, p2) = (p1.into(), p2.into());
-        unsafe {
-            self.native_mut().arcTo1(p1.x, p1.y, p2.x, p2.y, radius);
-        }
-        self
-    }
-
-    /// Appends arc to [`Path`]. Arc is implemented by one or more conics weighted to
-    /// describe part of oval with radii (rx, ry) rotated by `x_axis_rotate` degrees. Arc
-    /// curves from last [`Path`] [`Point`] to (x, y), choosing one of four possible routes:
-    /// clockwise or counterclockwise, and smaller or larger.
-    ///
-    /// Arc sweep is always less than 360 degrees. `arc_to_rotated()` appends line to (x, y) if
-    /// either radii are zero, or if last [`Path`] [`Point`] equals (x, y). `arc_to_rotated()` scales radii
-    /// (rx, ry) to fit last [`Path`] [`Point`] and (x, y) if both are greater than zero but
-    /// too small.
-    ///
-    /// `arc_to_rotated()` appends up to four conic curves.
-    /// `arc_to_rotated()` implements the functionality of SVG arc, although SVG sweep-flag value
-    /// is opposite the integer value of sweep; SVG sweep-flag uses 1 for clockwise,
-    /// while [`PathDirection::CW`] cast to int is zero.
-    ///
-    /// * `r.x` - radius on x-axis before x-axis rotation
-    /// * `r.y` - radius on y-axis before x-axis rotation
-    /// * `x_axis_rotate` - x-axis rotation in degrees; positive values are clockwise
-    /// * `large_arc` - chooses smaller or larger arc
-    /// * `sweep` - chooses clockwise or counterclockwise arc
-    /// * `end.x` - end of arc
-    /// * `end.y` - end of arc
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn arc_to_rotated(
-        &mut self,
-        r: impl Into<Point>,
-        x_axis_rotate: scalar,
-        large_arc: ArcSize,
-        sweep: PathDirection,
-        end: impl Into<Point>,
-    ) -> &mut Self {
-        let (r, end) = (r.into(), end.into());
-        unsafe {
-            self.native_mut()
-                .arcTo2(r.x, r.y, x_axis_rotate, large_arc, sweep, end.x, end.y);
-        }
-        self
-    }
-
-    /// Appends arc to [`Path`], relative to last [`Path`] [`Point`]. Arc is implemented by one or
-    /// more conic, weighted to describe part of oval with radii (r.x, r.y) rotated by
-    /// `x_axis_rotate` degrees. Arc curves from last [`Path`] [`Point`] to relative end [`Point`]:
-    /// (dx, dy), choosing one of four possible routes: clockwise or
-    /// counterclockwise, and smaller or larger. If [`Path`] is empty, the start arc [`Point`]
-    /// is (0, 0).
-    ///
-    /// Arc sweep is always less than 360 degrees. `arc_to()` appends line to end [`Point`]
-    /// if either radii are zero, or if last [`Path`] [`Point`] equals end [`Point`].
-    /// `arc_to()` scales radii (rx, ry) to fit last [`Path`] [`Point`] and end [`Point`] if both are
-    /// greater than zero but too small to describe an arc.
-    ///
-    /// `arc_to()` appends up to four conic curves.
-    /// `arc_to()` implements the functionality of svg arc, although SVG "sweep-flag" value is
-    /// opposite the integer value of sweep; SVG "sweep-flag" uses 1 for clockwise, while
-    /// [`PathDirection::CW`] cast to int is zero.
-    ///
-    /// * `r.x` - radius before x-axis rotation
-    /// * `r.y` - radius before x-axis rotation
-    /// * `x_axis_rotate` - x-axis rotation in degrees; positive values are clockwise
-    /// * `large_arc` - chooses smaller or larger arc
-    /// * `sweep` - chooses clockwise or counterclockwise arc
-    /// * `d.x` - x-axis offset end of arc from last [`Path`] [`Point`]
-    /// * `d.y` - y-axis offset end of arc from last [`Path`] [`Point`]
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn r_arc_to_rotated(
-        &mut self,
-        r: impl Into<Point>,
-        x_axis_rotate: scalar,
-        large_arc: ArcSize,
-        sweep: PathDirection,
-        d: impl Into<Point>,
-    ) -> &mut Self {
-        let (r, d) = (r.into(), d.into());
-        unsafe {
-            self.native_mut()
-                .rArcTo(r.x, r.y, x_axis_rotate, large_arc, sweep, d.x, d.y);
-        }
-        self
-    }
-
-    /// Appends [`Verb::Close`] to [`Path`]. A closed contour connects the first and last [`Point`]
-    /// with line, forming a continuous loop. Open and closed contour draw the same
-    /// with fill style. With stroke style, open contour draws
-    /// [`crate::paint::Cap`] at contour start and end; closed contour draws
-    /// [`crate::paint::Join`] at contour start and end.
-    ///
-    /// `close()` has no effect if [`Path`] is empty or last [`Path`] [`Verb`] is [`Verb::Close`].
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_close>
-    pub fn close(&mut self) -> &mut Self {
-        unsafe {
-            self.native_mut().close();
-        }
-        self
-    }
-
-    /// Adds a new contour to the path, defined by the rect, and wound in the
-    /// specified direction. The verbs added to the path will be:
-    ///
-    /// `Move`, `Line`, `Line`, `Line`, `Close`
-    ///
-    /// start specifies which corner to begin the contour:
-    ///     0: upper-left  corner
-    ///     1: upper-right corner
-    ///     2: lower-right corner
-    ///     3: lower-left  corner
-    ///
-    /// This start point also acts as the implied beginning of the subsequent,
-    /// contour, if it does not have an explicit `move_to`(). e.g.
-    ///
-    /// `path.add_rect(...)`
-    /// // if we don't say `move_to()` here, we will use the rect's start point
-    /// `path.line_to`(...)`
-    ///
-    /// * `rect` - [`Rect`] to add as a closed contour
-    /// * `dir` - [`PathDirection`] to orient the new contour
-    /// * `start` - initial corner of [`Rect`] to add
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_addRect_2>
-    pub fn add_rect(
-        &mut self,
-        rect: impl AsRef<Rect>,
-        dir_start: Option<(PathDirection, usize)>,
-    ) -> &mut Self {
-        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
-        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
-        unsafe {
-            self.native_mut()
-                .addRect(rect.as_ref().native(), dir, start.try_into().unwrap())
-        };
-        self
-    }
-
-    /// Adds oval to [`Path`], appending [`Verb::Move`], four [`Verb::Conic`], and [`Verb::Close`].
-    /// Oval is upright ellipse bounded by [`Rect`] oval with radii equal to half oval width
-    /// and half oval height. Oval begins at start and continues
-    /// clockwise if dir is [`PathDirection::CW`], counterclockwise if dir is [`PathDirection::CCW`].
-    ///
-    /// * `oval` - bounds of ellipse added
-    /// * `dir` - [`PathDirection`] to wind ellipse
-    /// * `start` - index of initial point of ellipse
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_addOval_2>
-    pub fn add_oval(
-        &mut self,
-        oval: impl AsRef<Rect>,
-        dir_start: Option<(PathDirection, usize)>,
-    ) -> &mut Self {
-        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
-        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
-        unsafe {
-            self.native_mut()
-                .addOval1(oval.as_ref().native(), dir, start.try_into().unwrap())
-        };
-        self
-    }
-
-    /// Adds circle centered at (x, y) of size radius to [`Path`], appending [`Verb::Move`],
-    /// four [`Verb::Conic`], and [`Verb::Close`]. Circle begins at: (x + radius, y), continuing
-    /// clockwise if dir is [`PathDirection::CW`], and counterclockwise if dir is [`PathDirection::CCW`].
-    ///
-    /// Has no effect if radius is zero or negative.
-    ///
-    /// * `p` - center of circle
-    /// * `radius` - distance from center to edge
-    /// * `dir` - [`PathDirection`] to wind circle
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn add_circle(
-        &mut self,
-        p: impl Into<Point>,
-        radius: scalar,
-        dir: impl Into<Option<PathDirection>>,
-    ) -> &mut Self {
-        let p = p.into();
-        let dir = dir.into().unwrap_or_default();
-        unsafe { self.native_mut().addCircle(p.x, p.y, radius, dir) };
-        self
-    }
-
-    /// Appends arc to [`Path`], as the start of new contour. Arc added is part of ellipse
-    /// bounded by oval, from `start_angle` through `sweep_angle`. Both `start_angle` and
-    /// `sweep_angle` are measured in degrees, where zero degrees is aligned with the
-    /// positive x-axis, and positive sweeps extends arc clockwise.
-    ///
-    /// If `sweep_angle` <= -360, or `sweep_angle` >= 360; and `start_angle` modulo 90 is nearly
-    /// zero, append oval instead of arc. Otherwise, `sweep_angle` values are treated
-    /// modulo 360, and arc may or may not draw depending on numeric rounding.
-    ///
-    /// * `oval` - bounds of ellipse containing arc
-    /// * `start_angle` - starting angle of arc in degrees
-    /// * `sweep_angle` - sweep, in degrees. Positive is clockwise; treated modulo 360
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_addArc>
-    pub fn add_arc(
-        &mut self,
-        oval: impl AsRef<Rect>,
-        start_angle: scalar,
-        sweep_angle: scalar,
-    ) -> &mut Self {
-        unsafe {
-            self.native_mut()
-                .addArc(oval.as_ref().native(), start_angle, sweep_angle)
-        };
-        self
-    }
-
-    /// Appends [`RRect`] to [`Path`], creating a new closed contour. [`RRect`] has bounds
-    /// equal to rect; each corner is 90 degrees of an ellipse with radii (rx, ry). If
-    /// dir is [`PathDirection::CW`], [`RRect`] starts at top-left of the lower-left corner and
-    /// winds clockwise. If dir is [`PathDirection::CCW`], [`RRect`] starts at the bottom-left
-    /// of the upper-left corner and winds counterclockwise.
-    ///
-    /// If either rx or ry is too large, rx and ry are scaled uniformly until the
-    /// corners fit. If rx or ry is less than or equal to zero, `add_round_rect()` appends
-    /// [`Rect`] rect to [`Path`].
-    ///
-    /// After appending, [`Path`] may be empty, or may contain: [`Rect`], oval, or [`RRect`].
-    ///
-    /// * `rect` - bounds of [`RRect`]
-    /// * `rx` - x-axis radius of rounded corners on the [`RRect`]
-    /// * `ry` - y-axis radius of rounded corners on the [`RRect`]
-    /// * `dir` - [`PathDirection`] to wind [`RRect`]
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn add_round_rect(
-        &mut self,
-        rect: impl AsRef<Rect>,
-        (rx, ry): (scalar, scalar),
-        dir: impl Into<Option<PathDirection>>,
-    ) -> &mut Self {
-        let dir = dir.into().unwrap_or_default();
-        unsafe {
-            self.native_mut()
-                .addRoundRect(rect.as_ref().native(), rx, ry, dir)
-        };
-        self
-    }
-
-    // No add_round_rect() with radii (8 of them). Decided to only provide the simpler variant of
-    // the two, if radii needs to be specified, add_rrect can be used.
-
-    /// Adds rrect to [`Path`], creating a new closed contour. If dir is [`PathDirection::CW`], rrect
-    /// winds clockwise; if dir is [`PathDirection::CCW`], rrect winds counterclockwise.
-    /// start determines the first point of rrect to add.
-    ///
-    /// * `rrect` - bounds and radii of rounded rectangle
-    /// * `dir` - [`PathDirection`] to wind [`RRect`]
-    /// * `start` - index of initial point of [`RRect`]
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_addRRect_2>
-    pub fn add_rrect(
-        &mut self,
-        rrect: impl AsRef<RRect>,
-        dir_start: Option<(PathDirection, usize)>,
-    ) -> &mut Self {
-        let dir = dir_start.map(|ds| ds.0).unwrap_or_default();
-        let start = dir_start.map(|ds| ds.1).unwrap_or_default();
-        unsafe {
-            self.native_mut()
-                .addRRect1(rrect.as_ref().native(), dir, start.try_into().unwrap())
-        };
-        self
-    }
-
-    /// Adds contour created from line array, adding `pts.len() - 1` line segments.
-    /// Contour added starts at `pts[0]`, then adds a line for every additional [`Point`]
-    /// in pts slice. If close is `true`, appends [`Verb::Close`] to [`Path`], connecting
-    /// `pts[pts.len() - 1]` and `pts[0]`.
-    ///
-    /// If count is zero, append [`Verb::Move`] to path.
-    /// Has no effect if ps.len() is less than one.
-    ///
-    /// * `pts` - slice of line sharing end and start [`Point`]
-    /// * `close` - `true` to add line connecting contour end and start
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_addPoly>
-    pub fn add_poly(&mut self, pts: &[Point], close: bool) -> &mut Self {
-        unsafe {
-            sb::C_SkPath_addPoly(self.native_mut(), pts.native().as_ptr(), pts.len(), close);
-        };
-        self
-    }
-
-    /// Appends src to [`Path`], offset by `(d.x, d.y)`.
-    ///
-    /// If mode is [`AddPathMode::Append`], src verb array, [`Point`] array, and conic weights are
-    /// added unaltered. If mode is [`AddPathMode::Extend`], add line before appending
-    /// verbs, [`Point`], and conic weights.
-    ///
-    /// * `src` - [`Path`] verbs, [`Point`], and conic weights to add
-    /// * `d.x` - offset added to src [`Point`] array x-axis coordinates
-    /// * `d.y` - offset added to src [`Point`] array y-axis coordinates
-    /// * `mode` - [`AddPathMode::Append`] or [`AddPathMode::Extend`]
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn add_path(
-        &mut self,
-        src: &Path,
-        d: impl Into<Vector>,
-        mode: impl Into<Option<AddPathMode>>,
-    ) -> &mut Self {
-        let d = d.into();
-        let mode = mode.into().unwrap_or(AddPathMode::Append);
-        unsafe { self.native_mut().addPath(src.native(), d.x, d.y, mode) };
-        self
-    }
-
-    // TODO: rename to add_path_with_matrix() ?
-
-    /// Appends src to [`Path`], transformed by matrix. Transformed curves may have different
-    /// verbs, [`Point`], and conic weights.
-    ///
-    /// If mode is [`AddPathMode::Append`], src verb array, [`Point`] array, and conic weights are
-    /// added unaltered. If mode is [`AddPathMode::Extend`], add line before appending
-    /// verbs, [`Point`], and conic weights.
-    ///
-    /// * `src` - [`Path`] verbs, [`Point`], and conic weights to add
-    /// * `matrix` - transform applied to src
-    /// * `mode` - [`AddPathMode::Append`] or [`AddPathMode::Extend`]
-    ///
-    /// Returns: reference to [`Path`]
-    pub fn add_path_matrix(
-        &mut self,
-        src: &Path,
-        matrix: &Matrix,
-        mode: impl Into<Option<AddPathMode>>,
-    ) -> &mut Self {
-        let mode = mode.into().unwrap_or(AddPathMode::Append);
-        unsafe {
-            self.native_mut()
-                .addPath1(src.native(), matrix.native(), mode)
-        };
-        self
-    }
-
-    /// Appends src to [`Path`], from back to front.
-    /// Reversed src always appends a new contour to [`Path`].
-    ///
-    /// * `src` - [`Path`] verbs, [`Point`], and conic weights to add
-    ///
-    /// Returns: reference to [`Path`]
-    ///
-    /// example: <https://fiddle.skia.org/c/@Path_reverseAddPath>
-    pub fn reverse_add_path(&mut self, src: &Path) -> &mut Self {
-        unsafe { self.native_mut().reverseAddPath(src.native()) };
-        self
-    }
 }
 
 impl Path {
-    /// Offsets [`Point`] array by `(d.x, d.y)`. [`Path`] is replaced by offset data.
-    ///
-    /// * `d.x` - offset added to [`Point`] array x-axis coordinates
-    /// * `d.y` - offset added to [`Point`] array y-axis coordinates
-    pub fn offset(&mut self, d: impl Into<Vector>) -> &mut Self {
-        let d = d.into();
-        unsafe {
-            let self_ptr = self.native_mut() as *mut _;
-            self.native().offset(d.x, d.y, self_ptr)
-        };
-        self
-    }
-
-    /// Transforms verb array, [`Point`] array, and weight by matrix.
-    /// transform may change verbs and increase their number.
-    ///
-    /// * `matrix` - [`Matrix`] to apply to [`Path`]
-    pub fn transform(&mut self, matrix: &Matrix) -> &mut Self {
-        let self_ptr = self.native_mut() as *mut _;
-        unsafe { self.native().transform(matrix.native(), self_ptr) };
-        self
-    }
-
-    /// Sets the last point on the path. If [`Point`] array is empty, append [`Verb::Move`] to
-    /// verb array and append p to [`Point`] array.
-    ///
-    /// * `p` - set value of last point
-    pub fn set_last_pt(&mut self, p: impl Into<Point>) -> &mut Self {
-        let p = p.into();
-        unsafe { self.native_mut().setLastPt(p.x, p.y) };
-        self
+    /// Returns a copy of this path in the current state, and resets the path to empty.
+    pub fn detach(&mut self) -> Self {
+        let result = self.clone();
+        self.reset();
+        result
     }
 
     pub fn iter(&self) -> PathIter {
@@ -1945,23 +1255,22 @@ impl Iterator for RawIter<'_> {
         let mut points = [Point::default(); Verb::MAX_POINTS];
 
         let verb = unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) };
-        (verb != Verb::Done).then_some((verb, points[0..verb.points()].into()))
+        (verb != Verb::Done).then(|| (verb, points[0..verb.points()].into()))
     }
 }
 
 impl Path {
-    /// Returns `true` if the point `(p.x, p.y)` is contained by [`Path`], taking into
+    /// Returns `true` if the point is contained by [`Path`], taking into
     /// account [`PathFillType`].
     ///
-    /// * `p.x` - x-axis value of containment test
-    /// * `p.y` - y-axis value of containment test
+    /// * `point` - the point to test
     ///
     /// Returns: `true` if [`Point`] is in [`Path`]
     ///
     /// example: <https://fiddle.skia.org/c/@Path_contains>
-    pub fn contains(&self, p: impl Into<Point>) -> bool {
-        let p = p.into();
-        unsafe { self.native().contains(p.x, p.y) }
+    pub fn contains(&self, point: impl Into<Point>) -> bool {
+        let point = point.into();
+        unsafe { self.native().contains(point.into_native()) }
     }
 
     /// Writes text representation of [`Path`] to [`Data`].
@@ -1990,21 +1299,6 @@ impl Path {
         unsafe { self.native().dump(ptr::null_mut(), true) }
     }
 
-    // Like [`Path::dump()`], but outputs for the [`Path::make()`] factory
-    pub fn dump_arrays_as_data(&self, dump_as_hex: bool) -> Data {
-        let mut stream = DynamicMemoryWStream::new();
-        unsafe {
-            self.native()
-                .dumpArrays(stream.native_mut().base_mut(), dump_as_hex);
-        }
-        stream.detach_as_data()
-    }
-
-    // Like [`Path::dump()`], but outputs for the [`Path::make()`] factory
-    pub fn dump_arrays(&self) {
-        unsafe { self.native().dumpArrays(ptr::null_mut(), false) }
-    }
-
     // TODO: writeToMemory()?
 
     /// Writes [`Path`] to buffer, returning the buffer written to, wrapped in [`Data`].
@@ -2022,18 +1316,15 @@ impl Path {
         Data::from_ptr(unsafe { sb::C_SkPath_serialize(self.native()) }).unwrap()
     }
 
-    // TODO: readFromMemory()?
+    // TODO: ReadFromMemory
 
     pub fn deserialize(data: &Data) -> Option<Path> {
         let mut path = Path::default();
         let bytes = data.as_bytes();
-        unsafe {
-            path.native_mut()
-                .readFromMemory(bytes.as_ptr() as _, bytes.len())
-                > 0
-        }
-        .then_some(path)
+        unsafe { sb::C_SkPath_ReadFromMemory(path.native_mut(), bytes.as_ptr() as _, bytes.len()) }
+            .then_some(path)
     }
+
     /// (See skbug.com/40032862)
     /// Returns a non-zero, globally unique value. A different value is returned
     /// if verb array, [`Point`] array, or conic weight changes.
@@ -2065,14 +1356,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_points() {
-        let mut p = Path::new();
-        p.add_rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+    fn test_count_points() {
+        let p = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
         let points_count = p.count_points();
-        let mut points = vec![Point::default(); points_count];
-        let count_returned = p.get_points(&mut points);
-        assert_eq!(count_returned, points.len());
-        assert_eq!(count_returned, 4);
+        assert_eq!(points_count, 4);
     }
 
     #[test]
@@ -2100,5 +1387,92 @@ mod tests {
         let r = Rect::new(0.0, 0.0, 100.0, 100.0);
         let path = Path::rect(r, None);
         assert_eq!(*path.bounds(), r);
+    }
+
+    #[test]
+    fn test_points_verbs_conic_weights() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test points()
+        let points = path.points();
+        assert_eq!(points.len(), 4);
+
+        // Test verbs()
+        let verbs = path.verbs();
+        assert_eq!(verbs.len(), 5); // Move + 4 Lines + Close
+
+        // Test conic_weights()
+        let weights = path.conic_weights();
+        assert_eq!(weights.len(), 0); // Rectangle has no conics
+    }
+
+    #[test]
+    fn test_with_offset() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+        let offset_path = path.with_offset((5.0, 5.0));
+
+        assert_eq!(*offset_path.bounds(), Rect::new(5.0, 5.0, 15.0, 15.0));
+    }
+
+    #[test]
+    fn test_with_transform() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+        let matrix = Matrix::scale((2.0, 2.0));
+        let transformed = path.with_transform(&matrix);
+
+        assert_eq!(*transformed.bounds(), Rect::new(0.0, 0.0, 20.0, 20.0));
+    }
+
+    #[test]
+    fn test_try_make_transform() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test with finite transform
+        let matrix = Matrix::scale((2.0, 2.0));
+        let result = path.try_make_transform(&matrix);
+        assert!(result.is_some());
+        let transformed = result.unwrap();
+        assert_eq!(*transformed.bounds(), Rect::new(0.0, 0.0, 20.0, 20.0));
+
+        // Test with extreme scale that might produce non-finite values
+        let extreme_matrix = Matrix::scale((f32::MAX, f32::MAX));
+        let result = path.try_make_transform(&extreme_matrix);
+        // The result depends on whether the transform produces finite values
+        // This test documents the behavior
+        if let Some(transformed) = result {
+            assert!(transformed.is_finite());
+        }
+    }
+
+    #[test]
+    fn test_try_make_offset() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test with finite offset
+        let result = path.try_make_offset((5.0, 5.0));
+        assert!(result.is_some());
+        let offset_path = result.unwrap();
+        assert_eq!(*offset_path.bounds(), Rect::new(5.0, 5.0, 15.0, 15.0));
+    }
+
+    #[test]
+    fn test_try_make_scale() {
+        let path = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+
+        // Test with finite scale
+        let result = path.try_make_scale((3.0, 3.0));
+        assert!(result.is_some());
+        let scaled = result.unwrap();
+        assert_eq!(*scaled.bounds(), Rect::new(0.0, 0.0, 30.0, 30.0));
+    }
+
+    #[test]
+    fn test_serialize_deserialize() {
+        let path = Path::rect(Rect::new(10.0, 10.0, 20.0, 20.0), None);
+
+        let data = path.serialize();
+        let deserialized = Path::deserialize(&data).unwrap();
+
+        assert_eq!(path, deserialized);
     }
 }

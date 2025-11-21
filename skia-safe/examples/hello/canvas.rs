@@ -1,17 +1,17 @@
-use std::mem;
-
-use skia_safe::{surfaces, Color, Data, EncodedImageFormat, Paint, PaintStyle, Path, Surface};
+use skia_safe::{
+    surfaces, Color, Data, EncodedImageFormat, Paint, PaintStyle, PathBuilder, Surface,
+};
 
 pub struct Canvas {
     surface: Surface,
-    path: Path,
+    path: PathBuilder,
     paint: Paint,
 }
 
 impl Canvas {
     pub fn new(width: i32, height: i32) -> Canvas {
         let mut surface = surfaces::raster_n32_premul((width, height)).expect("surface");
-        let path = Path::new();
+        let path = PathBuilder::new();
         let mut paint = Paint::default();
         paint.set_color(Color::BLACK);
         paint.set_anti_alias(true);
@@ -69,21 +69,25 @@ impl Canvas {
 
     #[inline]
     pub fn begin_path(&mut self) {
-        let new_path = Path::new();
-        self.surface.canvas().draw_path(&self.path, &self.paint);
-        let _ = mem::replace(&mut self.path, new_path);
+        self.surface
+            .canvas()
+            .draw_path(&self.path.detach(), &self.paint);
     }
 
     #[inline]
     pub fn stroke(&mut self) {
         self.paint.set_style(PaintStyle::Stroke);
-        self.surface.canvas().draw_path(&self.path, &self.paint);
+        self.surface
+            .canvas()
+            .draw_path(&self.path.snapshot(), &self.paint);
     }
 
     #[inline]
     pub fn fill(&mut self) {
         self.paint.set_style(PaintStyle::Fill);
-        self.surface.canvas().draw_path(&self.path, &self.paint);
+        self.surface
+            .canvas()
+            .draw_path(&self.path.snapshot(), &self.paint);
     }
 
     #[inline]

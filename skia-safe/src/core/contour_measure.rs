@@ -246,8 +246,7 @@ mod tests {
 
     #[test]
     fn contour_and_verb_measure() {
-        let mut p = Path::new();
-        p.add_rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
+        let p = Path::rect(Rect::new(0.0, 0.0, 10.0, 10.0), None);
         let measure = ContourMeasureIter::new(&p, true, None);
         for contour in measure {
             for verb in contour.verbs() {

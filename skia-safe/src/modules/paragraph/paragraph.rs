@@ -661,8 +661,11 @@ pub struct FontInfo {
 }
 
 impl FontInfo {
-    pub fn new(font: Font, text_range: TextRange) -> Self {
-        Self { font, text_range }
+    pub fn new(font: Font, text_range: &TextRange) -> Self {
+        Self {
+            font,
+            text_range: text_range.clone(),
+        }
     }
 
     fn from_native_ref(native: &sb::skia_textlayout_Paragraph_FontInfo) -> Self {

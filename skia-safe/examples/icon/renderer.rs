@@ -4,7 +4,7 @@
 #![allow(unknown_lints)]
 #![allow(clippy::unusual_byte_groupings)]
 use skia_safe::{
-    gradient_shader, Color, Matrix, Paint, PaintJoin, PaintStyle, Path, Point, TileMode,
+    gradient_shader, Color, Matrix, Paint, PaintJoin, PaintStyle, PathBuilder, Point, TileMode,
 };
 use std::cmp::min;
 
@@ -145,7 +145,7 @@ fn chain_ring(
     let teeth_bottom_gap = 0.2 * delta;
 
     let mut alpha = PI / 2.0;
-    let mut path = Path::new();
+    let mut path = PathBuilder::new();
     for i in 0..teeth_count {
         let mut a = alpha - delta / 2.0 + teeth_bottom_gap / 2.0;
         let v = point_in_circle(c, outer_radius - teeth_length, a);
@@ -231,11 +231,11 @@ fn chain_ring(
         None,
         None,
     ));
-    canvas.draw_path(&path, &paint);
+    canvas.draw_path(&path.snapshot(), &paint);
     paint.set_shader(None); // Remove gradient.
     paint.set_style(PaintStyle::Stroke);
     paint.set_color(0xff_592e1f);
-    canvas.draw_path(&path, &paint);
+    canvas.draw_path(&path.detach(), &paint);
 
     canvas.restore();
 
@@ -268,7 +268,7 @@ fn triangle(
     let side = r / ((PI - delta) / 2.0).cos() * 2.0;
 
     let mut alpha = degrees * DEGREES_IN_RADIANS;
-    let mut path = Path::new();
+    let mut path = PathBuilder::new();
     let mut paint = Paint::default();
     match vertex {
         Some(index) => {
@@ -328,7 +328,7 @@ fn triangle(
         alpha += delta;
     }
     path.close();
-    canvas.draw_path(&path, &paint);
+    canvas.draw_path(&path.detach(), &paint);
 }
 
 fn gradient(paint: &mut Paint, center: (f32, f32), radii: (f32, f32), colors: (Color, Color)) {

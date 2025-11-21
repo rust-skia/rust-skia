@@ -509,7 +509,7 @@ variant_name!(Dither::Yes);
 
 /// Create a filter that fills the output with the per-pixel evaluation of the [`Shader`]. The
 /// shader is defined in the image filter's local coordinate system, so will automatically
-/// be affected by [`Canvas'`] transform.
+/// be affected by [`crate::Canvas`]'s transform.
 ///
 /// Like `image()` and Picture(), this is a leaf filter that can be used to introduce inputs to
 /// a complex filter graph, but should generally be combined with a filter that as at least

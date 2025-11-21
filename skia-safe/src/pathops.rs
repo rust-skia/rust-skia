@@ -3,7 +3,7 @@ use crate::{prelude::*, Path, Rect};
 use skia_bindings::{self as sb, SkOpBuilder};
 use std::fmt;
 
-pub use skia_bindings::SkPathOp as PathOp;
+pub type PathOp = skia_bindings::SkPathOp;
 variant_name!(PathOp::XOR);
 
 // TODO: I am not so sure if we should export these global functions.
@@ -86,33 +86,44 @@ impl Path {
     }
 }
 
-#[test]
-fn test_tight_bounds() {
-    let mut path = Path::new();
-    path.add_rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
-    path.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
-    let tight_bounds: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
-    assert_eq!(path.compute_tight_bounds(), tight_bounds);
-}
+#[cfg(test)]
+mod tests {
+    use crate::{Path, PathBuilder, PathOp, Rect};
 
-#[test]
-fn test_union() {
-    let mut path = Path::new();
-    path.add_rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
-    let mut path2 = Path::new();
-    path2.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
-    let union = path.op(&path2, PathOp::Union).unwrap();
-    let expected: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
-    assert_eq!(union.compute_tight_bounds(), expected);
-}
+    #[test]
+    fn test_tight_bounds() {
+        let mut builder = PathBuilder::new();
+        builder.add_rect(
+            Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)),
+            None,
+            None,
+        );
+        builder.add_rect(
+            Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)),
+            None,
+            None,
+        );
+        let path = builder.detach();
 
-#[test]
-fn test_intersect() {
-    let mut path = Path::new();
-    path.add_rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
-    let mut path2 = Path::new();
-    path2.add_rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
-    let intersected = path.op(&path2, PathOp::Intersect).unwrap();
-    let expected: Rect = Rect::from_point_and_size((15.0, 15.0), (5.0, 5.0));
-    assert_eq!(intersected.compute_tight_bounds(), expected);
+        let tight_bounds: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
+        assert_eq!(path.compute_tight_bounds(), tight_bounds);
+    }
+
+    #[test]
+    fn test_union() {
+        let path = Path::rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
+        let path2 = Path::rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
+        let union = path.op(&path2, PathOp::Union).unwrap();
+        let expected: Rect = Rect::from_point_and_size((10.0, 10.0), (15.0, 15.0));
+        assert_eq!(union.compute_tight_bounds(), expected);
+    }
+
+    #[test]
+    fn test_intersect() {
+        let path = Path::rect(Rect::from_point_and_size((10.0, 10.0), (10.0, 10.0)), None);
+        let path2 = Path::rect(Rect::from_point_and_size((15.0, 15.0), (10.0, 10.0)), None);
+        let intersected = path.op(&path2, PathOp::Intersect).unwrap();
+        let expected: Rect = Rect::from_point_and_size((15.0, 15.0), (5.0, 5.0));
+        assert_eq!(intersected.compute_tight_bounds(), expected);
+    }
 }

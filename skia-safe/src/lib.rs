@@ -37,7 +37,7 @@ extern crate bitflags;
 // Prelude re-exports
 pub use crate::prelude::{Borrows, ConditionallySend, Handle, RCHandle, RefHandle, Sendable};
 
-/// All Sk* types are accessible via skia_safe::
+// All Sk* types are accessible via skia_safe::
 pub use crate::core::*;
 #[cfg(feature = "pdf")]
 pub use docs::*;
