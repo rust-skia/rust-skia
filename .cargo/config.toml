@@ -1,0 +1,4 @@
+[env]
+SKIA_BUILD_DEFINES="-DSK_VULKAN -DSK_SHAPER_UNICODE_AVAILABLE"
+SKIA_SOURCE_DIR="/home/mccakit/desktop/skia"
+SKIA_LIBRARY_SEARCH_PATH="/home/mccakit/desktop/skia/out/mingw"

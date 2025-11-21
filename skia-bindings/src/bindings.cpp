@@ -695,7 +695,7 @@ extern "C" void C_SkPath_Construct(SkPath* uninitialized) {
     new(uninitialized) SkPath();
 }
 
-extern "C" void C_SkPath_Raw(SkPath* uninitialized, 
+extern "C" void C_SkPath_Raw(SkPath* uninitialized,
     const SkPoint pts[], size_t pointCount,
     const SkPathVerb vbs[], size_t verbCount,
     const SkScalar ws[], size_t wCount,
@@ -703,7 +703,7 @@ extern "C" void C_SkPath_Raw(SkPath* uninitialized,
     new (uninitialized) SkPath(SkPath::Raw(SkSpan(pts, pointCount), SkSpan(vbs, verbCount), SkSpan(ws, wCount), ft, isVolatile));
 }
 
-extern "C" void C_SkPath_Make(SkPath* uninitialized, 
+extern "C" void C_SkPath_Make(SkPath* uninitialized,
     const SkPoint pts[], size_t pointCount,
     const uint8_t vbs[], size_t verbCount,
     const SkScalar ws[], size_t wCount,
@@ -1011,45 +1011,45 @@ extern "C" void C_SkCanvas_drawPoints(SkCanvas* self, SkCanvas::PointMode mode, 
 }
 
 extern "C" void C_SkCanvas_drawGlyphs(
-    SkCanvas* self, 
+    SkCanvas* self,
     const SkGlyphID* glyphs, size_t glyphCount,
     const SkPoint* positions,
     SkPoint origin, const SkFont* font, const SkPaint* paint) {
     self->drawGlyphs(
-        SkSpan(glyphs, glyphCount), 
+        SkSpan(glyphs, glyphCount),
         SkSpan(positions, glyphCount),
         origin, *font, *paint);
 }
 
 extern "C" void C_SkCanvas_drawGlyphs2(
-    SkCanvas* self, 
+    SkCanvas* self,
     const SkGlyphID* glyphs, size_t glyphCount,
     const SkPoint* positions,
     const uint32_t* clusters,
     const char* utf8Text, size_t textSize,
     SkPoint origin, const SkFont* font, const SkPaint* paint) {
     self->drawGlyphs(
-        SkSpan(glyphs, glyphCount), 
+        SkSpan(glyphs, glyphCount),
         SkSpan(positions, glyphCount),
         SkSpan(clusters, glyphCount),
-        SkSpan(utf8Text, textSize), 
+        SkSpan(utf8Text, textSize),
         origin, *font, *paint);
 }
 
 extern "C" void C_SkCanvas_drawGlyphsRSXform(
-    SkCanvas* self, 
+    SkCanvas* self,
     const SkGlyphID* glyphs, size_t glyphCount,
     const SkRSXform* xforms,
     SkPoint origin, const SkFont* font, const SkPaint* paint) {
     self->drawGlyphsRSXform(
-        SkSpan(glyphs, glyphCount), 
+        SkSpan(glyphs, glyphCount),
         SkSpan(xforms, glyphCount),
         origin, *font, *paint);
 }
 
 extern "C" void C_SkCanvas_drawAtlas(
     SkCanvas* self,
-    const SkImage* atlas, 
+    const SkImage* atlas,
     const SkRSXform* xform, size_t xformCount,
     const SkRect* tex, const SkColor* colors, SkBlendMode mode,
     const SkSamplingOptions* sampling, const SkRect* cullRect, const SkPaint* paint) {
@@ -1581,7 +1581,7 @@ extern "C" SkTextBlob* C_SkTextBlob_MakeFromText(const void* text, size_t byteLe
 }
 
 extern "C" SkTextBlob *C_SkTextBlob_MakeFromPosTextH(const void *text, size_t byteLength,
-                                                     const SkScalar xPos[], size_t characterCount, 
+                                                     const SkScalar xPos[], size_t characterCount,
                                                      SkScalar constY, const SkFont *font,
                                                      SkTextEncoding encoding) {
     return SkTextBlob::MakeFromPosTextH(text, byteLength, SkSpan(xPos, characterCount), constY, *font, encoding).release();
@@ -1749,7 +1749,7 @@ extern "C" void C_SkFont_setTypeface(SkFont* self, SkTypeface* tf) {
 
 extern "C" size_t C_SkFont_textToGlyphs(
     const SkFont* self,
-    const void* text, size_t byteLength, 
+    const void* text, size_t byteLength,
     SkTextEncoding encoding,
     SkGlyphID* glyphs, size_t glyphsCount) {
     return self->textToGlyphs(text, byteLength, encoding, SkSpan(glyphs, glyphsCount));
@@ -1790,12 +1790,12 @@ extern "C" void C_SkFont_getXPos(
 }
 
 extern "C" void C_SkFont_getIntercepts(
-    const SkFont* self, 
-    const SkGlyphID* glyphs, 
-    size_t count, 
-    const SkPoint* pos, 
-    SkScalar top, SkScalar bottom, 
-    const SkPaint* paint, 
+    const SkFont* self,
+    const SkGlyphID* glyphs,
+    size_t count,
+    const SkPoint* pos,
+    SkScalar top, SkScalar bottom,
+    const SkPaint* paint,
     VecSink<SkScalar>* vs) {
     auto r = self->getIntercepts(SkSpan(glyphs, count), SkSpan(pos, count), top, bottom, paint);
     vs->set(r);
@@ -2181,9 +2181,9 @@ extern "C" SkColorFilter* C_SkColorFilter_Deserialize(const void* data, size_t l
 }
 
 extern "C" SkColor4f C_SkColorFilter_filterColor4f(
-    const SkColorFilter* self, 
-    const SkColor4f* srcColor, 
-    SkColorSpace* srcCS, 
+    const SkColorFilter* self,
+    const SkColor4f* srcColor,
+    SkColorSpace* srcCS,
     SkColorSpace* dstCS) {
     return self->filterColor4f(*srcColor, srcCS, dstCS);
 }
@@ -2364,7 +2364,7 @@ extern "C" void C_SkImageFilter_filterBounds(
     const SkImageFilter* self,
     const SkIRect* src,
     const SkMatrix* ctm,
-    SkImageFilter::MapDirection mapDirection, 
+    SkImageFilter::MapDirection mapDirection,
     const SkIRect* inputRect,
     SkIRect *result) {
     *result = self ->filterBounds(*src, *ctm, mapDirection, inputRect);
@@ -2433,7 +2433,7 @@ extern "C" {
     void C_SkStrings_destruct(SkStrings* self) {
         self->~SkStrings();
     }
-    
+
     const SkString* C_SkStrings_ptr_count(const SkStrings* self, size_t* count) {
         *count = self->strings.size();
         return &self->strings.front();
@@ -2741,8 +2741,8 @@ extern "C" void C_SkYUVAPixmapInfo_SupportedDataTypes_All(SkYUVAPixmapInfo::Supp
 }
 
 extern "C" bool C_SkYUVAPixmapInfo_SupportedDataTypes_supported(
-    const SkYUVAPixmapInfo::SupportedDataTypes* self, 
-    SkYUVAPixmapInfo::PlaneConfig pc, 
+    const SkYUVAPixmapInfo::SupportedDataTypes* self,
+    SkYUVAPixmapInfo::PlaneConfig pc,
     SkYUVAPixmapInfo::DataType dt) {
     return self->supported(pc, dt);
 }
@@ -2892,7 +2892,7 @@ extern "C" void C_SkColorMatrix_Construct(SkColorMatrix* uninitialized) {
     new (uninitialized)SkColorMatrix();
 }
 
-extern "C" void C_SkColorMatrix_Construct2(SkColorMatrix* uninitialized, 
+extern "C" void C_SkColorMatrix_Construct2(SkColorMatrix* uninitialized,
                                            float m00, float m01, float m02, float m03, float m04,
                                            float m10, float m11, float m12, float m13, float m14,
                                            float m20, float m21, float m22, float m23, float m24,
@@ -3008,7 +3008,7 @@ SkShader *C_SkRuntimeEffect_makeShader(
 {
     return self->makeShader(
         sp(uniforms),
-        SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount), 
+        SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount),
         localMatrix).release();
 }
 
@@ -3398,8 +3398,8 @@ bool C_SkPngEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
 
 SkData* C_SkPngEncoder_EncodePixmap(
     const SkPixmap* src,
-    SkDataTable* comments, 
-    SkPngEncoder::FilterFlag filterFlags, 
+    SkDataTable* comments,
+    SkPngEncoder::FilterFlag filterFlags,
     int zLibLevel) {
 
     SkPngEncoder::Options options;
@@ -3440,11 +3440,11 @@ bool C_SkPngRustEncoder_Encode(
 
 // SkJpegEncoder
 
-bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap, 
+bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
     int quality,
-    SkJpegEncoder::Downsample downsample, 
-    SkJpegEncoder::AlphaOption alphaOption, 
-    const SkData* xmpMetadata, 
+    SkJpegEncoder::Downsample downsample,
+    SkJpegEncoder::AlphaOption alphaOption,
+    const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
 
     SkJpegEncoder::Options options;
@@ -3462,8 +3462,8 @@ bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap,
 bool C_SkJpegEncoder_EncodeYUVAPixmaps(SkWStream* stream, const SkYUVAPixmaps* src,
     const SkColorSpace* srcColorSpace,
     int quality,
-    SkJpegEncoder::Downsample downsample, 
-    SkJpegEncoder::AlphaOption alphaOption, 
+    SkJpegEncoder::Downsample downsample,
+    SkJpegEncoder::AlphaOption alphaOption,
     const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
 
@@ -3481,8 +3481,8 @@ bool C_SkJpegEncoder_EncodeYUVAPixmaps(SkWStream* stream, const SkYUVAPixmaps* s
 
 SkData* C_SkJpegEncoder_EncodePixmap(const SkPixmap* src,
     int quality,
-    SkJpegEncoder::Downsample downsample, 
-    SkJpegEncoder::AlphaOption alphaOption, 
+    SkJpegEncoder::Downsample downsample,
+    SkJpegEncoder::AlphaOption alphaOption,
     const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
 
@@ -3498,10 +3498,10 @@ SkData* C_SkJpegEncoder_EncodePixmap(const SkPixmap* src,
     return SkJpegEncoder::Encode(*src, options).release();
 }
 
-SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img, 
+SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
     int quality,
-    SkJpegEncoder::Downsample downsample, 
-    SkJpegEncoder::AlphaOption alphaOption, 
+    SkJpegEncoder::Downsample downsample,
+    SkJpegEncoder::AlphaOption alphaOption,
     const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
 
@@ -3745,7 +3745,7 @@ RustStream::RustStream(
     m_isEof(false),
     m_read(read),
     m_seekAbsolute(seekAbsolute),
-    m_seekRelative(seekRelative) 
+    m_seekRelative(seekRelative)
 {}
 
 size_t RustStream::read(void *buffer, size_t count) {
@@ -3824,7 +3824,7 @@ public:
     ) :
         m_data(data),
         m_write(write),
-        m_flush(flush) 
+        m_flush(flush)
     {}
 
     bool write(const void *buffer, size_t count) {

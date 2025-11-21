@@ -76,13 +76,16 @@ impl Target {
         self.abi.as_deref() == Some("msvc")
     }
 
+    pub fn is_mingw(&self) -> bool {
+        self.is_windows() && self.abi.as_deref() == Some("gnu") || self.abi.as_deref() == Some("gnullvm")
+    }
     /// Convert a library name to a filename.
     pub fn library_to_filename(&self, name: impl AsRef<str>) -> PathBuf {
         let name = name.as_ref();
-        if self.is_windows() {
+        if self.is_windows() && !self.is_mingw() {
             format!("{name}.lib").into()
         } else {
-            format!("lib{name}.a").into()
+            format!("lib{name}.dll.a").into()
         }
     }
 
