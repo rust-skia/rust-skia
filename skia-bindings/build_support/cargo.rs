@@ -85,7 +85,7 @@ impl Target {
         if self.is_windows() && !self.is_mingw() {
             format!("{name}.lib").into()
         } else {
-            format!("lib{name}.dll.a").into()
+            format!("lib{name}.a").into()
         }
     }
 
