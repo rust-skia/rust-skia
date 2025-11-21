@@ -3,7 +3,12 @@
 // Allow uppercase acronyms like QA and MacOS.
 #![allow(clippy::upper_case_acronyms)]
 
-use std::{collections::HashSet, fmt, fs, ops::Sub, path::PathBuf};
+use std::{
+    collections::{BTreeMap, HashSet},
+    fmt, fs,
+    ops::Sub,
+    path::PathBuf,
+};
 
 use target::Target;
 
@@ -87,6 +92,7 @@ pub struct Job {
     // we may need to disable clippy for beta builds temporarily.
     disable_clippy: bool,
     example_args: Option<String>,
+    matrix: BTreeMap<String, Vec<String>>,
 }
 
 impl fmt::Display for Job {
@@ -124,13 +130,8 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
             parts.push(job_header);
         }
 
-        let targets: Vec<String> = targets
-            .iter()
-            .filter_map(|t| build_target(workflow, job, t))
-            .map(|rendered| rendered.indented(2))
-            .collect();
-
-        parts.extend(targets);
+        let generic_steps = render_generic_steps(workflow, job).indented(2);
+        parts.push(generic_steps);
     }
 
     // some parts won't end with \n, so be safe and join them with a newline.
@@ -170,7 +171,86 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         ))
     }
 
-    render_template(template, &replacements)
+    let mut rendered = render_template(template, &replacements);
+
+    let mut matrix_lines = Vec::new();
+    matrix_lines.push("strategy:".to_string());
+    matrix_lines.push("  fail-fast: false".to_string());
+    matrix_lines.push("  matrix:".to_string());
+
+    if let Some(features) = job.matrix.get("features") {
+        matrix_lines.push(format!("    features: {:?}", features));
+    }
+
+    let target_names: Vec<String> = targets.iter().map(|t| t.target.to_string()).collect();
+    matrix_lines.push(format!("    target: {:?}", target_names));
+
+    matrix_lines.push("    include:".to_string());
+    for target in targets {
+        let android_env = target.android_env();
+        let emscripten_env = target.emscripten_env();
+        let native_target = workflow.host_target == target.target.to_string();
+        let run_clippy = native_target && !job.disable_clippy;
+        let run_tests = native_target;
+        let example_args = if native_target {
+            job.example_args.clone()
+        } else {
+            None
+        }
+        .unwrap_or_default();
+        let generate_artifacts = !example_args.is_empty();
+
+        let features_val = if workflow.kind == WorkflowKind::QA {
+            effective_features(workflow, job, target).to_string()
+        } else {
+            String::new()
+        };
+
+        matrix_lines.push(format!("      - target: {}", target.target));
+        matrix_lines.push(format!("        androidEnv: {}", android_env));
+        matrix_lines.push(format!("        emscriptenEnv: {}", emscripten_env));
+        matrix_lines.push(format!("        runClippy: {}", run_clippy));
+        matrix_lines.push(format!("        runTests: {}", run_tests));
+        matrix_lines.push(format!("        exampleArgs: '{}'", example_args));
+        matrix_lines.push(format!("        generateArtifacts: {}", generate_artifacts));
+        if workflow.kind == WorkflowKind::QA {
+            matrix_lines.push(format!("        features: '{}'", features_val));
+        }
+    }
+
+    if workflow.kind == WorkflowKind::Release {
+        if let Some(features_list) = job.matrix.get("features") {
+            let mut excludes = Vec::new();
+            for feature_str in features_list {
+                let features = Features::from(feature_str.as_str());
+                for target in targets {
+                    let mut disabled = false;
+                    for f in &features.0 {
+                        if target.disabled_features.contains(f) {
+                            disabled = true;
+                            break;
+                        }
+                    }
+                    if disabled {
+                        excludes.push((target.target.to_string(), feature_str.clone()));
+                    }
+                }
+            }
+
+            if !excludes.is_empty() {
+                matrix_lines.push("    exclude:".to_string());
+                for (t, f) in excludes {
+                    matrix_lines.push(format!("      - target: {}", t));
+                    matrix_lines.push(format!("        features: '{}'", f));
+                }
+            }
+        }
+    }
+
+    let strategy = matrix_lines.join("\n");
+    rendered = format!("{}\n{}", strategy, rendered);
+
+    rendered
 }
 
 fn macosx_deployment_target(
@@ -192,40 +272,22 @@ fn macosx_deployment_target(
     None
 }
 
-fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> Option<String> {
-    let features = effective_features(workflow, job, target);
-    println!("Building: {workflow}, job: `{job}`, target `{target}` with effective features `{features}`");
-    if workflow.kind == WorkflowKind::Release && features != job.features {
-        println!(
-            ">>> Effective feature set `{features}` of a release workflow, does not match job features: `{}`, skipping.",
-            job.features
-        );
-        return None;
-    }
-
-    let native_target = workflow.host_target == target.target.to_string();
-    let example_args = if native_target {
-        job.example_args.clone()
-    } else {
-        None
-    }
-    .unwrap_or_default();
-    let generate_artifacts = !example_args.is_empty();
-    let run_clippy = native_target && !job.disable_clippy;
+fn render_generic_steps(workflow: &Workflow, _job: &Job) -> String {
     let release_binaries = workflow.kind == WorkflowKind::Release;
 
-    let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
-        ("target", &target.target),
-        ("androidEnv", &target.android_env()),
-        ("emscriptenEnv", &target.emscripten_env()),
-        ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL),
-        ("features", &features),
-        ("runTests", &native_target),
-        ("runClippy", &run_clippy),
-        ("exampleArgs", &example_args),
-        ("generateArtifacts", &generate_artifacts),
-        ("releaseBinaries", &release_binaries),
-        ("hostBinExt", &workflow.host_bin_ext),
+    let template_arguments: &[(&'static str, &str)] = &[
+        ("target", "${{ matrix.target }}"),
+        ("androidEnv", "${{ matrix.androidEnv }}"),
+        ("emscriptenEnv", "${{ matrix.emscriptenEnv }}"),
+        ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL.to_string()),
+        ("features", "${{ matrix.features }}"),
+        ("runTests", "${{ matrix.runTests }}"),
+        ("runClippy", "${{ matrix.runClippy }}"),
+        ("exampleArgs", "${{ matrix.exampleArgs }}"),
+        ("generateArtifacts", "${{ matrix.generateArtifacts }}"),
+        ("releaseBinaries", &release_binaries.to_string()),
+        ("hostBinExt", workflow.host_bin_ext),
+        ("stepIf", "true"),
     ];
 
     let replacements: Vec<(String, String)> = template_arguments
@@ -233,7 +295,7 @@ fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> Option<S
         .map(|(name, value)| (name.to_string(), value.to_string()))
         .collect();
 
-    Some(render_template(TARGET_TEMPLATE, &replacements))
+    render_template(TARGET_TEMPLATE, &replacements)
 }
 
 fn effective_features(workflow: &Workflow, job: &Job, target: &TargetConf) -> Features {
