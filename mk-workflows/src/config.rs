@@ -191,7 +191,7 @@ fn skia_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
 fn grida_canvas_release_jobs(workflow: &Workflow) -> Vec<Job> {
     match workflow.host_os {
         HostOS::Linux => {
-            vec![release_job("gl,textlayout,svg")]
+            vec![release_job("gl,textlayout,svg,webp")]
         }
         _ => Vec::new(),
     }
