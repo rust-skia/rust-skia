@@ -38,3 +38,7 @@ Update it whenever you learn something new about the project's patterns, convent
     - Do not rename functions when generating documentation.
     - If the Rust function name differs from the C++ function name, use the Rust name in the documentation text.
     - Ensure documentation parameter names match the Rust function parameter names.
+- Verify documentation links with `make doc`.
+- Use `[`Self::method()`]` instead of `[`method(&self)`]` for intra-doc links to methods.
+- Escape array indexing in comments (e.g., `` `pts[0]` ``) to avoid them being interpreted as links.
+- Use fully qualified paths (e.g., `[`crate::Canvas`]`) if the type is not in the immediate scope.

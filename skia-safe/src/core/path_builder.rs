@@ -823,9 +823,9 @@ impl PathBuilder {
     }
 
     /// Adds contour created from line array, adding (pts.len() - 1) line segments.
-    /// Contour added starts at pts[0], then adds a line for every additional [`Point`]
+    /// Contour added starts at `pts[0]`, then adds a line for every additional [`Point`]
     /// in pts array. If close is true, appends [`PathVerb::Close`] to [`Path`], connecting
-    /// pts[count - 1] and pts[0].
+    /// `pts[count - 1]` and `pts[0]`.
     ///
     /// - `pts`: array of line sharing end and start [`Point`]
     /// - `close`: true to add line connecting contour end and start
@@ -955,7 +955,7 @@ impl PathBuilder {
 
     /// Returns if [`Path`] is empty.
     /// Empty [`PathBuilder`] may have [`PathFillType`] but has no [`Point`], [`PathVerb`], or conic weight.
-    /// [`PathBuilder()`] constructs empty [`PathBuilder`]; `reset()` and `rewind()` make [`Path`] empty.
+    /// [`PathBuilder::new()`] constructs empty [`PathBuilder`]; `reset()` and `rewind()` make [`Path`] empty.
     ///
     /// # Returns
     /// true if the path contains no [`PathVerb`] array
