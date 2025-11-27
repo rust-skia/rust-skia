@@ -55,31 +55,13 @@ pub fn jobs(workflow: &Workflow) -> Vec<Job> {
 
 pub fn qa_jobs() -> Vec<Job> {
     const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp";
-    [
-        Job {
-            name: "stable-all-features".into(),
-            toolchain: "stable",
-            features: QA_ALL_FEATURES.into(),
-            example_args: Some("--driver cpu --driver pdf --driver svg".into()),
-            ..Job::default()
-        },
-        /*
-        Job {
-            name: "stable-all-features-debug",
-            toolchain: "stable",
-            features: QA_ALL_FEATURES.into(),
-            skia_debug: true,
-            ..Job::default()
-        },
-        */
-        Job {
-            name: "beta-all-features".into(),
-            toolchain: "beta",
-            features: QA_ALL_FEATURES.into(),
-            ..Job::default()
-        },
-    ]
-    .into()
+    vec![Job {
+        name: "stable-all-features".into(),
+        toolchain: "stable",
+        features: QA_ALL_FEATURES.into(),
+        example_args: Some("--driver cpu --driver pdf --driver svg".into()),
+        ..Job::default()
+    }]
 }
 
 /// Jobs for releasing prebuilt binaries.
