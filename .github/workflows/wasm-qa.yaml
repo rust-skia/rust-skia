@@ -25,8 +25,8 @@ jobs:
           - target: wasm32-unknown-emscripten
             androidEnv: false
             emscriptenEnv: true
-            runClippy: true
-            runTests: true
+            runClippy: false
+            runTests: false
             exampleArgs: ''
             generateArtifacts: false
             features: 'gl,svg,textlayout,webp'

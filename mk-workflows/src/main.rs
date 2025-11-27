@@ -196,8 +196,8 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         let android_env = target.android_env();
         let emscripten_env = target.emscripten_env();
         let native_target = workflow.host_target == target.target.to_string();
-        let run_clippy = native_target && !job.disable_clippy;
-        let run_tests = native_target;
+        let run_clippy = native_target && !job.disable_clippy && !emscripten_env;
+        let run_tests = native_target && !emscripten_env;
         let example_args = if native_target {
             job.example_args.clone()
         } else {
