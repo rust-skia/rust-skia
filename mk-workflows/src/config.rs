@@ -1,6 +1,6 @@
 use crate::{
-    HostOS, Job, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WINDOWS_ARM_JOB,
-    WINDOWS_JOB,
+    HostOS, Job, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WASM_JOB,
+    WINDOWS_ARM_JOB, WINDOWS_JOB,
 };
 use std::collections::BTreeMap;
 
@@ -46,38 +46,77 @@ pub fn workflows() -> Vec<Workflow> {
     workflows
 }
 
+pub fn wasm_workflows() -> Vec<Workflow> {
+    let mut workflows = Vec::new();
+    for kind in &[WorkflowKind::QA, WorkflowKind::Release] {
+        let kind = *kind;
+        workflows.push(Workflow {
+            kind,
+            host_os: HostOS::Wasm,
+            host_target: "wasm32-unknown-emscripten",
+            job_template: WASM_JOB,
+            targets: wasm_targets(),
+            host_bin_ext: "",
+        });
+    }
+    workflows
+}
+
 pub fn jobs(workflow: &Workflow) -> Vec<Job> {
     match workflow.kind {
-        WorkflowKind::QA => qa_jobs(),
+        WorkflowKind::QA => qa_jobs(workflow),
         WorkflowKind::Release => release_jobs(workflow),
     }
 }
 
-pub fn qa_jobs() -> Vec<Job> {
-    const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp";
-    vec![Job {
-        name: "stable-all-features".into(),
-        toolchain: "stable",
-        features: QA_ALL_FEATURES.into(),
-        example_args: Some("--driver cpu --driver pdf --driver svg".into()),
-        ..Job::default()
-    }]
+pub fn qa_jobs(workflow: &Workflow) -> Vec<Job> {
+    match workflow.host_os {
+        HostOS::Wasm => {
+            // WASM QA: Use features that work with WASM (no vulkan, ureq)
+            vec![Job {
+                name: "stable-all-features".into(),
+                toolchain: "stable",
+                features: "gl,textlayout,svg,webp".into(),
+                ..Job::default()
+            }]
+        }
+        _ => {
+            const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp";
+            vec![Job {
+                name: "stable-all-features".into(),
+                toolchain: "stable",
+                features: QA_ALL_FEATURES.into(),
+                example_args: Some("--driver cpu --driver pdf --driver svg".into()),
+                ..Job::default()
+            }]
+        }
+    }
 }
 
 /// Jobs for releasing prebuilt binaries.
 pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
-    let mut features: Vec<String> = [
-        "",
-        "gl",
-        "vulkan",
-        "textlayout",
-        "gl,textlayout",
-        "vulkan,textlayout",
-        "gl,vulkan,textlayout",
-    ]
-    .iter()
-    .map(|s| s.to_string())
-    .collect();
+    let mut features: Vec<String> = if workflow.host_os == HostOS::Wasm {
+        // WASM: Only features that work (no vulkan, ureq, x11, wayland)
+        vec![
+            "".into(),
+            "gl".into(),
+            "textlayout".into(),
+            "gl,textlayout".into(),
+        ]
+    } else {
+        [
+            "",
+            "gl",
+            "vulkan",
+            "textlayout",
+            "gl,textlayout",
+            "vulkan,textlayout",
+            "gl,vulkan,textlayout",
+        ]
+        .iter()
+        .map(|s| s.to_string())
+        .collect()
+    };
 
     match workflow.host_os {
         HostOS::Windows | HostOS::WindowsArm => {
@@ -101,6 +140,9 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
                 "metal,textlayout".into(),
                 "metal,gl,textlayout".into(),
             ]);
+        }
+        HostOS::Wasm => {
+            // WASM-specific features added via grida_canvas_release_features
         }
     }
 
@@ -131,7 +173,7 @@ fn freya_release_features(workflow: &Workflow) -> Vec<String> {
         HostOS::Windows | HostOS::MacOS => {
             vec!["gl,textlayout,svg".into()]
         }
-        HostOS::WindowsArm => {
+        HostOS::WindowsArm | HostOS::Wasm => {
             vec![]
         }
         HostOS::Linux => {
@@ -154,7 +196,7 @@ fn vizia_release_features(workflow: &Workflow) -> Vec<String> {
         HostOS::Windows => {
             vec!["gl,vulkan,textlayout,svg,d3d".into()]
         }
-        HostOS::WindowsArm => {
+        HostOS::WindowsArm | HostOS::Wasm => {
             vec![]
         }
         HostOS::Linux => {
@@ -184,17 +226,17 @@ fn skia_canvas_release_features(workflow: &Workflow) -> Vec<String> {
         HostOS::Linux => {
             vec!["vulkan,textlayout,webp,svg".into()]
         }
+        HostOS::Wasm => {
+            vec![]
+        }
     }
 }
 
 // <https://github.com/rust-skia/rust-skia/issues/1205>
-//
-// This is actually only used for the wasm32-unknown-enscripten target. But right now we
-// can't be this specific.
 fn grida_canvas_release_features(workflow: &Workflow) -> Vec<String> {
     match workflow.host_os {
-        HostOS::Linux => {
-            vec!["gl,textlayout,svg".into()]
+        HostOS::Wasm => {
+            vec!["gl,textlayout,svg,webp".into()]
         }
         _ => Vec::new(),
     }
@@ -215,7 +257,6 @@ fn linux_targets() -> Vec<TargetConf> {
     )];
     targets.extend(linux_aarch64_targets());
     targets.extend(android_targets());
-    targets.extend(wasm_targets());
     targets
 }
 
@@ -246,7 +287,7 @@ fn android_targets() -> Vec<TargetConf> {
     .into()
 }
 
-fn wasm_targets() -> Vec<TargetConf> {
+pub fn wasm_targets() -> Vec<TargetConf> {
     // Compiling ureq-proto v0.3.0
     //   error[E0277]: the trait bound `SystemRandom: ring::rand::SecureRandom` is not satisfied
     [TargetConf::new("wasm32-unknown-emscripten", "").disable("ureq,x11,wayland,vulkan")].into()

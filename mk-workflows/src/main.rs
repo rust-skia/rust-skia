@@ -18,6 +18,7 @@ mod target;
 const QA_WORKFLOW: &str = include_str!("templates/qa-workflow.yaml");
 const RELEASE_WORKFLOW: &str = include_str!("templates/release-workflow.yaml");
 const LINUX_JOB: &str = include_str!("templates/linux-job.yaml");
+const WASM_JOB: &str = include_str!("templates/wasm-job.yaml");
 const WINDOWS_JOB: &str = include_str!("templates/windows-job.yaml");
 const WINDOWS_ARM_JOB: &str = include_str!("templates/windows-arm-job.yaml");
 const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
@@ -25,6 +26,9 @@ const TARGET_TEMPLATE: &str = include_str!("templates/target.yaml");
 
 fn main() {
     for workflow in config::workflows() {
+        build_workflow(&workflow, &config::jobs(&workflow));
+    }
+    for workflow in config::wasm_workflows() {
         build_workflow(&workflow, &config::jobs(&workflow));
     }
 }
@@ -69,6 +73,7 @@ enum HostOS {
     WindowsArm,
     Linux,
     MacOS,
+    Wasm,
 }
 
 impl fmt::Display for HostOS {
@@ -79,6 +84,7 @@ impl fmt::Display for HostOS {
             WindowsArm => "windows-arm",
             Linux => "linux",
             MacOS => "macos",
+            Wasm => "wasm",
         })
     }
 }

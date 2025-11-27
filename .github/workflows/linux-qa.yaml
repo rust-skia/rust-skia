@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "aarch64-linux-android", "x86_64-linux-android", "i686-linux-android", "wasm32-unknown-emscripten"]
+        target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "aarch64-linux-android", "x86_64-linux-android", "i686-linux-android"]
         include:
           - target: x86_64-unknown-linux-gnu
             androidEnv: false
@@ -62,14 +62,6 @@ jobs:
             exampleArgs: ''
             generateArtifacts: false
             features: 'gl,svg,textlayout,ureq,vulkan,webp'
-          - target: wasm32-unknown-emscripten
-            androidEnv: false
-            emscriptenEnv: true
-            runClippy: false
-            runTests: false
-            exampleArgs: ''
-            generateArtifacts: false
-            features: 'gl,svg,textlayout,webp'
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 
