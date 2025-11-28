@@ -23,9 +23,6 @@ fn main() {
     for workflow in config::workflows() {
         build_workflow(&workflow, &config::jobs(&workflow));
     }
-    for workflow in config::wasm_workflows() {
-        build_workflow(&workflow, &config::jobs(&workflow));
-    }
 }
 
 #[derive(Clone, Debug)]

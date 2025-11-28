@@ -41,14 +41,6 @@ pub fn workflows() -> Vec<Workflow> {
             targets: macos_targets(),
             host_bin_ext: "",
         });
-    }
-    workflows
-}
-
-pub fn wasm_workflows() -> Vec<Workflow> {
-    let mut workflows = Vec::new();
-    for kind in &[WorkflowKind::QA, WorkflowKind::Release] {
-        let kind = *kind;
         workflows.push(Workflow {
             kind,
             host_os: HostOS::Wasm,
