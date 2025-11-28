@@ -53,31 +53,6 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-        exclude:
-          - target: aarch64-apple-ios
-            features: 'vulkan'
-          - target: aarch64-apple-ios-sim
-            features: 'vulkan'
-          - target: x86_64-apple-ios
-            features: 'vulkan'
-          - target: aarch64-apple-ios
-            features: 'textlayout,vulkan'
-          - target: aarch64-apple-ios-sim
-            features: 'textlayout,vulkan'
-          - target: x86_64-apple-ios
-            features: 'textlayout,vulkan'
-          - target: aarch64-apple-ios
-            features: 'gl,textlayout,vulkan'
-          - target: aarch64-apple-ios-sim
-            features: 'gl,textlayout,vulkan'
-          - target: x86_64-apple-ios
-            features: 'gl,textlayout,vulkan'
-          - target: aarch64-apple-ios
-            features: 'gl,svg,textlayout,vulkan'
-          - target: aarch64-apple-ios-sim
-            features: 'gl,svg,textlayout,vulkan'
-          - target: x86_64-apple-ios
-            features: 'gl,svg,textlayout,vulkan'
           - features: ''
             macosxDeploymentTarget: '10.13'
           - features: 'gl'
@@ -106,6 +81,31 @@ jobs:
             macosxDeploymentTarget: '10.13'
           - features: 'metal,svg,textlayout,webp'
             macosxDeploymentTarget: '10.14'
+        exclude:
+          - target: aarch64-apple-ios
+            features: 'vulkan'
+          - target: aarch64-apple-ios-sim
+            features: 'vulkan'
+          - target: x86_64-apple-ios
+            features: 'vulkan'
+          - target: aarch64-apple-ios
+            features: 'textlayout,vulkan'
+          - target: aarch64-apple-ios-sim
+            features: 'textlayout,vulkan'
+          - target: x86_64-apple-ios
+            features: 'textlayout,vulkan'
+          - target: aarch64-apple-ios
+            features: 'gl,textlayout,vulkan'
+          - target: aarch64-apple-ios-sim
+            features: 'gl,textlayout,vulkan'
+          - target: x86_64-apple-ios
+            features: 'gl,textlayout,vulkan'
+          - target: aarch64-apple-ios
+            features: 'gl,svg,textlayout,vulkan'
+          - target: aarch64-apple-ios-sim
+            features: 'gl,svg,textlayout,vulkan'
+          - target: x86_64-apple-ios
+            features: 'gl,svg,textlayout,vulkan'
     runs-on: macos-14
     env:
       SKIA_DEBUG: 0

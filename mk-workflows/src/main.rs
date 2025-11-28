@@ -231,6 +231,22 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
     }
 
     if let JobFeatures::Matrix(features_list) = &job.features {
+        // Add macosxDeploymentTarget includes for macOS matrix workflows
+        if matches!(workflow.host_os, HostOS::MacOS) {
+            for feature in features_list {
+                let deployment_target = if feature.contains("metal") {
+                    "10.14"
+                } else {
+                    "10.13"
+                };
+                matrix_lines.push(format!("      - features: '{}'", feature));
+                matrix_lines.push(format!(
+                    "        macosxDeploymentTarget: '{}'",
+                    deployment_target
+                ));
+            }
+        }
+
         let mut excludes = Vec::new();
         for features in features_list {
             for target in targets {
@@ -252,22 +268,6 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
             for (t, f) in excludes {
                 matrix_lines.push(format!("      - target: {}", t));
                 matrix_lines.push(format!("        features: '{}'", f));
-            }
-        }
-
-        // Add macosxDeploymentTarget includes for macOS matrix workflows
-        if matches!(workflow.host_os, HostOS::MacOS) {
-            for feature in features_list {
-                let deployment_target = if feature.contains("metal") {
-                    "10.14"
-                } else {
-                    "10.13"
-                };
-                matrix_lines.push(format!("      - features: '{}'", feature));
-                matrix_lines.push(format!(
-                    "        macosxDeploymentTarget: '{}'",
-                    deployment_target
-                ));
             }
         }
     }
