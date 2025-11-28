@@ -259,9 +259,10 @@ fn macos_targets() -> Vec<TargetConf> {
     vec![
         TargetConf::new("aarch64-apple-darwin", "metal"),
         TargetConf::new("x86_64-apple-darwin", "metal"),
-        TargetConf::new("aarch64-apple-ios", "metal"),
-        TargetConf::new("aarch64-apple-ios-sim", "metal"),
-        TargetConf::new("x86_64-apple-ios", "metal"),
+        // iOS: Vulkan is not supported ("No Vulkan support on iOS yet" in Skia)
+        TargetConf::new("aarch64-apple-ios", "metal").disable("vulkan"),
+        TargetConf::new("aarch64-apple-ios-sim", "metal").disable("vulkan"),
+        TargetConf::new("x86_64-apple-ios", "metal").disable("vulkan"),
     ]
 }
 

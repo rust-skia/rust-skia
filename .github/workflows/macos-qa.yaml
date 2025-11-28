@@ -45,7 +45,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-            features: 'gl,metal,svg,textlayout,ureq,vulkan,webp'
+            features: 'gl,metal,svg,textlayout,ureq,webp'
           - target: aarch64-apple-ios-sim
             androidEnv: false
             emscriptenEnv: false
@@ -53,7 +53,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-            features: 'gl,metal,svg,textlayout,ureq,vulkan,webp'
+            features: 'gl,metal,svg,textlayout,ureq,webp'
           - target: x86_64-apple-ios
             androidEnv: false
             emscriptenEnv: false
@@ -61,7 +61,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-            features: 'gl,metal,svg,textlayout,ureq,vulkan,webp'
+            features: 'gl,metal,svg,textlayout,ureq,webp'
     runs-on: macos-14
     env:
       SKIA_DEBUG: 0
