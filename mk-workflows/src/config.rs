@@ -1,8 +1,7 @@
 use crate::{
-    HostOS, Job, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WASM_JOB,
+    HostOS, Job, JobFeatures, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WASM_JOB,
     WINDOWS_ARM_JOB, WINDOWS_JOB,
 };
-use std::collections::BTreeMap;
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
 
@@ -76,7 +75,7 @@ pub fn qa_jobs(workflow: &Workflow) -> Vec<Job> {
             vec![Job {
                 name: "stable-all-features".into(),
                 toolchain: "stable",
-                features: "gl,textlayout,svg,webp".into(),
+                features: JobFeatures::Direct("gl,textlayout,svg,webp".into()),
                 ..Job::default()
             }]
         }
@@ -85,7 +84,7 @@ pub fn qa_jobs(workflow: &Workflow) -> Vec<Job> {
             vec![Job {
                 name: "stable-all-features".into(),
                 toolchain: "stable",
-                features: QA_ALL_FEATURES.into(),
+                features: JobFeatures::Direct(QA_ALL_FEATURES.into()),
                 example_args: Some("--driver cpu --driver pdf --driver svg".into()),
                 ..Job::default()
             }]
@@ -154,14 +153,10 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
     features.sort();
     features.dedup();
 
-    let mut matrix = BTreeMap::new();
-    matrix.insert("features".into(), features);
-
     vec![Job {
         name: "release".into(),
         toolchain: "stable",
-        features: "${{ matrix.features }}".into(),
-        matrix,
+        features: JobFeatures::Matrix(features),
         ..Job::default()
     }]
 }

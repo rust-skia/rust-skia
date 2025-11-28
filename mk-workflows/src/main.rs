@@ -3,12 +3,7 @@
 // Allow uppercase acronyms like QA and MacOS.
 #![allow(clippy::upper_case_acronyms)]
 
-use std::{
-    collections::{BTreeMap, HashSet},
-    fmt, fs,
-    ops::Sub,
-    path::PathBuf,
-};
+use std::{collections::HashSet, fmt, fs, ops::Sub, path::PathBuf};
 
 use target::Target;
 
@@ -89,23 +84,39 @@ impl fmt::Display for HostOS {
     }
 }
 
+/// Specifies how features are determined for a job.
+pub enum JobFeatures {
+    /// Features are specified directly and combined with target platform features.
+    Direct(Features),
+    /// Features come from a GitHub Actions matrix variable.
+    Matrix(Vec<String>),
+}
+
+impl Default for JobFeatures {
+    fn default() -> Self {
+        JobFeatures::Direct(Features::default())
+    }
+}
+
 #[derive(Default)]
 pub struct Job {
     name: String,
     toolchain: &'static str,
-    features: Features,
+    features: JobFeatures,
     skia_debug: bool,
     // we may need to disable clippy for beta builds temporarily.
     disable_clippy: bool,
     example_args: Option<String>,
-    matrix: BTreeMap<String, Vec<String>>,
 }
 
 impl fmt::Display for Job {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.name.fmt(f)?;
         f.write_str(", features: ")?;
-        self.features.fmt(f)
+        match &self.features {
+            JobFeatures::Direct(features) => features.fmt(f),
+            JobFeatures::Matrix(features) => write!(f, "matrix({} variants)", features.len()),
+        }
     }
 }
 
@@ -184,7 +195,7 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
     matrix_lines.push("  fail-fast: false".to_string());
     matrix_lines.push("  matrix:".to_string());
 
-    if let Some(features) = job.matrix.get("features") {
+    if let JobFeatures::Matrix(features) = &job.features {
         matrix_lines.push(format!("    features: {:?}", features));
     }
 
@@ -206,10 +217,11 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         .unwrap_or_default();
         let generate_artifacts = !example_args.is_empty();
 
-        let features_val = if workflow.kind == WorkflowKind::QA {
-            effective_features(workflow, job, target).to_string()
-        } else {
-            String::new()
+        let features_val = match &job.features {
+            JobFeatures::Direct(features) => {
+                effective_features(workflow, features, target).to_string()
+            }
+            JobFeatures::Matrix(_) => String::new(),
         };
 
         matrix_lines.push(format!("      - target: {}", target.target));
@@ -219,36 +231,50 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         matrix_lines.push(format!("        runTests: {}", run_tests));
         matrix_lines.push(format!("        exampleArgs: '{}'", example_args));
         matrix_lines.push(format!("        generateArtifacts: {}", generate_artifacts));
-        if workflow.kind == WorkflowKind::QA {
+        if matches!(&job.features, JobFeatures::Direct(_)) {
             matrix_lines.push(format!("        features: '{}'", features_val));
         }
     }
 
-    if workflow.kind == WorkflowKind::Release {
-        if let Some(features_list) = job.matrix.get("features") {
-            let mut excludes = Vec::new();
-            for feature_str in features_list {
-                let features = Features::from(feature_str.as_str());
-                for target in targets {
-                    let mut disabled = false;
-                    for f in &features.0 {
-                        if target.disabled_features.contains(f) {
-                            disabled = true;
-                            break;
-                        }
+    if let JobFeatures::Matrix(features_list) = &job.features {
+        let mut excludes = Vec::new();
+        for feature_str in features_list {
+            let features = Features::from(feature_str.as_str());
+            for target in targets {
+                let mut disabled = false;
+                for f in &features.0 {
+                    if target.disabled_features.contains(f) {
+                        disabled = true;
+                        break;
                     }
-                    if disabled {
-                        excludes.push((target.target.to_string(), feature_str.clone()));
-                    }
+                }
+                if disabled {
+                    excludes.push((target.target.to_string(), feature_str.clone()));
                 }
             }
+        }
 
-            if !excludes.is_empty() {
-                matrix_lines.push("    exclude:".to_string());
-                for (t, f) in excludes {
-                    matrix_lines.push(format!("      - target: {}", t));
-                    matrix_lines.push(format!("        features: '{}'", f));
-                }
+        if !excludes.is_empty() {
+            matrix_lines.push("    exclude:".to_string());
+            for (t, f) in excludes {
+                matrix_lines.push(format!("      - target: {}", t));
+                matrix_lines.push(format!("        features: '{}'", f));
+            }
+        }
+
+        // Add macosxDeploymentTarget includes for macOS matrix workflows
+        if matches!(workflow.host_os, HostOS::MacOS) {
+            for feature_str in features_list {
+                let deployment_target = if feature_str.contains("metal") {
+                    "10.14"
+                } else {
+                    "10.13"
+                };
+                matrix_lines.push(format!("      - features: '{}'", feature_str));
+                matrix_lines.push(format!(
+                    "        macosxDeploymentTarget: '{}'",
+                    deployment_target
+                ));
             }
         }
     }
@@ -266,13 +292,21 @@ fn macosx_deployment_target(
 ) -> Option<&'static str> {
     if let HostOS::MacOS = workflow.host_os {
         let metal = "metal".to_owned();
-        if targets
-            .iter()
-            .any(|target| effective_features(workflow, job, target).contains(&metal))
-        {
-            return Some("10.14");
-        } else {
-            return Some("10.13");
+        match &job.features {
+            JobFeatures::Direct(features) => {
+                let uses_metal = targets
+                    .iter()
+                    .any(|target| effective_features(workflow, features, target).contains(&metal));
+                if uses_metal {
+                    return Some("10.14");
+                } else {
+                    return Some("10.13");
+                }
+            }
+            JobFeatures::Matrix(_) => {
+                // Deployment target is set via matrix includes
+                return Some("${{ matrix.macosxDeploymentTarget }}");
+            }
         }
     }
     None
@@ -307,8 +341,8 @@ fn render_generic_steps(workflow: &Workflow, _job: &Job) -> String {
     render_template(TARGET_TEMPLATE, &replacements)
 }
 
-fn effective_features(workflow: &Workflow, job: &Job, target: &TargetConf) -> Features {
-    let mut features = job.features.clone();
+fn effective_features(workflow: &Workflow, features: &Features, target: &TargetConf) -> Features {
+    let mut features = features.clone();
     // if we are releasing binaries, we want the exact set of features specified.
     if workflow.kind == WorkflowKind::QA {
         features = features.join(&target.platform_features);
@@ -370,7 +404,7 @@ impl TargetConf {
 }
 
 #[derive(Clone, Default, Debug, PartialEq, Eq)]
-struct Features(HashSet<String>);
+pub struct Features(HashSet<String>);
 
 impl Features {
     #[must_use]

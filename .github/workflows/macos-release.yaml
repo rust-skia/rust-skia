@@ -53,10 +53,38 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
+          - features: ''
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl'
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl,textlayout'
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl,textlayout,svg'
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl,vulkan,textlayout'
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl,vulkan,textlayout,svg'
+            macosxDeploymentTarget: '10.13'
+          - features: 'metal'
+            macosxDeploymentTarget: '10.14'
+          - features: 'metal,gl,textlayout'
+            macosxDeploymentTarget: '10.14'
+          - features: 'metal,textlayout'
+            macosxDeploymentTarget: '10.14'
+          - features: 'metal,textlayout,webp,svg'
+            macosxDeploymentTarget: '10.14'
+          - features: 'textlayout'
+            macosxDeploymentTarget: '10.13'
+          - features: 'textlayout,webp,svg'
+            macosxDeploymentTarget: '10.13'
+          - features: 'vulkan'
+            macosxDeploymentTarget: '10.13'
+          - features: 'vulkan,textlayout'
+            macosxDeploymentTarget: '10.13'
     runs-on: macos-14
     env:
       SKIA_DEBUG: 0
-      MACOSX_DEPLOYMENT_TARGET: '10.13'
+      MACOSX_DEPLOYMENT_TARGET: '${{ matrix.macosxDeploymentTarget }}'
 
     steps:
     - uses: actions/checkout@v3
