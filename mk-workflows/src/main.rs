@@ -81,6 +81,14 @@ impl fmt::Display for HostOS {
     }
 }
 
+/// Specifies the job name.
+pub enum JobName {
+    /// A named job (e.g., "stable-all-features").
+    Named(String),
+    /// An unnamed job for binary releases that uses the workflow name directly.
+    Binaries,
+}
+
 /// Specifies how features are determined for a job.
 pub enum JobFeatures {
     /// Features are specified directly and combined with target platform features.
@@ -95,9 +103,8 @@ impl Default for JobFeatures {
     }
 }
 
-#[derive(Default)]
 pub struct Job {
-    name: String,
+    name: JobName,
     toolchain: &'static str,
     features: JobFeatures,
     skia_debug: bool,
@@ -108,7 +115,10 @@ pub struct Job {
 
 impl fmt::Display for Job {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.name.fmt(f)?;
+        match &self.name {
+            JobName::Named(name) => f.write_str(name)?,
+            JobName::Binaries => f.write_str("binaries")?,
+        }
         f.write_str(", features: ")?;
         match &self.features {
             JobFeatures::Direct(features) => features.fmt(f),
@@ -122,7 +132,10 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
     let job_template = workflow.job_template;
     let targets = &workflow.targets;
 
-    let workflow_name = format!("{}-{}", host_os, workflow.kind);
+    let workflow_name = match workflow.kind {
+        WorkflowKind::Release => format!("{}-binaries", host_os),
+        WorkflowKind::QA => format!("{}-{}", host_os, workflow.kind),
+    };
     let output_filename = PathBuf::new()
         .join(".github")
         .join("workflows")
@@ -134,7 +147,10 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
 
     for job in jobs {
         {
-            let job_name = workflow_name.clone() + "-" + &job.name;
+            let job_name = match &job.name {
+                JobName::Binaries => workflow_name.clone(),
+                JobName::Named(name) => workflow_name.clone() + "-" + name,
+            };
             let job_name = format!("{job_name}:").indented(1);
             parts.push(job_name);
         }
