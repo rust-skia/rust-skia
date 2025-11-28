@@ -17,6 +17,19 @@ concurrency:
 
 jobs:
   windows-qa-stable-all-features:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["x86_64-pc-windows-msvc"]
+        include:
+          - target: x86_64-pc-windows-msvc
+            androidEnv: false
+            emscriptenEnv: false
+            runClippy: true
+            runTests: true
+            exampleArgs: '--driver cpu --driver pdf --driver svg'
+            generateArtifacts: true
+            features: 'd3d,gl,svg,textlayout,ureq,vulkan,webp'
     runs-on: windows-2022
     # Containers are not supported on Windows.
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest
@@ -43,29 +56,29 @@ jobs:
 
     - name: Install Ninja
       run: choco install ninja
-    - name: 'Install Rust target x86_64-pc-windows-msvc'
+    - name: 'Install Rust target ${{ matrix.target }}'
       shell: bash
       run: |
-        rustup target add x86_64-pc-windows-msvc
+        rustup target add ${{ matrix.target }}
 
-    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features "d3d,gl,svg,textlayout,ureq,vulkan,webp"'
+    - name: 'Build skia-safe for ${{ matrix.target }} with features "${{ matrix.features }}"'
       shell: bash
       run: |
-        if [ "false" == "true" ]; then
-          TARGET=x86_64-pc-windows-msvc
+        if [ "${{ matrix.androidEnv }}" == "true" ]; then
+          TARGET=${{ matrix.target }}
           TARGET=${TARGET//-/_}
-          export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
-          export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
+          export CC_${TARGET}=${{ matrix.target }}26-clang.exe
+          export CXX_${TARGET}=${{ matrix.target }}26-clang++.exe
           export AR_${TARGET}=llvm-ar
           TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
+          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=${{ matrix.target }}26-clang.exe
           echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
         fi
-        if [ "false" == "true" ]; then
+        if [ "${{ matrix.emscriptenEnv }}" == "true" ]; then
           source /emsdk/emsdk_env.sh
         fi
         cargo clean
-        cargo build -p skia-safe --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc
+        cargo build -p skia-safe --release --features "${{ matrix.features }}" --target ${{ matrix.target }}
         echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
         echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
         echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
@@ -75,131 +88,27 @@ jobs:
 
     - name: 'Run Clippy'
       shell: bash
-      if: true
+      if: ${{ matrix.runClippy }}
       run: |
-        cargo clippy --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
+        cargo clippy --release --features "${{ matrix.features }}" --all-targets --target ${{ matrix.target }} -- -D warnings
 
     - name: 'Test all workspace projects'
       shell: bash
-      if: true
+      if: ${{ matrix.runTests }}
       run: |
-        cargo test --all --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
+        cargo test --all --release --features "${{ matrix.features }}" --all-targets --target ${{ matrix.target }} -- --nocapture
 
     - name: 'Generate skia-org example images'
       shell: bash
-      if: true
+      if: ${{ matrix.generateArtifacts }}
       run: |
-        cargo run --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" --driver cpu --driver pdf --driver svg
+        cargo run --release --features "${{ matrix.features }}" --target ${{ matrix.target }} "${{ env.SKIA_STAGING_PATH }}/skia-org" ${{ matrix.exampleArgs }}
 
     - name: 'Upload skia-org example images'
-      if: true
+      if: ${{ matrix.generateArtifacts }}
       uses: actions/upload-artifact@v4.6.0
       with:
-        name: skia-org-images-x86_64-pc-windows-msvc
-        path: ${{ env.SKIA_STAGING_PATH }}/skia-org
-
-    - name: 'Compress binaries'
-      if: false
-      uses: a7ul/tar-action@v1.1.2
-      with:
-        command: c
-        cwd: '${{ env.SKIA_STAGING_PATH }}'
-        files: 'skia-binaries'
-        outPath: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-
-    - name: 'Release binaries'
-      if: false
-      uses: pragmatrix/release-action@v1.11.1-rs
-      with:
-        owner: rust-skia
-        repo: skia-binaries
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: '${{ env.SKIA_BINARIES_TAG }}'
-        artifacts: '${{ runner.temp }}/skia-binaries-${{ env.SKIA_BINARIES_KEY }}.tar.gz'
-        artifactErrorsFailBuild: true
-        token: ${{ secrets.RUST_SKIA_RELEASE_TOKEN }}
-        prerelease: true
-  windows-qa-beta-all-features:
-    runs-on: windows-2022
-    # Containers are not supported on Windows.
-    # container: ghcr.io/pragmatrix/rust-skia-windows:latest
-    env: 
-      SKIA_DEBUG: 0
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@beta
-
-    - name: Install Clippy
-      run: rustup component add clippy
-      shell: bash
-
-    - name: Python Version
-      run: python --version
-
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
-
-    - name: Install Ninja
-      run: choco install ninja
-    - name: 'Install Rust target x86_64-pc-windows-msvc'
-      shell: bash
-      run: |
-        rustup target add x86_64-pc-windows-msvc
-
-    - name: 'Build skia-safe for x86_64-pc-windows-msvc with features "d3d,gl,svg,textlayout,ureq,vulkan,webp"'
-      shell: bash
-      run: |
-        if [ "false" == "true" ]; then
-          TARGET=x86_64-pc-windows-msvc
-          TARGET=${TARGET//-/_}
-          export CC_${TARGET}=x86_64-pc-windows-msvc26-clang.exe
-          export CXX_${TARGET}=x86_64-pc-windows-msvc26-clang++.exe
-          export AR_${TARGET}=llvm-ar
-          TARGET_UPPERCASE=`echo "${TARGET}" | tr [a-z] [A-Z]`
-          export CARGO_TARGET_${TARGET_UPPERCASE}_LINKER=x86_64-pc-windows-msvc26-clang.exe
-          echo "Set CC, CXX, and CARGO_LINKER target specific environment variables for Android"
-        fi
-        if [ "false" == "true" ]; then
-          source /emsdk/emsdk_env.sh
-        fi
-        cargo clean
-        cargo build -p skia-safe --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc
-        echo "SKIA_BINARIES_TAG=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/tag.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_BINARIES_KEY=$(cat "${BUILD_ARTIFACTSTAGINGDIRECTORY}/skia-binaries/key.txt")" >> ${GITHUB_ENV}
-        echo "SKIA_STAGING_PATH=${BUILD_ARTIFACTSTAGINGDIRECTORY}" >> ${GITHUB_ENV}
-      env:
-        BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
-        EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
-
-    - name: 'Run Clippy'
-      shell: bash
-      if: true
-      run: |
-        cargo clippy --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- -D warnings
-
-    - name: 'Test all workspace projects'
-      shell: bash
-      if: true
-      run: |
-        cargo test --all --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --all-targets --target x86_64-pc-windows-msvc -- --nocapture
-
-    - name: 'Generate skia-org example images'
-      shell: bash
-      if: false
-      run: |
-        cargo run --release --features "d3d,gl,svg,textlayout,ureq,vulkan,webp" --target x86_64-pc-windows-msvc "${{ env.SKIA_STAGING_PATH }}/skia-org" 
-
-    - name: 'Upload skia-org example images'
-      if: false
-      uses: actions/upload-artifact@v4.6.0
-      with:
-        name: skia-org-images-x86_64-pc-windows-msvc
+        name: skia-org-images-${{ matrix.target }}
         path: ${{ env.SKIA_STAGING_PATH }}/skia-org
 
     - name: 'Compress binaries'

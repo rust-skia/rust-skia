@@ -1,4 +1,4 @@
-//! This program builds the github workflow files for the rust-skia project.
+//! This program generates the github workflows for the rust-skia project.
 
 // Allow uppercase acronyms like QA and MacOS.
 #![allow(clippy::upper_case_acronyms)]
@@ -13,6 +13,7 @@ mod target;
 const QA_WORKFLOW: &str = include_str!("templates/qa-workflow.yaml");
 const RELEASE_WORKFLOW: &str = include_str!("templates/release-workflow.yaml");
 const LINUX_JOB: &str = include_str!("templates/linux-job.yaml");
+const WASM_JOB: &str = include_str!("templates/wasm-job.yaml");
 const WINDOWS_JOB: &str = include_str!("templates/windows-job.yaml");
 const WINDOWS_ARM_JOB: &str = include_str!("templates/windows-arm-job.yaml");
 const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
@@ -64,6 +65,7 @@ enum HostOS {
     WindowsArm,
     Linux,
     MacOS,
+    Wasm,
 }
 
 impl fmt::Display for HostOS {
@@ -74,7 +76,22 @@ impl fmt::Display for HostOS {
             WindowsArm => "windows-arm",
             Linux => "linux",
             MacOS => "macos",
+            Wasm => "wasm",
         })
+    }
+}
+
+/// Specifies how features are determined for a job.
+pub enum JobFeatures {
+    /// Features are specified directly and combined with target platform features.
+    Direct(Features),
+    /// Features come from a GitHub Actions matrix variable.
+    Matrix(Vec<Features>),
+}
+
+impl Default for JobFeatures {
+    fn default() -> Self {
+        JobFeatures::Direct(Features::default())
     }
 }
 
@@ -82,7 +99,7 @@ impl fmt::Display for HostOS {
 pub struct Job {
     name: String,
     toolchain: &'static str,
-    features: Features,
+    features: JobFeatures,
     skia_debug: bool,
     // we may need to disable clippy for beta builds temporarily.
     disable_clippy: bool,
@@ -93,7 +110,10 @@ impl fmt::Display for Job {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.name.fmt(f)?;
         f.write_str(", features: ")?;
-        self.features.fmt(f)
+        match &self.features {
+            JobFeatures::Direct(features) => features.fmt(f),
+            JobFeatures::Matrix(features) => write!(f, "matrix({} variants)", features.len()),
+        }
     }
 }
 
@@ -124,13 +144,8 @@ fn build_workflow(workflow: &Workflow, jobs: &[Job]) {
             parts.push(job_header);
         }
 
-        let targets: Vec<String> = targets
-            .iter()
-            .filter_map(|t| build_target(workflow, job, t))
-            .map(|rendered| rendered.indented(2))
-            .collect();
-
-        parts.extend(targets);
+        let generic_steps = render_generic_steps(workflow, job).indented(2);
+        parts.push(generic_steps);
     }
 
     // some parts won't end with \n, so be safe and join them with a newline.
@@ -170,7 +185,97 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         ))
     }
 
-    render_template(template, &replacements)
+    let mut rendered = render_template(template, &replacements);
+
+    let mut matrix_lines = Vec::new();
+    matrix_lines.push("strategy:".to_string());
+    matrix_lines.push("  fail-fast: false".to_string());
+    matrix_lines.push("  matrix:".to_string());
+
+    if let JobFeatures::Matrix(features) = &job.features {
+        matrix_lines.push(format!(
+            "    features: {:?}",
+            features.iter().map(|f| f.to_string()).collect::<Vec<_>>()
+        ));
+    }
+
+    let target_names: Vec<String> = targets.iter().map(|t| t.target.to_string()).collect();
+    matrix_lines.push(format!("    target: {:?}", target_names));
+
+    matrix_lines.push("    include:".to_string());
+    for target in targets {
+        let android_env = target.android_env();
+        let emscripten_env = target.emscripten_env();
+        let native_target = workflow.host_target == target.target.to_string();
+        let run_clippy = native_target && !job.disable_clippy && !emscripten_env;
+        let run_tests = native_target && !emscripten_env;
+        let example_args = if native_target {
+            job.example_args.clone()
+        } else {
+            None
+        }
+        .unwrap_or_default();
+        let generate_artifacts = !example_args.is_empty();
+
+        matrix_lines.push(format!("      - target: {}", target.target));
+        matrix_lines.push(format!("        androidEnv: {}", android_env));
+        matrix_lines.push(format!("        emscriptenEnv: {}", emscripten_env));
+        matrix_lines.push(format!("        runClippy: {}", run_clippy));
+        matrix_lines.push(format!("        runTests: {}", run_tests));
+        matrix_lines.push(format!("        exampleArgs: '{}'", example_args));
+        matrix_lines.push(format!("        generateArtifacts: {}", generate_artifacts));
+        if let JobFeatures::Direct(features) = &job.features {
+            let effective_features = effective_features(workflow, features, target).to_string();
+            matrix_lines.push(format!("        features: '{}'", effective_features));
+        }
+    }
+
+    if let JobFeatures::Matrix(features_list) = &job.features {
+        let mut excludes = Vec::new();
+        for features in features_list {
+            for target in targets {
+                let mut disabled = false;
+                for f in &features.0 {
+                    if target.disabled_features.contains(f) {
+                        disabled = true;
+                        break;
+                    }
+                }
+                if disabled {
+                    excludes.push((target.target.to_string(), features.clone()));
+                }
+            }
+        }
+
+        if !excludes.is_empty() {
+            matrix_lines.push("    exclude:".to_string());
+            for (t, f) in excludes {
+                matrix_lines.push(format!("      - target: {}", t));
+                matrix_lines.push(format!("        features: '{}'", f));
+            }
+        }
+
+        // Add macosxDeploymentTarget includes for macOS matrix workflows
+        if matches!(workflow.host_os, HostOS::MacOS) {
+            for feature in features_list {
+                let deployment_target = if feature.contains("metal") {
+                    "10.14"
+                } else {
+                    "10.13"
+                };
+                matrix_lines.push(format!("      - features: '{}'", feature));
+                matrix_lines.push(format!(
+                    "        macosxDeploymentTarget: '{}'",
+                    deployment_target
+                ));
+            }
+        }
+    }
+
+    let strategy = matrix_lines.join("\n");
+    rendered = format!("{}\n{}", strategy, rendered);
+
+    rendered
 }
 
 fn macosx_deployment_target(
@@ -180,52 +285,45 @@ fn macosx_deployment_target(
 ) -> Option<&'static str> {
     if let HostOS::MacOS = workflow.host_os {
         let metal = "metal".to_owned();
-        if targets
-            .iter()
-            .any(|target| effective_features(workflow, job, target).contains(&metal))
-        {
-            return Some("10.14");
-        } else {
-            return Some("10.13");
+        match &job.features {
+            JobFeatures::Direct(features) => {
+                let uses_metal = targets
+                    .iter()
+                    .any(|target| effective_features(workflow, features, target).contains(&metal));
+                if uses_metal {
+                    return Some("10.14");
+                } else {
+                    return Some("10.13");
+                }
+            }
+            JobFeatures::Matrix(_) => {
+                // Deployment target is set via matrix includes
+                return Some("${{ matrix.macosxDeploymentTarget }}");
+            }
         }
     }
     None
 }
 
-fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> Option<String> {
-    let features = effective_features(workflow, job, target);
-    println!("Building: {workflow}, job: `{job}`, target `{target}` with effective features `{features}`");
-    if workflow.kind == WorkflowKind::Release && features != job.features {
-        println!(
-            ">>> Effective feature set `{features}` of a release workflow, does not match job features: `{}`, skipping.",
-            job.features
-        );
-        return None;
-    }
-
-    let native_target = workflow.host_target == target.target.to_string();
-    let example_args = if native_target {
-        job.example_args.clone()
-    } else {
-        None
-    }
-    .unwrap_or_default();
-    let generate_artifacts = !example_args.is_empty();
-    let run_clippy = native_target && !job.disable_clippy;
+fn render_generic_steps(workflow: &Workflow, _job: &Job) -> String {
     let release_binaries = workflow.kind == WorkflowKind::Release;
 
-    let template_arguments: &[(&'static str, &dyn fmt::Display)] = &[
-        ("target", &target.target),
-        ("androidEnv", &target.android_env()),
-        ("emscriptenEnv", &target.emscripten_env()),
-        ("androidAPILevel", &config::DEFAULT_ANDROID_API_LEVEL),
-        ("features", &features),
-        ("runTests", &native_target),
-        ("runClippy", &run_clippy),
-        ("exampleArgs", &example_args),
-        ("generateArtifacts", &generate_artifacts),
-        ("releaseBinaries", &release_binaries),
-        ("hostBinExt", &workflow.host_bin_ext),
+    let template_arguments: &[(&'static str, &str)] = &[
+        ("target", "${{ matrix.target }}"),
+        ("androidEnv", "${{ matrix.androidEnv }}"),
+        ("emscriptenEnv", "${{ matrix.emscriptenEnv }}"),
+        (
+            "androidAPILevel",
+            &config::DEFAULT_ANDROID_API_LEVEL.to_string(),
+        ),
+        ("features", "${{ matrix.features }}"),
+        ("runTests", "${{ matrix.runTests }}"),
+        ("runClippy", "${{ matrix.runClippy }}"),
+        ("exampleArgs", "${{ matrix.exampleArgs }}"),
+        ("generateArtifacts", "${{ matrix.generateArtifacts }}"),
+        ("releaseBinaries", &release_binaries.to_string()),
+        ("hostBinExt", workflow.host_bin_ext),
+        ("stepIf", "true"),
     ];
 
     let replacements: Vec<(String, String)> = template_arguments
@@ -233,11 +331,11 @@ fn build_target(workflow: &Workflow, job: &Job, target: &TargetConf) -> Option<S
         .map(|(name, value)| (name.to_string(), value.to_string()))
         .collect();
 
-    Some(render_template(TARGET_TEMPLATE, &replacements))
+    render_template(TARGET_TEMPLATE, &replacements)
 }
 
-fn effective_features(workflow: &Workflow, job: &Job, target: &TargetConf) -> Features {
-    let mut features = job.features.clone();
+fn effective_features(workflow: &Workflow, features: &Features, target: &TargetConf) -> Features {
+    let mut features = features.clone();
     // if we are releasing binaries, we want the exact set of features specified.
     if workflow.kind == WorkflowKind::QA {
         features = features.join(&target.platform_features);
@@ -298,8 +396,8 @@ impl TargetConf {
     }
 }
 
-#[derive(Clone, Default, Debug, PartialEq, Eq)]
-struct Features(HashSet<String>);
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Features(HashSet<String>);
 
 impl Features {
     #[must_use]
@@ -329,6 +427,21 @@ impl Features {
 impl fmt::Display for Features {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.name(","))
+    }
+}
+
+impl Ord for Features {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0
+            .len()
+            .cmp(&other.0.len())
+            .then_with(|| self.name(",").cmp(&other.name(",")))
+    }
+}
+
+impl PartialOrd for Features {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 

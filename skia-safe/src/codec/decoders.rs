@@ -68,7 +68,7 @@ pub mod png_decoder {
     }
 }
 
-#[cfg(false)]
+#[cfg(any())]
 pub mod png_rust_decoder {
     use std::{io, result};
 
