@@ -1,6 +1,6 @@
 use crate::{
-    HostOS, Job, JobFeatures, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB, WASM_JOB,
-    WINDOWS_ARM_JOB, WINDOWS_JOB,
+    Features, HostOS, Job, JobFeatures, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB,
+    WASM_JOB, WINDOWS_ARM_JOB, WINDOWS_JOB,
 };
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
@@ -94,7 +94,7 @@ pub fn qa_jobs(workflow: &Workflow) -> Vec<Job> {
 
 /// Jobs for releasing prebuilt binaries.
 pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
-    let mut features: Vec<String> = if workflow.host_os == HostOS::Wasm {
+    let mut features: Vec<Features> = if workflow.host_os == HostOS::Wasm {
         // WASM: Only features that work (no vulkan, ureq, x11, wayland)
         vec![
             "".into(),
@@ -113,7 +113,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
             "gl,vulkan,textlayout",
         ]
         .iter()
-        .map(|s| s.to_string())
+        .map(|s| (*s).into())
         .collect()
     };
 
@@ -163,7 +163,7 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
 
 /// Specific binary releases for the Freya GUI library <https://github.com/marc2332/freya>
 /// <https://github.com/rust-skia/rust-skia/issues/706>
-fn freya_release_features(workflow: &Workflow) -> Vec<String> {
+fn freya_release_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::Windows | HostOS::MacOS => {
             vec!["gl,textlayout,svg".into()]
@@ -183,7 +183,7 @@ fn freya_release_features(workflow: &Workflow) -> Vec<String> {
 
 /// Specific binary releases for the Vizia GUI library <https://github.com/vizia/vizia>
 /// <https://github.com/rust-skia/rust-skia/discussions/961#discussioncomment-10485430>
-fn vizia_release_features(workflow: &Workflow) -> Vec<String> {
+fn vizia_release_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::MacOS => {
             vec!["gl,vulkan,textlayout,svg".into()]
@@ -204,7 +204,7 @@ fn vizia_release_features(workflow: &Workflow) -> Vec<String> {
 
 // Binaries for Skia Canvas: <https://github.com/samizdatco/skia-canvas>
 // <https://github.com/rust-skia/rust-skia/pull/1068#issuecomment-2518894492>
-fn skia_canvas_release_features(workflow: &Workflow) -> Vec<String> {
+fn skia_canvas_release_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::MacOS => {
             vec![
@@ -228,7 +228,7 @@ fn skia_canvas_release_features(workflow: &Workflow) -> Vec<String> {
 }
 
 // <https://github.com/rust-skia/rust-skia/issues/1205>
-fn grida_canvas_release_features(workflow: &Workflow) -> Vec<String> {
+fn grida_canvas_release_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::Wasm => {
             vec!["gl,textlayout,svg,webp".into()]
@@ -275,9 +275,9 @@ fn linux_aarch64_targets() -> Vec<TargetConf> {
 
 fn android_targets() -> Vec<TargetConf> {
     [
-        TargetConf::new("aarch64-linux-android", ""),
-        TargetConf::new("x86_64-linux-android", ""),
-        TargetConf::new("i686-linux-android", ""),
+        TargetConf::new("aarch64-linux-android", "").disable("egl,x11,wayland"),
+        TargetConf::new("x86_64-linux-android", "").disable("egl,x11,wayland"),
+        TargetConf::new("i686-linux-android", "").disable("egl,x11,wayland"),
     ]
     .into()
 }

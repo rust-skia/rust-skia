@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features: ["", "gl", "gl,textlayout", "gl,textlayout,svg", "gl,vulkan,textlayout", "gl,vulkan,textlayout,svg", "metal", "metal,gl,textlayout", "metal,textlayout", "metal,textlayout,webp,svg", "textlayout", "textlayout,webp,svg", "vulkan", "vulkan,textlayout"]
+        features: ["", "gl", "metal", "textlayout", "vulkan", "gl,textlayout", "metal,textlayout", "textlayout,vulkan", "gl,metal,textlayout", "gl,svg,textlayout", "gl,textlayout,vulkan", "svg,textlayout,webp", "gl,svg,textlayout,vulkan", "metal,svg,textlayout,webp"]
         target: ["aarch64-apple-darwin", "x86_64-apple-darwin", "aarch64-apple-ios", "aarch64-apple-ios-sim", "x86_64-apple-ios"]
         include:
           - target: aarch64-apple-darwin
@@ -57,30 +57,30 @@ jobs:
             macosxDeploymentTarget: '10.13'
           - features: 'gl'
             macosxDeploymentTarget: '10.13'
-          - features: 'gl,textlayout'
-            macosxDeploymentTarget: '10.13'
-          - features: 'gl,textlayout,svg'
-            macosxDeploymentTarget: '10.13'
-          - features: 'gl,vulkan,textlayout'
-            macosxDeploymentTarget: '10.13'
-          - features: 'gl,vulkan,textlayout,svg'
-            macosxDeploymentTarget: '10.13'
           - features: 'metal'
-            macosxDeploymentTarget: '10.14'
-          - features: 'metal,gl,textlayout'
-            macosxDeploymentTarget: '10.14'
-          - features: 'metal,textlayout'
-            macosxDeploymentTarget: '10.14'
-          - features: 'metal,textlayout,webp,svg'
             macosxDeploymentTarget: '10.14'
           - features: 'textlayout'
             macosxDeploymentTarget: '10.13'
-          - features: 'textlayout,webp,svg'
-            macosxDeploymentTarget: '10.13'
           - features: 'vulkan'
             macosxDeploymentTarget: '10.13'
-          - features: 'vulkan,textlayout'
+          - features: 'gl,textlayout'
             macosxDeploymentTarget: '10.13'
+          - features: 'metal,textlayout'
+            macosxDeploymentTarget: '10.14'
+          - features: 'textlayout,vulkan'
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl,metal,textlayout'
+            macosxDeploymentTarget: '10.14'
+          - features: 'gl,svg,textlayout'
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl,textlayout,vulkan'
+            macosxDeploymentTarget: '10.13'
+          - features: 'svg,textlayout,webp'
+            macosxDeploymentTarget: '10.13'
+          - features: 'gl,svg,textlayout,vulkan'
+            macosxDeploymentTarget: '10.13'
+          - features: 'metal,svg,textlayout,webp'
+            macosxDeploymentTarget: '10.14'
     runs-on: macos-14
     env:
       SKIA_DEBUG: 0

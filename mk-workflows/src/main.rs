@@ -89,7 +89,7 @@ pub enum JobFeatures {
     /// Features are specified directly and combined with target platform features.
     Direct(Features),
     /// Features come from a GitHub Actions matrix variable.
-    Matrix(Vec<String>),
+    Matrix(Vec<Features>),
 }
 
 impl Default for JobFeatures {
@@ -196,7 +196,10 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
     matrix_lines.push("  matrix:".to_string());
 
     if let JobFeatures::Matrix(features) = &job.features {
-        matrix_lines.push(format!("    features: {:?}", features));
+        matrix_lines.push(format!(
+            "    features: {:?}",
+            features.iter().map(|f| f.to_string()).collect::<Vec<_>>()
+        ));
     }
 
     let target_names: Vec<String> = targets.iter().map(|t| t.target.to_string()).collect();
@@ -217,13 +220,6 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         .unwrap_or_default();
         let generate_artifacts = !example_args.is_empty();
 
-        let features_val = match &job.features {
-            JobFeatures::Direct(features) => {
-                effective_features(workflow, features, target).to_string()
-            }
-            JobFeatures::Matrix(_) => String::new(),
-        };
-
         matrix_lines.push(format!("      - target: {}", target.target));
         matrix_lines.push(format!("        androidEnv: {}", android_env));
         matrix_lines.push(format!("        emscriptenEnv: {}", emscripten_env));
@@ -231,15 +227,15 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         matrix_lines.push(format!("        runTests: {}", run_tests));
         matrix_lines.push(format!("        exampleArgs: '{}'", example_args));
         matrix_lines.push(format!("        generateArtifacts: {}", generate_artifacts));
-        if matches!(&job.features, JobFeatures::Direct(_)) {
-            matrix_lines.push(format!("        features: '{}'", features_val));
+        if let JobFeatures::Direct(features) = &job.features {
+            let effective_features = effective_features(workflow, features, target).to_string();
+            matrix_lines.push(format!("        features: '{}'", effective_features));
         }
     }
 
     if let JobFeatures::Matrix(features_list) = &job.features {
         let mut excludes = Vec::new();
-        for feature_str in features_list {
-            let features = Features::from(feature_str.as_str());
+        for features in features_list {
             for target in targets {
                 let mut disabled = false;
                 for f in &features.0 {
@@ -249,7 +245,7 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
                     }
                 }
                 if disabled {
-                    excludes.push((target.target.to_string(), feature_str.clone()));
+                    excludes.push((target.target.to_string(), features.clone()));
                 }
             }
         }
@@ -264,13 +260,13 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
 
         // Add macosxDeploymentTarget includes for macOS matrix workflows
         if matches!(workflow.host_os, HostOS::MacOS) {
-            for feature_str in features_list {
-                let deployment_target = if feature_str.contains("metal") {
+            for feature in features_list {
+                let deployment_target = if feature.contains("metal") {
                     "10.14"
                 } else {
                     "10.13"
                 };
-                matrix_lines.push(format!("      - features: '{}'", feature_str));
+                matrix_lines.push(format!("      - features: '{}'", feature));
                 matrix_lines.push(format!(
                     "        macosxDeploymentTarget: '{}'",
                     deployment_target
@@ -403,7 +399,7 @@ impl TargetConf {
     }
 }
 
-#[derive(Clone, Default, Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Features(HashSet<String>);
 
 impl Features {
@@ -434,6 +430,21 @@ impl Features {
 impl fmt::Display for Features {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.name(","))
+    }
+}
+
+impl Ord for Features {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0
+            .len()
+            .cmp(&other.0.len())
+            .then_with(|| self.name(",").cmp(&other.name(",")))
+    }
+}
+
+impl PartialOrd for Features {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 

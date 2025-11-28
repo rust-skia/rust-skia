@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features: ["", "gl", "gl,textlayout", "gl,textlayout,svg,webp", "textlayout"]
+        features: ["", "gl", "textlayout", "gl,textlayout", "gl,svg,textlayout,webp"]
         target: ["wasm32-unknown-emscripten"]
         include:
           - target: wasm32-unknown-emscripten
