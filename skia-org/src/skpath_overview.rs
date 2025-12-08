@@ -75,7 +75,7 @@ fn draw_example4(canvas: &Canvas) {
         .set_stroke_width(8.0);
     let mut path = PathBuilder::new();
     path.move_to((36, 48)).quad_to((66, 88), (120, 36));
-    canvas.draw_path(&path.detach(), &paint);
+    canvas.draw_path(&path.snapshot(), &paint);
     path.close();
     canvas.translate((0, 50));
     canvas.draw_path(&path.detach(), &paint);
