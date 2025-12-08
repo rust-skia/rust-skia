@@ -2480,7 +2480,7 @@ extern "C" void C_SkImageGenerator_delete(SkImageGenerator *self) {
     delete self;
 }
 
-extern "C" SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
+extern "C" const SkData *C_SkImageGenerator_refEncodedData(SkImageGenerator *self) {
     return self->refEncodedData().release();
 }
 
