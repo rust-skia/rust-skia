@@ -194,7 +194,7 @@ pub trait NativeHash {
 #[repr(transparent)]
 pub struct Handle<N: NativeDrop>(
     // UnsafeCell is used for disabling niche optimization, because we don't care about the proper
-    // representations of bindgen types as long the size and alighment matches.
+    // representations of bindgen types as long the size and alignment matches.
     UnsafeCell<N>,
     // `*const` is needed to prevent automatic Send implementation, which happens when the
     // native type is Send.
@@ -507,6 +507,11 @@ impl<N: NativeRefCounted> RCHandle<N> {
     #[inline]
     pub(crate) fn from_ptr(ptr: *mut N) -> Option<Self> {
         ptr::NonNull::new(ptr).map(Self)
+    }
+
+    #[inline]
+    pub(crate) fn from_ptr_const(ptr: *const N) -> Option<Self> {
+        ptr::NonNull::new(ptr as *mut N).map(Self)
     }
 
     /// Creates an reference counted handle from a pointer.

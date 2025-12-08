@@ -27,7 +27,7 @@ impl ImageGenerator {
     }
 
     pub fn encoded_data(&mut self) -> Option<Data> {
-        Data::from_ptr(unsafe { sb::C_SkImageGenerator_refEncodedData(self.native_mut()) })
+        Data::from_ptr_const(unsafe { sb::C_SkImageGenerator_refEncodedData(self.native_mut()) })
     }
 
     pub fn info(&self) -> &ImageInfo {
