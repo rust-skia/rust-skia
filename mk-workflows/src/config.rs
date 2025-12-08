@@ -1,6 +1,6 @@
 use crate::{
-    Features, HostOS, Job, JobFeatures, TargetConf, Workflow, WorkflowKind, LINUX_JOB, MACOS_JOB,
-    WASM_JOB, WINDOWS_ARM_JOB, WINDOWS_JOB,
+    Features, HostOS, Job, JobFeatures, JobName, TargetConf, Workflow, WorkflowKind, LINUX_JOB,
+    MACOS_JOB, WASM_JOB, WINDOWS_ARM_JOB, WINDOWS_JOB,
 };
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;
@@ -56,7 +56,7 @@ pub fn workflows() -> Vec<Workflow> {
 pub fn jobs(workflow: &Workflow) -> Vec<Job> {
     match workflow.kind {
         WorkflowKind::QA => qa_jobs(workflow),
-        WorkflowKind::Release => release_jobs(workflow),
+        WorkflowKind::Release => binaries_jobs(workflow),
     }
 }
 
@@ -65,27 +65,30 @@ pub fn qa_jobs(workflow: &Workflow) -> Vec<Job> {
         HostOS::Wasm => {
             // WASM QA: Use features that work with WASM (no vulkan, ureq)
             vec![Job {
-                name: "stable-all-features".into(),
+                name: JobName::Named("stable-all-features".into()),
                 toolchain: "stable",
                 features: JobFeatures::Direct("gl,textlayout,svg,webp".into()),
-                ..Job::default()
+                skia_debug: false,
+                disable_clippy: false,
+                example_args: None,
             }]
         }
         _ => {
             const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp";
             vec![Job {
-                name: "stable-all-features".into(),
+                name: JobName::Named("stable-all-features".into()),
                 toolchain: "stable",
                 features: JobFeatures::Direct(QA_ALL_FEATURES.into()),
+                skia_debug: false,
+                disable_clippy: false,
                 example_args: Some("--driver cpu --driver pdf --driver svg".into()),
-                ..Job::default()
             }]
         }
     }
 }
 
-/// Jobs for releasing prebuilt binaries.
-pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
+/// Jobs for building prebuilt binaries.
+pub fn binaries_jobs(workflow: &Workflow) -> Vec<Job> {
     let mut features: Vec<Features> = if workflow.host_os == HostOS::Wasm {
         // WASM: Only features that work (no vulkan, ureq, x11, wayland)
         vec![
@@ -137,25 +140,27 @@ pub fn release_jobs(workflow: &Workflow) -> Vec<Job> {
         }
     }
 
-    features.extend(freya_release_features(workflow));
-    features.extend(vizia_release_features(workflow));
-    features.extend(skia_canvas_release_features(workflow));
-    features.extend(grida_canvas_release_features(workflow));
+    features.extend(freya_binaries_features(workflow));
+    features.extend(vizia_binaries_features(workflow));
+    features.extend(skia_canvas_binaries_features(workflow));
+    features.extend(grida_canvas_binaries_features(workflow));
 
     features.sort();
     features.dedup();
 
     vec![Job {
-        name: "release".into(),
+        name: JobName::Binaries,
         toolchain: "stable",
         features: JobFeatures::Matrix(features),
-        ..Job::default()
+        skia_debug: false,
+        disable_clippy: false,
+        example_args: None,
     }]
 }
 
 /// Specific binary releases for the Freya GUI library <https://github.com/marc2332/freya>
 /// <https://github.com/rust-skia/rust-skia/issues/706>
-fn freya_release_features(workflow: &Workflow) -> Vec<Features> {
+fn freya_binaries_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::Windows | HostOS::MacOS => {
             vec!["gl,textlayout,svg".into()]
@@ -175,7 +180,7 @@ fn freya_release_features(workflow: &Workflow) -> Vec<Features> {
 
 /// Specific binary releases for the Vizia GUI library <https://github.com/vizia/vizia>
 /// <https://github.com/rust-skia/rust-skia/discussions/961#discussioncomment-10485430>
-fn vizia_release_features(workflow: &Workflow) -> Vec<Features> {
+fn vizia_binaries_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::MacOS => {
             vec!["gl,vulkan,textlayout,svg".into()]
@@ -196,7 +201,7 @@ fn vizia_release_features(workflow: &Workflow) -> Vec<Features> {
 
 // Binaries for Skia Canvas: <https://github.com/samizdatco/skia-canvas>
 // <https://github.com/rust-skia/rust-skia/pull/1068#issuecomment-2518894492>
-fn skia_canvas_release_features(workflow: &Workflow) -> Vec<Features> {
+fn skia_canvas_binaries_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::MacOS => {
             vec![
@@ -220,7 +225,7 @@ fn skia_canvas_release_features(workflow: &Workflow) -> Vec<Features> {
 }
 
 // <https://github.com/rust-skia/rust-skia/issues/1205>
-fn grida_canvas_release_features(workflow: &Workflow) -> Vec<Features> {
+fn grida_canvas_binaries_features(workflow: &Workflow) -> Vec<Features> {
     match workflow.host_os {
         HostOS::Wasm => {
             vec!["gl,textlayout,svg,webp".into()]
