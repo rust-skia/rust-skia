@@ -226,7 +226,11 @@ impl YUVAInfo {
     }
 
     pub fn origin_matrix(&self) -> Matrix {
-        self.origin().to_matrix((self.width(), self.height()))
+        self.origin().to_matrix(self.dimensions())
+    }
+
+    pub fn inverse_origin_matrix(&self) -> Matrix {
+        self.origin().to_matrix_inverse(self.dimensions())
     }
 
     pub fn has_alpha(&self) -> bool {

@@ -2376,6 +2376,7 @@ pub mod lattice {
     variant_name!(RectType::FixedColor);
 }
 
+#[must_use]
 #[derive(Debug)]
 /// Stack helper class calls [`Canvas::restore_to_count()`] when [`AutoCanvasRestore`]
 /// goes out of scope. Use this to guarantee that the canvas is restored to a known
