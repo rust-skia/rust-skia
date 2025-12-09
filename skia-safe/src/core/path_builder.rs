@@ -386,7 +386,7 @@ impl PathBuilder {
     ///
     /// # Returns
     /// reference to [`PathBuilder`]
-    pub fn r_move_to(&mut self, pt: impl Into<Point>) -> &mut Self {
+    pub fn r_move_to(&mut self, pt: impl Into<Vector>) -> &mut Self {
         unsafe {
             self.native_mut().rMoveTo(pt.into().into_native());
         }
@@ -405,7 +405,7 @@ impl PathBuilder {
     ///
     /// # Returns
     /// reference to [`PathBuilder`]
-    pub fn r_line_to(&mut self, pt: impl Into<Point>) -> &mut Self {
+    pub fn r_line_to(&mut self, pt: impl Into<Vector>) -> &mut Self {
         unsafe {
             self.native_mut().rLineTo(pt.into().into_native());
         }
@@ -428,7 +428,7 @@ impl PathBuilder {
     ///
     /// # Returns
     /// reference to [`PathBuilder`]
-    pub fn r_quad_to(&mut self, pt1: impl Into<Point>, pt2: impl Into<Point>) -> &mut Self {
+    pub fn r_quad_to(&mut self, pt1: impl Into<Vector>, pt2: impl Into<Vector>) -> &mut Self {
         unsafe {
             self.native_mut()
                 .rQuadTo(pt1.into().into_native(), pt2.into().into_native());
@@ -462,8 +462,8 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn r_conic_to(
         &mut self,
-        pt1: impl Into<Point>,
-        pt2: impl Into<Point>,
+        pt1: impl Into<Vector>,
+        pt2: impl Into<Vector>,
         w: scalar,
     ) -> &mut Self {
         unsafe {
@@ -493,9 +493,9 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn r_cubic_to(
         &mut self,
-        pt1: impl Into<Point>,
-        pt2: impl Into<Point>,
-        pt3: impl Into<Point>,
+        pt1: impl Into<Vector>,
+        pt2: impl Into<Vector>,
+        pt3: impl Into<Vector>,
     ) -> &mut Self {
         unsafe {
             self.native_mut().rCubicTo(

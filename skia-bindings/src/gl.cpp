@@ -171,6 +171,14 @@ extern "C" void C_GrBackendFormats_ConstructGL(GrBackendFormat* uninitialized, G
     new (uninitialized) GrBackendFormat(GrBackendFormats::MakeGL(format, target));
 }
 
+extern "C" void C_GrBackendFormats_ConstructGLFormat(GrBackendFormat* uninitialized, GrGLenum format) {
+    new (uninitialized) GrBackendFormat(GrBackendFormats::MakeGL(format));
+}
+
+extern "C" void C_GrBackendFormats_ConstructGLExternal(GrBackendFormat* uninitialized) {
+    new (uninitialized) GrBackendFormat(GrBackendFormats::MakeGLExternal());
+}
+
 extern "C" GrGLFormat C_GrBackendFormats_AsGLFormat(const GrBackendFormat* format) {
     return GrBackendFormats::AsGLFormat(*format);
 }

@@ -293,6 +293,10 @@ extern "C" void C_SkEncodedOriginToMatrix(SkEncodedOrigin origin, int w, int h, 
     *matrix = SkEncodedOriginToMatrix(origin, w, h);
 }
 
+extern "C" void C_SkEncodedOriginToMatrixInverse(SkEncodedOrigin origin, int w, int h, SkMatrix* matrix) {
+    *matrix = SkEncodedOriginToMatrixInverse(origin, w, h);
+}
+
 //
 // codec/SkPixmapUtils.h
 //
