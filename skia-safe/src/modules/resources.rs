@@ -58,7 +58,7 @@ pub trait ResourceProvider {
 
     fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface>;
 
-    /// This is used in the SVG Dom and _should_ be used for ipmlementing load_typeface().
+    /// This is used in the SVG Dom and _should_ be used for implementing load_typeface().
     fn font_mgr(&self) -> FontMgr;
 }
 

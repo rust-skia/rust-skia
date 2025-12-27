@@ -102,6 +102,10 @@ pub enum ColorType {
     /// Single channel data (16 bits) interpreted as alpha. RGB are 0.
     /// Bits: [A:15..0]
     A16UNorm = SkColorType::kA16_unorm_SkColorType as _,
+    // Single channel data (16 bits) interpreted as red. G and B are forced to 0, alpha is forced to
+    // opaque.
+    //   Bits: [R:15..0]
+    R16UNorm = SkColorType::kR16_unorm_SkColorType as _,
     /// Two channel RG data (16 bits per channel) packed into a LE 32-bit word. B is forced to 0,
     /// alpha is forced to opaque.
     /// Bits: [G:31..16 R:15..0]

@@ -333,13 +333,11 @@ impl Shaper {
 }
 
 pub mod run_handler {
-    use crate::prelude::*;
-    use crate::{Font, GlyphId, Point, Vector};
-    use skia_bindings::{
-        SkShaper_RunHandler_Buffer, SkShaper_RunHandler_Range, SkShaper_RunHandler_RunInfo,
-    };
-    use std::ops::Range;
-    use std::slice;
+    use std::{ffi::CStr, ops::Range, slice};
+
+    use skia_bindings::{SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo};
+
+    use crate::{prelude::*, Font, FourByteTag, GlyphId, Point, Vector};
 
     pub trait RunHandler {
         fn begin_line(&mut self);
@@ -354,6 +352,8 @@ pub mod run_handler {
     pub struct RunInfo<'a> {
         pub font: &'a Font,
         pub bidi_level: u8,
+        pub script: FourByteTag,
+        pub language: Option<&'a str>,
         pub advance: Vector,
         pub glyph_count: usize,
         pub utf8_range: Range<usize>,
@@ -361,28 +361,21 @@ pub mod run_handler {
 
     impl RunInfo<'_> {
         pub(crate) fn from_native(ri: &SkShaper_RunHandler_RunInfo) -> Self {
-            // TODO: should we avoid that copy and wrap RunInfo with functions?
             let utf8_range = ri.utf8Range;
             RunInfo {
                 font: Font::from_native_ref(unsafe { &*ri.fFont }),
                 bidi_level: ri.fBidiLevel,
+                script: ri.fScript.into(),
+                language: unsafe {
+                    if ri.fLanguage.is_null() {
+                        None
+                    } else {
+                        CStr::from_ptr(ri.fLanguage).to_str().ok()
+                    }
+                },
                 advance: Vector::from_native_c(ri.fAdvance),
                 glyph_count: ri.glyphCount,
                 utf8_range: utf8_range.fBegin..utf8_range.fBegin + utf8_range.fSize,
-            }
-        }
-
-        #[allow(unused)]
-        pub(crate) fn to_native(&self) -> SkShaper_RunHandler_RunInfo {
-            SkShaper_RunHandler_RunInfo {
-                fFont: self.font.native(),
-                fBidiLevel: self.bidi_level,
-                fAdvance: self.advance.into_native(),
-                glyphCount: self.glyph_count,
-                utf8Range: SkShaper_RunHandler_Range {
-                    fBegin: self.utf8_range.start,
-                    fSize: self.utf8_range.end - self.utf8_range.start,
-                },
             }
         }
     }
