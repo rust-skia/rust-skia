@@ -48,7 +48,7 @@ mod mesh;
 mod milestone;
 pub mod paint;
 pub mod path;
-mod path_builder;
+pub mod path_builder;
 pub mod path_effect;
 mod path_iter;
 pub mod path_measure;
