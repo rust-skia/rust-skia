@@ -6,7 +6,7 @@ use crate::{
 };
 use skia_bindings::{self as sb, SkPathBuilder, SkPath_AddPathMode};
 
-pub use sb::SkPathBuilder_ArcSize as ArcSize;
+pub type ArcSize = sb::SkPathBuilder_ArcSize;
 variant_name!(ArcSize::Large);
 
 // PathBuilder can't be a Handle<>, because SkPathBuilder contains several STArrays with interior
@@ -1034,7 +1034,7 @@ impl PathBuilder {
     }
 }
 
-pub use skia_bindings::SkPathBuilder_DumpFormat as DumpFormat;
+pub type DumpFormat = skia_bindings::SkPathBuilder_DumpFormat;
 variant_name!(DumpFormat::Hex);
 
 impl PathBuilder {

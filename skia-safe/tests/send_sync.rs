@@ -103,6 +103,9 @@ mod core {
     assert_impl_all!(path::Verb: Send, Sync);
 
     assert_impl_all!(PathBuilder: Send, Sync);
+    assert_impl_all!(path_builder::ArcSize: Send, Sync);
+    assert_impl_all!(path_builder::DumpFormat: Send, Sync);
+
     assert_impl_all!(PathDirection: Send, Sync);
     assert_impl_all!(PathEffect: Send, Sync);
     assert_impl_all!(PathFillType: Send, Sync);
