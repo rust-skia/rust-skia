@@ -218,6 +218,12 @@ fn main() {
         window: Window,
     }
 
+    impl Drop for Env {
+        fn drop(&mut self) {
+            self.gr_context.release_resources_and_abandon();
+        }
+    }
+
     let env = Env {
         surface,
         gl_surface,
