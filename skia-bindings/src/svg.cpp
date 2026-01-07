@@ -53,6 +53,24 @@ extern "C" bool C_ImageAsset_isMultiFrame(skresources::ImageAsset* self) {
     return self->isMultiFrame();
 }
 
+extern "C" struct skresources::ImageAsset::FrameData C_ImageFrameData_Make(
+    const SkImage* image,
+    SkMatrix matrix,
+    SkSamplingOptions sampling,
+    skresources::ImageAsset::SizeFit scaling)
+{
+    skresources::ImageAsset::FrameData frameData;
+    
+    if (image) {
+        frameData.image = sk_ref_sp(image);
+        frameData.matrix = matrix;
+        frameData.sampling = sampling;
+        frameData.scaling = scaling;
+    }
+
+    return frameData;
+}
+
 extern "C" skresources::ImageAsset* C_MultiFrameImageAsset_Make(
     SkData* data, skresources::ImageDecodeStrategy decodeStrategy)
 {
@@ -68,6 +86,47 @@ namespace ResourceProvider {
         typedef SkTypeface *(*LoadTypeface)(TraitObject, const char name[], const char url[]);
         typedef SkFontMgr *(*FontMgr)(TraitObject);
     }
+}
+
+namespace ImageAsset {
+    extern "C" {
+        typedef void (*Drop)(TraitObject);
+        typedef bool (*IsMultiFrame)(TraitObject);
+        typedef skresources::ImageAsset::FrameData (*GetFrameData)(TraitObject, float t);
+    }
+}
+
+class RustImageAsset final : public skresources::ImageAsset {
+public:
+    struct Param {
+        TraitObject trait;
+        ::ImageAsset::Drop drop;
+        ::ImageAsset::IsMultiFrame isMultiFrame;
+        ::ImageAsset::GetFrameData getFrameData;
+    };
+
+    explicit RustImageAsset(const Param& param) 
+    : _param(param) 
+    { }
+
+    virtual ~RustImageAsset() {
+        _param.drop(_param.trait);
+    }
+
+    bool isMultiFrame() override {
+        return _param.isMultiFrame(_param.trait);
+    }
+
+    skresources::ImageAsset::FrameData getFrameData(float t) override {
+        return _param.getFrameData(_param.trait, t);
+    }
+
+private:
+    Param _param;
+};
+
+extern "C" RustImageAsset* C_RustImageAsset_New(const RustImageAsset::Param* param) {
+    return new RustImageAsset(*param);
 }
 
 class RustResourceProvider final : public skresources::ResourceProvider {
