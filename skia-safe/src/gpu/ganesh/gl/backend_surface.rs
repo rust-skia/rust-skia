@@ -7,7 +7,7 @@ pub mod backend_formats {
     };
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.92.0",
         note = "Prefer make_gl_format(format) for GL_TEXTURE_2D targets and make_gn_external() for GL_TEXTURE_EXTERNAL targets."
     )]
     pub fn make_gl(format: gl::Enum, target: gl::Enum) -> BackendFormat {
