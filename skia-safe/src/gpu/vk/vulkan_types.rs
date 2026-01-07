@@ -70,20 +70,19 @@ impl Alloc {
     }
 }
 
+// Robustness: All fields turned private in m144, so it's probably best to convert this to a Handle.
 #[derive(Copy, Clone, Eq, Debug)]
 #[repr(C)]
 pub struct YcbcrConversionInfo {
-    pub format: vk::Format,
-    pub external_format: u64,
-    pub ycbcr_model: vk::SamplerYcbcrModelConversion,
-    pub ycbcr_range: vk::SamplerYcbcrRange,
-    pub x_chroma_offset: vk::ChromaLocation,
-    pub y_chroma_offset: vk::ChromaLocation,
-    pub chroma_filter: vk::Filter,
-    pub force_explicit_reconstruction: vk::Bool32,
-    pub components: vk::ComponentMapping,
-    pub format_features: vk::FormatFeatureFlags,
-
+    format: vk::Format,
+    external_format: u64,
+    ycbcr_model: vk::SamplerYcbcrModelConversion,
+    ycbcr_range: vk::SamplerYcbcrRange,
+    x_chroma_offset: vk::ChromaLocation,
+    y_chroma_offset: vk::ChromaLocation,
+    chroma_filter: vk::Filter,
+    force_explicit_reconstruction: vk::Bool32,
+    components: vk::ComponentMapping,
     sampler_filter_must_match_chroma_filter: bool,
     supports_linear_filter: bool,
 }
@@ -113,7 +112,6 @@ impl Default for YcbcrConversionInfo {
                 b: vk::ComponentSwizzle::VK_COMPONENT_SWIZZLE_IDENTITY,
                 a: vk::ComponentSwizzle::VK_COMPONENT_SWIZZLE_IDENTITY,
             },
-            format_features: 0,
             sampler_filter_must_match_chroma_filter: true,
             supports_linear_filter: false,
         }
@@ -219,6 +217,10 @@ impl YcbcrConversionInfo {
 
     pub fn components(&self) -> vk::ComponentMapping {
         self.components
+    }
+
+    pub fn sampler_filter_must_match_chroma_filter(&self) -> bool {
+        self.sampler_filter_must_match_chroma_filter
     }
 
     pub fn supports_linear_filter(&self) -> bool {

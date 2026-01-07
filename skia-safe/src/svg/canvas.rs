@@ -28,9 +28,9 @@ impl Deref for Canvas {
 bitflags! {
     #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct Flags : u32 {
-        const CONVERT_TEXT_TO_PATHS = sb::SkSVGCanvas_kConvertTextToPaths_Flag as _;
-        const NO_PRETTY_XML = sb::SkSVGCanvas_kNoPrettyXML_Flag as _;
-        const RELATIVE_PATH_ENCODING = sb::SkSVGCanvas_kRelativePathEncoding_Flag as _;
+        const CONVERT_TEXT_TO_PATHS = sb::SkSVGCanvas_Flags_kConvertTextToPaths_Flag as _;
+        const NO_PRETTY_XML = sb::SkSVGCanvas_Flags_kNoPrettyXML_Flag as _;
+        const RELATIVE_PATH_ENCODING = sb::SkSVGCanvas_Flags_kRelativePathEncoding_Flag as _;
     }
 }
 

@@ -6,11 +6,27 @@ pub mod backend_formats {
         prelude::*,
     };
 
+    #[deprecated(
+        since = "0.92.0",
+        note = "Prefer make_gl_format(format) for GL_TEXTURE_2D targets and make_gn_external() for GL_TEXTURE_EXTERNAL targets."
+    )]
     pub fn make_gl(format: gl::Enum, target: gl::Enum) -> BackendFormat {
         BackendFormat::construct(|bf| unsafe {
             sb::C_GrBackendFormats_ConstructGL(bf, format, target)
         })
         .assert_valid()
+    }
+
+    pub fn make_gl_format(format: gl::Enum) -> BackendFormat {
+        BackendFormat::construct(|bf| unsafe {
+            sb::C_GrBackendFormats_ConstructGLFormat(bf, format)
+        })
+        .assert_valid()
+    }
+
+    pub fn make_gl_external() -> BackendFormat {
+        BackendFormat::construct(|bf| unsafe { sb::C_GrBackendFormats_ConstructGLExternal(bf) })
+            .assert_valid()
     }
 
     pub fn as_gl_format(format: &BackendFormat) -> gl::Format {

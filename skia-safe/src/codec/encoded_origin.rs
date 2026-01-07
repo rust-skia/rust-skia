@@ -51,6 +51,20 @@ impl EncodedOrigin {
         m
     }
 
+    pub fn to_matrix_inverse(self, size: impl Into<ISize>) -> Matrix {
+        let size = size.into();
+        let mut m = Matrix::default();
+        unsafe {
+            sb::C_SkEncodedOriginToMatrixInverse(
+                self.into_native(),
+                size.width,
+                size.height,
+                m.native_mut(),
+            )
+        };
+        m
+    }
+
     /// Return `true` if the encoded origin includes a 90 degree rotation, in which case the width
     /// and height of the source data are swapped relative to a correctly oriented destination.
     pub fn swaps_width_height(self) -> bool {
