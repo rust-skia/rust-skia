@@ -46,7 +46,7 @@ sparkle = { version = "0.1.25", optional = true }
 clap = { version = "4.0.7", features = ["derive"] }
 ash = { version = "0.38.0", optional = true }
 # need to rename the package because of the feature with the same name.
-metal = { package = "metal", version = "0.32.0", optional = true }
+metal = { package = "metal", version = "0.33.0", optional = true }
 # ... to access raw metal ptrs.
 foreign-types-shared = { version = "0.3.1", optional = true }
 # ... for that NSAutoReleasePool to be able to free metal devices.
