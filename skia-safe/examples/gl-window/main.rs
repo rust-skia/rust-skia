@@ -218,6 +218,15 @@ fn main() {
         window: Window,
     }
 
+    impl Drop for Env {
+        fn drop(&mut self) {
+            // This fixes a segmentation fault on AMD GPUs, see
+            // <https://github.com/rust-skia/rust-skia/pull/1235> and
+            // <https://github.com/marc2332/freya/issues/347> for more details.
+            self.gr_context.release_resources_and_abandon();
+        }
+    }
+
     let env = Env {
         surface,
         gl_surface,
