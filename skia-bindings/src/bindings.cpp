@@ -93,6 +93,7 @@
 #include "include/effects/SkCornerPathEffect.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkDiscretePathEffect.h"
+#include "include/effects/SkGradient.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkHighContrastFilter.h"
 #include "include/effects/SkImageFilters.h"
@@ -484,7 +485,7 @@ extern "C" SkImage* C_SkImage_makeScaled(const SkImage* self, const SkImageInfo*
     return self->makeScaled(*info, *sampling).release();
 }
 
-extern "C" SkData* C_SkImage_refEncodedData(const SkImage* self) {
+extern "C" const SkData* C_SkImage_refEncodedData(const SkImage* self) {
     return self->refEncodedData().release();
 }
 
@@ -2906,40 +2907,133 @@ extern "C" SkBlender* C_SkBlenders_Arithmetic(float k1, float k2, float k3, floa
 }
 
 //
-// effects/SkGradientShader.h
+// effects/SkGradient.h
 //
 
-extern "C" void C_SkGradientShader_Types(SkGradientShader *) {}
-extern "C" SkShader* C_SkGradientShader_MakeLinear(const SkPoint pts[2], const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeLinear(pts, colors, pos, count, mode, flags, localMatrix).release();
+//
+// SkGradient constructors
+//
+
+extern "C" void C_SkGradient_Construct(
+    SkGradient* uninitialized,
+    const SkColor4f* colors,
+    size_t colorCount,
+    const float* pos,
+    size_t posCount,
+    SkTileMode mode,
+    SkColorSpace* colorSpace,
+    const SkGradient::Interpolation* interpolation
+) {
+    SkGradient::Colors gradColors(
+        SkSpan<const SkColor4f>(colors, colorCount),
+        SkSpan<const float>(pos, posCount),
+        mode,
+        sp(colorSpace)
+    );
+    
+    new(uninitialized) SkGradient(gradColors, *interpolation);
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeLinearWithInterpolation(const SkPoint pts[2], const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, const SkGradientShader::Interpolation* interpolation, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeLinear(pts, colors, sp(colorSpace), pos, count, mode, *interpolation, localMatrix).release();
+extern "C" void C_SkGradient_Destruct(SkGradient* self) {
+    self->~SkGradient();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeRadial(const SkPoint* center, SkScalar radius, const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeRadial(*center, radius, colors, pos, count, mode, flags, localMatrix).release();
+//
+// SkGradient C++ API wrappers
+//
+
+extern "C" SkShader* C_SkShaders_LinearGradient(
+    const SkPoint pts[2],
+    const SkColor4f* colors,
+    size_t colorCount,
+    const float* pos,
+    size_t posCount,
+    SkTileMode mode,
+    SkColorSpace* colorSpace,
+    const SkGradient::Interpolation* interpolation,
+    const SkMatrix* localMatrix
+) {
+    SkGradient::Colors gradColors(
+        SkSpan<const SkColor4f>(colors, colorCount),
+        SkSpan<const float>(pos, posCount),
+        mode,
+        sp(colorSpace)
+    );
+    
+    SkGradient grad(gradColors, *interpolation);
+    return SkShaders::LinearGradient(pts, grad, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeRadialWithInterpolation(const SkPoint* center, SkScalar radius, const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, const SkGradientShader::Interpolation* interpolation, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeRadial(*center, radius, colors, sp(colorSpace), pos, count, mode, *interpolation, localMatrix).release();
+extern "C" SkShader* C_SkShaders_RadialGradient(
+    const SkPoint* center,
+    float radius,
+    const SkColor4f* colors,
+    size_t colorCount,
+    const float* pos,
+    size_t posCount,
+    SkTileMode mode,
+    SkColorSpace* colorSpace,
+    const SkGradient::Interpolation* interpolation,
+    const SkMatrix* localMatrix
+) {
+    SkGradient::Colors gradColors(
+        SkSpan<const SkColor4f>(colors, colorCount),
+        SkSpan<const float>(pos, posCount),
+        mode,
+        sp(colorSpace)
+    );
+    
+    SkGradient grad(gradColors, *interpolation);
+    return SkShaders::RadialGradient(*center, radius, grad, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeTwoPointConical(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, pos, count, mode, flags, localMatrix).release();
+extern "C" SkShader* C_SkShaders_TwoPointConicalGradient(
+    const SkPoint* start,
+    float startRadius,
+    const SkPoint* end,
+    float endRadius,
+    const SkColor4f* colors,
+    size_t colorCount,
+    const float* pos,
+    size_t posCount,
+    SkTileMode mode,
+    SkColorSpace* colorSpace,
+    const SkGradient::Interpolation* interpolation,
+    const SkMatrix* localMatrix
+) {
+    SkGradient::Colors gradColors(
+        SkSpan<const SkColor4f>(colors, colorCount),
+        SkSpan<const float>(pos, posCount),
+        mode,
+        sp(colorSpace)
+    );
+    
+    SkGradient grad(gradColors, *interpolation);
+    return SkShaders::TwoPointConicalGradient(*start, startRadius, *end, endRadius, grad, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkGradientShader_MakeTwoPointConicalWithInterpolation(const SkPoint* start, SkScalar startRadius, const SkPoint* end, SkScalar endRadius, const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, const SkGradientShader::Interpolation* interpolation, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeTwoPointConical(*start, startRadius, *end, endRadius, colors, sp(colorSpace), pos, count, mode, *interpolation, localMatrix).release();
-}
-
-extern "C" SkShader* C_SkGradientShader_MakeSweep(SkScalar cx, SkScalar cy, const SkColor colors[], const SkScalar pos[], int count, SkTileMode mode, SkScalar startAngle, SkScalar endAngle, uint32_t flags, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeSweep(cx, cy, colors, pos, count, mode, startAngle, endAngle, flags, localMatrix).release();
-}
-
-extern "C" SkShader* C_SkGradientShader_MakeSweepWithInterpolation(SkScalar cx, SkScalar cy, const SkColor4f colors[], SkColorSpace* colorSpace, const SkScalar pos[], int count, SkTileMode mode, SkScalar startAngle, SkScalar endAngle, const SkGradientShader::Interpolation* interpolation, const SkMatrix* localMatrix) {
-    return SkGradientShader::MakeSweep(cx, cy, colors, sp(colorSpace), pos, count, mode, startAngle, endAngle, *interpolation, localMatrix).release();
+extern "C" SkShader* C_SkShaders_SweepGradient(
+    const SkPoint* center,
+    float startAngle,
+    float endAngle,
+    const SkColor4f* colors,
+    size_t colorCount,
+    const float* pos,
+    size_t posCount,
+    SkTileMode mode,
+    SkColorSpace* colorSpace,
+    const SkGradient::Interpolation* interpolation,
+    const SkMatrix* localMatrix
+) {
+    SkGradient::Colors gradColors(
+        SkSpan<const SkColor4f>(colors, colorCount),
+        SkSpan<const float>(pos, posCount),
+        mode,
+        sp(colorSpace)
+    );
+    
+    SkGradient grad(gradColors, *interpolation);
+    return SkShaders::SweepGradient(*center, startAngle, endAngle, grad, localMatrix).release();
 }
 
 //
