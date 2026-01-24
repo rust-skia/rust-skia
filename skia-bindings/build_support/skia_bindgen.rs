@@ -622,7 +622,7 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("Result", rewrite::k_xxx),
     // SkMatrix_ScaleToFit
     ("ScaleToFit", rewrite::k_xxx_name),
-    // SkPath_*
+    // SkPathBuilder_*
     ("ArcSize", rewrite::k_xxx_name),
     ("AddPathMode", rewrite::k_xxx_name),
     // SkPathBuilder_*

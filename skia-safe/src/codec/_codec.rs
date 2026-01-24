@@ -37,6 +37,7 @@ pub struct Options {
     pub subset: Option<IRect>,
     pub frame_index: usize,
     pub prior_frame: Option<usize>,
+    pub max_decode_memory: Option<usize>,
 }
 
 pub const NO_FRAME: i32 = sb::SkCodec_kNoFrame;
@@ -241,6 +242,7 @@ impl Codec<'_> {
                 None => sb::SkCodec_kNoFrame,
                 Some(frame) => frame.try_into().expect("invalid prior frame"),
             },
+            fMaxDecodeMemory: options.max_decode_memory.unwrap_or(0),
         }
     }
 

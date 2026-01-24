@@ -98,7 +98,6 @@ mod core {
     assert_not_impl_any!(Path: Sync);
     assert_not_impl_any!(path::Iter: Send, Sync);
     assert_not_impl_any!(path::RawIter: Send, Sync);
-    assert_impl_all!(path::ArcSize: Send, Sync);
     assert_impl_all!(path::SegmentMask: Send, Sync);
     assert_impl_all!(path::Verb: Send, Sync);
 

@@ -772,11 +772,6 @@ impl Path {
     }
 }
 
-/// Four oval parts with radii (rx, ry) start at last [`Path`] [`Point`] and ends at (x, y).
-/// ArcSize and Direction select one of the four oval parts.
-pub use sb::SkPath_ArcSize as ArcSize;
-variant_name!(ArcSize::Small);
-
 impl Path {
     /// Approximates conic with quad array. Conic is constructed from start [`Point`] p0,
     /// control [`Point`] p1, end [`Point`] p2, and weight w.

@@ -87,7 +87,7 @@ impl<'a> Colors<'a> {
         color_space: impl Into<Option<ColorSpace>>,
     ) -> Self {
         // Validate positions match colors if provided
-        assert!(pos.map_or(true, |pos| pos.len() == colors.len()));
+        assert!(pos.is_none_or(|pos| pos.len() == colors.len()));
 
         Self {
             colors,
