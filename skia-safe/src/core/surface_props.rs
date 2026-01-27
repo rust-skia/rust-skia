@@ -50,6 +50,9 @@ bitflags! {
         #[allow(clippy::unnecessary_cast)]
         const ALWAYS_DITHER =
             sb::SkSurfaceProps_Flags_kAlwaysDither_Flag as u32;
+        #[allow(clippy::unnecessary_cast)]
+        const PRESERVES_TRANSPARENT_DRAWS =
+            sb::SkSurfaceProps_Flags_kPreservesTransparentDraws_Flag as u32;
     }
 }
 
@@ -151,6 +154,11 @@ impl SurfaceProps {
 
     pub fn is_always_dither(self) -> bool {
         self.flags().contains(SurfacePropsFlags::ALWAYS_DITHER)
+    }
+
+    pub fn preserves_transparent_draws(self) -> bool {
+        self.flags()
+            .contains(SurfacePropsFlags::PRESERVES_TRANSPARENT_DRAWS)
     }
 }
 

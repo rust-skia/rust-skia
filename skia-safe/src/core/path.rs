@@ -707,14 +707,15 @@ impl Path {
         unsafe { self.native().approximateBytesUsed() }
     }
 
-    /// Returns minimum and maximum axes values of [`Point`] array.
-    /// Returns (0, 0, 0, 0) if [`Path`] contains no points. Returned bounds width and height may
-    /// be larger or smaller than area affected when [`Path`] is drawn.
+    /// Returns the min/max of the path's 'trimmed' points. The trimmed points are all of the
+    /// points in the path, with the exception of the path having more than one contour, and the
+    /// final contour containing only a [`Verb::Move`]. In that case the trailing [`Verb::Move`] point
+    /// is ignored when computing the bounds.
     ///
-    /// [`Rect`] returned includes all [`Point`] added to [`Path`], including [`Point`] associated with
-    /// [`Verb::Move`] that define empty contours.
+    /// If the path has no verbs, or the path contains non-finite values,
+    /// then `{0, 0, 0, 0}` is returned. (see `is_finite`())
     ///
-    /// Returns: bounds of all [`Point`] in [`Point`] array
+    /// Returns: bounds of the path's points
     pub fn bounds(&self) -> &Rect {
         Rect::from_native_ref(unsafe { &*sb::C_SkPath_getBounds(self.native()) })
     }

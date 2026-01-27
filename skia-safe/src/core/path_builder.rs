@@ -983,10 +983,22 @@ impl PathBuilder {
         unsafe { sb::C_SkPathBuilder_setPoint(self.native_mut(), index, *p.native()) }
     }
 
+    /// Change the last point in the builder.
+    /// If the builder is empty, the call does nothing.
+    ///
+    /// - `p`: the new point value
+    pub fn set_last_point(&mut self, p: impl Into<Point>) {
+        let len = self.points().len();
+        if len != 0 {
+            self.set_point(len - 1, p);
+        };
+    }
+
     /// Sets the last point on the path. If [`Point`] array is empty, append [`PathVerb::Move`] to
     /// verb array and append p to [`Point`] array.
     ///
     /// - `p`: last point
+    #[deprecated(since = "0.0.0", note = "Use set_last_point() or set_point()")]
     pub fn set_last_pt(&mut self, p: impl Into<Point>) {
         let p = p.into();
         unsafe { self.native_mut().setLastPt(p.into_native()) };

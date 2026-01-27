@@ -40,6 +40,18 @@ pub struct Options {
     pub max_decode_memory: Option<usize>,
 }
 
+impl Default for Options {
+    fn default() -> Self {
+        Self {
+            zero_initialized: ZeroInitialized::No,
+            subset: None,
+            frame_index: 0,
+            prior_frame: None,
+            max_decode_memory: None,
+        }
+    }
+}
+
 pub const NO_FRAME: i32 = sb::SkCodec_kNoFrame;
 
 #[repr(C)]
