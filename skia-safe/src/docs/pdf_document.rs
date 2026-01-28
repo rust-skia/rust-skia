@@ -1,7 +1,5 @@
 pub mod pdf {
-    use std::{ffi::CString, fmt, io, mem, ptr};
-
-    use crate::Canvas;
+    use std::{ffi::CString, fmt, io, marker::PhantomData, mem, ptr};
 
     use skia_bindings::{
         self as sb, SkPDF_AttributeList, SkPDF_DateTime, SkPDF_Metadata, SkPDF_StructureElementNode,
@@ -10,11 +8,12 @@ pub mod pdf {
     use crate::{
         interop::{AsStr, RustWStream, SetStr},
         prelude::*,
-        scalar, Document, MILESTONE,
+        scalar, Canvas, Document, MILESTONE,
     };
 
-    pub type AttributeList = Handle<SkPDF_AttributeList>;
-    unsafe_send_sync!(AttributeList);
+    #[repr(transparent)]
+    pub struct AttributeList<'a>(Handle<SkPDF_AttributeList>, PhantomData<&'a ()>);
+    unsafe_send_sync!(AttributeList<'_>);
 
     impl NativeDrop for SkPDF_AttributeList {
         fn drop(&mut self) {
@@ -22,13 +21,16 @@ pub mod pdf {
         }
     }
 
-    impl Default for AttributeList {
+    impl Default for AttributeList<'_> {
         fn default() -> Self {
-            AttributeList::from_native_c(unsafe { SkPDF_AttributeList::new() })
+            Self(
+                Handle::from_native_c(unsafe { SkPDF_AttributeList::new() }),
+                PhantomData,
+            )
         }
     }
 
-    impl fmt::Debug for AttributeList {
+    impl fmt::Debug for AttributeList<'_> {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.debug_struct("AttributeList").finish()
         }
@@ -39,17 +41,16 @@ pub mod pdf {
     /// Each attribute must have an owner (e.g. "Layout", "List", "Table", etc)
     /// and an attribute name (e.g. "BBox", "RowSpan", etc.) from PDF32000_2008 14.8.5,
     /// and then a value of the proper type according to the spec.
-    impl AttributeList {
+    impl<'a> AttributeList<'a> {
         pub fn append_int(
             &mut self,
-            owner: impl AsRef<str>,
-            name: impl AsRef<str>,
+            owner: &'a CString,
+            name: &'a CString,
             value: i32,
         ) -> &mut Self {
-            let owner = CString::new(owner.as_ref()).unwrap();
-            let name = CString::new(name.as_ref()).unwrap();
             unsafe {
-                self.native_mut()
+                self.0
+                    .native_mut()
                     .appendInt(owner.as_ptr(), name.as_ptr(), value)
             }
             self
@@ -57,14 +58,13 @@ pub mod pdf {
 
         pub fn append_float(
             &mut self,
-            owner: impl AsRef<str>,
-            name: impl AsRef<str>,
+            owner: &'a CString,
+            name: &'a CString,
             value: f32,
         ) -> &mut Self {
-            let owner = CString::new(owner.as_ref()).unwrap();
-            let name = CString::new(name.as_ref()).unwrap();
             unsafe {
-                self.native_mut()
+                self.0
+                    .native_mut()
                     .appendFloat(owner.as_ptr(), name.as_ptr(), value)
             }
             self
@@ -72,15 +72,13 @@ pub mod pdf {
 
         pub fn append_float_array(
             &mut self,
-            owner: impl AsRef<str>,
-            name: impl AsRef<str>,
+            owner: &'a CString,
+            name: &'a CString,
             value: &[f32],
         ) -> &mut Self {
-            let owner = CString::new(owner.as_ref()).unwrap();
-            let name = CString::new(name.as_ref()).unwrap();
             unsafe {
                 sb::C_SkPDF_AttributeList_appendFloatArray(
-                    self.native_mut(),
+                    self.0.native_mut(),
                     owner.as_ptr(),
                     name.as_ptr(),
                     value.as_ptr(),
@@ -92,9 +90,12 @@ pub mod pdf {
     }
 
     #[repr(transparent)]
-    pub struct StructureElementNode(ptr::NonNull<SkPDF_StructureElementNode>);
+    pub struct StructureElementNode<'a>(
+        ptr::NonNull<SkPDF_StructureElementNode>,
+        PhantomData<&'a ()>,
+    );
 
-    impl NativeAccess for StructureElementNode {
+    impl NativeAccess for StructureElementNode<'_> {
         type Native = SkPDF_StructureElementNode;
 
         fn native(&self) -> &SkPDF_StructureElementNode {
@@ -105,19 +106,22 @@ pub mod pdf {
         }
     }
 
-    impl Drop for StructureElementNode {
+    impl Drop for StructureElementNode<'_> {
         fn drop(&mut self) {
             unsafe { sb::C_SkPDF_StructureElementNode_delete(self.native_mut()) }
         }
     }
 
-    impl Default for StructureElementNode {
+    impl Default for StructureElementNode<'_> {
         fn default() -> Self {
-            Self(ptr::NonNull::new(unsafe { sb::C_SkPDF_StructureElementNode_new() }).unwrap())
+            Self(
+                ptr::NonNull::new(unsafe { sb::C_SkPDF_StructureElementNode_new() }).unwrap(),
+                PhantomData,
+            )
         }
     }
 
-    impl fmt::Debug for StructureElementNode {
+    impl fmt::Debug for StructureElementNode<'_> {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.debug_struct("StructureElementNode")
                 .field("type_string", &self.type_string())
@@ -134,7 +138,7 @@ pub mod pdf {
     /// of the content.  Each node ID is associated with content
     /// by passing the [`crate::Canvas`] and node ID to [`set_node_id()`] when drawing.
     /// NodeIDs should be unique within each tree.
-    impl StructureElementNode {
+    impl<'a> StructureElementNode<'a> {
         pub fn new(type_string: impl AsRef<str>) -> Self {
             let mut node = Self::default();
             node.set_type_string(type_string);
@@ -190,12 +194,16 @@ pub mod pdf {
             self.native().fNodeId
         }
 
-        pub fn attributes(&self) -> &AttributeList {
-            AttributeList::from_native_ref(&self.native().fAttributes)
+        pub fn attributes(&self) -> &AttributeList<'a> {
+            unsafe { transmute_ref(Handle::from_native_ref(&self.native().fAttributes)) }
         }
 
-        pub fn attributes_mut(&mut self) -> &mut AttributeList {
-            AttributeList::from_native_ref_mut(&mut self.native_mut().fAttributes)
+        pub fn attributes_mut(&mut self) -> &mut AttributeList<'a> {
+            unsafe {
+                transmute_ref_mut(Handle::from_native_ref_mut(
+                    &mut self.native_mut().fAttributes,
+                ))
+            }
         }
 
         pub fn set_alt(&mut self, alt: impl AsRef<str>) -> &mut Self {
@@ -242,7 +250,7 @@ pub mod pdf {
 
     /// Optional metadata to be passed into the PDF factory function.
     #[derive(Debug)]
-    pub struct Metadata {
+    pub struct Metadata<'a> {
         /// The document's title.
         pub title: String,
         /// The name of the person who created the document.
@@ -282,7 +290,7 @@ pub mod pdf {
         /// setting.
         pub encoding_quality: Option<i32>,
 
-        pub structure_element_tree_root: Option<StructureElementNode>,
+        pub structure_element_tree_root: Option<StructureElementNode<'a>>,
 
         pub outline: Outline,
 
@@ -291,7 +299,7 @@ pub mod pdf {
         pub compression_level: CompressionLevel,
     }
 
-    impl Default for Metadata {
+    impl Default for Metadata<'_> {
         fn default() -> Self {
             Self {
                 title: Default::default(),
@@ -328,7 +336,8 @@ pub mod pdf {
     /// @returns `None` if there is an error, otherwise a newly created PDF-backed [`Document`].
     pub fn new_document<'a>(
         writer: &'a mut impl io::Write,
-        metadata: Option<&Metadata>,
+        // We need to make the metadata alive as long as the document, because of `structure_element_tree_root`.
+        metadata: Option<&'a Metadata<'a>>,
     ) -> Document<'a> {
         let mut md = InternalMetadata::default();
         if let Some(metadata) = metadata {
@@ -412,14 +421,16 @@ pub mod pdf {
 
 #[cfg(test)]
 mod tests {
-    use crate::pdf::StructureElementNode;
+    use std::ffi::CString;
 
-    use super::pdf;
+    use crate::pdf::{self, StructureElementNode};
 
     #[test]
     fn create_attribute_list() {
         let mut _al = pdf::AttributeList::default();
-        _al.append_float_array("Owner", "Name", &[1.0, 2.0, 3.0]);
+        let owner = CString::new("Owner").unwrap();
+        let name = CString::new("Name").unwrap();
+        _al.append_float_array(&owner, &name, &[1.0, 2.0, 3.0]);
     }
 
     #[test]
