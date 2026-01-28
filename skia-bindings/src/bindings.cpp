@@ -3720,6 +3720,19 @@ extern "C" void C_SkPDF_AttributeList_appendFloatArray(SkPDF::AttributeList *sel
     self->appendFloatArray(owner, name, v);
 }
 
+extern "C" void C_SkPDF_AttributeList_appendName(SkPDF::AttributeList *self, const char *owner, const char *name, const char *value) {
+    self->appendName(owner, name, value);
+}
+
+extern "C" void C_SkPDF_AttributeList_appendTextString(SkPDF::AttributeList *self, const char *owner, const char *name, const char *value) {
+    self->appendTextString(owner, name, value);
+}
+
+extern "C" void C_SkPDF_AttributeList_appendNodeIdArray(SkPDF::AttributeList *self, const char *owner, const char *name, const int *nodeIds, size_t len) {
+    std::vector<int> ids(nodeIds, nodeIds + len);
+    self->appendNodeIdArray(owner, name, ids);
+}
+
 extern "C" SkPDF::StructureElementNode *C_SkPDF_StructureElementNode_new() {
     return new SkPDF::StructureElementNode();
 }

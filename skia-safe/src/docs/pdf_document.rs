@@ -41,6 +41,11 @@ pub mod pdf {
     /// Each attribute must have an owner (e.g. "Layout", "List", "Table", etc)
     /// and an attribute name (e.g. "BBox", "RowSpan", etc.) from PDF32000_2008 14.8.5,
     /// and then a value of the proper type according to the spec.
+    ///
+    /// Parameters of type [`CString`] will not be copied and the pointers must remain valid until
+    /// [`crate::Document::close`] or [`crate::Document::abort`] is called.
+    /// Names are expected to be constants and are taken as [`CString`].
+    /// Parameters not taken as [`CString`] will be copied.
     impl<'a> AttributeList<'a> {
         pub fn append_int(
             &mut self,
@@ -83,6 +88,58 @@ pub mod pdf {
                     name.as_ptr(),
                     value.as_ptr(),
                     value.len(),
+                )
+            }
+            self
+        }
+
+        pub fn append_name(
+            &mut self,
+            owner: &'a CString,
+            name: &'a CString,
+            value: &'a CString,
+        ) -> &mut Self {
+            unsafe {
+                sb::C_SkPDF_AttributeList_appendName(
+                    self.0.native_mut(),
+                    owner.as_ptr(),
+                    name.as_ptr(),
+                    value.as_ptr(),
+                )
+            }
+            self
+        }
+
+        pub fn append_text_string(
+            &mut self,
+            owner: &'a CString,
+            name: &'a CString,
+            value: &'a CString,
+        ) -> &mut Self {
+            unsafe {
+                sb::C_SkPDF_AttributeList_appendTextString(
+                    self.0.native_mut(),
+                    owner.as_ptr(),
+                    name.as_ptr(),
+                    value.as_ptr(),
+                )
+            }
+            self
+        }
+
+        pub fn append_node_id_array(
+            &mut self,
+            owner: &'a CString,
+            name: &'a CString,
+            node_ids: &[i32],
+        ) -> &mut Self {
+            unsafe {
+                sb::C_SkPDF_AttributeList_appendNodeIdArray(
+                    self.0.native_mut(),
+                    owner.as_ptr(),
+                    name.as_ptr(),
+                    node_ids.as_ptr(),
+                    node_ids.len(),
                 )
             }
             self
@@ -265,37 +322,40 @@ pub mod pdf {
         pub creator: String,
         /// The product that is converting this document to PDF.
         pub producer: String,
-        /// The date and time the document was created.
+        /// The date and time the document was created. The zero default value represents an
+        /// unknown/unset time.
         pub creation: Option<DateTime>,
-        /// The date and time the document was most recently modified.
+        /// The date and time the document was most recently modified. The zero default value
+        /// represents an unknown/unset time.
         pub modified: Option<DateTime>,
         /// The natural language of the text in the PDF. If `lang` is empty, the root
-        /// StructureElementNode::lang will be used (if not empty). Text not in
-        /// this language should be marked with StructureElementNode::lang.
+        /// [`StructureElementNode`]'s `lang` will be used (if not empty). Text not in this
+        /// language should be marked with [`StructureElementNode`]'s `lang`.
         pub lang: String,
-        /// The DPI (pixels-per-inch) at which features without native PDF support
-        /// will be rasterized (e.g. draw image with perspective, draw text with
-        /// perspective, ...)  A larger DPI would create a PDF that reflects the
-        /// original intent with better fidelity, but it can make for larger PDF
-        /// files too, which would use more memory while rendering, and it would be
-        /// slower to be processed or sent online or to printer.
+        /// The DPI (pixels-per-inch) at which features without native PDF support will be
+        /// rasterized (e.g. draw image with perspective, draw text with perspective, ...) A larger
+        /// DPI would create a PDF that reflects the original intent with better fidelity, but it
+        /// can make for larger PDF files too, which would use more memory while rendering, and it
+        /// would be slower to be processed or sent online or to printer.
         pub raster_dpi: Option<scalar>,
-        /// If `true`, include XMP metadata, a document UUID, and `s_rgb` output intent
-        /// information.  This adds length to the document and makes it
-        /// non-reproducible, but are necessary features for PDF/A-2b conformance
+        /// If `true`, include XMP metadata, a document UUID, and sRGB output intent information.
+        /// This adds length to the document and makes it non-reproducible, but are necessary
+        /// features for PDF/A-2b conformance.
         pub pdf_a: bool,
-        /// Encoding quality controls the trade-off between size and quality. By default this is set
-        /// to 101 percent, which corresponds to lossless encoding. If this value is set to a value
-        /// <= 100, and the image is opaque, it will be encoded (using JPEG) with that quality
-        /// setting.
+        /// Encoding quality controls the trade-off between size and quality. By default this is
+        /// set to 101 percent, which corresponds to lossless encoding. If this value is set to a
+        /// value <= 100, and the image is opaque, it will be encoded (using JPEG) with that
+        /// quality setting.
         pub encoding_quality: Option<i32>,
 
+        /// An optional tree of structured document tags that provide a semantic representation of
+        /// the content. The caller should retain ownership.
         pub structure_element_tree_root: Option<StructureElementNode<'a>>,
 
         pub outline: Outline,
 
-        /// PDF streams may be compressed to save space.
-        /// Use this to specify the desired compression vs time tradeoff.
+        /// PDF streams may be compressed to save space. Use this to specify the desired
+        /// compression vs time tradeoff.
         pub compression_level: CompressionLevel,
     }
 
@@ -327,13 +387,16 @@ pub mod pdf {
     pub type CompressionLevel = skia_bindings::SkPDF_Metadata_CompressionLevel;
     variant_name!(CompressionLevel::HighButSlow);
 
-    /// Create a PDF-backed document.
+    /// Create a PDF-backed document, writing the results into a writer.
     ///
     /// PDF pages are sized in point units. 1 pt == 1/72 inch == 127/360 mm.
     ///
-    /// * `metadata` - a PDFmetadata object.  Any fields may be left empty.
+    /// - `writer` - A PDF document will be written to this writer. The document may write
+    ///   to the writer at anytime during its lifetime, until either [`crate::Document::close`] is
+    ///   called or the document is deleted.
+    /// - `metadata` - a PDF metadata object. Some fields may be left empty.
     ///
-    /// @returns `None` if there is an error, otherwise a newly created PDF-backed [`Document`].
+    /// Returns `None` if there is an error, otherwise a newly created PDF-backed [`Document`].
     pub fn new_document<'a>(
         writer: &'a mut impl io::Write,
         // We need to make the metadata alive as long as the document, because of `structure_element_tree_root`.
@@ -412,6 +475,15 @@ pub mod pdf {
         pub const BACKGROUND_ARTIFACT: i32 = -8;
     }
 
+    /// Associate a node ID with subsequent drawing commands in a [`Canvas`].
+    ///
+    /// The same node ID can appear in a [`StructureElementNode`] in order to associate
+    /// a document's structure element tree with its content.
+    ///
+    /// A node ID of zero indicates no node ID. Negative node IDs are reserved.
+    ///
+    /// - `canvas` - The canvas used to draw to the PDF.
+    /// - `node_id` - The node ID for subsequent drawing commands.
     pub fn set_node_id(canvas: &Canvas, node_id: i32) {
         unsafe {
             sb::C_SkPDF_SetNodeId(canvas.native_mut(), node_id);
