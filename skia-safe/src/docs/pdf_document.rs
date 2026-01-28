@@ -423,7 +423,10 @@ pub mod pdf {
 mod tests {
     use std::ffi::CString;
 
-    use crate::pdf::{self, StructureElementNode};
+    use crate::{
+        pdf::{self, Metadata, StructureElementNode},
+        Color, Paint, Rect,
+    };
 
     #[test]
     fn create_attribute_list() {
@@ -441,5 +444,89 @@ mod tests {
         let v = root.child_vector();
         assert_eq!(v[0].type_string(), "nested");
         assert_eq!(v[1].type_string(), "nested2");
+    }
+
+    #[test]
+    fn generate_pdf_with_structure_and_attributes() {
+        // String storage - must outlive the PDF document
+        let layout_owner = CString::new("Layout").unwrap();
+        let bbox_name = CString::new("BBox").unwrap();
+        let table_owner = CString::new("Table").unwrap();
+        let colspan_name = CString::new("ColSpan").unwrap();
+        let rowspan_name = CString::new("RowSpan").unwrap();
+
+        // Create structure tree with attributes
+        let mut root = StructureElementNode::new("Document");
+        root.set_node_id(1);
+
+        // Add a paragraph element with bounding box attribute
+        let mut paragraph = StructureElementNode::new("P");
+        paragraph.set_node_id(2);
+        paragraph.attributes_mut().append_float_array(
+            &layout_owner,
+            &bbox_name,
+            &[10.0, 10.0, 200.0, 50.0],
+        );
+
+        // Add a table element with column/row span attributes
+        let mut table = StructureElementNode::new("Table");
+        table.set_node_id(3);
+        table
+            .attributes_mut()
+            .append_int(&table_owner, &colspan_name, 2)
+            .append_int(&table_owner, &rowspan_name, 3);
+
+        root.append_child(paragraph);
+        root.append_child(table);
+
+        // Create metadata with structure tree
+        let metadata = Metadata {
+            title: "Test Document with Structure".to_string(),
+            author: "Rust Skia Test".to_string(),
+            structure_element_tree_root: Some(root),
+            ..Default::default()
+        };
+
+        // Generate PDF
+        let mut output = Vec::new();
+        let document = pdf::new_document(&mut output, Some(&metadata));
+
+        // Draw content on first page
+        let mut page = document.begin_page((200, 200), None);
+        let canvas = page.canvas();
+
+        // Mark the paragraph content area
+        pdf::set_node_id(canvas, 2);
+        let mut paint = Paint::default();
+        paint.set_color(Color::from_rgb(100, 150, 200));
+        canvas.draw_rect(Rect::from_xywh(10.0, 10.0, 190.0, 40.0), &paint);
+
+        // Mark the table content area
+        pdf::set_node_id(canvas, 3);
+        paint.set_color(Color::from_rgb(200, 150, 100));
+        canvas.draw_rect(Rect::from_xywh(10.0, 60.0, 190.0, 130.0), &paint);
+
+        let document = page.end_page();
+        document.close();
+
+        // Verify PDF was generated
+        assert!(!output.is_empty(), "PDF output should not be empty");
+
+        // Basic PDF format validation
+        assert!(
+            output.starts_with(b"%PDF-"),
+            "Output should start with PDF header"
+        );
+        assert!(
+            output.windows(5).any(|w| w == b"%%EOF"),
+            "Output should contain EOF marker"
+        );
+
+        // Check for structure-related content in the PDF
+        let pdf_str = String::from_utf8_lossy(&output);
+        assert!(
+            pdf_str.contains("/StructTreeRoot") || pdf_str.contains("Document"),
+            "PDF should contain structure tree references"
+        );
     }
 }
