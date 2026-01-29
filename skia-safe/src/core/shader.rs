@@ -229,4 +229,9 @@ pub mod shaders {
             )
         })
     }
+
+    // Re-export gradient shader factory functions from effects::gradient::shaders
+    pub use crate::effects::gradient::shaders::{
+        linear_gradient, radial_gradient, sweep_gradient, two_point_conical_gradient,
+    };
 }

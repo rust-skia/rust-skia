@@ -1336,7 +1336,7 @@ impl Image {
     ///
     /// example: <https://fiddle.skia.org/c/@Image_refEncodedData>
     pub fn encoded_data(&self) -> Option<Data> {
-        Data::from_ptr(unsafe { sb::C_SkImage_refEncodedData(self.native()) })
+        Data::from_ptr_const(unsafe { sb::C_SkImage_refEncodedData(self.native()) })
     }
 
     /// Returns subset of this image.

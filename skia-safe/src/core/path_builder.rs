@@ -817,7 +817,8 @@ impl PathBuilder {
         let center = center.into();
         let dir = dir.into().unwrap_or_default();
         unsafe {
-            self.native_mut().addCircle(center.x, center.y, radius, dir);
+            self.native_mut()
+                .addCircle(center.into_native(), radius, dir);
         }
         self
     }
@@ -982,13 +983,25 @@ impl PathBuilder {
         unsafe { sb::C_SkPathBuilder_setPoint(self.native_mut(), index, *p.native()) }
     }
 
+    /// Change the last point in the builder.
+    /// If the builder is empty, the call does nothing.
+    ///
+    /// - `p`: the new point value
+    pub fn set_last_point(&mut self, p: impl Into<Point>) {
+        let len = self.points().len();
+        if len != 0 {
+            self.set_point(len - 1, p);
+        };
+    }
+
     /// Sets the last point on the path. If [`Point`] array is empty, append [`PathVerb::Move`] to
     /// verb array and append p to [`Point`] array.
     ///
     /// - `p`: last point
+    #[deprecated(since = "0.93.0", note = "Use set_last_point() or set_point()")]
     pub fn set_last_pt(&mut self, p: impl Into<Point>) {
         let p = p.into();
-        unsafe { self.native_mut().setLastPt(p.x, p.y) };
+        unsafe { self.native_mut().setLastPt(p.into_native()) };
     }
 
     /// Returns the number of points in [`PathBuilder`].
@@ -1204,5 +1217,17 @@ mod tests {
         assert!(builder.contains((10., 10.)));
         assert!(!builder.contains((5., 5.)));
         assert!(!builder.contains((150., 150.)));
+    }
+
+    #[test]
+    fn test_add_circle() {
+        let mut builder = PathBuilder::new();
+        builder.add_circle((50., 50.), 25., None);
+
+        let bounds = builder.compute_finite_bounds().unwrap();
+        assert_eq!(bounds, Rect::new(25., 25., 75., 75.));
+
+        assert!(builder.contains((50., 50.)));
+        assert!(!builder.contains((10., 10.)));
     }
 }

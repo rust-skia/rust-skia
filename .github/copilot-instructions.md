@@ -16,6 +16,7 @@ Update it whenever you learn something new about the project's patterns, convent
 - Limit qualification paths to at most 2 module levels (e.g., `mpsc::channel` not `tokio::sync::mpsc::channel`).
 - Import types and modules to reduce path qualification in code.
 - Use `pub` visibility by default. Only use `pub(crate)` to limit visibility when the entire containing module is already crate-public.
+- Derive `Debug` for all public types unless there's a specific reason not to. Place `Debug` first in the derive list.
 
 ## Safety & Quality
 - Add or update tests when modifying behavior.
@@ -42,3 +43,6 @@ Update it whenever you learn something new about the project's patterns, convent
 - Use `[`Self::method()`]` instead of `[`method(&self)`]` for intra-doc links to methods.
 - Escape array indexing in comments (e.g., `` `pts[0]` ``) to avoid them being interpreted as links.
 - Use fully qualified paths (e.g., `[`crate::Canvas`]`) if the type is not in the immediate scope.
+
+## Deprecation
+- Use `since = "0.0.0"` for deprecated items unless a specific version is more appropriate.
