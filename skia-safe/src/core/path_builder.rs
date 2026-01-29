@@ -998,7 +998,7 @@ impl PathBuilder {
     /// verb array and append p to [`Point`] array.
     ///
     /// - `p`: last point
-    #[deprecated(since = "0.0.0", note = "Use set_last_point() or set_point()")]
+    #[deprecated(since = "0.93.0", note = "Use set_last_point() or set_point()")]
     pub fn set_last_pt(&mut self, p: impl Into<Point>) {
         let p = p.into();
         unsafe { self.native_mut().setLastPt(p.into_native()) };
