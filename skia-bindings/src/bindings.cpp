@@ -2910,38 +2910,6 @@ extern "C" SkBlender* C_SkBlenders_Arithmetic(float k1, float k2, float k3, floa
 // effects/SkGradient.h
 //
 
-//
-// SkGradient constructors
-//
-
-extern "C" void C_SkGradient_Construct(
-    SkGradient* uninitialized,
-    const SkColor4f* colors,
-    size_t colorCount,
-    const float* pos,
-    size_t posCount,
-    SkTileMode mode,
-    SkColorSpace* colorSpace,
-    const SkGradient::Interpolation* interpolation
-) {
-    SkGradient::Colors gradColors(
-        SkSpan<const SkColor4f>(colors, colorCount),
-        SkSpan<const float>(pos, posCount),
-        mode,
-        sp(colorSpace)
-    );
-    
-    new(uninitialized) SkGradient(gradColors, *interpolation);
-}
-
-extern "C" void C_SkGradient_Destruct(SkGradient* self) {
-    self->~SkGradient();
-}
-
-//
-// SkGradient C++ API wrappers
-//
-
 extern "C" SkShader* C_SkShaders_LinearGradient(
     const SkPoint pts[2],
     const SkColor4f* colors,
