@@ -313,3 +313,56 @@ pub mod shaders {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{Color, Paint, Point, Rect};
+
+    #[test]
+    fn interpolation_from_flags() {
+        let interp_no_premul = Interpolation::from_flags(0);
+        assert_eq!(interp_no_premul.in_premul, interpolation::InPremul::No);
+
+        let interp_premul = Interpolation::from_flags(1);
+        assert_eq!(interp_premul.in_premul, interpolation::InPremul::Yes);
+    }
+
+    #[test]
+    #[should_panic]
+    fn colors_new_mismatched_positions() {
+        let colors = [Color::RED.into(), Color::BLUE.into()];
+        let positions = [0.0, 0.5, 1.0];
+        let _ = Colors::new(&colors, Some(&positions), TileMode::Clamp, None);
+    }
+
+    #[test]
+    fn linear_gradient_renders() {
+        let mut surface = crate::surfaces::raster_n32_premul((100, 100)).unwrap();
+        let canvas = surface.canvas();
+
+        let colors = [Color::RED.into(), Color::BLUE.into()];
+        let gradient_colors = Colors::new_evenly_spaced(&colors, TileMode::Clamp, None);
+        let gradient = Gradient::new(gradient_colors, Interpolation::default());
+
+        let shader = shaders::linear_gradient(
+            (Point::new(0.0, 0.0), Point::new(100.0, 0.0)),
+            &gradient,
+            None,
+        )
+        .unwrap();
+
+        let mut paint = Paint::default();
+        paint.set_shader(shader);
+
+        canvas.draw_rect(Rect::from_xywh(0.0, 0.0, 100.0, 100.0), &paint);
+
+        let image = surface.image_snapshot();
+        let pixel_left = image.peek_pixels().unwrap().get_color((10, 50));
+        let pixel_right = image.peek_pixels().unwrap().get_color((90, 50));
+
+        assert_ne!(pixel_left, pixel_right);
+        assert!(pixel_left.r() > pixel_right.r());
+        assert!(pixel_left.b() < pixel_right.b());
+    }
+}
