@@ -673,7 +673,7 @@ impl Path {
     /// Returns: the number of points in the path
     ///
     /// example: <https://fiddle.skia.org/c/@Path_getPoints>
-    #[deprecated(since = "0.91.0")]
+    #[deprecated(since = "0.91.0", note = "use points()")]
     pub fn get_points(&self, points: &mut [Point]) -> usize {
         unsafe {
             sb::C_SkPath_getPoints(
