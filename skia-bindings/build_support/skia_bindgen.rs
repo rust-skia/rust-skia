@@ -69,6 +69,9 @@ impl Configuration {
             if features[feature::SVG] {
                 sources.push("src/svg.cpp".into());
             }
+            if features[feature::SKOTTIE] {
+                sources.push("src/skottie.cpp".into());
+            }
             if features[feature::WEBP_ENCODE] {
                 sources.push("src/webp-encode.cpp".into());
             }
@@ -472,6 +475,15 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::__tree.*",
     // libstdc++ 10 on Linux (since m143, c++20)
     "std::strong_ordering",
+    // skottie internal types with layout issues
+    "skottie::internal::TextAnimator",
+    "skottie::internal::TextAnimator_AnimatedProps",
+    "skottie::internal::TextAdapter",
+    "skottie::VectorValue",
+    "skottie::ColorValue",
+    "sksg::PaintNode",
+    "sksg::Color",
+    "sksg::BlurImageFilter",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
@@ -931,6 +943,9 @@ pub(crate) mod definitions {
         }
         if features[feature::SVG] {
             files.push("obj/modules/svg/svg.ninja".into());
+        }
+        if features[feature::SKOTTIE] {
+            files.push("obj/modules/skottie/skottie.ninja".into());
         }
         files
     }
