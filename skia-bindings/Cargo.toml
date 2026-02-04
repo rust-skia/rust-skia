@@ -51,6 +51,7 @@ pdf = []
 use-system-jpeg-turbo = ["dep:mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
 svg = ["textlayout"]
+skottie = ["textlayout"]
 binary-cache = ["dep:flate2", "dep:tar"]
 embed-icudtl = []
 embed-freetype = []

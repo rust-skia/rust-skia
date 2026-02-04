@@ -19,6 +19,9 @@ pub mod lib {
     pub const SK_SHAPER: &str = "skshaper";
     pub const SK_PARAGRAPH: &str = "skparagraph";
     pub const SVG: &str = "svg";
+    pub const SKOTTIE: &str = "skottie";
+    pub const SKSG: &str = "sksg";
+    pub const JSON_READER: &str = "jsonreader";
     pub const SK_RESOURCES: &str = "skresources";
     pub const SK_UNICODE_CORE: &str = "skunicode_core";
     pub const SK_UNICODE_ICU: &str = "skunicode_icu";
@@ -76,6 +79,15 @@ impl BinariesConfiguration {
         if features[feature::SVG] {
             ninja_built_libraries.push(lib::SVG.into());
             ninja_built_libraries.push(lib::SK_RESOURCES.into());
+        }
+        if features[feature::SKOTTIE] {
+            ninja_built_libraries.push(lib::SKOTTIE.into());
+            ninja_built_libraries.push(lib::SKSG.into());
+            ninja_built_libraries.push(lib::JSON_READER.into());
+            // skottie depends on skresources, add it if not already added by SVG
+            if !features[feature::SVG] {
+                ninja_built_libraries.push(lib::SK_RESOURCES.into());
+            }
         }
 
         let link_libraries = platform::link_libraries(features, &target);
