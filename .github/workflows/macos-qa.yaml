@@ -29,7 +29,7 @@ jobs:
             runTests: true
             exampleArgs: '--driver cpu --driver pdf --driver svg'
             generateArtifacts: true
-            features: 'gl,metal,svg,textlayout,ureq,vulkan,webp'
+            features: 'gl,metal,skottie,svg,textlayout,ureq,vulkan,webp'
           - target: x86_64-apple-darwin
             androidEnv: false
             emscriptenEnv: false
@@ -37,7 +37,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-            features: 'gl,metal,svg,textlayout,ureq,vulkan,webp'
+            features: 'gl,metal,skottie,svg,textlayout,ureq,vulkan,webp'
           - target: aarch64-apple-ios
             androidEnv: false
             emscriptenEnv: false
@@ -45,7 +45,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-            features: 'gl,metal,svg,textlayout,ureq,webp'
+            features: 'gl,metal,skottie,svg,textlayout,ureq,webp'
           - target: aarch64-apple-ios-sim
             androidEnv: false
             emscriptenEnv: false
@@ -53,7 +53,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-            features: 'gl,metal,svg,textlayout,ureq,webp'
+            features: 'gl,metal,skottie,svg,textlayout,ureq,webp'
           - target: x86_64-apple-ios
             androidEnv: false
             emscriptenEnv: false
@@ -61,7 +61,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-            features: 'gl,metal,svg,textlayout,ureq,webp'
+            features: 'gl,metal,skottie,svg,textlayout,ureq,webp'
     runs-on: macos-14
     env:
       SKIA_DEBUG: 0
