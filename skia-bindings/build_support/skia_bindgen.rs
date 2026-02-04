@@ -72,6 +72,9 @@ impl Configuration {
             if features[feature::SKOTTIE] {
                 sources.push("src/skottie.cpp".into());
             }
+            if features[feature::SVG] || features[feature::SKOTTIE] {
+                sources.push("src/skresources.cpp".into());
+            }
             if features[feature::WEBP_ENCODE] {
                 sources.push("src/webp-encode.cpp".into());
             }
