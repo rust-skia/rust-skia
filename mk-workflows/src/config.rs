@@ -67,14 +67,14 @@ pub fn qa_jobs(workflow: &Workflow) -> Vec<Job> {
             vec![Job {
                 name: JobName::Named("stable-all-features".into()),
                 toolchain: "stable",
-                features: JobFeatures::Direct("gl,textlayout,svg,webp".into()),
+                features: JobFeatures::Direct("gl,textlayout,svg,skottie,webp".into()),
                 skia_debug: false,
                 disable_clippy: false,
                 example_args: None,
             }]
         }
         _ => {
-            const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,ureq,webp";
+            const QA_ALL_FEATURES: &str = "gl,vulkan,textlayout,svg,skottie,ureq,webp";
             vec![Job {
                 name: JobName::Named("stable-all-features".into()),
                 toolchain: "stable",
@@ -125,7 +125,7 @@ pub fn binaries_jobs(workflow: &Workflow) -> Vec<Job> {
                 "gl,x11".into(),
                 "gl,textlayout,x11".into(),
                 // Full feature set: See skia-safe/Cargo.toml all-linux
-                "gl,egl,x11,wayland,vulkan,textlayout,svg,webp".into(),
+                "gl,egl,x11,wayland,vulkan,textlayout,svg,skottie,webp".into(),
             ]);
         }
         HostOS::MacOS => {

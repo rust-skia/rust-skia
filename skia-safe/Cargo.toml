@@ -28,9 +28,9 @@ doctest = false
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf"]
-all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "webp"]
-all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "webp"]
-all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "webp"]
+all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "skottie", "webp"]
+all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "webp"]
+all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "skottie", "webp"]
 gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
