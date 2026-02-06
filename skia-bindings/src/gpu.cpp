@@ -191,19 +191,6 @@ extern "C" bool C_GrRecordingContext_colorTypeSupportedAsSurface(const GrRecordi
 // gpu/GrYUVABackendTextures.h
 //
 
-extern "C" void C_GrYUVABackendTextures_construct(
-    GrYUVABackendTextures* uninitialized,
-    const SkYUVAInfo& yuvaInfo,
-    const GrBackendTexture* const *backend_textures,
-    GrSurfaceOrigin textureOrigin
-) {
-    GrBackendTexture textures[SkYUVAInfo::kMaxPlanes];
-    for (int i = 0; i < SkYUVAInfo::kMaxPlanes; ++i) {
-        textures[i] = *backend_textures[i];
-    }
-    new(uninitialized) GrYUVABackendTextures(yuvaInfo, textures, textureOrigin);
-}
-
 extern "C" void C_GrYUVABackendTextureInfo_destruct(GrYUVABackendTextureInfo* self) {
     self->~GrYUVABackendTextureInfo();
 }
@@ -216,8 +203,20 @@ extern "C" bool C_GrYUVABackendTextureInfo_equals(const GrYUVABackendTextureInfo
     return *a == *b;
 }
 
-extern "C" void C_GrYUVABackendTextures_destruct(GrYUVABackendTextures* self) {
-    self->~GrYUVABackendTextures();
+extern "C" GrYUVABackendTextures* C_GrYUVABackendTextures_new(
+    const SkYUVAInfo& yuvaInfo,
+    const GrBackendTexture* const *backend_textures,
+    GrSurfaceOrigin textureOrigin
+) {
+    GrBackendTexture textures[SkYUVAInfo::kMaxPlanes];
+    for (int i = 0; i < SkYUVAInfo::kMaxPlanes; ++i) {
+        textures[i] = *backend_textures[i];
+    }
+    return new GrYUVABackendTextures(yuvaInfo, textures, textureOrigin);
+}
+
+extern "C" void C_GrYUVABackendTextures_delete(GrYUVABackendTextures* self) {
+    delete self;
 }
 
 extern "C" const SkYUVAInfo* C_GrYUVABackendTextures_yuvaInfo(const GrYUVABackendTextures* self) {

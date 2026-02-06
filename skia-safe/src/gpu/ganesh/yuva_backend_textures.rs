@@ -109,12 +109,15 @@ impl YUVABackendTextureInfo {
 }
 
 /// A set of [BackendTexture]s that hold the planar data for an image described a [YUVAInfo].
-pub type YUVABackendTextures = Handle<GrYUVABackendTextures>;
+///
+// Because BackendTexture itself is a RefHandle, we need to put GrYUVABackendTextures on the heap, too.
+// See <https://github.com/rust-skia/rust-skia/issues/1246>
+pub type YUVABackendTextures = RefHandle<GrYUVABackendTextures>;
 unsafe_send_sync!(YUVABackendTextures);
 
 impl NativeDrop for GrYUVABackendTextures {
     fn drop(&mut self) {
-        unsafe { sb::C_GrYUVABackendTextures_destruct(self) }
+        unsafe { sb::C_GrYUVABackendTextures_delete(self) }
     }
 }
 
@@ -150,15 +153,10 @@ impl YUVABackendTextures {
         ));
         assert_eq!(texture_handles.len(), YUVAInfo::MAX_PLANES);
 
-        let n = construct(|cloned| unsafe {
-            sb::C_GrYUVABackendTextures_construct(
-                cloned,
-                info.native(),
-                texture_handles.as_ptr(),
-                texture_origin,
-            )
-        });
-        Self::native_is_valid(&n).then(|| Self::from_native_c(n))
+        let textures = Self::from_ptr(unsafe {
+            sb::C_GrYUVABackendTextures_new(info.native(), texture_handles.as_ptr(), texture_origin)
+        })?;
+        Self::native_is_valid(textures.native()).then_some(textures)
     }
 
     pub fn textures(&self) -> Vec<BackendTexture> {
