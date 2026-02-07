@@ -16,8 +16,10 @@
 
 use std::{ffi::CString, fmt, path::Path};
 
-use crate::{interop, prelude::*, Canvas, Rect, Size};
+use crate::{interop, prelude::*, Canvas, FontMgr, Rect, Size};
 use skia_bindings::{self as sb, SkNVRefCnt};
+
+use super::resources::NativeResourceProvider;
 
 /// A Lottie animation that can be rendered to a canvas.
 ///
@@ -60,6 +62,103 @@ bitflags::bitflags! {
         const SKIP_TOP_LEVEL_ISOLATION = 0x01;
         /// Disables the top-level clipping to the animation bounds.
         const DISABLE_TOP_LEVEL_CLIPPING = 0x02;
+    }
+}
+
+bitflags::bitflags! {
+    /// Flags for configuring the animation builder.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    pub struct BuilderFlags: u32 {
+        /// Defer image loading until the image asset is actually used.
+        const DEFER_IMAGE_LOADING = 0x01;
+        /// Prefer embedded fonts over system fonts.
+        const PREFER_EMBEDDED_FONTS = 0x02;
+    }
+}
+
+/// A builder for creating [`Animation`] instances with custom configuration.
+///
+/// The builder allows setting a resource provider for loading external assets,
+/// a font manager for text rendering, and various flags to control animation loading.
+///
+/// # Example
+///
+/// ```no_run
+/// use skia_safe::skottie::Builder;
+///
+/// let json = r#"{"v":"5.5.7","fr":30,"ip":0,"op":60,"w":200,"h":200,"layers":[]}"#;
+/// let animation = Builder::new().make(json);
+/// ```
+pub type Builder = RefHandle<sb::skottie_Animation_Builder>;
+
+impl NativeDrop for sb::skottie_Animation_Builder {
+    fn drop(&mut self) {
+        unsafe { sb::C_skottie_Builder_delete(self) }
+    }
+}
+
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl fmt::Debug for Builder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Builder").finish()
+    }
+}
+
+impl Builder {
+    /// Create a new animation builder with default settings.
+    pub fn new() -> Self {
+        Self::from_ptr(unsafe { sb::C_skottie_Builder_new(0) }).unwrap()
+    }
+
+    /// Create a new animation builder with the specified flags.
+    pub fn with_flags(flags: BuilderFlags) -> Self {
+        Self::from_ptr(unsafe { sb::C_skottie_Builder_new(flags.bits()) }).unwrap()
+    }
+
+    /// Set the font manager to use for text rendering.
+    ///
+    /// Consumes and returns self for method chaining.
+    pub fn set_font_manager(mut self, font_mgr: FontMgr) -> Self {
+        unsafe { sb::C_skottie_Builder_setFontManager(self.native_mut(), font_mgr.into_ptr()) }
+        self
+    }
+
+    /// Set the resource provider for loading external assets.
+    ///
+    /// The resource provider is used to load images, fonts, and other external
+    /// resources referenced by the animation.
+    ///
+    /// Consumes and returns self for method chaining.
+    pub fn set_resource_provider(mut self, provider: impl Into<NativeResourceProvider>) -> Self {
+        let provider = provider.into();
+        unsafe { sb::C_skottie_Builder_setResourceProvider(self.native_mut(), provider.into_ptr()) }
+        self
+    }
+
+    /// Build an animation from a JSON string.
+    ///
+    /// Returns `None` if the JSON cannot be parsed as a valid Lottie animation.
+    pub fn make(mut self, json: impl AsRef<str>) -> Option<Animation> {
+        let json = json.as_ref();
+        Animation::from_ptr(unsafe {
+            sb::C_skottie_Builder_make(self.native_mut(), json.as_ptr() as _, json.len())
+        })
+    }
+
+    /// Build an animation from a file path.
+    ///
+    /// Returns `None` if the file cannot be loaded or parsed.
+    /// Note: This will return `None` for non-UTF8 paths or paths containing null bytes.
+    pub fn make_from_file(mut self, path: impl AsRef<Path>) -> Option<Animation> {
+        let path = CString::new(path.as_ref().to_str()?).ok()?;
+        Animation::from_ptr(unsafe {
+            sb::C_skottie_Builder_makeFromFile(self.native_mut(), path.as_ptr())
+        })
     }
 }
 
@@ -230,5 +329,40 @@ mod tests {
     fn invalid_json_returns_none() {
         assert!(Animation::from_str("not valid json").is_none());
         assert!(Animation::from_str("{}").is_none());
+    }
+
+    #[test]
+    fn builder_basic() {
+        let json = r#"{"v":"5.5.7","fr":30,"ip":0,"op":60,"w":200,"h":200,"layers":[]}"#;
+        let anim = Builder::new().make(json).expect("build failed");
+        assert_eq!(anim.fps(), 30.0);
+    }
+
+    #[test]
+    fn builder_with_flags() {
+        let json = r#"{"v":"5.5.7","fr":30,"ip":0,"op":60,"w":200,"h":200,"layers":[]}"#;
+        let anim = Builder::with_flags(BuilderFlags::DEFER_IMAGE_LOADING)
+            .make(json)
+            .expect("build failed");
+        assert_eq!(anim.fps(), 30.0);
+    }
+
+    #[test]
+    fn builder_with_font_manager() {
+        let json = r#"{"v":"5.5.7","fr":30,"ip":0,"op":60,"w":200,"h":200,"layers":[]}"#;
+        let font_mgr = FontMgr::default();
+        let anim = Builder::new()
+            .set_font_manager(font_mgr)
+            .make(json)
+            .expect("build failed");
+        assert_eq!(anim.fps(), 30.0);
+    }
+
+    #[test]
+    fn builder_default() {
+        // Test that Default is implemented
+        let builder: Builder = Default::default();
+        let json = r#"{"v":"5.5.7","fr":30,"ip":0,"op":60,"w":200,"h":200,"layers":[]}"#;
+        let _anim = builder.make(json).expect("build failed");
     }
 }

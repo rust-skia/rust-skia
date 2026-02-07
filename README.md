@@ -332,6 +332,7 @@ More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust
   added build support for the `wasm32-unknown-emscripten` target.
 - Osei Fortune ([@triniwiz](https://github.com/triniwiz)) and Savchenko Ivan ([@Aiving](https://github.com/Aiving))
   contributed rendering SVG files.
+- Maxime Vincent ([@maximevince](https://github.com/maximevince)) contributed the Skottie/Lottie support and examples.
 
 ## Maintainers
 

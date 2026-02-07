@@ -1,4 +1,5 @@
 #include "bindings.h"
+#include "rust_resource_provider.h"
 
 #include "modules/skottie/include/Skottie.h"
 
@@ -78,4 +79,45 @@ extern "C" void C_skottie_Animation_render_with_flags(
     uint32_t flags
 ) {
     self->render(canvas, dst, static_cast<skottie::Animation::RenderFlags>(flags));
+}
+
+// Animation::Builder lifecycle
+extern "C" skottie::Animation::Builder* C_skottie_Builder_new(uint32_t flags) {
+    return new skottie::Animation::Builder(
+        static_cast<skottie::Animation::Builder::Flags>(flags));
+}
+
+extern "C" void C_skottie_Builder_delete(skottie::Animation::Builder* builder) {
+    delete builder;
+}
+
+// Animation::Builder setters
+extern "C" void C_skottie_Builder_setFontManager(
+    skottie::Animation::Builder* builder,
+    SkFontMgr* fontMgr)
+{
+    builder->setFontManager(sk_sp<SkFontMgr>(fontMgr));
+}
+
+extern "C" void C_skottie_Builder_setResourceProvider(
+    skottie::Animation::Builder* builder,
+    RustResourceProvider* provider)
+{
+    builder->setResourceProvider(sp(provider));
+}
+
+// Animation::Builder build methods
+extern "C" skottie::Animation* C_skottie_Builder_make(
+    skottie::Animation::Builder* builder,
+    const char* data,
+    size_t length)
+{
+    return builder->make(data, length).release();
+}
+
+extern "C" skottie::Animation* C_skottie_Builder_makeFromFile(
+    skottie::Animation::Builder* builder,
+    const char* path)
+{
+    return builder->makeFromFile(path).release();
 }
