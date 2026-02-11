@@ -12,9 +12,14 @@ fn main() {
 
 #[cfg(all(target_os = "macos", feature = "metal"))]
 fn main() {
-    use core_graphics_types::geometry::CGSize;
-    use foreign_types_shared::ForeignTypeRef;
-    use objc::rc::autoreleasepool;
+    use objc2::{
+        rc::{autoreleasepool, Retained},
+        runtime::ProtocolObject,
+    };
+    use objc2_core_foundation::CGSize;
+    use objc2_metal::{MTLCommandBuffer, MTLCommandQueue};
+    use objc2_quartz_core::CAMetalDrawable;
+
     use winit::{
         application::ApplicationHandler,
         event::WindowEvent,
@@ -53,19 +58,22 @@ fn main() {
                 WindowEvent::Resized(size) => {
                     context
                         .metal_layer
-                        .set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
+                        .setDrawableSize(CGSize::new(size.width as f64, size.height as f64));
                     context.window.request_redraw()
                 }
                 WindowEvent::RedrawRequested => {
-                    if let Some(drawable) = context.metal_layer.next_drawable() {
+                    if let Some(drawable) = context.metal_layer.nextDrawable() {
                         let (drawable_width, drawable_height) = {
-                            let size = context.metal_layer.drawable_size();
+                            let size = context.metal_layer.drawableSize();
                             (size.width as scalar, size.height as scalar)
                         };
 
-                        let mut surface = unsafe {
-                            let texture_info =
-                                mtl::TextureInfo::new(drawable.texture().as_ptr() as mtl::Handle);
+                        let mut surface = {
+                            let texture_info = unsafe {
+                                mtl::TextureInfo::new(
+                                    Retained::as_ptr(&drawable.texture()) as mtl::Handle
+                                )
+                            };
 
                             let backend_render_target = backend_render_targets::make_mtl(
                                 (drawable_width as i32, drawable_height as i32),
@@ -88,8 +96,14 @@ fn main() {
                         context.skia.flush_and_submit();
                         drop(surface);
 
-                        let command_buffer = context.command_queue.new_command_buffer();
-                        command_buffer.present_drawable(drawable);
+                        let command_buffer = context
+                            .command_queue
+                            .commandBuffer()
+                            .expect("unable to get command buffer");
+
+                        let drawable: Retained<ProtocolObject<dyn objc2_metal::MTLDrawable>> =
+                            (&drawable).into();
+                        command_buffer.presentDrawable(&drawable);
                         command_buffer.commit();
                     }
                 }
@@ -100,18 +114,24 @@ fn main() {
 
     // As of winit 0.30.0, this is crashing on exit:
     // https://github.com/rust-windowing/winit/issues/3668
-    autoreleasepool(|| {
+    autoreleasepool(|_| {
         event_loop.run_app(&mut application).expect("run() failed");
     })
 }
 
 #[cfg(all(target_os = "macos", feature = "metal"))]
 mod window {
-    use cocoa::{appkit::NSView, base::id as cocoa_id};
-    use core_graphics_types::geometry::CGSize;
-    use foreign_types_shared::ForeignType;
-    use metal_rs::{CommandQueue, Device, MTLPixelFormat, MetalLayer};
-    use objc::runtime::YES;
+    use objc2::{rc::Retained, runtime::ProtocolObject};
+    use objc2_core_foundation::CGSize;
+    use objc2_metal::{MTLCommandQueue, MTLCreateSystemDefaultDevice, MTLDevice};
+    use objc2_quartz_core::CAMetalLayer;
+
+    #[cfg(target_os = "macos")]
+    use objc2_app_kit::NSView;
+
+    #[cfg(target_os = "ios")]
+    use objc2_ui_kit::UIView;
+
     use skia_safe::{
         gpu::{self, mtl, DirectContext},
         Canvas, Color4f, Paint, Point, Rect,
@@ -125,8 +145,8 @@ mod window {
 
     pub struct Context {
         pub window: Window,
-        pub metal_layer: MetalLayer,
-        pub command_queue: CommandQueue,
+        pub metal_layer: Retained<CAMetalLayer>,
+        pub command_queue: Retained<ProtocolObject<dyn MTLCommandQueue>>,
         pub skia: DirectContext,
     }
 
@@ -141,47 +161,56 @@ mod window {
                 .create_window(window_attributes)
                 .expect("Failed to create Window");
 
-            let window_handle = window
-                .window_handle()
-                .expect("Failed to retrieve a window handle");
-
-            let raw_window_handle = window_handle.as_raw();
-
-            let device = Device::system_default().expect("no device found");
+            let device = MTLCreateSystemDefaultDevice().expect("no device found");
 
             let metal_layer = {
-                let draw_size = window.inner_size();
-                let layer = MetalLayer::new();
-                layer.set_device(&device);
-                layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
-                layer.set_presents_with_transaction(false);
+                let layer = CAMetalLayer::new();
+                layer.setDevice(Some(&device));
+                layer.setPixelFormat(objc2_metal::MTLPixelFormat::BGRA8Unorm);
+                layer.setPresentsWithTransaction(false);
                 // Disabling this option allows Skia's Blend Mode to work.
                 // More about: https://developer.apple.com/documentation/quartzcore/cametallayer/1478168-framebufferonly
-                layer.set_framebuffer_only(false);
+                layer.setFramebufferOnly(false);
+                layer.setDrawableSize(CGSize::new(size.width as f64, size.height as f64));
 
-                unsafe {
-                    let view = match raw_window_handle {
-                        raw_window_handle::RawWindowHandle::AppKit(appkit) => {
-                            appkit.ns_view.as_ptr()
-                        }
-                        _ => panic!("Wrong window handle type"),
-                    } as cocoa_id;
-                    view.setWantsLayer(YES);
-                    view.setLayer(layer.as_ref() as *const _ as _);
+                let view_ptr = match window.window_handle().unwrap().as_raw() {
+                    #[cfg(target_os = "macos")]
+                    raw_window_handle::RawWindowHandle::AppKit(appkit) => {
+                        appkit.ns_view.as_ptr() as *mut NSView
+                    }
+                    #[cfg(target_os = "ios")]
+                    raw_window_handle::RawWindowHandle::UiKit(uikit) => {
+                        uikit.ui_view.as_ptr() as *mut UIView
+                    }
+                    _ => panic!("Wrong window handle type"),
+                };
+                let view = unsafe { view_ptr.as_ref().unwrap() };
+
+                #[cfg(target_os = "macos")]
+                {
+                    view.setWantsLayer(true);
+                    view.setLayer(Some(&layer.clone().into_super()));
                 }
-                layer.set_drawable_size(CGSize::new(
-                    draw_size.width as f64,
-                    draw_size.height as f64,
-                ));
+
+                #[cfg(target_os = "ios")]
+                {
+                    // TODO: consider using raw-window-metal crate. It synchronises some properties
+                    // from the parent UIView layer to the child metal layer when they change
+                    layer.setFrame(view.layer().frame());
+                    view.layer().addSublayer(&layer)
+                }
+
                 layer
             };
 
-            let command_queue = device.new_command_queue();
+            let command_queue = device
+                .newCommandQueue()
+                .expect("unable to get command queue");
 
             let backend = unsafe {
                 mtl::BackendContext::new(
-                    device.as_ptr() as mtl::Handle,
-                    command_queue.as_ptr() as mtl::Handle,
+                    Retained::as_ptr(&device) as mtl::Handle,
+                    Retained::as_ptr(&command_queue) as mtl::Handle,
                 )
             };
 
