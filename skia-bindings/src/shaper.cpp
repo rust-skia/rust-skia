@@ -1,5 +1,8 @@
 #include "bindings.h"
 
+#define SK_SHAPER_UNICODE_AVAILABLE
+#define SK_SHAPER_HARFBUZZ_AVAILABLE
+
 #include "include/core/SkFontMgr.h"
 #include "modules/skshaper/include/SkShaper.h"
 #include "modules/skshaper/include/SkShaper_harfbuzz.h"

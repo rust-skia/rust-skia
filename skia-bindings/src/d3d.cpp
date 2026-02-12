@@ -2,9 +2,8 @@
 
 // for VSCode
 // TODO: remove that and add proper CMake support for VSCode
-#ifndef SK_DIRECT3D
-    #define SK_DIRECT3D
-#endif
+#define SK_DIRECT3D
+
 
 #include "include/gpu/ganesh/GrBackendSurface.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
@@ -31,7 +30,7 @@ extern "C" void C_GrBackendFormat_ConstructDxgi(GrBackendFormat* uninitialized, 
 
 extern "C" GrBackendTexture* C_GrBackendTexture_newD3D(
     int width, int height,
-    const GrD3DTextureResourceInfo* resourceInfo, 
+    const GrD3DTextureResourceInfo* resourceInfo,
     const char* label,
     size_t labelCount) {
     return new GrBackendTexture(width, height, *resourceInfo, std::string_view(label, labelCount));
