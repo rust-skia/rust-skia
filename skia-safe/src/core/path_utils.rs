@@ -1,4 +1,4 @@
-use crate::{prelude::*, Matrix, Paint, Path, Rect};
+use crate::{prelude::*, Matrix, Paint, Path, PathBuilder, Rect};
 use skia_bindings as sb;
 
 /// Returns the filled equivalent of the stroked path.
@@ -13,7 +13,7 @@ use skia_bindings as sb;
 pub fn fill_path_with_paint<'a>(
     src: &Path,
     paint: &Paint,
-    dst: &mut Path,
+    dst: &mut PathBuilder,
     cull_rect: impl Into<Option<&'a Rect>>,
     ctm: impl Into<Option<Matrix>>,
 ) -> bool {
