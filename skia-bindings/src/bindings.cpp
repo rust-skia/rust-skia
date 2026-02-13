@@ -94,7 +94,6 @@
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkDiscretePathEffect.h"
 #include "include/effects/SkGradient.h"
-#include "include/effects/SkGradientShader.h"
 #include "include/effects/SkHighContrastFilter.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/effects/SkLumaColorFilter.h"
@@ -1004,7 +1003,7 @@ C_SkPathTypes_Types(SkPathFillType *, SkPathDirection *, SkPathSegmentMask *, Sk
 // core/SkPathUtils.h
 //
 
-extern "C" bool C_PathUtils_FillPathWithPaint(const SkPath* src, const SkPaint* paint, SkPath* dst, const SkRect* cullRect, const SkMatrix* matrix) {
+extern "C" bool C_PathUtils_FillPathWithPaint(const SkPath* src, const SkPaint* paint, SkPathBuilder* dst, const SkRect* cullRect, const SkMatrix* matrix) {
     return skpathutils::FillPathWithPaint(*src, *paint, dst, cullRect, *matrix);
 }
 
