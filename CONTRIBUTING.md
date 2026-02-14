@@ -21,13 +21,13 @@ The repository consists of two primary cargo packages in the folders `/skia-bind
 We did our best to cover most of the Skia API, but you'll find a lot of blind spots by looking closer:
 
 - GPU API support is incomplete, specifically functions that use callbacks.
-- Supporting [Skottie](https://skia.org/user/modules/skottie) would be a nice addition.
+- The new rendering backend Graphite isn't supported yet.
 
 For larger contributions, familiarize yourself with the [various wrapper types](https://github.com/rust-skia/rust-skia/wiki) and consider filing an issue beforehand to give us a heads up and to receive additional directions.
 
 ## Contributing Examples
 
-Examples should be added to `/skia-safe/examples` or directly to the `/skia-org` executable which provides a minimal infrastructure to render to PNG, PDF, and SVG files using the CPU or the GPU.
+Examples should be added to `/skia-safe/examples` or directly to the `/skia-org` executable which provides a minimal infrastructure to render to PNG, PDF, and SVG files using the CPU or the GPU backends.
 
 ## Updating Skia
 

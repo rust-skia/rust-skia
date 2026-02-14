@@ -72,6 +72,12 @@ impl Configuration {
             if features[feature::SVG] {
                 sources.push("src/svg.cpp".into());
             }
+            if features[feature::SKOTTIE] {
+                sources.push("src/skottie.cpp".into());
+            }
+            if features[feature::SVG] || features[feature::SKOTTIE] {
+                sources.push("src/skresources.cpp".into());
+            }
             if features[feature::WEBP_ENCODE] {
                 sources.push("src/webp-encode.cpp".into());
             }
@@ -477,6 +483,15 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::strong_ordering",
     // Graphite types that expose std::unordered_set in public fields
     "skgpu::graphite::Recording",
+    // skottie internal types with layout issues
+    "skottie::internal::TextAnimator",
+    "skottie::internal::TextAnimator_AnimatedProps",
+    "skottie::internal::TextAdapter",
+    "skottie::VectorValue",
+    "skottie::ColorValue",
+    "sksg::PaintNode",
+    "sksg::Color",
+    "sksg::BlurImageFilter",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
@@ -627,7 +642,7 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("Result", rewrite::k_xxx),
     // SkMatrix_ScaleToFit
     ("ScaleToFit", rewrite::k_xxx_name),
-    // SkPath_*
+    // SkPathBuilder_*
     ("ArcSize", rewrite::k_xxx_name),
     ("AddPathMode", rewrite::k_xxx_name),
     // SkPathBuilder_*
@@ -936,6 +951,9 @@ pub(crate) mod definitions {
         }
         if features[feature::SVG] {
             files.push("obj/modules/svg/svg.ninja".into());
+        }
+        if features[feature::SKOTTIE] {
+            files.push("obj/modules/skottie/skottie.ninja".into());
         }
         files
     }

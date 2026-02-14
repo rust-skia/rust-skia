@@ -1,9 +1,11 @@
 #[cfg(feature = "textlayout")]
 pub(crate) mod paragraph;
-#[cfg(feature = "svg")]
+#[cfg(any(feature = "svg", feature = "skottie"))]
 pub mod resources;
 #[cfg(feature = "textlayout")]
 pub mod shaper;
+#[cfg(feature = "skottie")]
+pub mod skottie;
 #[cfg(feature = "svg")]
 pub mod svg;
 #[cfg(feature = "textlayout")]

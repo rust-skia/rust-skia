@@ -28,6 +28,7 @@ mod modules;
 mod pathops;
 mod prelude;
 pub(crate) mod private;
+pub mod skottie;
 pub mod svg;
 pub mod wrapper;
 // TODO: We don't export utils/* into the crate's root yet. Should we?

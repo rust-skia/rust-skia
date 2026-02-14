@@ -153,11 +153,30 @@ impl FontCollection {
         locale: impl AsRef<str>,
         font_args: impl Into<Option<&'fa FontArguments>>,
     ) -> Option<Typeface> {
+        self.default_fallback_char_and_families(
+            unicode,
+            &[] as &[&str],
+            font_style,
+            locale,
+            font_args,
+        )
+    }
+
+    pub fn default_fallback_char_and_families<'fa>(
+        &mut self,
+        unicode: Unichar,
+        family_names: &[impl AsRef<str>],
+        font_style: FontStyle,
+        locale: impl AsRef<str>,
+        font_args: impl Into<Option<&'fa FontArguments>>,
+    ) -> Option<Typeface> {
+        let family_names = interop::Strings::from_strs(family_names);
         let locale = interop::String::from_str(locale.as_ref());
         Typeface::from_ptr(unsafe {
             sb::C_FontCollection_defaultFallback(
                 self.native_mut(),
                 unicode,
+                family_names.native(),
                 font_style.into_native(),
                 locale.native(),
                 font_args.into().native_ptr_or_null(),

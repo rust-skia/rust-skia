@@ -13,20 +13,22 @@ Function level documentation is [not yet](https://github.com/rust-skia/rust-skia
 Skia-safe wraps most parts of the public Skia C++ APIs:
 
 - [x] Vector Geometry: Matrix, Rect, Point, Size, etc.
-- [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path.
-- [x] Effects and Shaders.
-- [x] Utility classes we think are useful.
+- [x] Most drawing related classes and functions: Surface, Canvas, Paint, Path
+- [x] Effects and Shaders
+- [x] Utility classes we think are useful
 - [x] PDF & SVG rendering
 - [ ] Skia Modules
   - [x] Text shaping with [Harfbuzz](https://www.freedesktop.org/wiki/Software/HarfBuzz/) and [ICU](http://site.icu-project.org/home).
   - [x] Text layout (skparagraph)
-  - [ ] Animation via [Skottie](https://skia.org/docs/user/modules/skottie/)
-- [x] GPU Backends
-  - [x] Vulkan
-  - [x] OpenGL
-  - [x] Metal
-  - [x] Direct3D
-  - [ ] WebGPU [Dawn](https://dawn.googlesource.com/dawn/)
+  - [x] Animation via [Skottie](https://skia.org/docs/user/modules/skottie/)
+- [ ] GPU Backends
+  - [ ] Ganesh
+    - [x] Vulkan
+    - [x] OpenGL
+    - [x] Metal
+    - [x] Direct3D
+    - [ ] WebGPU [Dawn](https://dawn.googlesource.com/dawn/)
+  - [ ] Graphite
 
 Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
 
@@ -91,6 +93,10 @@ The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bi
 ### `svg`
 
 This feature enables support for rendering SVG files (`svg::Dom`).
+
+### `skottie`
+
+The Cargo feature `skottie` enables support for rendering Lottie animations through Skia's Skottie module. Skottie provides an API to load, parse, and render animations exported in the [Lottie JSON format](https://lottiefiles.github.io/lottie-docs/). The bindings are available in the `skia_safe::skottie` module.
 
 ### `webp-encode`, `webp-decode`, `webp`
 

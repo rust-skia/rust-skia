@@ -29,7 +29,7 @@ jobs:
             runTests: true
             exampleArgs: '--driver cpu --driver pdf --driver svg'
             generateArtifacts: true
-            features: 'd3d,gl,svg,textlayout,ureq,vulkan,webp'
+            features: 'd3d,gl,skottie,svg,textlayout,ureq,vulkan,webp'
     runs-on: windows-11-arm
     # Containers are not supported on Windows.
     # container: ghcr.io/pragmatrix/rust-skia-windows:latest

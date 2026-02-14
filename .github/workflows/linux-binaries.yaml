@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features: ["", "gl", "textlayout", "vulkan", "gl,textlayout", "gl,x11", "textlayout,vulkan", "gl,textlayout,vulkan", "gl,textlayout,x11", "gl,svg,textlayout,x11", "svg,textlayout,vulkan,webp", "gl,svg,textlayout,wayland,x11", "egl,gl,svg,textlayout,vulkan,wayland,webp,x11"]
+        features: ["", "gl", "textlayout", "vulkan", "gl,textlayout", "gl,x11", "textlayout,vulkan", "gl,textlayout,vulkan", "gl,textlayout,x11", "gl,svg,textlayout,x11", "svg,textlayout,vulkan,webp", "gl,svg,textlayout,wayland,x11", "egl,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11"]
         target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "aarch64-linux-android", "x86_64-linux-android", "i686-linux-android"]
         include:
           - target: x86_64-unknown-linux-gnu
@@ -79,11 +79,11 @@ jobs:
           - target: i686-linux-android
             features: 'gl,svg,textlayout,wayland,x11'
           - target: aarch64-linux-android
-            features: 'egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+            features: 'egl,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11'
           - target: x86_64-linux-android
-            features: 'egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+            features: 'egl,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11'
           - target: i686-linux-android
-            features: 'egl,gl,svg,textlayout,vulkan,wayland,webp,x11'
+            features: 'egl,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11'
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
     env: 

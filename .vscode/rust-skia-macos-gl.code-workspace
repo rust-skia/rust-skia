@@ -5,7 +5,7 @@
     "settings": {
         "rust-analyzer": {
             "cargo": {
-                "features": ["gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "ureq", "webp"]
+                "features": ["gl"]
             }
         }
     }

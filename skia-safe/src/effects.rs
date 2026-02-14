@@ -6,6 +6,7 @@ pub mod color_matrix_filter;
 pub mod corner_path_effect;
 pub mod dash_path_effect;
 pub mod discrete_path_effect;
+pub mod gradient;
 pub mod gradient_shader;
 pub mod high_contrast_filter;
 pub mod image_filters;

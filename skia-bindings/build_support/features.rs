@@ -58,6 +58,9 @@ impl Features {
         if cfg!(feature = "svg") {
             features += feature::SVG;
         }
+        if cfg!(feature = "skottie") {
+            features += feature::SKOTTIE;
+        }
         if cfg!(feature = "webp-encode") {
             features += feature::WEBP_ENCODE;
         }
@@ -204,6 +207,8 @@ pub mod feature {
     pub const TEXTLAYOUT: &str = "textlayout";
     /// Support for rendering SVG
     pub const SVG: &str = "svg";
+    /// Support for Lottie animations via Skottie
+    pub const SKOTTIE: &str = "skottie";
     /// Support the encoding of bitmap data to the WEBP image format
     pub const WEBP_ENCODE: &str = "webp-encode";
     /// Support the decoding of the WEBP image format to bitmap data
@@ -216,7 +221,12 @@ pub mod feature {
 
     pub const FREETYPE_SPECIFIC: &[&str] = &[EMBED_FREETYPE, FREETYPE_WOFF2];
 
-    pub const DEPENDENCIES: &[(&str, &[&str])] = &[(EGL, &[GL]), (X11, &[GL]), (WAYLAND, &[EGL])];
+    pub const DEPENDENCIES: &[(&str, &[&str])] = &[
+        (EGL, &[GL]),
+        (X11, &[GL]),
+        (WAYLAND, &[EGL]),
+        (SKOTTIE, &[TEXTLAYOUT]),
+    ];
 
     pub const KEY_REPLACEMENTS: &[(&str, &str)] = &[
         (WEBP_ENCODE, "webpe"),
