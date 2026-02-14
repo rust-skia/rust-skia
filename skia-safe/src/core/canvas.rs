@@ -8,6 +8,8 @@ use skia_bindings::{
 
 #[cfg(feature = "gpu")]
 use crate::gpu;
+#[cfg(feature = "graphite")]
+use crate::graphite;
 use crate::{
     prelude::*, scalar, Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode,
     Font, GlyphId, IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, Matrix, Paint, Path,
@@ -511,6 +513,12 @@ impl Canvas {
     pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.recording_context()
             .and_then(|mut c| c.as_direct_context())
+    }
+
+    /// Returns the [`graphite::Recorder`] if this canvas is backed by Graphite.
+    #[cfg(feature = "graphite")]
+    pub fn recorder(&self) -> Option<graphite::Recorder> {
+        graphite::Recorder::from_ptr(unsafe { sb::C_SkCanvas_recorder(self.native()) })
     }
 
     /// Sometimes a canvas is owned by a surface. If it is, [`Self::surface()`] will return a bare
