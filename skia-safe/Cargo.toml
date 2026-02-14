@@ -28,9 +28,9 @@ doctest = false
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf"]
-all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "webp"]
-all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "webp"]
-all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "webp"]
+all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "webp", "graphite"]
+all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "webp", "graphite"]
+all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "webp", "graphite"]
 gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
@@ -56,6 +56,7 @@ save-svg-images = []
 
 # implied only, do not use
 gpu = []
+graphite = ["skia-bindings/graphite"]
 
 [dependencies]
 bitflags = "2.0"

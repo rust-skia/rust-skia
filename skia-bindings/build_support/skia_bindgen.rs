@@ -63,6 +63,9 @@ impl Configuration {
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
+            if features.graphite() {
+                sources.push("src/graphite.cpp".into());
+            }
             if features[feature::TEXTLAYOUT] {
                 sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
             }
@@ -472,6 +475,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::__tree.*",
     // libstdc++ 10 on Linux (since m143, c++20)
     "std::strong_ordering",
+    // Graphite types that expose std::unordered_set in public fields
+    "skgpu::graphite::Recording",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
