@@ -79,7 +79,7 @@ tar = { version = "0.4.26", optional = true }
 # the matching prebuilt binaries.
 serde_json = "1.0.39"
 # For reading Cargo.toml from within a package.
-toml = "0.9.2"
+toml = "1.0.3"
 
 [dev-dependencies]
 # build dependencies duplicated for testing :(
@@ -92,4 +92,4 @@ heck = "0.5.0"
 flate2 = { version = "1.0.7" }
 tar = { version = "0.4.26" }
 serde_json = "1.0.39"
-toml = "0.9.2"
+toml = "1.0.3"
