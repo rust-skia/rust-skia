@@ -215,6 +215,9 @@ pub mod feature {
     /// Build with FreeType WOFF2 support
     pub const FREETYPE_WOFF2: &str = "freetype-woff2";
 
+    pub const JPEG_ENCODE: &str = "jpeg-encode";
+    pub const JPEG_DECODE: &str = "jpeg-decode";
+
     pub const FREETYPE_SPECIFIC: &[&str] = &[EMBED_FREETYPE, FREETYPE_WOFF2];
 
     pub const DEPENDENCIES: &[(&str, &[&str])] = &[
@@ -222,6 +225,7 @@ pub mod feature {
         (X11, &[GL]),
         (WAYLAND, &[EGL]),
         (SKOTTIE, &[TEXTLAYOUT]),
+        (PDF, &[JPEG_ENCODE, JPEG_DECODE]),
     ];
 
     pub const KEY_REPLACEMENTS: &[(&str, &str)] = &[
@@ -229,9 +233,7 @@ pub mod feature {
         (WEBP_DECODE, "webpd"),
         (EMBED_FREETYPE, "ftembed"),
         (FREETYPE_WOFF2, "ftwoff2"),
+        (JPEG_ENCODE, "jpege"),
+        (JPEG_DECODE, "jpegd"),
     ];
-
-    pub const JPEG_ENCODE: &str = "jpeg-encode";
-
-    pub const JPEG_DECODE: &str = "jpeg-decode";
 }
