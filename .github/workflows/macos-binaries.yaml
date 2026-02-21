@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features: ["", "gl", "metal", "textlayout", "vulkan", "gl,textlayout", "metal,textlayout", "textlayout,vulkan", "gl,metal,textlayout", "gl,svg,textlayout", "gl,textlayout,vulkan", "svg,textlayout,webp", "gl,svg,textlayout,vulkan", "metal,svg,textlayout,webp"]
+        features: ["", "gl", "metal", "textlayout", "vulkan", "gl,textlayout", "metal,textlayout", "textlayout,vulkan", "gl,metal,textlayout", "gl,textlayout,vulkan", "svg,textlayout,webp", "gl,metal,svg,textlayout", "gl,svg,textlayout,vulkan", "metal,svg,textlayout,webp"]
         target: ["aarch64-apple-darwin", "x86_64-apple-darwin", "aarch64-apple-ios", "aarch64-apple-ios-sim", "x86_64-apple-ios"]
         include:
           - target: aarch64-apple-darwin
@@ -71,12 +71,12 @@ jobs:
             macosxDeploymentTarget: '10.13'
           - features: 'gl,metal,textlayout'
             macosxDeploymentTarget: '10.14'
-          - features: 'gl,svg,textlayout'
-            macosxDeploymentTarget: '10.13'
           - features: 'gl,textlayout,vulkan'
             macosxDeploymentTarget: '10.13'
           - features: 'svg,textlayout,webp'
             macosxDeploymentTarget: '10.13'
+          - features: 'gl,metal,svg,textlayout'
+            macosxDeploymentTarget: '10.14'
           - features: 'gl,svg,textlayout,vulkan'
             macosxDeploymentTarget: '10.13'
           - features: 'metal,svg,textlayout,webp'
