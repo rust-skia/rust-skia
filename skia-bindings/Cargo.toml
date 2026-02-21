@@ -47,6 +47,8 @@ webp = ["webp-encode", "webp-decode"]
 webp-encode = []
 webp-decode = []
 pdf = []
+graphite = []
+
 # sys libraries
 use-system-jpeg-turbo = ["dep:mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.
@@ -56,7 +58,7 @@ binary-cache = ["dep:flate2", "dep:tar"]
 embed-icudtl = []
 embed-freetype = []
 freetype-woff2 = []
-# Panic when any compilation steps are required to run. 
+# Panic when any compilation steps are required to run.
 # See <https://github.com/rust-skia/rust-skia/pull/1121>.
 no-compile = []
 

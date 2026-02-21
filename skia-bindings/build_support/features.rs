@@ -48,6 +48,10 @@ impl Features {
             features += feature::D3D;
         }
 
+        if cfg!(feature = "graphite") {
+            features += feature::GRAPHITE;
+        }
+
         if cfg!(feature = "textlayout") {
             features += feature::TEXTLAYOUT;
         }
@@ -76,6 +80,10 @@ impl Features {
 
     pub fn gpu(&self) -> bool {
         self[feature::GL] || self[feature::VULKAN] || self[feature::METAL] || self[feature::D3D]
+    }
+
+    pub fn graphite(&self) -> bool {
+        self[feature::GRAPHITE]
     }
 
     pub fn is_empty(&self) -> bool {
@@ -191,6 +199,9 @@ pub mod feature {
     pub const METAL: &str = "metal";
     /// Build with Direct3D support
     pub const D3D: &str = "d3d";
+
+    /// Build with Graphite support
+    pub const GRAPHITE: &str = "graphite";
 
     /// Features related to text layout. Modules skshaper and skparagraph
     pub const TEXTLAYOUT: &str = "textlayout";
