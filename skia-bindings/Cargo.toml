@@ -60,6 +60,10 @@ freetype-woff2 = []
 # See <https://github.com/rust-skia/rust-skia/pull/1121>.
 no-compile = []
 
+jpeg = ["jpeg-encode", "jpeg-decode"]
+jpeg-encode = []
+jpeg-decode = []
+
 [dependencies]
 mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
 
