@@ -98,7 +98,7 @@ ash = { version = "^0.38.0" }
 vulkano = { version = "0.35" }
 
 # metal-window
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dev-dependencies]
 objc2 = { version = "0.6.3", default-features = false }
 objc2-core-foundation = { version = "0.3.2", default-features = false }
 objc2-metal = { version = "0.3.2", default-features = false, features = ["MTLCommandBuffer", "MTLCommandQueue", "MTLDrawable", "MTLPixelFormat"] }
@@ -106,11 +106,11 @@ objc2-quartz-core = { version = "0.3.2", default-features = false, features = ["
 raw-window-handle = "0.6.0"
 
 # metal-window (macOS)
-[target.'cfg(target_os = "macos")'.dependencies]
+[target.'cfg(target_os = "macos")'.dev-dependencies]
 objc2-app-kit = { version = "0.3.2", default-features = false, features = ["objc2-quartz-core", "NSView", "NSResponder"] }
 
 # metal-window (iOS)
-[target.'cfg(target_os = "ios")'.dependencies]
+[target.'cfg(target_os = "ios")'.dev-dependencies]
 objc2-ui-kit = { version = "0.3.2", default-features = false, features = ["objc2-quartz-core", "UIView", "UIResponder"] }
 
 # d3d-window
