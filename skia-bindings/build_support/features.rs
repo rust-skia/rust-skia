@@ -71,6 +71,13 @@ impl Features {
             features += feature::FREETYPE_WOFF2;
         }
 
+        if cfg!(feature = "jpeg-encode") {
+            features += feature::JPEG_ENCODE;
+        }
+        if cfg!(feature = "jpeg-decode") {
+            features += feature::JPEG_DECODE;
+        }
+
         features
     }
 
@@ -223,4 +230,8 @@ pub mod feature {
         (EMBED_FREETYPE, "ftembed"),
         (FREETYPE_WOFF2, "ftwoff2"),
     ];
+
+    pub const JPEG_ENCODE: &str = "jpeg-encode";
+
+    pub const JPEG_DECODE: &str = "jpeg-decode";
 }

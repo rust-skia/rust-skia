@@ -138,9 +138,16 @@ impl FinalBuildConfiguration {
                 .arg("skia_use_system_zlib", yes_if(use_system_libraries))
                 .arg("skia_use_xps", no())
                 .arg("skia_use_dng_sdk", no())
+                .arg(
+                    "skia_use_libjpeg_turbo_decode",
+                    yes_if(features[feature::JPEG_ENCODE]),
+                )
+                .arg(
+                    "skia_use_libjpeg_turbo_encode",
+                    yes_if(features[feature::JPEG_DECODE]),
+                )
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
-
             if features[feature::VULKAN] {
                 builder
                     .arg("skia_use_vulkan", yes())
