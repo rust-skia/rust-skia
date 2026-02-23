@@ -1934,6 +1934,33 @@ C_SkFontArguments_getPalette(const SkFontArguments *self) {
     return self->getPalette();
 }
 
+extern "C" void C_SkFontArguments_setSyntheticBold(SkFontArguments* self, int syntheticBold) {
+    self->setSyntheticBold(
+        syntheticBold < 0 ? std::nullopt : std::optional<bool>(syntheticBold != 0));
+}
+
+extern "C" int C_SkFontArguments_getSyntheticBold(const SkFontArguments* self) {
+    auto syntheticBold = self->getSyntheticBold();
+    if (!syntheticBold.has_value()) {
+        return -1;
+    }
+    return syntheticBold.value() ? 1 : 0;
+}
+
+extern "C" void C_SkFontArguments_setSyntheticOblique(SkFontArguments* self,
+                                                        int syntheticOblique) {
+    self->setSyntheticOblique(
+        syntheticOblique < 0 ? std::nullopt : std::optional<bool>(syntheticOblique != 0));
+}
+
+extern "C" int C_SkFontArguments_getSyntheticOblique(const SkFontArguments* self) {
+    auto syntheticOblique = self->getSyntheticOblique();
+    if (!syntheticOblique.has_value()) {
+        return -1;
+    }
+    return syntheticOblique.value() ? 1 : 0;
+}
+
 //
 // core/SkFontMgr.h
 //
