@@ -177,7 +177,7 @@ mod docs {
 }
 
 mod effects {
-    use skia_safe::{gradient, gradient_shader, image_filters, runtime_effect, RuntimeEffect};
+    use skia_safe::{gradient, image_filters, runtime_effect, RuntimeEffect};
     use static_assertions::*;
 
     assert_impl_all!(gradient::Interpolation: Send, Sync);
@@ -186,8 +186,6 @@ mod effects {
     assert_impl_all!(gradient::interpolation::HueMethod: Send, Sync);
     assert_impl_all!(gradient::Colors: Send, Sync);
     assert_impl_all!(gradient::Gradient: Send, Sync);
-
-    assert_impl_all!(gradient_shader::Interpolation: Send, Sync);
 
     assert_impl_all!(image_filters::CropRect: Send, Sync);
     assert_impl_all!(image_filters::Dither: Send, Sync);

@@ -2,24 +2,7 @@ use std::fmt;
 
 use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
 
-use crate::{
-    gradient_shader, prelude::*, scalar, Color, ColorFilter, ColorSpace, Image, Matrix,
-    NativeFlattenable, TileMode,
-};
-
-#[derive(Clone, PartialEq, Debug)]
-pub struct GradientInfo<'a> {
-    pub colors: &'a [Color],
-    pub color_offsets: &'a [scalar],
-    pub tile_mode: TileMode,
-    pub gradient_flags: gradient_shader::Flags,
-}
-
-impl GradientInfo<'_> {
-    pub fn color_count(&self) -> usize {
-        self.colors.len()
-    }
-}
+use crate::{prelude::*, ColorFilter, ColorSpace, Image, Matrix, NativeFlattenable, TileMode};
 
 pub type Shader = RCHandle<SkShader>;
 unsafe_send_sync!(Shader);
