@@ -7,6 +7,7 @@ pub mod corner_path_effect;
 pub mod dash_path_effect;
 pub mod discrete_path_effect;
 pub mod gradient;
+#[deprecated(since = "0.0.0", note = "Use the skia_safe::gradient module")]
 pub mod gradient_shader;
 pub mod high_contrast_filter;
 pub mod image_filters;

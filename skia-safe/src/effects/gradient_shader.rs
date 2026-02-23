@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use crate::{
     gradient, scalar, shaders, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode,
 };
@@ -20,7 +22,10 @@ impl From<Flags> for Interpolation {
 }
 
 impl Shader {
-    #[deprecated(since = "0.93.0", note = "Use shaders::linear_gradient() instead")]
+    #[deprecated(
+        since = "0.93.0",
+        note = "Use gradient::shaders::linear_gradient() instead"
+    )]
     pub fn linear_gradient<'a>(
         points: (impl Into<Point>, impl Into<Point>),
         colors: impl Into<GradientShaderColors<'a>>,
@@ -32,7 +37,10 @@ impl Shader {
         linear(points, colors, pos, mode, flags, local_matrix)
     }
 
-    #[deprecated(since = "0.93.0", note = "Use shaders::linear_gradient() instead")]
+    #[deprecated(
+        since = "0.93.0",
+        note = "Use gradient::shaders::linear_gradient() instead"
+    )]
     pub fn linear_gradient_with_interpolation<'a>(
         points: (impl Into<Point>, impl Into<Point>),
         colors: (&'a [Color4f], impl Into<Option<ColorSpace>>),
@@ -44,7 +52,10 @@ impl Shader {
         linear_with_interpolation(points, colors, pos, mode, interpolation, local_matrix)
     }
 
-    #[deprecated(since = "0.93.0", note = "Use shaders::radial_gradient() instead")]
+    #[deprecated(
+        since = "0.93.0",
+        note = "Use gradient::shaders::radial_gradient() instead"
+    )]
     pub fn radial_gradient<'a>(
         center: impl Into<Point>,
         radius: scalar,
@@ -57,7 +68,10 @@ impl Shader {
         radial(center, radius, colors, pos, mode, flags, local_matrix)
     }
 
-    #[deprecated(since = "0.93.0", note = "Use shaders::radial_gradient() instead")]
+    #[deprecated(
+        since = "0.93.0",
+        note = "Use gradient::shaders::radial_gradient() instead"
+    )]
     #[allow(clippy::too_many_arguments)]
     pub fn radial_gradient_with_interpolation<'a>(
         center_and_radius: (impl Into<Point>, scalar),
@@ -79,7 +93,7 @@ impl Shader {
 
     #[deprecated(
         since = "0.93.0",
-        note = "Use shaders::two_point_conical_gradient() instead"
+        note = "Use gradient::shaders::two_point_conical_gradient() instead"
     )]
     #[allow(clippy::too_many_arguments)]
     pub fn two_point_conical_gradient<'a>(
@@ -108,7 +122,7 @@ impl Shader {
 
     #[deprecated(
         since = "0.93.0",
-        note = "Use shaders::two_point_conical_gradient() instead"
+        note = "Use gradient::shaders::two_point_conical_gradient() instead"
     )]
     pub fn two_point_conical_gradient_with_interpolation<'a>(
         start_and_radius: (impl Into<Point>, scalar),
@@ -130,7 +144,10 @@ impl Shader {
         )
     }
 
-    #[deprecated(since = "0.93.0", note = "Use shaders::sweep_gradient() instead")]
+    #[deprecated(
+        since = "0.93.0",
+        note = "Use gradient::shaders::sweep_gradient() instead"
+    )]
     pub fn sweep_gradient<'a>(
         center: impl Into<Point>,
         colors: impl Into<GradientShaderColors<'a>>,
@@ -143,7 +160,10 @@ impl Shader {
         sweep(center, colors, pos, mode, angles, flags, local_matrix)
     }
 
-    #[deprecated(since = "0.93.0", note = "Use shaders::sweep_gradient() instead")]
+    #[deprecated(
+        since = "0.93.0",
+        note = "Use gradient::shaders::sweep_gradient() instead"
+    )]
     pub fn sweep_gradient_with_interpolation<'a>(
         center: impl Into<Point>,
         colors: (&'a [Color4f], impl Into<Option<ColorSpace>>),
