@@ -12,7 +12,7 @@ add_library(skiabindings
         skia-bindings/src/gl.cpp
         skia-bindings/src/gpu.cpp
         skia-bindings/src/paragraph.cpp
-        skia-bindings/src/shaper.cpp 
+        skia-bindings/src/shaper.cpp
         skia-bindings/src/svg.cpp
         skia-bindings/src/vulkan.cpp
         skia-bindings/src/metal.cpp

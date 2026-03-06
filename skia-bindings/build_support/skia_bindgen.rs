@@ -149,7 +149,10 @@ pub fn generate_bindings(
         // linked into the final executable.
         .blocklist_type("SkUnicode")
         .raw_line("pub enum SkUnicode {}")
-
+        //libc++ fix
+        .opaque_type("std::optional.*")
+        .opaque_type("std_optional.*")
+        .opaque_type("std_add_pointer.*")
 
         // misc
         .allowlist_var("SK_Color.*")
