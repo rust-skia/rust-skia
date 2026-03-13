@@ -10,7 +10,7 @@ members = [
 ]
 
 [workspace.package]
-rust-version = "1.82"
+rust-version = "1.85"
 
 [profile.release]
 # We want to build skia-org with with lto="thin"
