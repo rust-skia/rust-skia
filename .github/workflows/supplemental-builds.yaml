@@ -143,6 +143,9 @@ jobs:
     - name: Install Ninja
       run: choco install ninja
 
+    - name: Install Rust target x86_64-pc-windows-msvc
+      run: rustup target add x86_64-pc-windows-msvc
+
     - name: 'Build with RUSTFLAGS=-Clink-dead-code (#318)'
       run: |
         # See https://github.com/rust-lang/rust/issues/90056 why we have to provide a target.
