@@ -207,6 +207,13 @@ jobs:
     - name: Install Ninja
       run: choco install ninja
 
+    - name: Install Clippy
+      run: rustup component add clippy
+
+    - name: 'Run Clippy for skia-safe with no default features and no PDF'
+      run: |
+        cargo clippy -p skia-safe --no-default-features -- -Dwarnings
+
     - name: 'Test skia-safe with no default features and no PDF'
       run: |
         cargo test -p skia-safe --no-default-features
@@ -234,6 +241,13 @@ jobs:
 
     - name: Install Ninja
       run: choco install ninja
+
+    - name: Install Clippy
+      run: rustup component add clippy
+
+    - name: 'Run Clippy for skia-safe with SVG only'
+      run: |
+        cargo clippy -p skia-safe --no-default-features --features svg -- -Dwarnings
 
     - name: 'Test skia-safe with SVG only'
       run: |
