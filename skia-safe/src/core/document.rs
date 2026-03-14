@@ -66,6 +66,7 @@ impl<State> Document<'_, State> {
 }
 
 impl<'a> Document<'a, state::Open> {
+    #[allow(unused)]
     pub(crate) fn new(stream: RustWStream<'a>, document: RCHandle<SkDocument>) -> Self {
         Document {
             document,

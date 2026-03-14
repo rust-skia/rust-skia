@@ -106,6 +106,7 @@ impl Features {
     }
 
     /// A comparable set of feature ids (sorted and joined by `-`).
+    #[allow(unused)]
     pub fn to_key(&self) -> String {
         let mut features: Vec<_> = self
             .0
