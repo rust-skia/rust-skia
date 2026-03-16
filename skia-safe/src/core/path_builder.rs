@@ -4,7 +4,7 @@ use crate::{
     path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, PathVerb, Point, RRect,
     Rect, Vector,
 };
-use skia_bindings::{self as sb, SkPathBuilder, SkPath_AddPathMode};
+use skia_bindings::{self as sb, SkPathBuilder};
 
 pub type ArcSize = sb::SkPathBuilder_ArcSize;
 variant_name!(ArcSize::Large);
@@ -845,20 +845,51 @@ impl PathBuilder {
         self
     }
 
-    /// Appends src to [`PathBuilder`], offset by (dx, dy).
+    /// Appends src to [`PathBuilder`].
     ///
     /// If mode is [`path::AddPathMode::Append`], src verb array, [`Point`] array, and conic weights are
     /// added unaltered. If mode is [`path::AddPathMode::Extend`], add line before appending
     /// verbs, [`Point`], and conic weights.
     ///
     /// - `path`: [`Path`] verbs, [`Point`], and conic weights to add
+    /// - `mode`: [`path::AddPathMode::Append`] or [`path::AddPathMode::Extend`]
     ///
     /// # Returns
     /// reference to [`PathBuilder`]
-    pub fn add_path(&mut self, path: &Path) -> &mut Self {
+    pub fn add_path(
+        &mut self,
+        path: &Path,
+        mode: impl Into<Option<path::AddPathMode>>,
+    ) -> &mut Self {
+        self.add_path_with_offset(path, (0.0, 0.0), mode)
+    }
+
+    /// Appends src to [`PathBuilder`], offset by (dx, dy).
+    ///
+    /// If mode is [`path::AddPathMode::Append`], src verb array, [`Point`] array, and conic weights are
+    /// added unaltered except for the applied offset. If mode is [`path::AddPathMode::Extend`], add line
+    /// before appending verbs, [`Point`], and conic weights.
+    ///
+    /// - `path`: [`Path`] verbs, [`Point`], and conic weights to add
+    /// - `offset`: offset applied to src before appending
+    /// - `mode`: [`path::AddPathMode::Append`] or [`path::AddPathMode::Extend`]
+    ///
+    /// # Returns
+    /// reference to [`PathBuilder`]
+    pub fn add_path_with_offset(
+        &mut self,
+        path: &Path,
+        offset: impl Into<Vector>,
+        mode: impl Into<Option<path::AddPathMode>>,
+    ) -> &mut Self {
+        let offset = offset.into();
         unsafe {
-            self.native_mut()
-                .addPath(path.native(), 0., 0., SkPath_AddPathMode::Append)
+            self.native_mut().addPath(
+                path.native(),
+                offset.x,
+                offset.y,
+                mode.into().unwrap_or(path::AddPathMode::Append),
+            )
         };
         self
     }
@@ -1206,6 +1237,23 @@ mod tests {
 
         // Both should contain verb information
         assert!(decimal.contains("path") || decimal.contains("move") || decimal.contains("line"));
+    }
+
+    #[test]
+    fn test_add_path_with_offset() {
+        let mut src_builder = PathBuilder::new();
+        src_builder.move_to((1.0, 2.0)).line_to((3.0, 4.0));
+        let src = src_builder.detach();
+
+        let mut dst = PathBuilder::new();
+        dst.add_path_with_offset(&src, (10.0, 20.0), None);
+
+        let points = dst.points();
+        assert_eq!(points.len(), 2);
+        assert_eq!(points[0].x, 11.0);
+        assert_eq!(points[0].y, 22.0);
+        assert_eq!(points[1].x, 13.0);
+        assert_eq!(points[1].y, 24.0);
     }
 
     #[test]
