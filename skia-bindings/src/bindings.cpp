@@ -319,6 +319,8 @@ extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, cons
 extern "C" void C_Core_Types(
     SkArc *, SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
 
+extern "C" void C_SkDocument_Types(SkDocument*) {}
+
 //
 // core/SkBlender.h
 //
