@@ -3679,6 +3679,7 @@ SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
 // docs/SkPDFDocument.h
 //
 
+#if defined(SK_SUPPORT_PDF)
 extern "C" void C_SkPDF_AttributeList_destruct(SkPDF::AttributeList *self) {
     self->~AttributeList();
 }
@@ -3763,6 +3764,7 @@ extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Meta
 extern "C" void C_SkPDF_SetNodeId(SkCanvas* dst, int nodeID) {
     return SkPDF::SetNodeId(dst, nodeID);
 }
+#endif
 
 //
 // pathops/

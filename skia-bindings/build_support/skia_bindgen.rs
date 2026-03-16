@@ -154,6 +154,8 @@ pub fn generate_bindings(
         // misc
         .allowlist_var("SK_Color.*")
         .allowlist_var("kAll_GrBackendState")
+        .allowlist_type("SkDocument")
+        .allowlist_type("SkDocument_INHERITED")
         .use_core()
         .clang_arg(format!("-std=c++{CPP_VERSION}"))
         .clang_args(&["-x", "c++"])
