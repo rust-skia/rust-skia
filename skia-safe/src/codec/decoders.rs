@@ -40,6 +40,7 @@ pub mod ico_decoder {
     }
 }
 
+#[cfg(feature = "jpeg")]
 pub mod jpeg_decoder {
     use std::{io, result};
 

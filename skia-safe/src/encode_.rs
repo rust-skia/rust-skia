@@ -1,5 +1,6 @@
 use crate::{Bitmap, EncodedImageFormat, Pixmap};
 
+#[cfg(feature = "jpeg")]
 pub mod jpeg_encoder;
 pub mod png_encoder;
 // TODO: May support with an optional feature, gn flag `skia_use_rust_png_encode`.
@@ -39,7 +40,9 @@ impl crate::Image {
 }
 
 pub mod encode {
-    use super::{jpeg_encoder, png_encoder};
+    #[cfg(feature = "jpeg")]
+    use super::jpeg_encoder;
+    use super::png_encoder;
     use crate::{Bitmap, EncodedImageFormat, Pixmap};
 
     pub fn pixmap(
@@ -49,7 +52,9 @@ pub mod encode {
     ) -> Option<Vec<u8>> {
         let mut data = Vec::new();
         let quality = quality.into().unwrap_or(100).clamp(0, 100);
+        let _ = quality;
         match format {
+            #[cfg(feature = "jpeg")]
             EncodedImageFormat::JPEG => {
                 let opts = jpeg_encoder::Options {
                     quality,
@@ -95,7 +100,9 @@ pub mod encode {
         quality: impl Into<Option<u32>>,
     ) -> Option<crate::Data> {
         let quality = quality.into().unwrap_or(100).clamp(0, 100);
+        let _ = quality;
         match image_format {
+            #[cfg(feature = "jpeg")]
             EncodedImageFormat::JPEG => {
                 let opts = jpeg_encoder::Options {
                     quality,
