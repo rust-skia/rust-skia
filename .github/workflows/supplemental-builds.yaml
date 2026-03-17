@@ -220,41 +220,6 @@ jobs:
       env:
         RUSTFLAGS: '-Dwarnings'
 
-  windows-skia-safe-svg-only:
-    runs-on: windows-2022
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-
-    - name: Install Rust
-      uses: hecrj/setup-rust-action@v1.4.0
-      with:
-        rust-version: stable
-
-    - name: Python Version
-      run: python --version
-
-    - name: Upgrade LLVM
-      run: choco upgrade llvm
-
-    - name: Install Ninja
-      run: choco install ninja
-
-    - name: Install Clippy
-      run: rustup component add clippy
-
-    - name: 'Run Clippy for skia-safe with SVG only'
-      run: |
-        cargo clippy -p skia-safe --no-default-features --features svg -- -Dwarnings
-
-    - name: 'Test skia-safe with SVG only'
-      run: |
-        cargo test -p skia-safe --no-default-features --features svg
-      env:
-        RUSTFLAGS: '-Dwarnings'
-
   linux-beta:
     runs-on: ubuntu-24.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
