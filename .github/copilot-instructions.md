@@ -23,6 +23,7 @@ Update it whenever you learn something new about the project's patterns, convent
 - Preserve backwards compatibility unless instructed otherwise.
 - When refactoring, don't add trait implementations (Clone, Debug, Default, etc.) that weren't present in the original code.
 - If a trait can't be derived due to field constraints, investigate whether the trait is actually needed before implementing it manually.
+- Keep reduced-feature builds and tests working: code and tests that rely on optional components should be gated or provide safe fallbacks when those components are disabled.
 
 ## Communication
 - Explanations should be concise and strictly relevant.

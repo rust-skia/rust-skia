@@ -7,14 +7,18 @@ use skia_safe::{
 };
 
 /// The supported encoders.
-const STANDARD_ENCODERS: &[EncodedImageFormat] =
-    &[EncodedImageFormat::JPEG, EncodedImageFormat::PNG];
+const STANDARD_ENCODERS: &[EncodedImageFormat] = &[
+    #[cfg(feature = "jpeg")]
+    EncodedImageFormat::JPEG,
+    EncodedImageFormat::PNG,
+];
 
 /// The supported decoders.
 const STANDARD_DECODERS: &[EncodedImageFormat] = &[
     EncodedImageFormat::BMP,
     EncodedImageFormat::GIF,
     EncodedImageFormat::ICO,
+    #[cfg(feature = "jpeg")]
     EncodedImageFormat::JPEG,
     EncodedImageFormat::PNG,
     EncodedImageFormat::WBMP,
@@ -110,6 +114,7 @@ const DECODER_TESTS: &[DecoderTest] = &[
         codec::ico_decoder::decoder,
         include_bytes!("images/color_wheel.ico"),
     ),
+    #[cfg(feature = "jpeg")]
     (
         EncodedImageFormat::JPEG,
         codec::jpeg_decoder::decoder,

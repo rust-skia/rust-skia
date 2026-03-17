@@ -163,6 +163,7 @@ mod core {
     assert_impl_all!(runtime_effect::ChildPtr: Send, Sync);
 }
 
+#[cfg(feature = "pdf")]
 mod docs {
     use skia_safe::pdf;
     use static_assertions::*;

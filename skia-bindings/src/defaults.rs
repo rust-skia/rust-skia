@@ -1,10 +1,12 @@
 //! This file contains Default trait implementations for types that are re-exported from skia-safe.
 #![allow(clippy::derivable_impls)]
 
+#[cfg(feature = "pdf")]
+use crate::SkPDF_Metadata_CompressionLevel;
 use crate::{
-    SkArc_Type, SkBlendMode, SkBlurStyle, SkCanvas_Lattice_RectType, SkClipOp,
-    SkPDF_Metadata_CompressionLevel, SkPaint_Cap, SkPaint_Join, SkParsePath_PathEncoding,
-    SkPathDirection, SkPathFillType, SkTileMode, SkYUVColorSpace,
+    SkArc_Type, SkBlendMode, SkBlurStyle, SkCanvas_Lattice_RectType, SkClipOp, SkPaint_Cap,
+    SkPaint_Join, SkParsePath_PathEncoding, SkPathDirection, SkPathFillType, SkTileMode,
+    SkYUVColorSpace,
 };
 
 impl Default for SkArc_Type {
@@ -68,6 +70,7 @@ impl Default for SkParsePath_PathEncoding {
     }
 }
 
+#[cfg(feature = "pdf")]
 impl Default for SkPDF_Metadata_CompressionLevel {
     fn default() -> Self {
         SkPDF_Metadata_CompressionLevel::Default

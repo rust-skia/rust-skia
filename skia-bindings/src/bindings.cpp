@@ -260,9 +260,11 @@ extern "C" void C_SkIcoDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
     new (uninitialized) SkCodecs::Decoder(SkIcoDecoder::Decoder());
 }
 
+#if defined(SK_CODEC_DECODES_JPEG)
 extern "C" void C_SkJpegDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
     new (uninitialized) SkCodecs::Decoder(SkJpegDecoder::Decoder());
 }
+#endif
 
 extern "C" void C_SkPngDecoder_Decoder(SkCodecs::Decoder* uninitialized) {
     new (uninitialized) SkCodecs::Decoder(SkPngDecoder::Decoder());
@@ -316,6 +318,8 @@ extern "C" void C_SkPixmapUtils_SwapWidthHeight(SkImageInfo* uninitialized, cons
 
 extern "C" void C_Core_Types(
     SkArc *, SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
+
+extern "C" void C_SkDocument_Types(SkDocument*) {}
 
 //
 // core/SkBlender.h
@@ -3596,13 +3600,13 @@ bool C_SkPngRustEncoder_Encode(
 
 // SkJpegEncoder
 
+#if defined(SK_CODEC_ENCODES_JPEG)
 bool C_SkJpegEncoder_Encode(SkWStream* stream, const SkPixmap* pixmap, 
     int quality,
     SkJpegEncoder::Downsample downsample, 
     SkJpegEncoder::AlphaOption alphaOption, 
     const SkData* xmpMetadata, 
     const SkEncodedOrigin* origin) {
-
     SkJpegEncoder::Options options;
     options.fQuality = quality;
     options.fDownsample = downsample;
@@ -3622,7 +3626,6 @@ bool C_SkJpegEncoder_EncodeYUVAPixmaps(SkWStream* stream, const SkYUVAPixmaps* s
     SkJpegEncoder::AlphaOption alphaOption, 
     const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
-
     SkJpegEncoder::Options options;
     options.fQuality = quality;
     options.fDownsample = downsample;
@@ -3641,7 +3644,6 @@ SkData* C_SkJpegEncoder_EncodePixmap(const SkPixmap* src,
     SkJpegEncoder::AlphaOption alphaOption, 
     const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
-
     SkJpegEncoder::Options options;
     options.fQuality = quality;
     options.fDownsample = downsample;
@@ -3660,7 +3662,6 @@ SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
     SkJpegEncoder::AlphaOption alphaOption, 
     const SkData* xmpMetadata,
     const SkEncodedOrigin* origin) {
-
     SkJpegEncoder::Options options;
     options.fQuality = quality;
     options.fDownsample = downsample;
@@ -3672,6 +3673,7 @@ SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
 
     return SkJpegEncoder::Encode(ctx, img, options).release();
 }
+#endif
 
 } // extern "C"
 
@@ -3679,6 +3681,7 @@ SkData* C_SkJpegEncoder_EncodeImage(GrDirectContext* ctx, const SkImage* img,
 // docs/SkPDFDocument.h
 //
 
+#if defined(SK_SUPPORT_PDF)
 extern "C" void C_SkPDF_AttributeList_destruct(SkPDF::AttributeList *self) {
     self->~AttributeList();
 }
@@ -3763,6 +3766,7 @@ extern "C" SkDocument* C_SkPDF_MakeDocument(SkWStream* stream, const SkPDF::Meta
 extern "C" void C_SkPDF_SetNodeId(SkCanvas* dst, int nodeID) {
     return SkPDF::SetNodeId(dst, nodeID);
 }
+#endif
 
 //
 // pathops/

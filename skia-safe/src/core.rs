@@ -164,6 +164,7 @@ pub use surface_props::*;
 pub use swizzle::*;
 pub use text_blob::*;
 pub use texture_compression_type::*;
+#[allow(unused)]
 pub use time::*;
 #[allow(unused)]
 pub use trace_memory_dump::*;

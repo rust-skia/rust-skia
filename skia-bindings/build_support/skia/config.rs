@@ -140,11 +140,11 @@ impl FinalBuildConfiguration {
                 .arg("skia_use_dng_sdk", no())
                 .arg(
                     "skia_use_libjpeg_turbo_decode",
-                    yes_if(features[feature::JPEG_ENCODE]),
+                    yes_if(features[feature::JPEG_DECODE]),
                 )
                 .arg(
                     "skia_use_libjpeg_turbo_encode",
-                    yes_if(features[feature::JPEG_DECODE]),
+                    yes_if(features[feature::JPEG_ENCODE]),
                 )
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
