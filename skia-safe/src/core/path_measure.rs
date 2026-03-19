@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn current_measure() {
         let mut builder = PathBuilder::new_path(&Path::circle((0., 0.), 10.0, None));
-        builder.add_path(&Path::circle((100., 100.), 27.0, None));
+        builder.add_path(&Path::circle((100., 100.), 27.0, None), None);
         let path = builder.detach();
 
         let mut measure = PathMeasure::new(&path, false, None);
