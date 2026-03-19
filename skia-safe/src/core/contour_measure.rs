@@ -92,7 +92,7 @@ impl ContourMeasure {
         .then_some(m)
     }
 
-    #[deprecated(since = "0.0.0", note = "Use get_segment()")]
+    #[deprecated(since = "0.94.0", note = "Use get_segment()")]
     #[must_use]
     /// Given a start and stop distance, appends the intervening segment(s) to `path_builder`.
     ///
