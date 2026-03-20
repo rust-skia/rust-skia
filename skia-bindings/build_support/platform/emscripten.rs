@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use super::{generic, prelude::*};
 
 pub struct Emscripten;
@@ -40,6 +42,24 @@ impl PlatformDetails for Emscripten {
                 "please set the EMSDK environment variable to the root of your Emscripten installation"
             ),
         };
+
+        let sysroot_include = format!("{emsdk_base_dir}/upstream/emscripten/cache/sysroot/include");
+        if Path::new(&sysroot_include).is_dir() {
+            // Newer emsdk versions expose headers via cache/sysroot and reject direct includes
+            // from upstream/emscripten/system.
+            let libcxx_include = format!("{sysroot_include}/c++/v1");
+            if Path::new(&libcxx_include).is_dir() {
+                builder.arg(format!("-isystem{libcxx_include}"));
+            }
+            builder.arg(format!("-isystem{sysroot_include}"));
+
+            // For xlocale.h
+            let compat_include = format!("{sysroot_include}/compat");
+            if Path::new(&compat_include).is_dir() {
+                builder.arg(format!("-isystem{compat_include}"));
+            }
+            return;
+        }
 
         // Add C++ includes (otherwise build will fail with <cmath> not found)
         let mut add_sys_include = |path: &str| {

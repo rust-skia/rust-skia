@@ -1,10 +1,10 @@
 use std::path;
 
 use skia_safe::{
-    color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient_shader,
+    color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient,
     line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar, shaders,
-    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Font, MaskFilter, Matrix, Paint, Path,
-    PathBuilder, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
+    AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Color4f, Font, MaskFilter, Matrix,
+    Paint, Path, PathBuilder, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
 };
 
 use crate::{helper::default_typeface, resources, DrawingDriver};
@@ -117,17 +117,12 @@ fn draw_fill_and_stroke(canvas: &Canvas) {
 
 fn draw_gradient(canvas: &Canvas) {
     let points: (Point, Point) = ((0.0, 0.0).into(), (256.0, 256.0).into());
-    let colors = [Color::BLUE, Color::YELLOW];
+    let colors: [Color4f; 2] = [Color::BLUE.into(), Color::YELLOW.into()];
+    let gradient_colors = gradient::Colors::new_evenly_spaced(&colors, TileMode::Clamp, None);
+    let gradient = gradient::Gradient::new(gradient_colors, gradient::Interpolation::default());
     let paint = &mut Paint::default();
 
-    paint.set_shader(gradient_shader::linear(
-        points,
-        colors.as_ref(),
-        None,
-        TileMode::Clamp,
-        None,
-        None,
-    ));
+    paint.set_shader(gradient::shaders::linear_gradient(points, &gradient, None));
     canvas.draw_paint(paint);
 }
 
@@ -176,24 +171,29 @@ fn draw_transfer_modes(canvas: &Canvas) {
     stroke.set_style(paint::Style::Stroke);
     let font = &Font::from_typeface(default_typeface(), 24.0);
     let src_points: (Point, Point) = ((0.0, 0.0).into(), (64.0, 0.0).into());
-    let src_colors = [Color::MAGENTA & 0x00_FF_FF_FF, Color::MAGENTA];
-    src.set_shader(gradient_shader::linear(
+    let src_colors: [Color4f; 2] = [
+        (Color::MAGENTA & 0x00_FF_FF_FF).into(),
+        Color::MAGENTA.into(),
+    ];
+    let src_gradient_colors =
+        gradient::Colors::new_evenly_spaced(&src_colors, TileMode::Clamp, None);
+    let src_gradient =
+        gradient::Gradient::new(src_gradient_colors, gradient::Interpolation::default());
+    src.set_shader(gradient::shaders::linear_gradient(
         src_points,
-        src_colors.as_ref(),
-        None,
-        TileMode::Clamp,
-        None,
+        &src_gradient,
         None,
     ));
 
     let dst_points: (Point, Point) = ((0.0, 0.0).into(), (0.0, 64.0).into());
-    let dst_colors = [Color::CYAN & 0x00_FF_FF_FF, Color::CYAN];
-    dst.set_shader(gradient_shader::linear(
+    let dst_colors: [Color4f; 2] = [(Color::CYAN & 0x00_FF_FF_FF).into(), Color::CYAN.into()];
+    let dst_gradient_colors =
+        gradient::Colors::new_evenly_spaced(&dst_colors, TileMode::Clamp, None);
+    let dst_gradient =
+        gradient::Gradient::new(dst_gradient_colors, gradient::Interpolation::default());
+    dst.set_shader(gradient::shaders::linear_gradient(
         dst_points,
-        dst_colors.as_ref(),
-        None,
-        TileMode::Clamp,
-        None,
+        &dst_gradient,
         None,
     ));
     canvas.clear(Color::WHITE);
@@ -231,47 +231,46 @@ fn draw_bitmap_shader(canvas: &Canvas) {
 }
 
 fn draw_radial_gradient_shader(canvas: &Canvas) {
-    let colors = [Color::BLUE, Color::YELLOW];
+    let colors: [Color4f; 2] = [Color::BLUE.into(), Color::YELLOW.into()];
+    let gradient_colors = gradient::Colors::new_evenly_spaced(&colors, TileMode::Clamp, None);
+    let gradient = gradient::Gradient::new(gradient_colors, gradient::Interpolation::default());
     let mut paint = Paint::default();
-    paint.set_shader(gradient_shader::radial(
-        (128.0, 128.0),
-        180.0,
-        colors.as_ref(),
-        None,
-        TileMode::Clamp,
-        None,
+    paint.set_shader(gradient::shaders::radial_gradient(
+        ((128.0, 128.0), 180.0),
+        &gradient,
         None,
     ));
     canvas.draw_paint(&paint);
 }
 
 fn draw_two_point_conical_shader(canvas: &Canvas) {
-    let colors = [Color::BLUE, Color::YELLOW];
+    let colors: [Color4f; 2] = [Color::BLUE.into(), Color::YELLOW.into()];
+    let gradient_colors = gradient::Colors::new_evenly_spaced(&colors, TileMode::Clamp, None);
+    let gradient = gradient::Gradient::new(gradient_colors, gradient::Interpolation::default());
     let paint = &mut Paint::default();
-    paint.set_shader(gradient_shader::two_point_conical(
-        (128.0, 128.0),
-        128.0,
-        (128.0, 16.0),
-        16.0,
-        colors.as_ref(),
-        None,
-        TileMode::Clamp,
-        None,
+    paint.set_shader(gradient::shaders::two_point_conical_gradient(
+        ((128.0, 128.0), 128.0),
+        ((128.0, 16.0), 16.0),
+        &gradient,
         None,
     ));
     canvas.draw_paint(paint);
 }
 
 fn draw_sweep_gradient_shader(canvas: &Canvas) {
-    let colors = [Color::CYAN, Color::MAGENTA, Color::YELLOW, Color::CYAN];
+    let colors: [Color4f; 4] = [
+        Color::CYAN.into(),
+        Color::MAGENTA.into(),
+        Color::YELLOW.into(),
+        Color::CYAN.into(),
+    ];
+    let gradient_colors = gradient::Colors::new_evenly_spaced(&colors, TileMode::default(), None);
+    let gradient = gradient::Gradient::new(gradient_colors, gradient::Interpolation::default());
     let paint = &mut Paint::default();
-    paint.set_shader(gradient_shader::sweep(
+    paint.set_shader(gradient::shaders::sweep_gradient(
         (128.0, 128.0),
-        colors.as_ref(),
-        None,
-        TileMode::default(),
-        None,
-        None,
+        (0.0, 360.0),
+        &gradient,
         None,
     ));
     canvas.draw_paint(paint);
@@ -292,20 +291,13 @@ fn draw_turbulence_perlin_noise_shader(canvas: &Canvas) {
 }
 
 fn draw_compose_shader(canvas: &Canvas) {
-    let colors = [Color::BLUE, Color::YELLOW];
+    let colors: [Color4f; 2] = [Color::BLUE.into(), Color::YELLOW.into()];
+    let gradient_colors = gradient::Colors::new_evenly_spaced(&colors, TileMode::Clamp, None);
+    let gradient = gradient::Gradient::new(gradient_colors, gradient::Interpolation::default());
     let paint = &mut Paint::default();
     paint.set_shader(shaders::blend(
         BlendMode::Difference,
-        gradient_shader::radial(
-            (128.0, 128.0),
-            180.0,
-            colors.as_ref(),
-            None,
-            TileMode::Clamp,
-            None,
-            None,
-        )
-        .unwrap(),
+        gradient::shaders::radial_gradient(((128.0, 128.0), 180.0), &gradient, None).unwrap(),
         shaders::turbulence((0.025, 0.025), 2, 0.0, None).unwrap(),
     ));
     canvas.draw_paint(paint);

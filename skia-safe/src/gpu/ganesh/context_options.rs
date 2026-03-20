@@ -13,15 +13,6 @@ variant_name!(ShaderCacheStrategy::BackendSource);
 #[repr(C)]
 #[derive(Debug)]
 pub struct ContextOptions {
-    /// If Skia is creating a default VMA allocator for the Vulkan backend this value will be used
-    /// for the `preferred_large_heap_block_size`. If the value is not set, then Skia will use an
-    /// internally defined default size.
-    ///
-    /// However, it is highly discouraged to have Skia make a default allocator (and support for
-    /// doing so will be removed soon,  b/321962001). Instead clients should create their own
-    /// allocator to pass into Skia where they can fine tune this value themeselves.
-    vulkan_vma_large_heap_block_size: sb::OptionalU64,
-
     /// Optional callback that can be passed into the [`DirectContext`] which will be called when the
     /// [`DirectContext`] is about to be destroyed. When this call is made, it will be safe for the
     /// client to delete the GPU backend context that is backing the [`DirectContext`]. The

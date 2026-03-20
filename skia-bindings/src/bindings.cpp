@@ -94,7 +94,6 @@
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkDiscretePathEffect.h"
 #include "include/effects/SkGradient.h"
-#include "include/effects/SkGradientShader.h"
 #include "include/effects/SkHighContrastFilter.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/effects/SkLumaColorFilter.h"
@@ -1008,7 +1007,7 @@ C_SkPathTypes_Types(SkPathFillType *, SkPathDirection *, SkPathSegmentMask *, Sk
 // core/SkPathUtils.h
 //
 
-extern "C" bool C_PathUtils_FillPathWithPaint(const SkPath* src, const SkPaint* paint, SkPath* dst, const SkRect* cullRect, const SkMatrix* matrix) {
+extern "C" bool C_PathUtils_FillPathWithPaint(const SkPath* src, const SkPaint* paint, SkPathBuilder* dst, const SkRect* cullRect, const SkMatrix* matrix) {
     return skpathutils::FillPathWithPaint(*src, *paint, dst, cullRect, *matrix);
 }
 
@@ -1933,6 +1932,33 @@ C_SkFontArguments_getVariationDesignPosition(const SkFontArguments *self) {
 extern "C" SkFontArguments::Palette
 C_SkFontArguments_getPalette(const SkFontArguments *self) {
     return self->getPalette();
+}
+
+extern "C" void C_SkFontArguments_setSyntheticBold(SkFontArguments* self, int syntheticBold) {
+    self->setSyntheticBold(
+        syntheticBold < 0 ? std::nullopt : std::optional<bool>(syntheticBold != 0));
+}
+
+extern "C" int C_SkFontArguments_getSyntheticBold(const SkFontArguments* self) {
+    auto syntheticBold = self->getSyntheticBold();
+    if (!syntheticBold.has_value()) {
+        return -1;
+    }
+    return syntheticBold.value() ? 1 : 0;
+}
+
+extern "C" void C_SkFontArguments_setSyntheticOblique(SkFontArguments* self,
+                                                        int syntheticOblique) {
+    self->setSyntheticOblique(
+        syntheticOblique < 0 ? std::nullopt : std::optional<bool>(syntheticOblique != 0));
+}
+
+extern "C" int C_SkFontArguments_getSyntheticOblique(const SkFontArguments* self) {
+    auto syntheticOblique = self->getSyntheticOblique();
+    if (!syntheticOblique.has_value()) {
+        return -1;
+    }
+    return syntheticOblique.value() ? 1 : 0;
 }
 
 //
