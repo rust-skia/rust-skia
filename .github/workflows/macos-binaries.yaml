@@ -106,7 +106,7 @@ jobs:
             features: 'gl,svg,textlayout,vulkan'
           - target: x86_64-apple-ios
             features: 'gl,svg,textlayout,vulkan'
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       SKIA_DEBUG: 0
       MACOSX_DEPLOYMENT_TARGET: '${{ matrix.macosxDeploymentTarget }}'
