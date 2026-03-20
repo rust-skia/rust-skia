@@ -250,10 +250,11 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         // Add macosxDeploymentTarget includes for macOS matrix workflows
         if matches!(workflow.host_os, HostOS::MacOS) {
             for feature in features_list {
+                #[allow(clippy::if_same_then_else)]
                 let deployment_target = if feature.contains("metal") {
-                    "10.14"
+                    "11.0"
                 } else {
-                    "10.13"
+                    "11.0"
                 };
                 matrix_lines.push(format!("      - features: '{}'", feature));
                 matrix_lines.push(format!(
@@ -306,10 +307,11 @@ fn macosx_deployment_target(
                 let uses_metal = targets
                     .iter()
                     .any(|target| effective_features(workflow, features, target).contains(&metal));
+                #[allow(clippy::if_same_then_else)]
                 if uses_metal {
-                    return Some("10.14");
+                    return Some("11.0");
                 } else {
-                    return Some("10.13");
+                    return Some("11.0");
                 }
             }
             JobFeatures::Matrix(_) => {
