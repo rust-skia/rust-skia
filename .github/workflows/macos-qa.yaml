@@ -62,7 +62,7 @@ jobs:
             exampleArgs: ''
             generateArtifacts: false
             features: 'gl,metal,skottie,svg,textlayout,ureq,webp'
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       SKIA_DEBUG: 0
       MACOSX_DEPLOYMENT_TARGET: '10.14'
