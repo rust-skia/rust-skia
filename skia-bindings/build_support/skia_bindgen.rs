@@ -487,6 +487,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "sksg::PaintNode",
     "sksg::Color",
     "sksg::BlurImageFilter",
+    // m147
+    "std::unordered_map.*",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
