@@ -41,6 +41,7 @@ bitflags! {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct GpuStats {
     pub elapsed_time: u64,
+    pub num_occlusion_pass_samples: u64,
 }
 
 native_transmutable!(skgpu_GpuStats, GpuStats);
