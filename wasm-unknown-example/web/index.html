@@ -1,33 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>rust-skia wasm32-unknown-unknown sample</title>
     <script type="module" src="./main.js"></script>
-    <style>
-      :root {
-        color-scheme: light dark;
-      }
-
-      body {
-        margin: 0;
-        font-family: system-ui, sans-serif;
-        display: grid;
-        place-items: center;
-        min-height: 100vh;
-        gap: 1rem;
-      }
-
-      canvas {
-        width: min(80vw, 640px);
-        height: min(60vw, 360px);
-        border: 1px solid #9aa0a6;
-      }
-    </style>
   </head>
-  <body>
-    <h1>rust-skia wasm32-unknown-unknown sample</h1>
-    <canvas id="skia-canvas"></canvas>
+  <body style="margin: 0">
+    <canvas style="width: 100vw; height: 100vh; display: block;" id="glcanvas"></canvas>
   </body>
 </html>

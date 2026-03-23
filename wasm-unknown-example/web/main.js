@@ -1,6 +1,6 @@
-import init, { render_scene } from "./pkg/wasm_unknown_example.js";
+import init, { State } from "./pkg/wasm_unknown_example.js";
 
-function resizeCanvasToDisplaySize(canvas) {
+function resizeCanvas(canvas) {
   const width = Math.max(1, canvas.clientWidth);
   const height = Math.max(1, canvas.clientHeight);
   if (canvas.width !== width || canvas.height !== height) {
@@ -11,48 +11,24 @@ function resizeCanvasToDisplaySize(canvas) {
   return false;
 }
 
-function draw(canvas, context) {
-  resizeCanvasToDisplaySize(canvas);
-  const width = canvas.width;
-  const height = canvas.height;
-  const expectedLength = width * height * 4;
-  const pixels = render_scene(width, height);
-  const actualLength = pixels?.length ?? 0;
-
-  if (expectedLength === 0 || actualLength !== expectedLength) {
-    console.error(
-      "render_scene returned unexpected pixel buffer length",
-      { width, height, expectedLength, actualLength },
-    );
-    return;
-  }
-
-  try {
-    const clamped =
-      pixels instanceof Uint8Array
-        ? new Uint8ClampedArray(pixels.buffer, pixels.byteOffset, pixels.byteLength)
-        : new Uint8ClampedArray(pixels);
-    const imageData = new ImageData(clamped, width, height);
-    context.putImageData(imageData, 0, 0);
-  } catch (error) {
-    console.error("Failed to draw rendered pixels", error);
-  }
-}
-
 async function main() {
   await init();
 
-  const canvas = document.getElementById("skia-canvas");
-  const context = canvas.getContext("2d");
-  if (!context) {
-    throw new Error("2D canvas context is not available");
-  }
+  const canvas = document.getElementById("glcanvas");
+  resizeCanvas(canvas);
+  const ctx = canvas.getContext("2d");
+  const state = new State(canvas.width, canvas.height, ctx);
 
-  const render = () => draw(canvas, context);
-  render();
-  window.addEventListener("resize", render);
+  window.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    state.draw(e.clientX - rect.x, e.clientY - rect.y);
+  });
+
+  window.addEventListener("resize", () => {
+    if (resizeCanvas(canvas)) {
+      state.resize(canvas.width, canvas.height);
+    }
+  });
 }
 
-main().catch((error) => {
-  console.error(error);
-});
+main().catch(console.error);

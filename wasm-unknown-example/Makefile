@@ -14,4 +14,4 @@ build_release:
 
 .PHONY: serve
 serve:
-	python3 -m http.server --directory web 8000
+	python3 -m http.server --directory web 8001
