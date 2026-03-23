@@ -20,7 +20,7 @@ Then open http://localhost:8000/web/ in your browser.
 
 ## Notes
 
-This sample uses the `wasm32-unknown-emscripten` target, because plain WASM [does not support linking to C/C++ libraries](https://github.com/rustwasm/team/issues/291#issuecomment-645482430) (yet).
+This sample uses the `wasm32-unknown-emscripten` target because it demonstrates the Emscripten/WebGL integration path.
 
 For this reason there is a bit of ceremony involved both for building and for running the Rust code.
 
@@ -38,3 +38,5 @@ The build requires to set several environment variables:
   - `-s EXPORT_NAME=createRustSkiaModule` -- customize Emscripten's load function.
   
 - `-s EXPORTED_RUNTIME_METHODS=GL` -- give access to Emscripten's GL group of functions, required to bind Emscripten to the WebGL context.
+
+This repository also supports `wasm32-unknown-unknown` (experimental) for `rust-skia`, but this sample currently targets Emscripten/WebGL and intentionally keeps using `wasm32-unknown-emscripten`.

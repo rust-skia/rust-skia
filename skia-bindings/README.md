@@ -64,6 +64,22 @@ dependencies.
 
 Additional arguments for the `gn` executable can be specified by setting the `SKIA_GN_ARGS` environment variable.
 
+### WebAssembly (`wasm32-unknown-unknown`) runtime provisioning
+
+When targeting `wasm32-unknown-unknown`, the build support auto-provisions a WASI runtime toolchain (WASI SDK + sysroot with libc/libc++) into `OUT_DIR/.cache/skia-wasm-runtime` and configures clang/linker arguments automatically.
+
+No Emscripten setup is required for this target.
+
+Optional advanced overrides:
+
+| Variable | Description |
+| --- | --- |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK` | Use an existing WASI SDK root directory (must contain `bin/` and `share/wasi-sysroot/`). |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` | Use an existing WASI SDK `bin/` directory directly. |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_URL` | Override the download URL for the WASI SDK archive. |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` | Use an explicit sysroot directory instead of the auto-provisioned one. |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT_URL` | Override the download URL for the standalone WASI sysroot archive. |
+
 ### Using system libraries
 
 By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event that this is not wanted (say, if the crate is being built as part of a package's build routine,) this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
@@ -100,4 +116,3 @@ It's possible to cross compile Skia and the Rust bindings for different architec
 
  * `CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-poky-linux-g++`
  * `RUSTFLAGS="-Clink-args=--sysroot=$SDKTARGETSYSROOT"`
-
