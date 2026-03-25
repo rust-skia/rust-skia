@@ -9,6 +9,8 @@
 #include "include/gpu/ganesh/GrBackendSurface.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/d3d/GrD3DBackendContext.h"
+#include "include/gpu/ganesh/d3d/GrD3DBackendSurface.h"
+#include "include/gpu/ganesh/d3d/GrD3DDirectContext.h"
 
 // Additional types not yet referenced.
 extern "C" void C_GrD3DTypes(GrD3DSurfaceInfo *) {};
@@ -25,8 +27,8 @@ extern "C" void C_GrD3DTextureResourceInfo_Construct(GrD3DTextureResourceInfo* u
 // gpu/GrBackendSurface.h
 //
 
-extern "C" void C_GrBackendFormat_ConstructDxgi(GrBackendFormat* uninitialized, DXGI_FORMAT format) {
-    new(uninitialized)GrBackendFormat(GrBackendFormat::MakeDxgi(format));
+extern "C" void C_GrBackendFormat_ConstructD3D(GrBackendFormat* uninitialized, DXGI_FORMAT format) {
+    new(uninitialized)GrBackendFormat(GrBackendFormats::MakeD3D(format));
 }
 
 extern "C" GrBackendTexture* C_GrBackendTexture_newD3D(
@@ -34,22 +36,23 @@ extern "C" GrBackendTexture* C_GrBackendTexture_newD3D(
     const GrD3DTextureResourceInfo* resourceInfo, 
     const char* label,
     size_t labelCount) {
-    return new GrBackendTexture(width, height, *resourceInfo, std::string_view(label, labelCount));
+    return new GrBackendTexture(
+            GrBackendTextures::MakeD3D(width, height, *resourceInfo, std::string_view(label, labelCount)));
 }
 
 extern "C" void C_GrBackendRenderTarget_ConstructD3D(GrBackendRenderTarget* uninitialized, int width, int height, const GrD3DTextureResourceInfo* resourceInfo) {
-    new(uninitialized)GrBackendRenderTarget(width, height, *resourceInfo);
+    new(uninitialized)GrBackendRenderTarget(GrBackendRenderTargets::MakeD3D(width, height, *resourceInfo));
 }
 
 //
 // gpu/GrDirectContext.h
 //
 
-extern "C" GrDirectContext* C_GrDirectContext_MakeDirect3D(
+extern "C" GrDirectContext* C_GrDirectContext_MakeD3D(
     const GrD3DBackendContext* backendContext,
     const GrContextOptions* options) {
     if (options) {
-        return GrDirectContext::MakeDirect3D(*backendContext, *options).release();
+        return GrDirectContexts::MakeD3D(*backendContext, *options).release();
     }
-    return GrDirectContext::MakeDirect3D(*backendContext).release();
+    return GrDirectContexts::MakeD3D(*backendContext).release();
 }

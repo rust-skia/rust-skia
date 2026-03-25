@@ -110,7 +110,7 @@ impl DirectContext {
         backend_context: &crate::gpu::d3d::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        DirectContext::from_ptr(sb::C_GrDirectContext_MakeDirect3D(
+        DirectContext::from_ptr(sb::C_GrDirectContext_MakeD3D(
             backend_context.native(),
             options.into().native_ptr_or_null(),
         ))

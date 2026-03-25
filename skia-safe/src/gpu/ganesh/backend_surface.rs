@@ -90,9 +90,15 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "d3d")]
+    #[deprecated(since = "0.0.0", note = "use new_d3d()")]
     pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
+        Self::new_d3d(format)
+    }
+
+    #[cfg(feature = "d3d")]
+    pub fn new_d3d(format: d3d::DXGI_FORMAT) -> Self {
         Self::construct(|bf| unsafe {
-            sb::C_GrBackendFormat_ConstructDxgi(bf, format.into_native())
+            sb::C_GrBackendFormat_ConstructD3D(bf, format.into_native())
         })
         .assert_valid()
     }
