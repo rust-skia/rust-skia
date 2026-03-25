@@ -72,6 +72,10 @@ impl Target {
         self.system == "windows"
     }
 
+    pub fn is_emscripten(&self) -> bool {
+        self.system == "emscripten"
+    }
+
     pub fn builds_with_msvc(&self) -> bool {
         self.abi.as_deref() == Some("msvc")
     }
