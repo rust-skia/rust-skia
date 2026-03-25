@@ -137,7 +137,8 @@ impl BackendFormat {
     #[cfg(feature = "d3d")]
     pub fn as_dxgi_format(&self) -> Option<d3d::DXGI_FORMAT> {
         let mut f = sb::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-        unsafe { self.native().asDxgiFormat(&mut f) }.then_some(d3d::DXGI_FORMAT::from_native_c(f))
+        unsafe { sb::C_GrBackendFormats_AsDxgiFormat(self.native(), &mut f) }
+            .then_some(d3d::DXGI_FORMAT::from_native_c(f))
     }
 
     #[must_use]
@@ -373,7 +374,7 @@ impl BackendTexture {
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         unsafe {
             let mut info = sb::GrD3DTextureResourceInfo::default();
-            self.native().getD3DTextureResourceInfo(&mut info).then(|| {
+            sb::C_GrBackendTextures_GetD3DTextureResourceInfo(self.native(), &mut info).then(|| {
                 assert!(!info.fResource.fObject.is_null());
                 d3d::TextureResourceInfo::from_native_c(info)
             })
@@ -382,7 +383,7 @@ impl BackendTexture {
 
     #[cfg(feature = "d3d")]
     pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
-        unsafe { self.native_mut().setD3DResourceState(resource_state) }
+        unsafe { sb::C_GrBackendTextures_SetD3DResourceState(self.native_mut(), resource_state) }
         self
     }
 
@@ -550,15 +551,18 @@ impl BackendRenderTarget {
     #[cfg(feature = "d3d")]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         let mut info = sb::GrD3DTextureResourceInfo::default();
-        unsafe { self.native().getD3DTextureResourceInfo(&mut info) }.then(|| {
-            assert!(!info.fResource.fObject.is_null());
-            d3d::TextureResourceInfo::from_native_c(info)
-        })
+        unsafe { sb::C_GrBackendRenderTargets_GetD3DTextureResourceInfo(self.native(), &mut info) }
+            .then(|| {
+                assert!(!info.fResource.fObject.is_null());
+                d3d::TextureResourceInfo::from_native_c(info)
+            })
     }
 
     #[cfg(feature = "d3d")]
     pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
-        unsafe { self.native_mut().setD3DResourceState(resource_state) }
+        unsafe {
+            sb::C_GrBackendRenderTargets_SetD3DResourceState(self.native_mut(), resource_state)
+        }
         self
     }
 
