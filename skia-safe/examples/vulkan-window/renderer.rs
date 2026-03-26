@@ -164,7 +164,7 @@ impl VulkanRenderer {
         //
         // Since we need to draw to multiple images, we are going to create a different framebuffer
         // for each image. We'll wait until the first `prepare_swapchain` call to actually allocate them.
-        let frames = vec![];
+        let frames = Vec::new();
 
         // In some situations, the swapchain will become invalid by itself. This includes for
         // example when the window is resized (as the images of the swapchain will no longer match
@@ -326,18 +326,22 @@ impl VulkanRenderer {
             // caller recreate the swapchain and render again.
             // If this is omitted, the stale acquire work gets dropped instead of being chained
             // into `last_render`, which can show up as resize flicker or intermittent stalls.
-            self.last_render = Some(
-                self.last_render
-                    .take()
-                    .unwrap_or_else(|| sync::now(self.queue.device().clone()).boxed())
-                    .join(acquire_future)
-                    .boxed(),
-            );
+            self.chain_acquire_without_present(acquire_future);
             return None;
         }
 
         // Always consume successful acquires in the frame submission chain.
         Some((image_index, acquire_future))
+    }
+
+    fn chain_acquire_without_present(&mut self, acquire_future: SwapchainAcquireFuture) {
+        self.last_render = Some(
+            self.last_render
+                .take()
+                .unwrap_or_else(|| sync::now(self.queue.device().clone()).boxed())
+                .join(acquire_future)
+                .boxed(),
+        );
     }
 
     pub fn draw_and_present<F>(&mut self, f: F)
@@ -357,8 +361,7 @@ impl VulkanRenderer {
                 let frame = &self.frames[image_index as usize];
                 (frame.framebuffer.clone(), frame.image_layout)
             };
-            let mut surface =
-                surface_for_framebuffer(&mut self.skia_ctx, framebuffer.clone(), current_layout);
+            let mut surface = surface_for_framebuffer(&mut self.skia_ctx, framebuffer, current_layout);
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
