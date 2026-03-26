@@ -361,7 +361,8 @@ impl VulkanRenderer {
                 let frame = &self.frames[image_index as usize];
                 (frame.framebuffer.clone(), frame.image_layout)
             };
-            let mut surface = surface_for_framebuffer(&mut self.skia_ctx, framebuffer, current_layout);
+            let mut surface =
+                surface_for_framebuffer(&mut self.skia_ctx, framebuffer, current_layout);
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
