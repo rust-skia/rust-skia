@@ -313,11 +313,9 @@ impl VulkanRenderer {
             self.swapchain_is_valid = false;
         }
 
-        if self.swapchain_is_valid {
-            Some((image_index, acquire_future))
-        } else {
-            None
-        }
+        // Even when suboptimal, we must consume the acquire future instead of dropping it,
+        // otherwise its semaphore can remain signaled and be reused incorrectly.
+        Some((image_index, acquire_future))
     }
 
     pub fn draw_and_present<F>(&mut self, f: F)
