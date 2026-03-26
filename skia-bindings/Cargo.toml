@@ -73,11 +73,11 @@ bindgen = { version = "0.72.0" }
 pkg-config = "0.3.32"
 
 # For enum variant name replacements.
-regex = "1.4.5"
+regex = "1.12.3"
 heck = "0.5.0"
 
 flate2 = { version = "1.0.7", optional = true }
-tar = { version = "0.4.26", optional = true }
+tar = { version = "0.4.45", optional = true }
 
 # For reading .cargo.vcs_info.json to get the repository sha1 that is used to download
 # the matching prebuilt binaries.
@@ -90,10 +90,10 @@ toml = "1.0.3"
 cc = { version = "1.1.28" }
 bindgen = { version = "0.72.0" }
 pkg-config = "0.3.32"
-regex = "1.4.5"
+regex = "1.12.3"
 heck = "0.5.0"
 # ureq = { version = "2.8.0" }
 flate2 = { version = "1.0.7" }
-tar = { version = "0.4.26" }
+tar = { version = "0.4.45" }
 serde_json = "1.0.39"
 toml = "1.0.3"
