@@ -193,9 +193,6 @@ impl Codec<'_> {
         unsafe { sb::C_SkCodec_getEncodedFormat(self.native()) }
     }
 
-    // TODO: May wrap `getEncodedData()`. But how? It would return the stream, which is already
-    // mutably borrowed.
-
     pub fn get_pixels_with_options(
         &mut self,
         info: &ImageInfo,
