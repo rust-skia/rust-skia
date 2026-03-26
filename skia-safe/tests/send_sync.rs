@@ -203,6 +203,7 @@ mod gpu {
     use skia_safe::gpu::*;
     use static_assertions::*;
     assert_impl_all!(BackendFormat: Send, Sync);
+    assert_impl_all!(BackendSemaphore: Send, Sync);
     assert_impl_all!(BackendTexture: Send, Sync);
     assert_impl_all!(BackendRenderTarget: Send, Sync);
     assert_impl_all!(ContextOptions: Send, Sync);

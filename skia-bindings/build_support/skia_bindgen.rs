@@ -169,7 +169,9 @@ pub fn generate_bindings(
             .blocklist_type("GrBackendTexture_AnyTextureData")
             .raw_line("#[repr(C, align(8))] pub struct GrBackendTexture_AnyTextureData { data: [u8;GrBackendTexture_kMaxSubclassSize + 1] }")
             .blocklist_type("GrBackendRenderTarget_AnyRenderTargetData")
-            .raw_line("#[repr(C, align(8))] pub struct GrBackendRenderTarget_AnyRenderTargetData { data: [u8;GrBackendRenderTarget_kMaxSubclassSize + 1] }");
+            .raw_line("#[repr(C, align(8))] pub struct GrBackendRenderTarget_AnyRenderTargetData { data: [u8;GrBackendRenderTarget_kMaxSubclassSize + 1] }")
+            .blocklist_type("GrBackendSemaphore_AnySemaphoreData")
+            .raw_line("#[repr(C, align(8))] pub struct GrBackendSemaphore_AnySemaphoreData { data: [u8;GrBackendSemaphore_kMaxSubclassSize + 1] }");
     }
 
     // Don't generate destructors for Windows targets:
@@ -487,6 +489,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "sksg::PaintNode",
     "sksg::Color",
     "sksg::BlurImageFilter",
+    // m147
+    "std::unordered_map.*",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[

@@ -97,6 +97,7 @@ mod window {
 
     use skia_safe::{
         gpu::{
+            self,
             d3d::{BackendContext, TextureResourceInfo},
             surfaces, BackendRenderTarget, DirectContext, Protected, SurfaceOrigin,
         },
@@ -143,7 +144,7 @@ mod window {
                 protected_context: Protected::No,
             };
             let mut direct_context =
-                unsafe { DirectContext::new_d3d(&backend_context, None) }.unwrap();
+                unsafe { gpu::direct_contexts::make_d3d(&backend_context, None) }.unwrap();
 
             let swap_chain: IDXGISwapChain3 = unsafe {
                 factory.CreateSwapChainForHwnd(
@@ -171,7 +172,7 @@ mod window {
             let surfaces: [_; BUFFER_COUNT] = std::array::from_fn(|i| {
                 let resource = unsafe { swap_chain.GetBuffer(i as u32).unwrap() };
 
-                let backend_render_target = BackendRenderTarget::new_d3d(
+                let backend_render_target = gpu::backend_render_targets::make_d3d(
                     window.inner_size().into(),
                     &TextureResourceInfo {
                         resource,

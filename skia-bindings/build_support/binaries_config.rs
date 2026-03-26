@@ -134,6 +134,22 @@ impl BinariesConfiguration {
 
         let target = cargo::target();
 
+        if target.is_emscripten() {
+            // Since Skia m147, the wasm GN toolchain emits static archives as `*.a.wasm`.
+            for lib in &self.ninja_built_libraries {
+                let from = self.output_directory.join(format!("lib{lib}.a.wasm"));
+                let to = self.output_directory.join(format!("lib{lib}.a"));
+                fs::copy(&from, &to).unwrap_or_else(|e| {
+                    panic!(
+                        "failed to prepare emscripten archive for linking: from '{}' to '{}': {}",
+                        from.display(),
+                        to.display(),
+                        e
+                    )
+                });
+            }
+        }
+
         cargo::add_static_link_libs(&target, self.built_libraries(true));
         cargo::add_link_libs(&self.link_libraries);
     }
