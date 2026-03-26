@@ -20,21 +20,18 @@ use skia_safe::{
 use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
 
 pub struct VulkanRenderer {
-    pub window: Arc<Window>,
     queue: Arc<Queue>,
-    swapchain: Arc<Swapchain>,
     framebuffers: Vec<Arc<Framebuffer>>,
     render_pass: Arc<RenderPass>,
     last_render: Option<Box<dyn GpuFuture>>,
-    skia_ctx: gpu::DirectContext,
-    swapchain_is_valid: bool,
-}
 
-impl Drop for VulkanRenderer {
-    fn drop(&mut self) {
-        // prevent in-flight commands from trying to draw to the window after it's gone
-        self.skia_ctx.abandon();
-    }
+    // ordering: The context must dropped _before_ the swapchain, because the swapchain refers to
+    // the Surface which the Context is drawing on.
+    skia_ctx: gpu::DirectContext,
+    swapchain: Arc<Swapchain>,
+    pub window: Arc<Window>,
+
+    swapchain_is_valid: bool,
 }
 
 impl VulkanRenderer {
@@ -233,14 +230,14 @@ impl VulkanRenderer {
         };
 
         VulkanRenderer {
-            skia_ctx,
             queue,
-            window,
-            swapchain,
-            swapchain_is_valid,
             render_pass,
             framebuffers,
             last_render,
+            skia_ctx,
+            swapchain,
+            window,
+            swapchain_is_valid,
         }
     }
 
