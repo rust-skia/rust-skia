@@ -23,7 +23,10 @@ impl NativeClone for GrBackendSemaphore {
 
 impl fmt::Debug for BackendSemaphore {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("BackendSemaphore").finish()
+        f.debug_struct("BackendSemaphore")
+            .field("backend", &self.backend())
+            .field("is_initialized", &self.is_initialized())
+            .finish()
     }
 }
 
