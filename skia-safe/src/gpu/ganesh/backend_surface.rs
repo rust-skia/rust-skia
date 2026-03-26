@@ -92,7 +92,7 @@ impl BackendFormat {
     #[cfg(feature = "d3d")]
     #[deprecated(since = "0.0.0", note = "use gpu::backend_formats::make_d3d()")]
     pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
-        Self::new_d3d(format)
+        gpu::backend_formats::make_d3d(format)
     }
 
     #[cfg(feature = "d3d")]
@@ -276,7 +276,7 @@ impl BackendTexture {
     #[cfg(feature = "d3d")]
     #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_d3d()")]
     pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
-        Self::new_d3d_with_label((width, height), d3d_info, "")
+        gpu::backend_textures::make_d3d((width, height), d3d_info, "")
     }
 
     #[cfg(feature = "d3d")]

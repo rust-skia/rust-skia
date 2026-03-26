@@ -54,7 +54,7 @@ impl DrawingDriver for D3D {
             protected_context: Protected::No,
         };
 
-        let context = unsafe { gpu::DirectContext::new_d3d(&backend_context, None) }.unwrap();
+        let context = unsafe { gpu::direct_contexts::make_d3d(&backend_context, None) }.unwrap();
         Self { context }
     }
 

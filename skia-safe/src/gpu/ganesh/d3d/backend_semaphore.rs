@@ -21,7 +21,7 @@ pub mod backend_semaphores {
             return None;
         }
 
-        let mut info = sb::GrD3DFenceInfo::default();
+        let mut info = construct(|info| unsafe { sb::C_GrD3DFenceInfo_Construct(info) });
         unsafe { sb::C_GrBackendSemaphores_GetD3DFenceInfo(semaphore.native(), &mut info) }
         Some(d3d::FenceInfo::from_native_c(info))
     }

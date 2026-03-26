@@ -19,6 +19,10 @@ extern "C" void C_GrD3DTextureResourceInfo_Construct(GrD3DTextureResourceInfo* u
     new(uninitialized) GrD3DTextureResourceInfo();
 }
 
+extern "C" void C_GrD3DFenceInfo_Construct(GrD3DFenceInfo* uninitialized) {
+    new(uninitialized) GrD3DFenceInfo();
+}
+
 //
 // gpu/d3d/GrD3DBackendSemaphore.h
 //
