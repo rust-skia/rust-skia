@@ -105,7 +105,7 @@ impl DirectContext {
     }
 
     #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.0.0", note = "use gpu::direct_contexts::make_d3d()")]
+    #[deprecated(since = "0.95.0", note = "use gpu::direct_contexts::make_d3d()")]
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_d3d<'a>(
         backend_context: &crate::gpu::d3d::BackendContext,
