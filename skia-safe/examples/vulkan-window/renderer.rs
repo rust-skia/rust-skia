@@ -315,10 +315,22 @@ impl VulkanRenderer {
         // to become out of date.
         if suboptimal {
             self.swapchain_is_valid = false;
+
+            // Consume the acquire future without presenting this stale frame, then let the
+            // caller recreate the swapchain and render again.
+            // If this is omitted, the stale acquire work gets dropped instead of being chained
+            // into `last_render`, which can show up as resize flicker or intermittent stalls.
+            self.last_render = Some(
+                self.last_render
+                    .take()
+                    .unwrap_or_else(|| sync::now(self.queue.device().clone()).boxed())
+                    .join(acquire_future)
+                    .boxed(),
+            );
+            return None;
         }
 
-        // Even when suboptimal, we must consume the acquire future instead of dropping it,
-        // otherwise its semaphore can remain signaled and be reused incorrectly.
+        // Always consume successful acquires in the frame submission chain.
         Some((image_index, acquire_future))
     }
 
@@ -337,11 +349,8 @@ impl VulkanRenderer {
             // pull the appropriate framebuffer from the swapchain and attach a skia Surface to it
             let framebuffer = self.framebuffers[image_index as usize].clone();
             let current_layout = self.image_layouts[image_index as usize];
-            let mut surface = surface_for_framebuffer(
-                &mut self.skia_ctx,
-                framebuffer.clone(),
-                current_layout,
-            );
+            let mut surface =
+                surface_for_framebuffer(&mut self.skia_ctx, framebuffer.clone(), current_layout);
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
@@ -356,7 +365,7 @@ impl VulkanRenderer {
             canvas.reset_matrix();
             canvas.scale(scale);
 
-            // pass the suface's canvas and canvas size to the user-provided callback
+            // pass the surface's canvas and canvas size to the user-provided callback
             f(canvas, size);
 
             // Flush the surface and explicitly set PRESENT_SRC_KHR for the swapchain image.
