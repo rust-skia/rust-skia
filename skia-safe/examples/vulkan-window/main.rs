@@ -96,7 +96,15 @@ fn main() {
     }
 
     let event_loop = EventLoop::new().unwrap();
-    let mut app = App::default();
+    let validate = std::env::args().any(|arg| arg == "--validate");
+    if validate {
+        println!("Vulkan validation requested via --validate");
+    }
+
+    let mut app = App {
+        render_ctx: VulkanRenderContext::new(validate),
+        renderer: None,
+    };
 
     event_loop.set_control_flow(winit::event_loop::ControlFlow::Wait);
     event_loop.run_app(&mut app).ok();
