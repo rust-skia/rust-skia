@@ -1,14 +1,10 @@
 #include "bindings.h"
 
-// for VSCode
-// TODO: remove that and add proper CMake support for VSCode
-#ifndef SK_DIRECT3D
-    #define SK_DIRECT3D
-#endif
-
 #include "include/gpu/ganesh/GrBackendSurface.h"
+#include "include/gpu/ganesh/GrBackendSemaphore.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/d3d/GrD3DBackendContext.h"
+#include "include/gpu/ganesh/d3d/GrD3DBackendSemaphore.h"
 #include "include/gpu/ganesh/d3d/GrD3DBackendSurface.h"
 #include "include/gpu/ganesh/d3d/GrD3DDirectContext.h"
 
@@ -21,6 +17,22 @@ extern "C" void C_GrD3DTypes(GrD3DSurfaceInfo *) {};
 
 extern "C" void C_GrD3DTextureResourceInfo_Construct(GrD3DTextureResourceInfo* uninitialized) {
     new(uninitialized) GrD3DTextureResourceInfo();
+}
+
+//
+// gpu/d3d/GrD3DBackendSemaphore.h
+//
+
+extern "C" void C_GrBackendSemaphore_ConstructD3D(
+    GrBackendSemaphore* uninitialized,
+    const GrD3DFenceInfo* info) {
+    new(uninitialized) GrBackendSemaphore(GrBackendSemaphores::MakeD3D(*info));
+}
+
+extern "C" void C_GrBackendSemaphores_GetD3DFenceInfo(
+    const GrBackendSemaphore* semaphore,
+    GrD3DFenceInfo* info) {
+    *info = GrBackendSemaphores::GetD3DFenceInfo(*semaphore);
 }
 
 //
@@ -79,11 +91,17 @@ extern "C" void C_GrBackendRenderTargets_SetD3DResourceState(
 // gpu/GrDirectContext.h
 //
 
-extern "C" GrDirectContext* C_GrDirectContext_MakeD3D(
+extern "C" GrDirectContext* C_GrDirectContexts_MakeD3D(
     const GrD3DBackendContext* backendContext,
     const GrContextOptions* options) {
     if (options) {
         return GrDirectContexts::MakeD3D(*backendContext, *options).release();
     }
     return GrDirectContexts::MakeD3D(*backendContext).release();
+}
+
+extern "C" GrDirectContext* C_GrDirectContext_MakeD3D(
+    const GrD3DBackendContext* backendContext,
+    const GrContextOptions* options) {
+    return C_GrDirectContexts_MakeD3D(backendContext, options);
 }

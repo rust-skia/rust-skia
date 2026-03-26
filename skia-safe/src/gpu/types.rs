@@ -34,6 +34,7 @@ bitflags! {
     pub struct GpuStatsFlags : u32 {
         const NONE = sb::skgpu_GpuStatsFlags_kNone as _;
         const ELAPSED_TIME = sb::skgpu_GpuStatsFlags_kElapsedTime as _;
+        const OCCLUSION_PASS_SAMPLES = sb::skgpu_GpuStatsFlags_kOcclusionPassSamples as _;
     }
 }
 

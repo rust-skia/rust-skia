@@ -1,7 +1,8 @@
 use std::{fmt, os::raw::c_uint};
 
 use skia_bindings::{
-    GrD3DAlloc, GrD3DMemoryAllocator, GrD3DSurfaceInfo, GrD3DTextureResourceInfo, SkRefCntBase,
+    GrD3DAlloc, GrD3DFenceInfo, GrD3DMemoryAllocator, GrD3DSurfaceInfo, GrD3DTextureResourceInfo,
+    SkRefCntBase,
 };
 use windows::Win32::Graphics::{
     Direct3D12::{ID3D12Fence, D3D12_RESOURCE_STATE_COMMON},
@@ -58,6 +59,8 @@ pub struct TextureResourceInfo {
     pub sample_quality_pattern: std::os::raw::c_uint,
     pub protected: gpu::Protected,
 }
+
+native_transmutable!(GrD3DTextureResourceInfo, TextureResourceInfo);
 unsafe_send_sync!(TextureResourceInfo);
 
 impl TextureResourceInfo {
@@ -89,8 +92,6 @@ impl From<ID3D12Resource> for TextureResourceInfo {
     }
 }
 
-native_transmutable!(GrD3DTextureResourceInfo, TextureResourceInfo);
-
 #[repr(C)]
 #[derive(Clone, Debug)]
 pub struct FenceInfo {
@@ -99,6 +100,7 @@ pub struct FenceInfo {
 }
 
 unsafe_send_sync!(FenceInfo);
+native_transmutable!(GrD3DFenceInfo, FenceInfo);
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[repr(C)]

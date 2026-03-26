@@ -90,17 +90,15 @@ impl BackendFormat {
     }
 
     #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.0.0", note = "use new_d3d()")]
+    #[deprecated(since = "0.0.0", note = "use gpu::backend_formats::make_d3d()")]
     pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
         Self::new_d3d(format)
     }
 
     #[cfg(feature = "d3d")]
+    #[deprecated(since = "0.0.0", note = "use gpu::backend_formats::make_d3d()")]
     pub fn new_d3d(format: d3d::DXGI_FORMAT) -> Self {
-        Self::construct(|bf| unsafe {
-            sb::C_GrBackendFormat_ConstructD3D(bf, format.into_native())
-        })
-        .assert_valid()
+        gpu::backend_formats::make_d3d(format)
     }
 
     pub fn backend(&self) -> BackendAPI {
@@ -136,9 +134,7 @@ impl BackendFormat {
 
     #[cfg(feature = "d3d")]
     pub fn as_dxgi_format(&self) -> Option<d3d::DXGI_FORMAT> {
-        let mut f = sb::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-        unsafe { sb::C_GrBackendFormats_AsDxgiFormat(self.native(), &mut f) }
-            .then_some(d3d::DXGI_FORMAT::from_native_c(f))
+        gpu::backend_formats::as_dxgi_format(self)
     }
 
     #[must_use]
@@ -278,27 +274,19 @@ impl BackendTexture {
     }
 
     #[cfg(feature = "d3d")]
+    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_d3d()")]
     pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
         Self::new_d3d_with_label((width, height), d3d_info, "")
     }
 
     #[cfg(feature = "d3d")]
+    #[deprecated(since = "0.0.0", note = "use gpu::backend_textures::make_d3d()")]
     pub fn new_d3d_with_label(
         (width, height): (i32, i32),
         d3d_info: &d3d::TextureResourceInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        let label = label.as_ref().as_bytes();
-        unsafe {
-            Self::from_native_if_valid(sb::C_GrBackendTexture_newD3D(
-                width,
-                height,
-                d3d_info.native(),
-                label.as_ptr() as _,
-                label.len(),
-            ))
-        }
-        .unwrap()
+        gpu::backend_textures::make_d3d((width, height), d3d_info, label)
     }
 
     pub(crate) unsafe fn from_native_if_valid(
@@ -372,19 +360,12 @@ impl BackendTexture {
 
     #[cfg(feature = "d3d")]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
-        unsafe {
-            let mut info = sb::GrD3DTextureResourceInfo::default();
-            sb::C_GrBackendTextures_GetD3DTextureResourceInfo(self.native(), &mut info).then(|| {
-                assert!(!info.fResource.fObject.is_null());
-                d3d::TextureResourceInfo::from_native_c(info)
-            })
-        }
+        gpu::backend_textures::get_d3d_texture_resource_info(self)
     }
 
     #[cfg(feature = "d3d")]
     pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
-        unsafe { sb::C_GrBackendTextures_SetD3DResourceState(self.native_mut(), resource_state) }
-        self
+        gpu::backend_textures::set_d3d_resource_state(self, resource_state)
     }
 
     pub fn backend_format(&self) -> BackendFormat {
@@ -484,10 +465,9 @@ impl BackendRenderTarget {
     }
 
     #[cfg(feature = "d3d")]
+    #[deprecated(since = "0.0.0", note = "use gpu::backend_render_targets::make_d3d()")]
     pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
-        Self::construct(|brt| unsafe {
-            sb::C_GrBackendRenderTarget_ConstructD3D(brt, width, height, d3d_info.native())
-        })
+        gpu::backend_render_targets::make_d3d((width, height), d3d_info)
     }
 
     pub(crate) fn from_native_c_if_valid(
@@ -550,20 +530,12 @@ impl BackendRenderTarget {
 
     #[cfg(feature = "d3d")]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
-        let mut info = sb::GrD3DTextureResourceInfo::default();
-        unsafe { sb::C_GrBackendRenderTargets_GetD3DTextureResourceInfo(self.native(), &mut info) }
-            .then(|| {
-                assert!(!info.fResource.fObject.is_null());
-                d3d::TextureResourceInfo::from_native_c(info)
-            })
+        gpu::backend_render_targets::get_d3d_texture_resource_info(self)
     }
 
     #[cfg(feature = "d3d")]
     pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
-        unsafe {
-            sb::C_GrBackendRenderTargets_SetD3DResourceState(self.native_mut(), resource_state)
-        }
-        self
+        gpu::backend_render_targets::set_d3d_resource_state(self, resource_state)
     }
 
     pub fn backend_format(&self) -> BackendFormat {
