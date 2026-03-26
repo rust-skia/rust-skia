@@ -37,10 +37,9 @@ pub struct VulkanRenderer {
 impl VulkanRenderer {
     pub fn new(window: Arc<Window>, queue: Arc<Queue>) -> Self {
         // Extract references to key structs from the queue
-        let library = queue.device().instance().library();
-        let instance = queue.device().instance();
         let device = queue.device();
-        let queue = queue.clone();
+        let instance = device.instance();
+        let library = instance.library();
 
         // Before we can render to a window, we must first create a `vulkano::swapchain::Surface`
         // object from it, which represents the drawable surface of a window. For that we must wrap
