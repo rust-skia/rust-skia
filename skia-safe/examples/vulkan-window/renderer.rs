@@ -19,10 +19,14 @@ use skia_safe::{
 
 use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
 
+struct SwapchainFrame {
+    framebuffer: Arc<Framebuffer>,
+    image_layout: vk::ImageLayout,
+}
+
 pub struct VulkanRenderer {
     queue: Arc<Queue>,
-    framebuffers: Vec<Arc<Framebuffer>>,
-    image_layouts: Vec<vk::ImageLayout>,
+    frames: Vec<SwapchainFrame>,
     render_pass: Arc<RenderPass>,
     last_render: Option<Box<dyn GpuFuture>>,
 
@@ -160,8 +164,7 @@ impl VulkanRenderer {
         //
         // Since we need to draw to multiple images, we are going to create a different framebuffer
         // for each image. We'll wait until the first `prepare_swapchain` call to actually allocate them.
-        let framebuffers = vec![];
-        let image_layouts = vec![];
+        let frames = vec![];
 
         // In some situations, the swapchain will become invalid by itself. This includes for
         // example when the window is resized (as the images of the swapchain will no longer match
@@ -233,8 +236,7 @@ impl VulkanRenderer {
         VulkanRenderer {
             queue,
             render_pass,
-            framebuffers,
-            image_layouts,
+            frames,
             last_render,
             skia_ctx,
             swapchain,
@@ -275,22 +277,26 @@ impl VulkanRenderer {
             // Because framebuffers contains a reference to the old swapchain, we need to
             // recreate framebuffers as well.
             // self.framebuffers = allocate_framebuffers(&new_images, &self.render_pass);
-            self.framebuffers = new_images
+            self.frames = new_images
                 .iter()
                 .map(|image| {
                     let view = ImageView::new_default(image.clone()).unwrap();
 
-                    Framebuffer::new(
+                    let framebuffer = Framebuffer::new(
                         self.render_pass.clone(),
                         FramebufferCreateInfo {
                             attachments: vec![view],
                             ..Default::default()
                         },
                     )
-                    .unwrap()
+                    .unwrap();
+
+                    SwapchainFrame {
+                        framebuffer,
+                        image_layout: vk::ImageLayout::UNDEFINED,
+                    }
                 })
                 .collect::<Vec<_>>();
-            self.image_layouts = vec![vk::ImageLayout::UNDEFINED; new_images.len()];
 
             self.swapchain_is_valid = true;
         }
@@ -347,8 +353,10 @@ impl VulkanRenderer {
 
         if let Some((image_index, acquire_future)) = next_frame {
             // pull the appropriate framebuffer from the swapchain and attach a skia Surface to it
-            let framebuffer = self.framebuffers[image_index as usize].clone();
-            let current_layout = self.image_layouts[image_index as usize];
+            let (framebuffer, current_layout) = {
+                let frame = &self.frames[image_index as usize];
+                (frame.framebuffer.clone(), frame.image_layout)
+            };
             let mut surface =
                 surface_for_framebuffer(&mut self.skia_ctx, framebuffer.clone(), current_layout);
             let canvas = surface.canvas();
@@ -384,7 +392,7 @@ impl VulkanRenderer {
                 sync: gpu::SyncCpu::Yes,
                 ..gpu::SubmitInfo::default()
             });
-            self.image_layouts[image_index as usize] = vk::ImageLayout::PRESENT_SRC_KHR;
+            self.frames[image_index as usize].image_layout = vk::ImageLayout::PRESENT_SRC_KHR;
 
             // send the framebuffer to the gpu and display it on screen
             self.last_render = self
