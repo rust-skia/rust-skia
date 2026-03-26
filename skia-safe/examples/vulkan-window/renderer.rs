@@ -30,8 +30,8 @@ pub struct VulkanRenderer {
     render_pass: Arc<RenderPass>,
     last_render: Option<Box<dyn GpuFuture>>,
 
-    // ordering: The context must dropped _before_ the swapchain, because the swapchain refers to
-    // the Surface which the Context is drawing on.
+    // Keep `skia_ctx` before `swapchain`: struct fields are dropped in declaration order, and
+    // the context must be dropped before the swapchain it renders to.
     skia_ctx: gpu::DirectContext,
     swapchain: Arc<Swapchain>,
     pub window: Arc<Window>,
