@@ -22,6 +22,7 @@ use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
 pub struct VulkanRenderer {
     queue: Arc<Queue>,
     framebuffers: Vec<Arc<Framebuffer>>,
+    image_layouts: Vec<vk::ImageLayout>,
     render_pass: Arc<RenderPass>,
     last_render: Option<Box<dyn GpuFuture>>,
 
@@ -160,6 +161,7 @@ impl VulkanRenderer {
         // Since we need to draw to multiple images, we are going to create a different framebuffer
         // for each image. We'll wait until the first `prepare_swapchain` call to actually allocate them.
         let framebuffers = vec![];
+        let image_layouts = vec![];
 
         // In some situations, the swapchain will become invalid by itself. This includes for
         // example when the window is resized (as the images of the swapchain will no longer match
@@ -232,6 +234,7 @@ impl VulkanRenderer {
             queue,
             render_pass,
             framebuffers,
+            image_layouts,
             last_render,
             skia_ctx,
             swapchain,
@@ -287,6 +290,7 @@ impl VulkanRenderer {
                     .unwrap()
                 })
                 .collect::<Vec<_>>();
+            self.image_layouts = vec![vk::ImageLayout::UNDEFINED; new_images.len()];
 
             self.swapchain_is_valid = true;
         }
@@ -332,7 +336,12 @@ impl VulkanRenderer {
         if let Some((image_index, acquire_future)) = next_frame {
             // pull the appropriate framebuffer from the swapchain and attach a skia Surface to it
             let framebuffer = self.framebuffers[image_index as usize].clone();
-            let mut surface = surface_for_framebuffer(&mut self.skia_ctx, framebuffer.clone());
+            let current_layout = self.image_layouts[image_index as usize];
+            let mut surface = surface_for_framebuffer(
+                &mut self.skia_ctx,
+                framebuffer.clone(),
+                current_layout,
+            );
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
@@ -350,8 +359,23 @@ impl VulkanRenderer {
             // pass the suface's canvas and canvas size to the user-provided callback
             f(canvas, size);
 
-            // flush the canvas's contents to the framebuffer
-            self.skia_ctx.flush_and_submit();
+            // Flush the surface and explicitly set PRESENT_SRC_KHR for the swapchain image.
+            let flush_info = gpu::FlushInfo::default();
+            let present_state = gpu::vk::mutable_texture_states::new_vulkan(
+                vk::ImageLayout::PRESENT_SRC_KHR,
+                self.queue.queue_family_index(),
+            );
+            self.skia_ctx.flush_surface_with_texture_state(
+                &mut surface,
+                &flush_info,
+                Some(&present_state),
+            );
+            // Keep this synchronized so the transition is complete before vkQueuePresentKHR.
+            self.skia_ctx.submit(gpu::SubmitInfo {
+                sync: gpu::SyncCpu::Yes,
+                ..gpu::SubmitInfo::default()
+            });
+            self.image_layouts[image_index as usize] = vk::ImageLayout::PRESENT_SRC_KHR;
 
             // send the framebuffer to the gpu and display it on screen
             self.last_render = self
@@ -377,6 +401,7 @@ impl VulkanRenderer {
 fn surface_for_framebuffer(
     skia_ctx: &mut gpu::DirectContext,
     framebuffer: Arc<Framebuffer>,
+    current_layout: vk::ImageLayout,
 ) -> skia_safe::Surface {
     let [width, height] = framebuffer.extent();
     let image_access = &framebuffer.attachments()[0];
@@ -398,7 +423,7 @@ fn surface_for_framebuffer(
             image_object as _,
             alloc,
             vk::ImageTiling::OPTIMAL,
-            vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+            current_layout,
             vk_format,
             1,
             None,

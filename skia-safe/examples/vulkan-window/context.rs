@@ -4,11 +4,11 @@ use vulkano::{
         physical::PhysicalDeviceType, Device, DeviceCreateInfo, DeviceExtensions, Queue,
         QueueCreateInfo, QueueFlags,
     },
-    instance::{Instance, InstanceCreateFlags, InstanceCreateInfo, InstanceExtensions},
     instance::debug::{
         DebugUtilsMessageSeverity, DebugUtilsMessageType, DebugUtilsMessengerCallback,
         DebugUtilsMessengerCreateInfo,
     },
+    instance::{Instance, InstanceCreateFlags, InstanceCreateInfo, InstanceExtensions},
     swapchain::Surface,
     VulkanLibrary,
 };
@@ -45,7 +45,11 @@ impl VulkanRenderContext {
         VulkanRenderer::new(window.clone(), queue.clone())
     }
 
-    fn shared_queue(event_loop: &ActiveEventLoop, window: Arc<Window>, validate: bool) -> Arc<Queue> {
+    fn shared_queue(
+        event_loop: &ActiveEventLoop,
+        window: Arc<Window>,
+        validate: bool,
+    ) -> Arc<Queue> {
         let library = VulkanLibrary::new().expect("Vulkan libraries not found on system");
 
         // The first step of any Vulkan program is to create an instance.
