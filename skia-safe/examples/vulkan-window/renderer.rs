@@ -19,31 +19,32 @@ use skia_safe::{
 
 use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
 
-pub struct VulkanRenderer {
-    pub window: Arc<Window>,
-    queue: Arc<Queue>,
-    swapchain: Arc<Swapchain>,
-    framebuffers: Vec<Arc<Framebuffer>>,
-    render_pass: Arc<RenderPass>,
-    last_render: Option<Box<dyn GpuFuture>>,
-    skia_ctx: gpu::DirectContext,
-    swapchain_is_valid: bool,
+struct SwapchainFrame {
+    framebuffer: Arc<Framebuffer>,
+    image_layout: vk::ImageLayout,
 }
 
-impl Drop for VulkanRenderer {
-    fn drop(&mut self) {
-        // prevent in-flight commands from trying to draw to the window after it's gone
-        self.skia_ctx.abandon();
-    }
+pub struct VulkanRenderer {
+    queue: Arc<Queue>,
+    frames: Vec<SwapchainFrame>,
+    render_pass: Arc<RenderPass>,
+    last_render: Option<Box<dyn GpuFuture>>,
+
+    // Keep `skia_ctx` before `swapchain`: struct fields are dropped in declaration order, and
+    // the context must be dropped before the swapchain it renders to.
+    skia_ctx: gpu::DirectContext,
+    swapchain: Arc<Swapchain>,
+    pub window: Arc<Window>,
+
+    swapchain_is_valid: bool,
 }
 
 impl VulkanRenderer {
     pub fn new(window: Arc<Window>, queue: Arc<Queue>) -> Self {
         // Extract references to key structs from the queue
-        let library = queue.device().instance().library();
-        let instance = queue.device().instance();
         let device = queue.device();
-        let queue = queue.clone();
+        let instance = device.instance();
+        let library = instance.library();
 
         // Before we can render to a window, we must first create a `vulkano::swapchain::Surface`
         // object from it, which represents the drawable surface of a window. For that we must wrap
@@ -163,7 +164,7 @@ impl VulkanRenderer {
         //
         // Since we need to draw to multiple images, we are going to create a different framebuffer
         // for each image. We'll wait until the first `prepare_swapchain` call to actually allocate them.
-        let framebuffers = vec![];
+        let frames = Vec::new();
 
         // In some situations, the swapchain will become invalid by itself. This includes for
         // example when the window is resized (as the images of the swapchain will no longer match
@@ -233,14 +234,14 @@ impl VulkanRenderer {
         };
 
         VulkanRenderer {
-            skia_ctx,
             queue,
-            window,
-            swapchain,
-            swapchain_is_valid,
             render_pass,
-            framebuffers,
+            frames,
             last_render,
+            skia_ctx,
+            swapchain,
+            window,
+            swapchain_is_valid,
         }
     }
 
@@ -276,19 +277,24 @@ impl VulkanRenderer {
             // Because framebuffers contains a reference to the old swapchain, we need to
             // recreate framebuffers as well.
             // self.framebuffers = allocate_framebuffers(&new_images, &self.render_pass);
-            self.framebuffers = new_images
+            self.frames = new_images
                 .iter()
                 .map(|image| {
                     let view = ImageView::new_default(image.clone()).unwrap();
 
-                    Framebuffer::new(
+                    let framebuffer = Framebuffer::new(
                         self.render_pass.clone(),
                         FramebufferCreateInfo {
                             attachments: vec![view],
                             ..Default::default()
                         },
                     )
-                    .unwrap()
+                    .unwrap();
+
+                    SwapchainFrame {
+                        framebuffer,
+                        image_layout: vk::ImageLayout::UNDEFINED,
+                    }
                 })
                 .collect::<Vec<_>>();
 
@@ -315,13 +321,27 @@ impl VulkanRenderer {
         // to become out of date.
         if suboptimal {
             self.swapchain_is_valid = false;
+
+            // Consume the acquire future without presenting this stale frame, then let the
+            // caller recreate the swapchain and render again.
+            // If this is omitted, the stale acquire work gets dropped instead of being chained
+            // into `last_render`, which can show up as resize flicker or intermittent stalls.
+            self.chain_acquire_without_present(acquire_future);
+            return None;
         }
 
-        if self.swapchain_is_valid {
-            Some((image_index, acquire_future))
-        } else {
-            None
-        }
+        // Always consume successful acquires in the frame submission chain.
+        Some((image_index, acquire_future))
+    }
+
+    fn chain_acquire_without_present(&mut self, acquire_future: SwapchainAcquireFuture) {
+        self.last_render = Some(
+            self.last_render
+                .take()
+                .unwrap_or_else(|| sync::now(self.queue.device().clone()).boxed())
+                .join(acquire_future)
+                .boxed(),
+        );
     }
 
     pub fn draw_and_present<F>(&mut self, f: F)
@@ -337,8 +357,12 @@ impl VulkanRenderer {
 
         if let Some((image_index, acquire_future)) = next_frame {
             // pull the appropriate framebuffer from the swapchain and attach a skia Surface to it
-            let framebuffer = self.framebuffers[image_index as usize].clone();
-            let mut surface = surface_for_framebuffer(&mut self.skia_ctx, framebuffer.clone());
+            let (framebuffer, current_layout) = {
+                let frame = &self.frames[image_index as usize];
+                (frame.framebuffer.clone(), frame.image_layout)
+            };
+            let mut surface =
+                surface_for_framebuffer(&mut self.skia_ctx, framebuffer, current_layout);
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
@@ -353,11 +377,26 @@ impl VulkanRenderer {
             canvas.reset_matrix();
             canvas.scale(scale);
 
-            // pass the suface's canvas and canvas size to the user-provided callback
+            // pass the surface's canvas and canvas size to the user-provided callback
             f(canvas, size);
 
-            // flush the canvas's contents to the framebuffer
-            self.skia_ctx.flush_and_submit();
+            // Flush the surface and explicitly set PRESENT_SRC_KHR for the swapchain image.
+            let flush_info = gpu::FlushInfo::default();
+            let present_state = gpu::vk::mutable_texture_states::new_vulkan(
+                vk::ImageLayout::PRESENT_SRC_KHR,
+                self.queue.queue_family_index(),
+            );
+            self.skia_ctx.flush_surface_with_texture_state(
+                &mut surface,
+                &flush_info,
+                Some(&present_state),
+            );
+            // Keep this synchronized so the transition is complete before vkQueuePresentKHR.
+            self.skia_ctx.submit(gpu::SubmitInfo {
+                sync: gpu::SyncCpu::Yes,
+                ..gpu::SubmitInfo::default()
+            });
+            self.frames[image_index as usize].image_layout = vk::ImageLayout::PRESENT_SRC_KHR;
 
             // send the framebuffer to the gpu and display it on screen
             self.last_render = self
@@ -383,6 +422,7 @@ impl VulkanRenderer {
 fn surface_for_framebuffer(
     skia_ctx: &mut gpu::DirectContext,
     framebuffer: Arc<Framebuffer>,
+    current_layout: vk::ImageLayout,
 ) -> skia_safe::Surface {
     let [width, height] = framebuffer.extent();
     let image_access = &framebuffer.attachments()[0];
@@ -404,7 +444,7 @@ fn surface_for_framebuffer(
             image_object as _,
             alloc,
             vk::ImageTiling::OPTIMAL,
-            vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+            current_layout,
             vk_format,
             1,
             None,
