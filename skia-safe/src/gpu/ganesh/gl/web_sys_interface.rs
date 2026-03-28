@@ -23,9 +23,11 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::ffi::CStr;
 use std::os::raw::{c_char, c_void};
+use wasm_bindgen::JsCast;
 use web_sys::{
     WebGl2RenderingContext as Gl, WebGlBuffer, WebGlFramebuffer, WebGlProgram, WebGlQuery,
-    WebGlRenderbuffer, WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject,
+    WebGlRenderbuffer, WebGlSampler, WebGlShader, WebGlSync, WebGlTexture, WebGlUniformLocation,
+    WebGlVertexArrayObject,
 };
 
 // -------------------------------------------------------------------
@@ -51,6 +53,12 @@ const GL_NUM_EXTENSIONS: GLenum = 0x821D;
 // Thread-local WebGL state
 // -------------------------------------------------------------------
 
+struct MappedBuffer {
+    target: GLenum,
+    offset: GLintptr,
+    data: Vec<u8>,
+}
+
 struct WebGlState {
     ctx: Gl,
     textures: HashMap<GLuint, WebGlTexture>,
@@ -62,6 +70,9 @@ struct WebGlState {
     vaos: HashMap<GLuint, WebGlVertexArrayObject>,
     uniform_locs: HashMap<GLuint, WebGlUniformLocation>,
     queries: HashMap<GLuint, WebGlQuery>,
+    syncs: HashMap<GLuint, WebGlSync>,
+    samplers: HashMap<GLuint, WebGlSampler>,
+    mapped_buffer: Option<MappedBuffer>,
     next_id: GLuint,
     // Cached NUL-terminated C strings returned by glGetString
     version_cstr: Vec<u8>,
@@ -109,11 +120,16 @@ impl WebGlState {
             vaos: HashMap::new(),
             uniform_locs: HashMap::new(),
             queries: HashMap::new(),
+            syncs: HashMap::new(),
+            samplers: HashMap::new(),
+            mapped_buffer: None,
             next_id: 1,
-            version_cstr: b"OpenGL ES 2.0\0".to_vec(),
+            // Expose an ES 3.0 version string so Skia's GLES code path enables
+            // ES3 renderable formats (e.g. RGBA8) on wasm32-unknown.
+            version_cstr: b"OpenGL ES 3.0\0".to_vec(),
             vendor_cstr,
             renderer_cstr,
-            shading_lang_cstr: b"OpenGL ES GLSL ES 1.00\0".to_vec(),
+            shading_lang_cstr: b"OpenGL ES GLSL ES 3.00\0".to_vec(),
             extension_strs,
         }
     }
@@ -177,6 +193,163 @@ macro_rules! with_gl_ref {
 // Helpers
 // -------------------------------------------------------------------
 
+/// Returns true if `pname` is valid for WebGL2 `getParameter`.
+///
+/// Invalid names generate `INVALID_ENUM` in the browser console before we can
+/// clear the error, so guard them before calling into WebGL.
+fn is_valid_webgl2_get_parameter(pname: GLenum) -> bool {
+    // DRAW_BUFFERi: DRAW_BUFFER0 (0x8825) … DRAW_BUFFER15 (0x8834)
+    if (0x8825..=0x8834).contains(&pname) {
+        return true;
+    }
+
+    matches!(
+        pname,
+        0x84E0 // ACTIVE_TEXTURE
+            | 0x846E // ALIASED_LINE_WIDTH_RANGE
+            | 0x846D // ALIASED_POINT_SIZE_RANGE
+            | 0x0D55 // ALPHA_BITS
+            | 0x8894 // ARRAY_BUFFER_BINDING
+            | 0x0BE2 // BLEND
+            | 0x8005 // BLEND_COLOR
+            | 0x80CA // BLEND_DST_ALPHA
+            | 0x80C8 // BLEND_DST_RGB
+            | 0x8009 // BLEND_EQUATION_RGB (= BLEND_EQUATION)
+            | 0x883D // BLEND_EQUATION_ALPHA
+            | 0x80CB // BLEND_SRC_ALPHA
+            | 0x80C9 // BLEND_SRC_RGB
+            | 0x0D54 // BLUE_BITS
+            | 0x0C22 // COLOR_CLEAR_VALUE
+            | 0x0C23 // COLOR_WRITEMASK
+            | 0x86A3 // COMPRESSED_TEXTURE_FORMATS
+            | 0x8F36 // COPY_READ_BUFFER_BINDING
+            | 0x8F37 // COPY_WRITE_BUFFER_BINDING
+            | 0x0B44 // CULL_FACE
+            | 0x0B45 // CULL_FACE_MODE
+            | 0x8B8D // CURRENT_PROGRAM
+            | 0x0D56 // DEPTH_BITS
+            | 0x0B73 // DEPTH_CLEAR_VALUE
+            | 0x0B74 // DEPTH_FUNC
+            | 0x0B70 // DEPTH_RANGE
+            | 0x0B71 // DEPTH_TEST
+            | 0x0B72 // DEPTH_WRITEMASK
+            | 0x0BD0 // DITHER
+            | 0x8CA6 // DRAW_FRAMEBUFFER_BINDING (= FRAMEBUFFER_BINDING)
+            | 0x8895 // ELEMENT_ARRAY_BUFFER_BINDING
+            | 0x8B8B // FRAGMENT_SHADER_DERIVATIVE_HINT
+            | 0x0B46 // FRONT_FACE
+            | 0x8192 // GENERATE_MIPMAP_HINT
+            | 0x0D53 // GREEN_BITS
+            | 0x8B9B // IMPLEMENTATION_COLOR_READ_FORMAT
+            | 0x8B9A // IMPLEMENTATION_COLOR_READ_TYPE
+            | 0x0B21 // LINE_WIDTH
+            | 0x8073 // MAX_3D_TEXTURE_SIZE
+            | 0x88FF // MAX_ARRAY_TEXTURE_LAYERS
+            | 0x8CDF // MAX_COLOR_ATTACHMENTS
+            | 0x8A33 // MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS
+            | 0x8B4D // MAX_COMBINED_TEXTURE_IMAGE_UNITS
+            | 0x8A2E // MAX_COMBINED_UNIFORM_BLOCKS
+            | 0x8A31 // MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS
+            | 0x851C // MAX_CUBE_MAP_TEXTURE_SIZE
+            | 0x8824 // MAX_DRAW_BUFFERS
+            | 0x8D6B // MAX_ELEMENT_INDEX
+            | 0x80E9 // MAX_ELEMENTS_INDICES
+            | 0x80E8 // MAX_ELEMENTS_VERTICES
+            | 0x9125 // MAX_FRAGMENT_INPUT_COMPONENTS
+            | 0x8A2D // MAX_FRAGMENT_UNIFORM_BLOCKS
+            | 0x8B49 // MAX_FRAGMENT_UNIFORM_COMPONENTS
+            | 0x8DFD // MAX_FRAGMENT_UNIFORM_VECTORS
+            | 0x8905 // MAX_PROGRAM_TEXEL_OFFSET
+            | 0x84E8 // MAX_RENDERBUFFER_SIZE
+            | 0x8D57 // MAX_SAMPLES
+            | 0x9111 // MAX_SERVER_WAIT_TIMEOUT
+            | 0x8872 // MAX_TEXTURE_IMAGE_UNITS
+            | 0x84FD // MAX_TEXTURE_LOD_BIAS
+            | 0x0D33 // MAX_TEXTURE_SIZE
+            | 0x8C8A // MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS
+            | 0x8C8B // MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS
+            | 0x8C80 // MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS
+            | 0x8A30 // MAX_UNIFORM_BLOCK_SIZE
+            | 0x8A2F // MAX_UNIFORM_BUFFER_BINDINGS
+            | 0x8B4B // MAX_VARYING_COMPONENTS
+            | 0x8DFC // MAX_VARYING_VECTORS
+            | 0x8869 // MAX_VERTEX_ATTRIBS
+            | 0x9122 // MAX_VERTEX_OUTPUT_COMPONENTS
+            | 0x8B4C // MAX_VERTEX_TEXTURE_IMAGE_UNITS
+            | 0x8A2B // MAX_VERTEX_UNIFORM_BLOCKS
+            | 0x8B4A // MAX_VERTEX_UNIFORM_COMPONENTS
+            | 0x8DFB // MAX_VERTEX_UNIFORM_VECTORS
+            | 0x0D3A // MAX_VIEWPORT_DIMS
+            | 0x821B // GL_MAJOR_VERSION
+            | 0x821C // GL_MINOR_VERSION
+            | 0x8904 // MIN_PROGRAM_TEXEL_OFFSET
+            | 0x86A2 // NUM_COMPRESSED_TEXTURE_FORMATS
+            | 0x821D // NUM_EXTENSIONS
+            | 0x0D05 // PACK_ALIGNMENT
+            | 0x0D02 // PACK_ROW_LENGTH
+            | 0x0D04 // PACK_SKIP_PIXELS
+            | 0x0D03 // PACK_SKIP_ROWS
+            | 0x88ED // PIXEL_PACK_BUFFER_BINDING
+            | 0x88EF // PIXEL_UNPACK_BUFFER_BINDING
+            | 0x8038 // POLYGON_OFFSET_FACTOR
+            | 0x8037 // POLYGON_OFFSET_FILL
+            | 0x2A00 // POLYGON_OFFSET_UNITS
+            | 0x8C89 // RASTERIZER_DISCARD
+            | 0x0C02 // READ_BUFFER
+            | 0x8CAA // READ_FRAMEBUFFER_BINDING
+            | 0x0D52 // RED_BITS
+            | 0x8CA7 // RENDERBUFFER_BINDING
+            | 0x809E // SAMPLE_ALPHA_TO_COVERAGE
+            | 0x80A8 // SAMPLE_BUFFERS
+            | 0x80AB // SAMPLE_COVERAGE_INVERT
+            | 0x80AA // SAMPLE_COVERAGE_VALUE
+            | 0x80A9 // SAMPLES
+            | 0x0C10 // SCISSOR_BOX
+            | 0x0C11 // SCISSOR_TEST
+            | 0x8801 // STENCIL_BACK_FAIL
+            | 0x8800 // STENCIL_BACK_FUNC
+            | 0x8802 // STENCIL_BACK_PASS_DEPTH_FAIL
+            | 0x8803 // STENCIL_BACK_PASS_DEPTH_PASS
+            | 0x8CA3 // STENCIL_BACK_REF
+            | 0x8CA4 // STENCIL_BACK_VALUE_MASK
+            | 0x8CA5 // STENCIL_BACK_WRITEMASK
+            | 0x0D57 // STENCIL_BITS
+            | 0x0B91 // STENCIL_CLEAR_VALUE
+            | 0x0B94 // STENCIL_FAIL
+            | 0x0B92 // STENCIL_FUNC
+            | 0x0B95 // STENCIL_PASS_DEPTH_FAIL
+            | 0x0B96 // STENCIL_PASS_DEPTH_PASS
+            | 0x0B97 // STENCIL_REF
+            | 0x0B90 // STENCIL_TEST
+            | 0x0B93 // STENCIL_VALUE_MASK
+            | 0x0B98 // STENCIL_WRITEMASK
+            | 0x0D50 // SUBPIXEL_BITS
+            | 0x8069 // TEXTURE_BINDING_2D
+            | 0x8C1D // TEXTURE_BINDING_2D_ARRAY
+            | 0x806A // TEXTURE_BINDING_3D
+            | 0x8514 // TEXTURE_BINDING_CUBE_MAP
+            | 0x8E24 // TRANSFORM_FEEDBACK_ACTIVE
+            | 0x8E25 // TRANSFORM_FEEDBACK_BINDING
+            | 0x8C8F // TRANSFORM_FEEDBACK_BUFFER_BINDING
+            | 0x8E23 // TRANSFORM_FEEDBACK_PAUSED
+            | 0x8A28 // UNIFORM_BUFFER_BINDING
+            | 0x8A34 // UNIFORM_BUFFER_OFFSET_ALIGNMENT
+            | 0x0CF5 // UNPACK_ALIGNMENT
+            | 0x9243 // UNPACK_COLORSPACE_CONVERSION_WEBGL
+            | 0x9240 // UNPACK_FLIP_Y_WEBGL
+            | 0x806E // UNPACK_IMAGE_HEIGHT
+            | 0x9241 // UNPACK_PREMULTIPLY_ALPHA_WEBGL
+            | 0x0CF2 // UNPACK_ROW_LENGTH
+            | 0x806D // UNPACK_SKIP_IMAGES
+            | 0x0CF4 // UNPACK_SKIP_PIXELS
+            | 0x0CF3 // UNPACK_SKIP_ROWS
+            | 0x85B5 // VERTEX_ARRAY_BINDING
+            | 0x1F00 // VENDOR
+            | 0x1F02 // VERSION
+            | 0x0BA2 // VIEWPORT
+    )
+}
+
 /// Estimate the byte length of a `glTexImage2D` / `glTexSubImage2D` pixel buffer.
 ///
 /// This is a best-effort calculation; Skia's Ganesh renderer almost exclusively
@@ -184,14 +357,14 @@ macro_rules! with_gl_ref {
 fn pixel_byte_size(width: i32, height: i32, format: u32, type_: u32) -> usize {
     let components: usize = match format {
         0x1902 | 0x1909 | 0x1903 | 0x1906 => 1, // DEPTH_COMPONENT, LUMINANCE, RED, ALPHA
-        0x190A | 0x8227 => 2,                     // LUMINANCE_ALPHA, RG
-        0x1907 | 0x8C41 => 3,                     // RGB, SRGB
-        _ => 4,                                   // RGBA, SRGB_ALPHA, etc.
+        0x190A | 0x8227 => 2,                   // LUMINANCE_ALPHA, RG
+        0x1907 | 0x8C41 => 3,                   // RGB, SRGB
+        _ => 4,                                 // RGBA, SRGB_ALPHA, etc.
     };
     let bytes_per_component: usize = match type_ {
-        0x1400 | 0x1401 => 1,       // BYTE, UNSIGNED_BYTE
-        0x140B | 0x8D61 => 2,       // HALF_FLOAT, HALF_FLOAT_OES
-        0x1402 | 0x1403 => 2,       // SHORT, UNSIGNED_SHORT
+        0x1400 | 0x1401 => 1,          // BYTE, UNSIGNED_BYTE
+        0x140B | 0x8D61 => 2,          // HALF_FLOAT, HALF_FLOAT_OES
+        0x1402 | 0x1403 => 2,          // SHORT, UNSIGNED_SHORT
         0x1404 | 0x1405 | 0x1406 => 4, // INT, UNSIGNED_INT, FLOAT
         0x8363 | 0x8033 | 0x8034 => 2, // packed 16-bit types
         _ => 1,
@@ -233,14 +406,18 @@ unsafe extern "C" fn gl_bind_buffer(target: GLenum, buffer: GLuint) {
 
 unsafe extern "C" fn gl_bind_framebuffer(target: GLenum, framebuffer: GLuint) {
     with_gl!(s, {
-        let fb = (framebuffer != 0).then(|| s.framebuffers.get(&framebuffer)).flatten();
+        let fb = (framebuffer != 0)
+            .then(|| s.framebuffers.get(&framebuffer))
+            .flatten();
         s.ctx.bind_framebuffer(target, fb);
     });
 }
 
 unsafe extern "C" fn gl_bind_renderbuffer(target: GLenum, renderbuffer: GLuint) {
     with_gl!(s, {
-        let rb = (renderbuffer != 0).then(|| s.renderbuffers.get(&renderbuffer)).flatten();
+        let rb = (renderbuffer != 0)
+            .then(|| s.renderbuffers.get(&renderbuffer))
+            .flatten();
         s.ctx.bind_renderbuffer(target, rb);
     });
 }
@@ -281,7 +458,11 @@ unsafe extern "C" fn gl_blend_func_separate(
     src_alpha: GLenum,
     dst_alpha: GLenum,
 ) {
-    with_gl!(s, s.ctx.blend_func_separate(src_rgb, dst_rgb, src_alpha, dst_alpha));
+    with_gl!(
+        s,
+        s.ctx
+            .blend_func_separate(src_rgb, dst_rgb, src_alpha, dst_alpha)
+    );
 }
 
 unsafe extern "C" fn gl_blit_framebuffer(
@@ -316,7 +497,8 @@ unsafe extern "C" fn gl_buffer_data(
         } else {
             let bytes = unsafe { std::slice::from_raw_parts(data as *const u8, size as usize) };
             let array = js_sys::Uint8Array::from(bytes);
-            s.ctx.buffer_data_with_array_buffer_view(target, &array, usage);
+            s.ctx
+                .buffer_data_with_array_buffer_view(target, &array, usage);
         }
     });
 }
@@ -431,7 +613,14 @@ unsafe extern "C" fn gl_compressed_tex_sub_image_2d(
         if data.is_null() || image_size <= 0 {
             let mut empty = Vec::<u8>::new();
             s.ctx.compressed_tex_sub_image_2d_with_u8_array(
-                target, level, xoffset, yoffset, width, height, format, empty.as_mut_slice(),
+                target,
+                level,
+                xoffset,
+                yoffset,
+                width,
+                height,
+                format,
+                empty.as_mut_slice(),
             );
             return;
         }
@@ -606,7 +795,9 @@ unsafe extern "C" fn gl_framebuffer_renderbuffer(
     renderbuffer: GLuint,
 ) {
     with_gl!(s, {
-        let rb = (renderbuffer != 0).then(|| s.renderbuffers.get(&renderbuffer)).flatten();
+        let rb = (renderbuffer != 0)
+            .then(|| s.renderbuffers.get(&renderbuffer))
+            .flatten();
         s.ctx
             .framebuffer_renderbuffer(target, attachment, renderbuffertarget, rb);
     });
@@ -660,9 +851,16 @@ gen_objects!(gl_gen_vertex_arrays, create_vertex_array, vaos);
 unsafe extern "C" fn gl_get_booleanv(pname: GLenum, params: *mut GLboolean) {
     with_gl!(s, {
         unsafe { *params = GL_FALSE };
+        if !is_valid_webgl2_get_parameter(pname) {
+            return;
+        }
         match s.ctx.get_parameter(pname) {
             Ok(v) => unsafe {
-                *params = if v.as_bool().unwrap_or(false) { GL_TRUE } else { GL_FALSE };
+                *params = if v.as_bool().unwrap_or(false) {
+                    GL_TRUE
+                } else {
+                    GL_FALSE
+                };
             },
             Err(_) => {
                 let _ = s.ctx.get_error();
@@ -682,12 +880,23 @@ unsafe extern "C" fn gl_get_framebuffer_attachment_parameter_iv(
     params: *mut GLint,
 ) {
     with_gl!(s, {
+        if params.is_null() {
+            return;
+        }
+        unsafe { *params = 0 };
         if let Ok(v) = s
             .ctx
             .get_framebuffer_attachment_parameter(target, attachment, pname)
         {
             if let Some(n) = v.as_f64() {
                 unsafe { *params = n as GLint };
+            } else if let Some(b) = v.as_bool() {
+                unsafe { *params = b as GLint };
+            } else if v.is_object() {
+                // WebGL returns a WebGLRenderbuffer/WebGLTexture object for
+                // FRAMEBUFFER_ATTACHMENT_OBJECT_NAME. GL expects an integer object name.
+                // Skia uses this as a presence check, so return a non-zero sentinel.
+                unsafe { *params = 1 };
             }
         }
     });
@@ -701,9 +910,44 @@ unsafe extern "C" fn gl_get_integerv(pname: GLenum, params: *mut GLint) {
                 unsafe { *params = s.extension_strs.len() as GLint };
                 return;
             }
+            0x84E2 => {
+                // GL_MAX_TEXTURE_UNITS (legacy alias)
+                if let Some(v) = get_parameter_int(&s.ctx, Gl::MAX_TEXTURE_IMAGE_UNITS) {
+                    unsafe { *params = v };
+                }
+                return;
+            }
+            0x8B4A => {
+                // GL_MAX_VERTEX_UNIFORM_COMPONENTS_ARB
+                if let Some(v) = get_parameter_int(&s.ctx, Gl::MAX_VERTEX_UNIFORM_VECTORS) {
+                    unsafe { *params = v * 4 };
+                }
+                return;
+            }
+            0x8B49 => {
+                // GL_MAX_FRAGMENT_UNIFORM_COMPONENTS_ARB
+                if let Some(v) = get_parameter_int(&s.ctx, Gl::MAX_FRAGMENT_UNIFORM_VECTORS) {
+                    unsafe { *params = v * 4 };
+                }
+                return;
+            }
+            0x8B4B => {
+                // GL_MAX_VARYING_FLOATS_ARB
+                if let Some(v) = get_parameter_int(&s.ctx, Gl::MAX_VARYING_VECTORS) {
+                    unsafe { *params = v * 4 };
+                }
+                return;
+            }
+            0x8871 => {
+                // GL_MAX_TEXTURE_COORDS
+                if let Some(v) = get_parameter_int(&s.ctx, Gl::MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
+                    unsafe { *params = v };
+                }
+                return;
+            }
             0x821B => {
-                // GL_MAJOR_VERSION
-                unsafe { *params = 2 };
+                // GL_MAJOR_VERSION — report 3 to match "OpenGL ES 3.0" version string
+                unsafe { *params = 3 };
                 return;
             }
             0x821C => {
@@ -712,6 +956,10 @@ unsafe extern "C" fn gl_get_integerv(pname: GLenum, params: *mut GLint) {
                 return;
             }
             _ => {}
+        }
+
+        if !is_valid_webgl2_get_parameter(pname) {
+            return;
         }
 
         match s.ctx.get_parameter(pname) {
@@ -819,10 +1067,7 @@ unsafe extern "C" fn gl_get_stringi(name: GLenum, index: GLuint) -> *const u8 {
     })
 }
 
-unsafe extern "C" fn gl_get_uniform_location(
-    program: GLuint,
-    name: *const c_char,
-) -> GLint {
+unsafe extern "C" fn gl_get_uniform_location(program: GLuint, name: *const c_char) -> GLint {
     let name_str = unsafe { CStr::from_ptr(name) }.to_str().unwrap_or("");
     with_gl!(s => {
         if let Some(p) = s.programs.get(&program) {
@@ -887,9 +1132,9 @@ unsafe extern "C" fn gl_read_pixels(
     with_gl!(s, {
         let len = pixel_byte_size(width, height, format, type_);
         let slice = unsafe { std::slice::from_raw_parts_mut(pixels as *mut u8, len) };
-        let _ = s
-            .ctx
-            .read_pixels_with_opt_u8_array(x, y, width, height, format, type_, Some(slice));
+        let _ =
+            s.ctx
+                .read_pixels_with_opt_u8_array(x, y, width, height, format, type_, Some(slice));
     });
 }
 
@@ -899,7 +1144,11 @@ unsafe extern "C" fn gl_renderbuffer_storage(
     width: GLsizei,
     height: GLsizei,
 ) {
-    with_gl!(s, s.ctx.renderbuffer_storage(target, internalformat, width, height));
+    with_gl!(
+        s,
+        s.ctx
+            .renderbuffer_storage(target, internalformat, width, height)
+    );
 }
 
 unsafe extern "C" fn gl_renderbuffer_storage_multisample(
@@ -1099,8 +1348,7 @@ macro_rules! uniform_vec {
         unsafe extern "C" fn $fn_name(location: GLint, count: GLsizei, value: *const $T) {
             with_gl!(s, {
                 if let Some(loc) = s.uniform_locs.get(&(location as GLuint)) {
-                    let data =
-                        unsafe { std::slice::from_raw_parts(value, count as usize * $n) };
+                    let data = unsafe { std::slice::from_raw_parts(value, count as usize * $n) };
                     s.ctx.$method(Some(loc), data);
                 }
             });
@@ -1266,7 +1514,11 @@ unsafe extern "C" fn gl_tex_storage_2d(
     width: GLsizei,
     height: GLsizei,
 ) {
-    with_gl!(s, s.ctx.tex_storage_2d(target, levels, internalformat, width, height));
+    with_gl!(
+        s,
+        s.ctx
+            .tex_storage_2d(target, levels, internalformat, width, height)
+    );
 }
 
 unsafe extern "C" fn gl_vertex_attrib1f(index: GLuint, x: GLfloat) {
@@ -1294,11 +1546,7 @@ unsafe extern "C" fn gl_vertex_attrib4fv(index: GLuint, v: *const GLfloat) {
     });
 }
 
-unsafe extern "C" fn gl_get_buffer_parameteriv(
-    target: GLenum,
-    pname: GLenum,
-    params: *mut GLint,
-) {
+unsafe extern "C" fn gl_get_buffer_parameteriv(target: GLenum, pname: GLenum, params: *mut GLint) {
     with_gl!(s, {
         let v = s.ctx.get_buffer_parameter(target, pname);
         if let Some(n) = v.as_f64() {
@@ -1322,6 +1570,9 @@ unsafe extern "C" fn gl_depth_rangef(n: GLclampf, f: GLclampf) {
 unsafe extern "C" fn gl_get_floatv(pname: GLenum, params: *mut GLfloat) {
     with_gl!(s, {
         unsafe { *params = 0.0 };
+        if !is_valid_webgl2_get_parameter(pname) {
+            return;
+        }
         match s.ctx.get_parameter(pname) {
             Ok(v) => write_glfloat_params_from_js(pname, params, &v),
             Err(_) => {
@@ -1330,7 +1581,6 @@ unsafe extern "C" fn gl_get_floatv(pname: GLenum, params: *mut GLfloat) {
         }
     });
 }
-
 
 // -------------------------------------------------------------------
 // Internal helpers
@@ -1344,6 +1594,10 @@ fn js_value_to_glint(v: &wasm_bindgen::JsValue) -> GLint {
     } else {
         0
     }
+}
+
+fn get_parameter_int(ctx: &Gl, pname: GLenum) -> Option<GLint> {
+    ctx.get_parameter(pname).ok().map(|v| js_value_to_glint(&v))
 }
 
 fn write_glint_params_from_js(pname: GLenum, params: *mut GLint, value: &wasm_bindgen::JsValue) {
@@ -1369,7 +1623,11 @@ fn write_glint_params_from_js(pname: GLenum, params: *mut GLint, value: &wasm_bi
     }
 }
 
-fn write_glfloat_params_from_js(pname: GLenum, params: *mut GLfloat, value: &wasm_bindgen::JsValue) {
+fn write_glfloat_params_from_js(
+    pname: GLenum,
+    params: *mut GLfloat,
+    value: &wasm_bindgen::JsValue,
+) {
     let count = expected_gl_param_count(pname);
     for i in 0..count {
         unsafe { *params.add(i) = 0.0 };
@@ -1412,12 +1670,7 @@ fn js_array_num(value: &wasm_bindgen::JsValue, index: u32) -> Option<f64> {
         .and_then(|v| v.as_f64())
 }
 
-fn copy_info_log(
-    bytes: &[u8],
-    max_length: GLsizei,
-    length: *mut GLsizei,
-    buf: *mut c_char,
-) {
+fn copy_info_log(bytes: &[u8], max_length: GLsizei, length: *mut GLsizei, buf: *mut c_char) {
     if max_length <= 0 || buf.is_null() {
         return;
     }
@@ -1430,6 +1683,490 @@ fn copy_info_log(
         }
     }
 }
+
+// -------------------------------------------------------------------
+// ES 3.0 — instanced drawing
+// -------------------------------------------------------------------
+
+unsafe extern "C" fn gl_draw_arrays_instanced(
+    mode: GLenum,
+    first: GLint,
+    count: GLsizei,
+    instance_count: GLsizei,
+) {
+    with_gl!(
+        s,
+        s.ctx
+            .draw_arrays_instanced(mode, first, count, instance_count)
+    )
+}
+
+unsafe extern "C" fn gl_draw_elements_instanced(
+    mode: GLenum,
+    count: GLsizei,
+    type_: GLenum,
+    indices: *const c_void,
+    instance_count: GLsizei,
+) {
+    with_gl!(s, {
+        s.ctx
+            .draw_elements_instanced_with_i32(mode, count, type_, indices as i32, instance_count)
+    })
+}
+
+unsafe extern "C" fn gl_vertex_attrib_divisor(index: GLuint, divisor: GLuint) {
+    with_gl!(s, s.ctx.vertex_attrib_divisor(index, divisor))
+}
+
+unsafe extern "C" fn gl_draw_range_elements(
+    mode: GLenum,
+    start: GLuint,
+    end: GLuint,
+    count: GLsizei,
+    type_: GLenum,
+    indices: *const c_void,
+) {
+    with_gl!(s, {
+        s.ctx
+            .draw_range_elements_with_i32(mode, start, end, count, type_, indices as i32)
+    })
+}
+
+unsafe extern "C" fn gl_vertex_attrib_i_pointer(
+    index: GLuint,
+    size: GLint,
+    type_: GLenum,
+    stride: GLsizei,
+    pointer: *const c_void,
+) {
+    with_gl!(s, {
+        s.ctx
+            .vertex_attrib_i_pointer_with_i32(index, size, type_, stride, pointer as i32)
+    })
+}
+
+// -------------------------------------------------------------------
+// ES 3.0 — framebuffer / buffer
+// -------------------------------------------------------------------
+
+unsafe extern "C" fn gl_draw_buffers(n: GLsizei, bufs: *const GLenum) {
+    if n <= 0 || bufs.is_null() {
+        return;
+    }
+    let array = js_sys::Array::new();
+    for i in 0..n as usize {
+        array.push(&wasm_bindgen::JsValue::from_f64(*bufs.add(i) as f64));
+    }
+    with_gl!(s, s.ctx.draw_buffers(&array))
+}
+
+unsafe extern "C" fn gl_read_buffer(src: GLenum) {
+    with_gl!(s, s.ctx.read_buffer(src))
+}
+
+unsafe extern "C" fn gl_copy_buffer_sub_data(
+    read_target: GLenum,
+    write_target: GLenum,
+    read_offset: GLintptr,
+    write_offset: GLintptr,
+    size: GLsizeiptr,
+) {
+    with_gl!(s, {
+        s.ctx.copy_buffer_sub_data_with_i32_and_i32_and_i32(
+            read_target,
+            write_target,
+            read_offset,
+            write_offset,
+            size,
+        )
+    })
+}
+
+unsafe extern "C" fn gl_invalidate_sub_framebuffer(
+    target: GLenum,
+    num_attachments: GLsizei,
+    attachments: *const GLenum,
+    x: GLint,
+    y: GLint,
+    width: GLsizei,
+    height: GLsizei,
+) {
+    if num_attachments <= 0 || attachments.is_null() {
+        return;
+    }
+    let array = js_sys::Array::new();
+    for i in 0..num_attachments as usize {
+        array.push(&wasm_bindgen::JsValue::from_f64(*attachments.add(i) as f64));
+    }
+    with_gl!(s, {
+        let _ = s
+            .ctx
+            .invalidate_sub_framebuffer(target, &array, x, y, width, height);
+    })
+}
+
+// -------------------------------------------------------------------
+// ES 3.0 — buffer mapping (emulated)
+// -------------------------------------------------------------------
+
+unsafe extern "C" fn gl_map_buffer_range(
+    target: GLenum,
+    offset: GLintptr,
+    length: GLsizeiptr,
+    _access: GLbitfield,
+) -> *mut c_void {
+    if length <= 0 {
+        return std::ptr::null_mut();
+    }
+    GL_CONTEXTS.with(|ctxs| {
+        let mut borrow = ctxs.borrow_mut();
+        let id = GL_CURRENT.with(|c| c.get());
+        if let Some(s) = borrow.get_mut(&id) {
+            let data = vec![0u8; length as usize];
+            let ptr = data.as_ptr() as *mut c_void;
+            s.mapped_buffer = Some(MappedBuffer {
+                target,
+                offset,
+                data,
+            });
+            ptr
+        } else {
+            std::ptr::null_mut()
+        }
+    })
+}
+
+unsafe extern "C" fn gl_unmap_buffer(target: GLenum) -> GLboolean {
+    GL_CONTEXTS.with(|ctxs| {
+        let mut borrow = ctxs.borrow_mut();
+        let id = GL_CURRENT.with(|c| c.get());
+        if let Some(s) = borrow.get_mut(&id) {
+            if let Some(mapped) = s.mapped_buffer.take() {
+                if mapped.target != target {
+                    return GL_FALSE;
+                }
+                let view = unsafe { js_sys::Uint8Array::view(&mapped.data) };
+                let _ = s.ctx.buffer_sub_data_with_i32_and_array_buffer_view(
+                    target,
+                    mapped.offset,
+                    &view,
+                );
+            } else {
+                return GL_FALSE;
+            }
+            GL_TRUE
+        } else {
+            GL_FALSE
+        }
+    })
+}
+
+unsafe extern "C" fn gl_flush_mapped_buffer_range(
+    _target: GLenum,
+    _offset: GLintptr,
+    _length: GLsizeiptr,
+) {
+    // no-op; data is fully uploaded on gl_unmap_buffer
+}
+
+// -------------------------------------------------------------------
+// ES 3.0 — sync objects
+// -------------------------------------------------------------------
+
+unsafe extern "C" fn gl_fence_sync(condition: GLenum, _flags: GLbitfield) -> *mut c_void {
+    GL_CONTEXTS.with(|ctxs| {
+        let mut borrow = ctxs.borrow_mut();
+        let id = GL_CURRENT.with(|c| c.get());
+        if let Some(s) = borrow.get_mut(&id) {
+            match s.ctx.fence_sync(condition, 0) {
+                Some(sync) => {
+                    let handle = s.alloc_id();
+                    s.syncs.insert(handle, sync);
+                    handle as usize as *mut c_void
+                }
+                None => std::ptr::null_mut(),
+            }
+        } else {
+            std::ptr::null_mut()
+        }
+    })
+}
+
+unsafe extern "C" fn gl_client_wait_sync(
+    sync: *mut c_void,
+    flags: GLbitfield,
+    timeout: u64,
+) -> GLenum {
+    let handle = sync as usize as GLuint;
+    GL_CONTEXTS.with(|ctxs| {
+        let mut borrow = ctxs.borrow_mut();
+        let id = GL_CURRENT.with(|c| c.get());
+        if let Some(s) = borrow.get_mut(&id) {
+            if let Some(sync_obj) = s.syncs.get(&handle) {
+                s.ctx.client_wait_sync_with_u32(
+                    sync_obj,
+                    flags,
+                    timeout.min(u32::MAX as u64) as u32,
+                )
+            } else {
+                0x911C // GL_WAIT_FAILED
+            }
+        } else {
+            0x911C
+        }
+    })
+}
+
+unsafe extern "C" fn gl_delete_sync(sync: *mut c_void) {
+    if sync.is_null() {
+        return;
+    }
+    let handle = sync as usize as GLuint;
+    with_gl!(s, {
+        if let Some(sync_obj) = s.syncs.remove(&handle) {
+            s.ctx.delete_sync(Some(&sync_obj));
+        }
+    })
+}
+
+unsafe extern "C" fn gl_is_sync(sync: *mut c_void) -> GLboolean {
+    if sync.is_null() {
+        return GL_FALSE;
+    }
+    let handle = sync as usize as GLuint;
+    with_gl!(s => {
+        match s.syncs.get(&handle) {
+            Some(sync_obj) => {
+                if s.ctx.is_sync(Some(sync_obj)) { GL_TRUE } else { GL_FALSE }
+            }
+            None => GL_FALSE,
+        }
+    })
+}
+
+unsafe extern "C" fn gl_wait_sync(sync: *mut c_void, flags: GLbitfield, _timeout: u64) {
+    if sync.is_null() {
+        return;
+    }
+    let handle = sync as usize as GLuint;
+    with_gl!(s, {
+        if let Some(sync_obj) = s.syncs.get(&handle) {
+            // timeout must be TIMEOUT_IGNORED (-1) per WebGL spec
+            s.ctx.wait_sync_with_f64(sync_obj, flags, -1.0);
+        }
+    })
+}
+
+// -------------------------------------------------------------------
+// ES 3.0 — sampler objects
+// -------------------------------------------------------------------
+
+unsafe extern "C" fn gl_gen_samplers(count: GLsizei, samplers: *mut GLuint) {
+    if count <= 0 || samplers.is_null() {
+        return;
+    }
+    with_gl!(s, {
+        for i in 0..count as usize {
+            let handle = if let Some(obj) = s.ctx.create_sampler() {
+                let id = s.alloc_id();
+                s.samplers.insert(id, obj);
+                id
+            } else {
+                0
+            };
+            *samplers.add(i) = handle;
+        }
+    })
+}
+
+unsafe extern "C" fn gl_delete_samplers(count: GLsizei, samplers: *const GLuint) {
+    if count <= 0 || samplers.is_null() {
+        return;
+    }
+    with_gl!(s, {
+        for i in 0..count as usize {
+            let id = *samplers.add(i);
+            if let Some(obj) = s.samplers.remove(&id) {
+                s.ctx.delete_sampler(Some(&obj));
+            }
+        }
+    })
+}
+
+unsafe extern "C" fn gl_bind_sampler(unit: GLuint, sampler: GLuint) {
+    with_gl!(s, {
+        let obj = s.samplers.get(&sampler);
+        s.ctx.bind_sampler(unit, obj);
+    })
+}
+
+unsafe extern "C" fn gl_sampler_parameteri(sampler: GLuint, pname: GLenum, param: GLint) {
+    with_gl!(s, {
+        if let Some(obj) = s.samplers.get(&sampler) {
+            s.ctx.sampler_parameteri(obj, pname, param);
+        }
+    })
+}
+
+unsafe extern "C" fn gl_sampler_parameterf(sampler: GLuint, pname: GLenum, param: GLfloat) {
+    with_gl!(s, {
+        if let Some(obj) = s.samplers.get(&sampler) {
+            s.ctx.sampler_parameterf(obj, pname, param);
+        }
+    })
+}
+
+unsafe extern "C" fn gl_sampler_parameter_iv(sampler: GLuint, pname: GLenum, params: *const GLint) {
+    if params.is_null() {
+        return;
+    }
+    with_gl!(s, {
+        if let Some(obj) = s.samplers.get(&sampler) {
+            s.ctx.sampler_parameteri(obj, pname, *params);
+        }
+    })
+}
+
+// -------------------------------------------------------------------
+// ES 3.0 — queries / misc
+// -------------------------------------------------------------------
+
+unsafe extern "C" fn gl_get_queryiv(_target: GLenum, pname: GLenum, params: *mut GLint) {
+    // Return reasonable defaults. GL_CURRENT_QUERY = 0 (no active query).
+    // GL_QUERY_COUNTER_BITS = 0 (not supported).
+    if !params.is_null() {
+        *params = match pname {
+            0x8865 => 0, // GL_CURRENT_QUERY
+            0x8864 => 0, // GL_QUERY_COUNTER_BITS
+            _ => 0,
+        };
+    }
+}
+
+unsafe extern "C" fn gl_get_internalformativ(
+    target: GLenum,
+    internalformat: GLenum,
+    pname: GLenum,
+    buf_size: GLsizei,
+    params: *mut GLint,
+) {
+    if buf_size <= 0 || params.is_null() {
+        return;
+    }
+    for i in 0..buf_size as usize {
+        unsafe { *params.add(i) = 0 };
+    }
+
+    if target != Gl::RENDERBUFFER {
+        return;
+    }
+
+    // A conservative fallback for common color-renderbuffer formats. If WebGL reports empty sample
+    // lists for these, Skia can incorrectly conclude the format is never renderable.
+    let fallback_num_samples = match internalformat {
+        0x8051 | // GL_RGB8
+        0x8056 | // GL_RGBA4
+        0x8058 | // GL_RGBA8
+        0x8059 | // GL_RGB10_A2
+        0x8D62 | // GL_RGB565
+        0x8C43 => 1, // GL_SRGB8_ALPHA8
+        _ => 0,
+    };
+
+    // WebGL2 only supports GL_SAMPLES (0x80A9) and GL_NUM_SAMPLE_COUNTS (0x9380)
+    // for getInternalformatParameter. All other pnames generate INVALID_ENUM.
+    const GL_SAMPLES: GLenum = 0x80A9;
+    const GL_NUM_SAMPLE_COUNTS: GLenum = 0x9380;
+    if pname == GL_NUM_SAMPLE_COUNTS {
+        with_gl!(s, {
+            match s
+                .ctx
+                .get_internalformat_parameter(target, internalformat, GL_SAMPLES)
+            {
+                Ok(v) => {
+                    if let Some(arr) = v.dyn_ref::<js_sys::Int32Array>() {
+                        let n = arr.length() as GLint;
+                        unsafe { *params = if n > 0 { n } else { fallback_num_samples } };
+                    } else if let Some(n) = v.as_f64() {
+                        unsafe { *params = if n > 0.0 { 1 } else { fallback_num_samples } };
+                    } else {
+                        unsafe { *params = fallback_num_samples };
+                    }
+                }
+                Err(_) => {
+                    let _ = s.ctx.get_error();
+                    unsafe { *params = fallback_num_samples };
+                }
+            }
+        });
+        return;
+    }
+
+    if pname != GL_SAMPLES {
+        return;
+    }
+    with_gl!(s, {
+        match s
+            .ctx
+            .get_internalformat_parameter(target, internalformat, pname)
+        {
+            Ok(v) => {
+                // NUM_SAMPLE_COUNTS returns a plain integer; SAMPLES returns an Int32Array
+                if let Some(arr) = v.dyn_ref::<js_sys::Int32Array>() {
+                    let len = (arr.length() as GLsizei).min(buf_size) as usize;
+                    if len > 0 {
+                        for i in 0..len {
+                            unsafe { *params.add(i) = arr.get_index(i as u32) };
+                        }
+                    } else {
+                        unsafe { *params = fallback_num_samples };
+                    }
+                } else if let Some(n) = v.as_f64() {
+                    unsafe {
+                        *params = if n > 0.0 {
+                            n as GLint
+                        } else {
+                            fallback_num_samples
+                        }
+                    };
+                } else {
+                    unsafe { *params = fallback_num_samples };
+                }
+            }
+            Err(_) => {
+                // INVALID_ENUM from unsupported internalformat — clear the error flag
+                let _ = s.ctx.get_error();
+                unsafe { *params = fallback_num_samples };
+            }
+        }
+    })
+}
+
+// -------------------------------------------------------------------
+// ES 3.0 — program binary (stub; WebGL doesn't expose binary format)
+// -------------------------------------------------------------------
+
+unsafe extern "C" fn gl_get_program_binary(
+    _program: GLuint,
+    _buf_size: GLsizei,
+    length: *mut GLsizei,
+    _binary_format: *mut GLenum,
+    _binary: *mut c_void,
+) {
+    if !length.is_null() {
+        *length = 0;
+    }
+}
+
+unsafe extern "C" fn gl_program_binary(
+    _program: GLuint,
+    _binary_format: GLenum,
+    _binary: *const c_void,
+    _length: GLsizei,
+) {
+}
+
+unsafe extern "C" fn gl_program_parameteri(_program: GLuint, _pname: GLenum, _value: GLint) {}
 
 // -------------------------------------------------------------------
 // Proc address table
@@ -1577,6 +2314,35 @@ pub(super) unsafe extern "C" fn web_sys_get_proc(
         "glDepthFunc" => gl_depth_func as *const c_void,
         "glDepthRangef" => gl_depth_rangef as *const c_void,
         "glGetFloatv" => gl_get_floatv as *const c_void,
+        // ES 3.0
+        "glDrawArraysInstanced" => gl_draw_arrays_instanced as *const c_void,
+        "glDrawElementsInstanced" => gl_draw_elements_instanced as *const c_void,
+        "glVertexAttribDivisor" => gl_vertex_attrib_divisor as *const c_void,
+        "glDrawRangeElements" => gl_draw_range_elements as *const c_void,
+        "glVertexAttribIPointer" => gl_vertex_attrib_i_pointer as *const c_void,
+        "glDrawBuffers" => gl_draw_buffers as *const c_void,
+        "glReadBuffer" => gl_read_buffer as *const c_void,
+        "glCopyBufferSubData" => gl_copy_buffer_sub_data as *const c_void,
+        "glInvalidateSubFramebuffer" => gl_invalidate_sub_framebuffer as *const c_void,
+        "glMapBufferRange" => gl_map_buffer_range as *const c_void,
+        "glUnmapBuffer" => gl_unmap_buffer as *const c_void,
+        "glFlushMappedBufferRange" => gl_flush_mapped_buffer_range as *const c_void,
+        "glFenceSync" => gl_fence_sync as *const c_void,
+        "glClientWaitSync" => gl_client_wait_sync as *const c_void,
+        "glDeleteSync" => gl_delete_sync as *const c_void,
+        "glIsSync" => gl_is_sync as *const c_void,
+        "glWaitSync" => gl_wait_sync as *const c_void,
+        "glGenSamplers" => gl_gen_samplers as *const c_void,
+        "glDeleteSamplers" => gl_delete_samplers as *const c_void,
+        "glBindSampler" => gl_bind_sampler as *const c_void,
+        "glSamplerParameteri" => gl_sampler_parameteri as *const c_void,
+        "glSamplerParameterf" => gl_sampler_parameterf as *const c_void,
+        "glSamplerParameteriv" => gl_sampler_parameter_iv as *const c_void,
+        "glGetQueryiv" => gl_get_queryiv as *const c_void,
+        "glGetInternalformativ" => gl_get_internalformativ as *const c_void,
+        "glGetProgramBinary" => gl_get_program_binary as *const c_void,
+        "glProgramBinary" => gl_program_binary as *const c_void,
+        "glProgramParameteri" => gl_program_parameteri as *const c_void,
         _ => std::ptr::null(),
     }
 }
@@ -1605,7 +2371,8 @@ pub(super) fn make_identified(
             std::ptr::null_mut(),
             Some(web_sys_get_proc),
         ) as *mut _
-    })?;
+    });
+    let iface = iface?;
     Some((id, iface))
 }
 
