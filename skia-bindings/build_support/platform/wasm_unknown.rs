@@ -1,6 +1,9 @@
-use std::{path::{Path, PathBuf}, process::Command};
+use std::{
+    path::{Path, PathBuf},
+    process::Command,
+};
 
-use super::{generic, prelude::*};
+use super::prelude::*;
 
 const WASI_UNKNOWN_UNKNOWN_SHIM_SOURCE: &str = "src/wasm_unknown_unknown_wasi_shim.c";
 const WASM_UNKNOWN_SYSROOT_ENV: &str = "SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT";
@@ -13,8 +16,7 @@ impl PlatformDetails for WasmUnknown {
         true
     }
 
-    fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
-        let features = &config.features;
+    fn gn_args(&self, _config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let sysroot = skia::env::wasm_unknown_unknown_sysroot();
         let ar = locate_wasi_sdk_bin().join(exe_name("llvm-ar"));
 
@@ -22,8 +24,8 @@ impl PlatformDetails for WasmUnknown {
             .arg("target_cpu", quote("wasm"))
             .arg("target_os", quote("wasm"))
             .arg("ar", quote(&ar.display().to_string()))
-            .arg("skia_gl_standard", quote("webgl"))
-            .arg("skia_use_webgl", yes_if(features.gpu()));
+            .arg("skia_gl_standard", quote("gles"))
+            .arg("skia_use_webgl", no());
         builder.cflag("-DSK_BUILD_FOR_UNIX");
         builder.cflag("-D_WASI_EMULATED_MMAN");
         builder.cflag("-D__wasi__=1");
@@ -56,13 +58,21 @@ impl PlatformDetails for WasmUnknown {
         let clangxx = bin.join(exe_name("clang++"));
         let ar = bin.join(exe_name("llvm-ar"));
 
-        assert!(clang.is_file(), "WASI SDK clang not found at {}", clang.display());
+        assert!(
+            clang.is_file(),
+            "WASI SDK clang not found at {}",
+            clang.display()
+        );
         assert!(
             clangxx.is_file(),
             "WASI SDK clang++ not found at {}",
             clangxx.display()
         );
-        assert!(ar.is_file(), "WASI SDK llvm-ar not found at {}", ar.display());
+        assert!(
+            ar.is_file(),
+            "WASI SDK llvm-ar not found at {}",
+            ar.display()
+        );
 
         let clang = clang.display().to_string();
         let clangxx = clangxx.display().to_string();
@@ -93,8 +103,8 @@ impl PlatformDetails for WasmUnknown {
         compile_wasi_shim(output_directory);
     }
 
-    fn link_libraries(&self, features: &Features) -> Vec<String> {
-        let mut libraries = generic::link_libraries(features);
+    fn link_libraries(&self, _features: &Features) -> Vec<String> {
+        let mut libraries = Vec::new();
         libraries.extend([
             "static=c".into(),
             "static=c++".into(),
@@ -121,6 +131,8 @@ impl PlatformDetails for WasmUnknown {
 }
 
 pub fn compile_wasi_shim(output_directory: &Path) {
+    cargo::rerun_if_file_changed(WASI_UNKNOWN_UNKNOWN_SHIM_SOURCE);
+
     let sdk_bin = locate_wasi_sdk_bin();
     let clang = sdk_bin.join(if cargo::host().is_windows() {
         "clang.exe"
@@ -185,9 +197,7 @@ fn ensure_wasi_sdk(output_directory: &Path) -> PathBuf {
         return path;
     }
 
-    let cache_dir = output_directory
-        .join(".cache")
-        .join("skia-wasm-runtime");
+    let cache_dir = output_directory.join(".cache").join("skia-wasm-runtime");
     let sdk_root = cache_dir.join(wasi_sdk_dir_name());
     if sdk_root.join("bin").is_dir() && sdk_root.join("share/wasi-sysroot").is_dir() {
         return sdk_root;

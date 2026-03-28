@@ -3,6 +3,8 @@
 
 typedef uint32_t __wasi_fd_t;
 typedef uint64_t __wasi_filesize_t;
+typedef uint32_t __wasi_clockid_t;
+typedef uint64_t __wasi_timestamp_t;
 typedef uint16_t __wasi_whence_t;
 typedef uint16_t __wasi_errno_t;
 typedef uint32_t __wasi_size_t;
@@ -15,6 +17,19 @@ typedef struct {
 // __WASI_ERRNO_BADF
 #define WASI_BADF ((__wasi_errno_t)8)
 #define WASI_OK ((__wasi_errno_t)0)
+
+__wasi_errno_t __imported_wasi_snapshot_preview1_clock_time_get(
+    __wasi_clockid_t id,
+    __wasi_timestamp_t precision,
+    __wasi_timestamp_t* time
+) {
+    (void)id;
+    (void)precision;
+    if (time) {
+        *time = 0;
+    }
+    return WASI_OK;
+}
 
 __wasi_errno_t __imported_wasi_snapshot_preview1_fd_close(__wasi_fd_t fd) {
     (void)fd;

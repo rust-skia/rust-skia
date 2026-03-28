@@ -10,6 +10,8 @@ pub mod make_ios_interface;
 pub mod make_mac_interface;
 #[cfg(target_arch = "wasm32")]
 pub mod make_web_gl_interface;
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+pub(super) mod web_sys_interface;
 #[cfg(target_os = "windows")]
 pub mod make_win_interface;
 pub mod types;
