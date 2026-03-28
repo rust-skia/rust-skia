@@ -1,3 +1,5 @@
+#[cfg(feature = "binary-cache")]
+use crate::build_support::binary_cache;
 /// Environment variables used for configuring the Skia build.
 use crate::build_support::cargo;
 use std::{
@@ -5,8 +7,6 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
 };
-#[cfg(feature = "binary-cache")]
-use crate::build_support::binary_cache;
 
 /// A boolean specifying whether to build Skia's dependencies or not. If not, the system's
 /// provided libraries are used.

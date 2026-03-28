@@ -1,5 +1,5 @@
-use std::io;
 use std::fs;
+use std::io;
 
 use build_support::{
     binaries_config,
@@ -9,10 +9,7 @@ use build_support::{
 
 mod build_support;
 
-fn maybe_compile_wasm_unknown_runtime_support(
-    target: &Target,
-    output_directory: &std::path::Path,
-) {
+fn maybe_compile_wasm_unknown_runtime_support(target: &Target, output_directory: &std::path::Path) {
     if target.as_strs() != ("wasm32", "unknown", "unknown", None) {
         return;
     }
@@ -163,10 +160,7 @@ fn main() -> Result<(), io::Error> {
         }
     };
 
-    maybe_compile_wasm_unknown_runtime_support(
-        &cargo_target,
-        &binaries_config.output_directory,
-    );
+    maybe_compile_wasm_unknown_runtime_support(&cargo_target, &binaries_config.output_directory);
     binaries_config.commit_to_cargo();
 
     #[cfg(feature = "binary-cache")]

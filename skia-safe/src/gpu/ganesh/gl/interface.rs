@@ -49,9 +49,7 @@ impl Interface {
     /// Like `new_web_sys` but also returns an integer handle for use with
     /// `make_web_sys_current` when multiple HTML canvases are in use.
     #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
-    pub fn new_web_sys_identified(
-        ctx: web_sys::WebGl2RenderingContext,
-    ) -> Option<(u32, Self)> {
+    pub fn new_web_sys_identified(ctx: web_sys::WebGl2RenderingContext) -> Option<(u32, Self)> {
         super::web_sys_interface::make_identified(ctx)
     }
 
