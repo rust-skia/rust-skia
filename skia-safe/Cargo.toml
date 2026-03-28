@@ -69,6 +69,23 @@ gpu = []
 bitflags = "2.0"
 skia-bindings = { version = "=0.95.0", path = "../skia-bindings", default-features = false }
 
+# D3D types & ComPtr
+windows = { version = "0.62.0", features = [
+    "Win32",
+    "Win32_Graphics",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Direct3D12",
+    "Win32_Graphics_Direct3D",
+    "Win32_Foundation",
+    "Win32_Graphics_Dxgi_Common",
+], optional = true }
+
+# svg
+ureq = { version = "3.0.4", optional = true }
+base64 = { version = "0.22.0", optional = true }
+percent-encoding = { version = "2.3.1", optional = true }
+skia-svg-macros = { version = "0.1.0", path = "../skia-svg-macros", optional = true }
+
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 js-sys = { version = "0.3", optional = true }
 wasm-bindgen = { version = "0.2", optional = true }
@@ -87,23 +104,6 @@ web-sys = { version = "0.3", features = [
     "WebGlSampler",
 ], optional = true }
 
-
-# D3D types & ComPtr
-windows = { version = "0.62.0", features = [
-    "Win32",
-    "Win32_Graphics",
-    "Win32_Graphics_Dxgi",
-    "Win32_Graphics_Direct3D12",
-    "Win32_Graphics_Direct3D",
-    "Win32_Foundation",
-    "Win32_Graphics_Dxgi_Common",
-], optional = true }
-
-# svg
-ureq = { version = "3.0.4", optional = true }
-base64 = { version = "0.22.0", optional = true }
-percent-encoding = { version = "2.3.1", optional = true }
-skia-svg-macros = { version = "0.1.0", path = "../skia-svg-macros", optional = true }
 
 [dev-dependencies]
 
