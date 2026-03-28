@@ -8,6 +8,7 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkImageGenerator.h"
 #include "include/gpu/MutableTextureState.h"
+#include "include/gpu/ganesh/GrBackendSemaphore.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/GrYUVABackendTextures.h"
 #include "include/gpu/ganesh/SkImageGanesh.h"
@@ -33,6 +34,30 @@ extern "C" bool C_SkSurface_replaceBackendTexture(
 //
 // gpu/GrBackendSurface.h
 //
+
+// GrBackendSemaphore
+
+extern "C" void C_GrBackendSemaphore_Construct(GrBackendSemaphore* uninitialized) {
+    new(uninitialized) GrBackendSemaphore();
+}
+
+extern "C" void C_GrBackendSemaphore_CopyConstruct(
+    GrBackendSemaphore* uninitialized,
+    const GrBackendSemaphore* semaphore) {
+    new(uninitialized) GrBackendSemaphore(*semaphore);
+}
+
+extern "C" void C_GrBackendSemaphore_destruct(GrBackendSemaphore* semaphore) {
+    semaphore->~GrBackendSemaphore();
+}
+
+extern "C" GrBackendApi C_GrBackendSemaphore_backend(const GrBackendSemaphore* semaphore) {
+    return semaphore->backend();
+}
+
+extern "C" bool C_GrBackendSemaphore_isInitialized(const GrBackendSemaphore* semaphore) {
+    return semaphore->isInitialized();
+}
 
 // GrBackendRenderTarget
 

@@ -11,9 +11,9 @@ pub mod vk;
 // Ganesh re-exports (these will probably be conflict with future graphite types)
 pub use ganesh::{
     context_options::ContextOptions, images, BackendAPI, BackendFormat, BackendRenderTarget,
-    BackendTexture, DirectContext, DirectContextId, DriverBugWorkarounds, FlushInfo,
-    PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SubmitInfo, SurfaceOrigin,
-    SyncCpu, YUVABackendTextureInfo, YUVABackendTextures,
+    BackendSemaphore, BackendTexture, DirectContext, DirectContextId, DriverBugWorkarounds,
+    FlushInfo, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SubmitInfo,
+    SurfaceOrigin, SyncCpu, YUVABackendTextureInfo, YUVABackendTextures,
 };
 
 pub use mutable_texture_state::*;
@@ -31,6 +31,8 @@ pub mod surfaces {
 }
 
 pub mod backend_formats {
+    #[cfg(feature = "d3d")]
+    pub use super::ganesh::d3d::backend_formats::*;
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::backend_formats::*;
     #[cfg(feature = "metal")]
@@ -40,6 +42,8 @@ pub mod backend_formats {
 }
 
 pub mod backend_textures {
+    #[cfg(feature = "d3d")]
+    pub use super::ganesh::d3d::backend_textures::*;
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::backend_textures::*;
     #[cfg(feature = "metal")]
@@ -49,6 +53,8 @@ pub mod backend_textures {
 }
 
 pub mod backend_render_targets {
+    #[cfg(feature = "d3d")]
+    pub use super::ganesh::d3d::backend_render_targets::*;
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::backend_render_targets::*;
     #[cfg(feature = "metal")]
@@ -57,7 +63,14 @@ pub mod backend_render_targets {
     pub use super::ganesh::vk::backend_render_targets::*;
 }
 
+pub mod backend_semaphores {
+    #[cfg(feature = "d3d")]
+    pub use super::ganesh::d3d::backend_semaphores::*;
+}
+
 pub mod direct_contexts {
+    #[cfg(feature = "d3d")]
+    pub use super::ganesh::d3d::direct_contexts::*;
     #[cfg(feature = "gl")]
     pub use super::ganesh::gl::direct_contexts::*;
     #[cfg(feature = "metal")]

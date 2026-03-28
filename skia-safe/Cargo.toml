@@ -18,7 +18,7 @@ categories = [
 ]
 license = "MIT"
 
-version = "0.94.0"
+version = "0.95.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition = "2021"
 rust-version.workspace = true
@@ -67,7 +67,7 @@ gpu = []
 
 [dependencies]
 bitflags = "2.0"
-skia-bindings = { version = "=0.94.0", path = "../skia-bindings", default-features = false }
+skia-bindings = { version = "=0.95.0", path = "../skia-bindings", default-features = false }
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 js-sys = { version = "0.3", optional = true }

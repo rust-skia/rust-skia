@@ -105,15 +105,13 @@ impl DirectContext {
     }
 
     #[cfg(feature = "d3d")]
+    #[deprecated(since = "0.95.0", note = "use gpu::direct_contexts::make_d3d()")]
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_d3d<'a>(
         backend_context: &crate::gpu::d3d::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        DirectContext::from_ptr(sb::C_GrDirectContext_MakeDirect3D(
-            backend_context.native(),
-            options.into().native_ptr_or_null(),
-        ))
+        crate::gpu::direct_contexts::make_d3d(backend_context, options)
     }
 
     pub fn reset(&mut self, backend_state: Option<u32>) -> &mut Self {

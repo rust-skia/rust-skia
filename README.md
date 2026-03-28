@@ -2,10 +2,10 @@
 
 [![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![Windows QA](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml) [![Linux QA](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml) [![macOS QA](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml)
 
-Skia Submodule Status: chrome/m146 ([upstream changes][skia-upstream], [our changes][skia-ours]).
+Skia Submodule Status: chrome/m147 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m146-0.93.2...google:chrome/m146
-[skia-ours]: https://github.com/google/skia/compare/chrome/m146...rust-skia:m146-0.93.2
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m147-0.94.3...google:chrome/m147
+[skia-ours]: https://github.com/google/skia/compare/chrome/m147...rust-skia:m147-0.94.3
 
 ## About
 
@@ -300,6 +300,12 @@ An example application that opens a Window and renders a blue rectangle using [V
 
 ```bash
 cargo run --example vulkan-window --features "vulkan"
+```
+
+To enable Vulkan validation layer messages and debug output in this example:
+
+```bash
+cargo run --example vulkan-window --features "vulkan" -- --validate
 ```
 
 To add Vulkan support to your system, the easiest way is to install the [LunarG SDK](https://vulkan.lunarg.com/sdk/home), and enable "System Global Installation" in the installer.

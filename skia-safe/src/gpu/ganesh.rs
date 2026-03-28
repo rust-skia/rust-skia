@@ -1,3 +1,4 @@
+mod backend_semaphore;
 mod backend_surface;
 pub mod context_options;
 #[cfg(feature = "d3d")]
@@ -16,6 +17,7 @@ mod types;
 pub mod vk;
 mod yuva_backend_textures;
 
+pub use backend_semaphore::*;
 pub use backend_surface::*;
 pub use direct_context::*;
 pub use driver_bug_workarounds::*;

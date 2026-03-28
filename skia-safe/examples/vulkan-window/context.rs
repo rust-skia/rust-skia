@@ -4,7 +4,11 @@ use vulkano::{
         physical::PhysicalDeviceType, Device, DeviceCreateInfo, DeviceExtensions, Queue,
         QueueCreateInfo, QueueFlags,
     },
-    instance::{Instance, InstanceCreateFlags, InstanceCreateInfo},
+    instance::debug::{
+        DebugUtilsMessageSeverity, DebugUtilsMessageType, DebugUtilsMessengerCallback,
+        DebugUtilsMessengerCreateInfo,
+    },
+    instance::{Instance, InstanceCreateFlags, InstanceCreateInfo, InstanceExtensions},
     swapchain::Surface,
     VulkanLibrary,
 };
@@ -16,23 +20,36 @@ use super::renderer::VulkanRenderer;
 #[derive(Default)]
 pub struct VulkanRenderContext {
     pub queue: Option<Arc<Queue>>,
+    pub validate: bool,
 }
 
 impl VulkanRenderContext {
+    pub fn new(validate: bool) -> Self {
+        Self {
+            queue: None,
+            validate,
+        }
+    }
+
     pub fn renderer_for_window(
         &mut self,
         event_loop: &ActiveEventLoop,
         window: Arc<Window>,
     ) -> VulkanRenderer {
         // lazily set up a shared instance, device, and queue to use for all subsequent renderers
+        let validate = self.validate;
         let queue = self
             .queue
-            .get_or_insert_with(|| Self::shared_queue(event_loop, window.clone()));
+            .get_or_insert_with(|| Self::shared_queue(event_loop, window.clone(), validate));
 
         VulkanRenderer::new(window.clone(), queue.clone())
     }
 
-    fn shared_queue(event_loop: &ActiveEventLoop, window: Arc<Window>) -> Arc<Queue> {
+    fn shared_queue(
+        event_loop: &ActiveEventLoop,
+        window: Arc<Window>,
+        validate: bool,
+    ) -> Arc<Queue> {
         let library = VulkanLibrary::new().expect("Vulkan libraries not found on system");
 
         // The first step of any Vulkan program is to create an instance.
@@ -43,6 +60,8 @@ impl VulkanRenderContext {
         // enable manually. To do so, we ask `Surface` for the list of extensions required to draw
         // to a window.
         let required_extensions = Surface::required_extensions(event_loop).unwrap();
+        let (enabled_extensions, enabled_layers, debug_utils_messengers) =
+            Self::validation_instance_config(&library, required_extensions, validate);
 
         // Now creating the instance.
         let instance = Instance::new(
@@ -51,7 +70,9 @@ impl VulkanRenderContext {
                 // Enable enumerating devices that use non-conformant Vulkan implementations.
                 // (e.g. MoltenVK)
                 flags: InstanceCreateFlags::ENUMERATE_PORTABILITY,
-                enabled_extensions: required_extensions,
+                enabled_extensions,
+                enabled_layers,
+                debug_utils_messengers,
                 ..Default::default()
             },
         )
@@ -173,5 +194,71 @@ impl VulkanRenderContext {
         // only use one queue in this example, so we just retrieve the first and only element of
         // the iterator.
         queues.next().unwrap()
+    }
+
+    fn validation_instance_config(
+        library: &Arc<VulkanLibrary>,
+        required_extensions: InstanceExtensions,
+        validate: bool,
+    ) -> (
+        InstanceExtensions,
+        Vec<String>,
+        Vec<DebugUtilsMessengerCreateInfo>,
+    ) {
+        if !validate {
+            return (required_extensions, Vec::new(), Vec::new());
+        }
+
+        const VALIDATION_LAYER: &str = "VK_LAYER_KHRONOS_validation";
+
+        let mut enabled_extensions = required_extensions;
+        let mut enabled_layers = Vec::new();
+        let mut debug_utils_messengers = Vec::new();
+
+        let has_validation_layer = library
+            .layer_properties()
+            .map(|layers| {
+                layers
+                    .into_iter()
+                    .any(|layer| layer.name() == VALIDATION_LAYER)
+            })
+            .unwrap_or(false);
+
+        if has_validation_layer {
+            enabled_layers.push(VALIDATION_LAYER.to_owned());
+
+            if library.supported_extensions().ext_debug_utils {
+                enabled_extensions.ext_debug_utils = true;
+                debug_utils_messengers.push(DebugUtilsMessengerCreateInfo {
+                    message_severity: DebugUtilsMessageSeverity::ERROR
+                        | DebugUtilsMessageSeverity::WARNING
+                        | DebugUtilsMessageSeverity::INFO
+                        | DebugUtilsMessageSeverity::VERBOSE,
+                    message_type: DebugUtilsMessageType::GENERAL
+                        | DebugUtilsMessageType::VALIDATION
+                        | DebugUtilsMessageType::PERFORMANCE,
+                    ..DebugUtilsMessengerCreateInfo::user_callback(unsafe {
+                        DebugUtilsMessengerCallback::new(
+                            |message_severity, message_type, callback_data| {
+                                println!(
+                                    "[vulkan {:?} {:?}] {}",
+                                    message_severity, message_type, callback_data.message
+                                );
+                            },
+                        )
+                    })
+                });
+                println!("Vulkan validation enabled for vulkan-window example");
+            } else {
+                eprintln!("Vulkan validation requested, but VK_EXT_debug_utils is not available");
+            }
+        } else {
+            eprintln!(
+                "Vulkan validation requested, but '{}' is not available on this system",
+                VALIDATION_LAYER,
+            );
+        }
+
+        (enabled_extensions, enabled_layers, debug_utils_messengers)
     }
 }

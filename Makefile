@@ -165,7 +165,7 @@ build-local-build:
 	cargo clean
 	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=$(shell pwd)/tmp cargo build --release --no-default-features -vv --features ${local-build-features}
 
-# Diffs the rust skia commits of the current branch with what is commited to the master branch.
+# Diffs the rust skia commits of the current branch with what is committed to the master branch.
 rust-skia-logs = git log --oneline | head -n 1000 | grep rust-skia | cut -d' ' -f2-
 .PHONY: diff-skia
 diff-skia:

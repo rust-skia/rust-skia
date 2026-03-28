@@ -11,14 +11,13 @@ impl PlatformDetails for Emscripten {
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let features = &config.features;
+        let emsdk_base_dir = emsdk_base_dir();
 
         builder
-            .arg("cc", quote("emcc"))
-            .arg("cxx", quote("em++"))
-            .arg("ar", quote("emar"))
             .arg("skia_gl_standard", quote("webgl"))
             .arg("skia_use_webgl", yes_if(features.gpu()))
-            .arg("target_cpu", quote("wasm"));
+            .arg("target_cpu", quote("wasm"))
+            .arg("skia_emsdk_dir", quote(&emsdk_base_dir));
 
         // The custom embedded font manager is enabled by default on WASM, but depends
         // on the undefined symbol `SK_EMBEDDED_FONTS`. Enable the custom empty font
@@ -36,12 +35,7 @@ impl PlatformDetails for Emscripten {
         // <https://github.com/rust-lang/rust-bindgen/issues/751#issuecomment-555735577>
         builder.arg("-fvisibility=default");
 
-        let emsdk_base_dir = match std::env::var("EMSDK") {
-            Ok(val) => val,
-            Err(_e) => panic!(
-                "please set the EMSDK environment variable to the root of your Emscripten installation"
-            ),
-        };
+        let emsdk_base_dir = emsdk_base_dir();
 
         let sysroot_include = format!("{emsdk_base_dir}/upstream/emscripten/cache/sysroot/include");
         if Path::new(&sysroot_include).is_dir() {
@@ -86,5 +80,14 @@ impl PlatformDetails for Emscripten {
     ) -> Features {
         features += feature::EMBED_FREETYPE;
         features
+    }
+}
+
+fn emsdk_base_dir() -> String {
+    match std::env::var("EMSDK") {
+        Ok(val) => val,
+        Err(_e) => panic!(
+            "please set the EMSDK environment variable to the root of your Emscripten installation"
+        ),
     }
 }

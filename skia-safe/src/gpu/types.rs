@@ -34,6 +34,7 @@ bitflags! {
     pub struct GpuStatsFlags : u32 {
         const NONE = sb::skgpu_GpuStatsFlags_kNone as _;
         const ELAPSED_TIME = sb::skgpu_GpuStatsFlags_kElapsedTime as _;
+        const OCCLUSION_PASS_SAMPLES = sb::skgpu_GpuStatsFlags_kOcclusionPassSamples as _;
     }
 }
 
@@ -41,6 +42,7 @@ bitflags! {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct GpuStats {
     pub elapsed_time: u64,
+    pub num_occlusion_pass_samples: u64,
 }
 
 native_transmutable!(skgpu_GpuStats, GpuStats);
