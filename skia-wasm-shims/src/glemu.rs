@@ -177,13 +177,16 @@ macro_rules! with_gl {
 
 macro_rules! with_gl_ref {
     ($s:ident => $body:expr) => {
+        with_gl_ref!($s, Default::default() => $body)
+    };
+    ($s:ident, $default:expr => $body:expr) => {
         GL_CONTEXTS.with(|ctxs| {
             let borrow = ctxs.borrow();
             let id = GL_CURRENT.with(|c| c.get());
             if let Some($s) = borrow.get(&id) {
                 $body
             } else {
-                Default::default()
+                $default
             }
         })
     };
@@ -1044,7 +1047,7 @@ unsafe extern "C" fn gl_get_shader_precision_format(
 }
 
 unsafe extern "C" fn gl_get_string(name: GLenum) -> *const u8 {
-    with_gl_ref!(s => match name {
+    with_gl_ref!(s, std::ptr::null() => match name {
         0x1F00 => s.vendor_cstr.as_ptr(),          // GL_VENDOR
         0x1F01 => s.renderer_cstr.as_ptr(),        // GL_RENDERER
         0x1F02 => s.version_cstr.as_ptr(),         // GL_VERSION
@@ -1055,7 +1058,7 @@ unsafe extern "C" fn gl_get_string(name: GLenum) -> *const u8 {
 }
 
 unsafe extern "C" fn gl_get_stringi(name: GLenum, index: GLuint) -> *const u8 {
-    with_gl_ref!(s => {
+    with_gl_ref!(s, std::ptr::null() => {
         if name == GL_EXTENSIONS {
             // GL_EXTENSIONS
             s.extension_strs
