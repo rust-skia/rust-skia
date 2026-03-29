@@ -44,7 +44,7 @@ impl Interface {
     pub fn new_web_sys() -> Option<Self> {
         use skia_wasm_shims;
 
-        gl::Interface::from_ptr(unsafe {
+        Self::from_ptr(unsafe {
             skia_bindings::C_GrGLInterface_MakeAssembledInterface(
                 std::ptr::null_mut(),
                 Some(skia_wasm_shims::web_sys_get_proc),
