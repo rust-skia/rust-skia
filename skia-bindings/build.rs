@@ -1,4 +1,5 @@
-use std::{fs, io};
+use std::fs;
+use std::io;
 
 use build_support::{
     binaries_config,
@@ -8,6 +9,18 @@ use build_support::{
 
 mod build_support;
 
+fn maybe_compile_wasm_unknown_runtime_support(target: &Target, output_directory: &std::path::Path) {
+    if target.as_strs() != ("wasm32", "unknown", "unknown", None) {
+        return;
+    }
+
+    platform::prepare_build_support(target, output_directory);
+
+    for path in platform::link_search_paths(target) {
+        cargo::add_link_search(path);
+    }
+}
+
 fn main() -> Result<(), io::Error> {
     if env::is_docs_rs_build() {
         println!("DETECTED DOCS_RS BUILD");
@@ -16,6 +29,7 @@ fn main() -> Result<(), io::Error> {
 
     let skia_debug = env::is_skia_debug();
     let cargo_target = cargo::target();
+    platform::configure_build_environment(&cargo_target, &cargo::output_directory());
 
     let features = {
         let mut features = features::Features::from_cargo_env();
@@ -62,7 +76,7 @@ fn main() -> Result<(), io::Error> {
                 definitions,
                 &binaries_config,
                 &source_dir,
-                cargo_target,
+                cargo_target.clone(),
                 None,
             );
         } else {
@@ -146,6 +160,7 @@ fn main() -> Result<(), io::Error> {
         }
     };
 
+    maybe_compile_wasm_unknown_runtime_support(&cargo_target, &binaries_config.output_directory);
     binaries_config.commit_to_cargo();
 
     #[cfg(feature = "binary-cache")]

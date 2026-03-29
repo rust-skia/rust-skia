@@ -22,6 +22,7 @@ include = [
 	"build_support.rs",
 	"build_support/**/*.rs",
 	"src/**/*.h",
+	"src/**/*.c",
 	"src/**/*.cpp",
 	"src/*.rs" ]
 

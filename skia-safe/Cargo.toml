@@ -31,7 +31,13 @@ default = ["binary-cache", "embed-icudtl", "pdf", "jpeg"]
 all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "skottie", "webp"]
 all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "webp"]
 all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "skottie", "webp"]
-gl = ["gpu", "skia-bindings/gl"]
+gl = [
+    "gpu",
+    "skia-bindings/gl",
+    "dep:js-sys",
+    "dep:wasm-bindgen",
+    "dep:web-sys",
+]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
 wayland = ["egl", "skia-bindings/wayland"]
@@ -63,7 +69,6 @@ gpu = []
 bitflags = "2.0"
 skia-bindings = { version = "=0.95.0", path = "../skia-bindings", default-features = false }
 
-
 # D3D types & ComPtr
 windows = { version = "0.62.0", features = [
     "Win32",
@@ -80,6 +85,25 @@ ureq = { version = "3.0.4", optional = true }
 base64 = { version = "0.22.0", optional = true }
 percent-encoding = { version = "2.3.1", optional = true }
 skia-svg-macros = { version = "0.1.0", path = "../skia-svg-macros", optional = true }
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+js-sys = { version = "0.3", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+web-sys = { version = "0.3", features = [
+    "WebGl2RenderingContext",
+    "WebGlBuffer",
+    "WebGlFramebuffer",
+    "WebGlProgram",
+    "WebGlQuery",
+    "WebGlRenderbuffer",
+    "WebGlShader",
+    "WebGlTexture",
+    "WebGlUniformLocation",
+    "WebGlVertexArrayObject",
+    "WebGlSync",
+    "WebGlSampler",
+], optional = true }
+
 
 [dev-dependencies]
 
