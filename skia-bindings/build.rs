@@ -10,7 +10,7 @@ use build_support::{
 mod build_support;
 
 fn maybe_compile_wasm_unknown_runtime_support(target: &Target, output_directory: &std::path::Path) {
-    if target.as_strs() != ("wasm32", "unknown", "unknown", None) {
+    if target.is_wasm_unknown_unknown() {
         return;
     }
 
