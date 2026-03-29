@@ -2,8 +2,7 @@ use ash::vk::Handle;
 use std::{ptr, sync::Arc};
 use vulkano::{
     device::Queue,
-    image::{view::ImageView, ImageUsage},
-    render_pass::{Framebuffer, FramebufferCreateInfo, RenderPass},
+    image::{Image, ImageUsage},
     swapchain::{
         acquire_next_image, PresentMode, Surface, Swapchain, SwapchainAcquireFuture,
         SwapchainCreateInfo, SwapchainPresentInfo,
@@ -20,14 +19,13 @@ use skia_safe::{
 use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
 
 struct SwapchainFrame {
-    framebuffer: Arc<Framebuffer>,
+    image: Arc<Image>,
     image_layout: vk::ImageLayout,
 }
 
 pub struct VulkanRenderer {
     queue: Arc<Queue>,
     frames: Vec<SwapchainFrame>,
-    render_pass: Arc<RenderPass>,
     last_render: Option<Box<dyn GpuFuture>>,
 
     // Keep `skia_ctx` before `swapchain`: struct fields are dropped in declaration order, and
@@ -123,47 +121,8 @@ impl VulkanRenderer {
             .unwrap()
         };
 
-        // The next step is to create a *render pass*, which is an object that describes where the
-        // output of the graphics pipeline will go. It describes the layout of the images where the
-        // colors (and in other use-cases depth and/or stencil information) will be written.
-        let render_pass = vulkano::single_pass_renderpass!(
-            device.clone(),
-            attachments: {
-                // `color` is a custom name we give to the first and only attachment.
-                color: {
-                    // `format: <ty>` indicates the type of the format of the image. This has to be
-                    // one of the types of the `vulkano::format` module (or alternatively one of
-                    // your structs that implements the `FormatDesc` trait). Here we use the same
-                    // format as the swapchain.
-                    format: swapchain.image_format(),
-                    // `samples: 1` means that we ask the GPU to use one sample to determine the
-                    // value of each pixel in the color attachment. We could use a larger value
-                    // (multisampling) for antialiasing. An example of this can be found in
-                    // msaa-renderpass.rs.
-                    samples: 1,
-                    // `load_op: DontCare` means that the initial contents of the attachment haven't been
-                    // 'cleared' ahead of time (i.e., the pixels haven't all been set to a single color).
-                    // This is fine since we'll be filling the entire framebuffer with skia's output
-                    load_op: DontCare,
-                    // `store_op: Store` means that we ask the GPU to store the output of the draw
-                    // in the actual image. We could also ask it to discard the result.
-                    store_op: Store,
-                },
-            },
-            pass: {
-                // We use the attachment named `color` as the one and only color attachment.
-                color: [color],
-                // No depth-stencil attachment is indicated with empty brackets.
-                depth_stencil: {},
-            },
-        )
-        .unwrap();
-
-        // The render pass we created above only describes the layout of our framebuffers. Before
-        // we can draw we also need to create the actual framebuffers.
-        //
-        // Since we need to draw to multiple images, we are going to create a different framebuffer
-        // for each image. We'll wait until the first `prepare_swapchain` call to actually allocate them.
+        // Swapchain images are wrapped directly into Skia backend render targets during draw.
+        // We'll wait until the first `prepare_swapchain` call to populate frame metadata.
         let frames = Vec::new();
 
         // In some situations, the swapchain will become invalid by itself. This includes for
@@ -235,7 +194,6 @@ impl VulkanRenderer {
 
         VulkanRenderer {
             queue,
-            render_pass,
             frames,
             last_render,
             skia_ctx,
@@ -260,7 +218,7 @@ impl VulkanRenderer {
         }
 
         // Whenever the window resizes we need to recreate everything dependent on the
-        // window size. In this example that includes the swapchain & the framebuffers
+        // window size. In this example that includes the swapchain and image metadata.
         let window_size: PhysicalSize<u32> = self.window.inner_size();
         if window_size.width > 0 && window_size.height > 0 && !self.swapchain_is_valid {
             // Use the new dimensions of the window.
@@ -274,27 +232,11 @@ impl VulkanRenderer {
 
             self.swapchain = new_swapchain;
 
-            // Because framebuffers contains a reference to the old swapchain, we need to
-            // recreate framebuffers as well.
-            // self.framebuffers = allocate_framebuffers(&new_images, &self.render_pass);
             self.frames = new_images
                 .iter()
-                .map(|image| {
-                    let view = ImageView::new_default(image.clone()).unwrap();
-
-                    let framebuffer = Framebuffer::new(
-                        self.render_pass.clone(),
-                        FramebufferCreateInfo {
-                            attachments: vec![view],
-                            ..Default::default()
-                        },
-                    )
-                    .unwrap();
-
-                    SwapchainFrame {
-                        framebuffer,
-                        image_layout: vk::ImageLayout::UNDEFINED,
-                    }
+                .map(|image| SwapchainFrame {
+                    image: image.clone(),
+                    image_layout: vk::ImageLayout::UNDEFINED,
                 })
                 .collect::<Vec<_>>();
 
@@ -356,13 +298,12 @@ impl VulkanRenderer {
         });
 
         if let Some((image_index, acquire_future)) = next_frame {
-            // pull the appropriate framebuffer from the swapchain and attach a skia Surface to it
-            let (framebuffer, current_layout) = {
+            // pull the appropriate image from the swapchain and attach a skia Surface to it
+            let (image, current_layout) = {
                 let frame = &self.frames[image_index as usize];
-                (frame.framebuffer.clone(), frame.image_layout)
+                (frame.image.clone(), frame.image_layout)
             };
-            let mut surface =
-                surface_for_framebuffer(&mut self.skia_ctx, framebuffer, current_layout);
+            let mut surface = surface_for_image(&mut self.skia_ctx, image, current_layout);
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
@@ -418,17 +359,16 @@ impl VulkanRenderer {
     }
 }
 
-// Create a skia `Surface` (and its associated `.canvas()`) whose render target is the specified `Framebuffer`.
-fn surface_for_framebuffer(
+// Create a skia `Surface` (and its associated `.canvas()`) whose render target is the specified image.
+fn surface_for_image(
     skia_ctx: &mut gpu::DirectContext,
-    framebuffer: Arc<Framebuffer>,
+    image: Arc<Image>,
     current_layout: vk::ImageLayout,
 ) -> skia_safe::Surface {
-    let [width, height] = framebuffer.extent();
-    let image_access = &framebuffer.attachments()[0];
-    let image_object = image_access.image().handle().as_raw();
+    let [width, height, _] = image.extent();
+    let image_object = image.handle().as_raw();
 
-    let format = image_access.format();
+    let format = image.format();
 
     let (vk_format, color_type) = match format {
         vulkano::format::Format::B8G8R8A8_UNORM => (
