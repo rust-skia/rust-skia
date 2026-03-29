@@ -13,8 +13,6 @@ pub mod make_web_gl_interface;
 #[cfg(target_os = "windows")]
 pub mod make_win_interface;
 pub mod types;
-#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
-pub(super) mod web_sys_interface;
 
 pub use backend_surface::*;
 pub use direct_context::*;

@@ -1,4 +1,4 @@
-use skia_safe::{AlphaType, ColorType, Color, ImageInfo, Paint, PaintStyle};
+use skia_safe::{AlphaType, Color, ColorType, ImageInfo, Paint, PaintStyle};
 use wasm_bindgen::prelude::*;
 use web_sys::{CanvasRenderingContext2d, ImageData};
 
@@ -26,7 +26,8 @@ impl State {
     pub fn resize(&mut self, width: u32, height: u32) {
         self.width = width as i32;
         self.height = height as i32;
-        self.pixels.resize((self.width * self.height * 4) as usize, 0);
+        self.pixels
+            .resize((self.width * self.height * 4) as usize, 0);
     }
 
     pub fn draw(&mut self, x: f32, y: f32) -> Result<(), JsValue> {
@@ -37,8 +38,9 @@ impl State {
             None,
         );
         let row_bytes = self.width as usize * 4;
-        let canvas = skia_safe::Canvas::from_raster_direct(&info, &mut self.pixels, Some(row_bytes), None)
-            .ok_or_else(|| JsValue::from_str("failed to create raster canvas"))?;
+        let canvas =
+            skia_safe::Canvas::from_raster_direct(&info, &mut self.pixels, Some(row_bytes), None)
+                .ok_or_else(|| JsValue::from_str("failed to create raster canvas"))?;
 
         canvas.clear(Color::WHITE);
         let mut paint = Paint::default();

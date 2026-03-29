@@ -365,7 +365,7 @@ fn pixel_byte_size(width: i32, height: i32, format: u32, type_: u32) -> usize {
         0x1400 | 0x1401 => 1,          // BYTE, UNSIGNED_BYTE
         0x140B | 0x8D61 => 2,          // HALF_FLOAT, HALF_FLOAT_OES
         0x1402 | 0x1403 => 2,          // SHORT, UNSIGNED_SHORT
-        0x1404 | 0x1405 | 0x1406 => 4, // INT, UNSIGNED_INT, FLOAT
+        0x1404..=0x1406 => 4,          // INT, UNSIGNED_INT, FLOAT
         0x8363 | 0x8033 | 0x8034 => 2, // packed 16-bit types
         _ => 1,
     };
@@ -1049,7 +1049,7 @@ unsafe extern "C" fn gl_get_string(name: GLenum) -> *const u8 {
         0x1F01 => s.renderer_cstr.as_ptr(),        // GL_RENDERER
         0x1F02 => s.version_cstr.as_ptr(),         // GL_VERSION
         0x8B8C => s.shading_lang_cstr.as_ptr(),    // GL_SHADING_LANGUAGE_VERSION
-        GL_EXTENSIONS => b"\0".as_ptr(),           // GL_EXTENSIONS (invalid in ES3; use glGetStringi)
+        GL_EXTENSIONS => c"".as_ptr().cast(),      // GL_EXTENSIONS (invalid in ES3; use glGetStringi)
         _ => std::ptr::null(),
     })
 }
@@ -1846,11 +1846,8 @@ unsafe extern "C" fn gl_unmap_buffer(target: GLenum) -> GLboolean {
                     return GL_FALSE;
                 }
                 let view = unsafe { js_sys::Uint8Array::view(&mapped.data) };
-                let _ = s.ctx.buffer_sub_data_with_i32_and_array_buffer_view(
-                    target,
-                    mapped.offset,
-                    &view,
-                );
+                s.ctx
+                    .buffer_sub_data_with_i32_and_array_buffer_view(target, mapped.offset, &view);
             } else {
                 return GL_FALSE;
             }
@@ -2177,10 +2174,7 @@ unsafe extern "C" fn gl_program_parameteri(_program: GLuint, _pname: GLenum, _va
 /// Returns a function pointer for each GL function name that Skia's Ganesh
 /// renderer requests.  Unknown names return null; Skia ignores missing
 /// optional extensions.
-pub(super) unsafe extern "C" fn web_sys_get_proc(
-    _ctx: *mut c_void,
-    name: *const c_char,
-) -> *const c_void {
+pub unsafe extern "C" fn web_sys_get_proc(_ctx: *mut c_void, name: *const c_char) -> *const c_void {
     let name = unsafe { CStr::from_ptr(name) }.to_str().unwrap_or("");
     match name {
         "glActiveTexture" => gl_active_texture as *const c_void,
@@ -2347,17 +2341,11 @@ pub(super) unsafe extern "C" fn web_sys_get_proc(
     }
 }
 
-// -------------------------------------------------------------------
-// Public entry point
-// -------------------------------------------------------------------
-
-/// Register `ctx` as a new context, make it current, and return `(id, Interface)`.
+/// Register `ctx` as a new context, make it current, and return `id`
 ///
 /// The returned `id` can be passed to `make_current` / `drop_context` when
 /// multiple HTML canvases are in use simultaneously.
-pub(super) fn make_identified(
-    ctx: web_sys::WebGl2RenderingContext,
-) -> Option<(u32, crate::gpu::gl::Interface)> {
+pub fn register_gl_context(ctx: web_sys::WebGl2RenderingContext) -> u32 {
     let id = GL_NEXT_ID.with(|n| {
         let v = n.get();
         n.set(v + 1);
@@ -2366,27 +2354,11 @@ pub(super) fn make_identified(
     GL_CONTEXTS.with(|ctxs| ctxs.borrow_mut().insert(id, WebGlState::new(ctx)));
     GL_CURRENT.with(|c| c.set(id));
 
-    let iface = crate::gpu::gl::Interface::from_ptr(unsafe {
-        skia_bindings::C_GrGLInterface_MakeAssembledInterface(
-            std::ptr::null_mut(),
-            Some(web_sys_get_proc),
-        ) as *mut _
-    });
-    let iface = iface?;
-    Some((id, iface))
-}
-
-/// Initialise the thread-local WebGL state and return a `GrGLInterface`
-/// backed by `ctx`.
-///
-/// This is called from `Interface::new_web_sys()`.  For multi-canvas use,
-/// prefer `Interface::new_web_sys_identified()`.
-pub(super) fn make(ctx: web_sys::WebGl2RenderingContext) -> Option<crate::gpu::gl::Interface> {
-    make_identified(ctx).map(|(_, iface)| iface)
+    id
 }
 
 /// Make the context registered under `id` the active one on this thread.
-pub(super) fn make_current(id: u32) {
+pub fn set_gl_context(id: u32) {
     assert!(
         GL_CONTEXTS.with(|c| c.borrow().contains_key(&id)),
         "unknown WebGL context id {id}"
@@ -2398,7 +2370,7 @@ pub(super) fn make_current(id: u32) {
 ///
 /// The associated `Interface` must not be used again until a different
 /// context is made current.
-pub(super) fn drop_context(id: u32) {
+pub fn drop_gl_context(id: u32) {
     GL_CONTEXTS.with(|ctxs| ctxs.borrow_mut().remove(&id));
     GL_CURRENT.with(|c| {
         if c.get() == id {

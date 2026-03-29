@@ -12,8 +12,12 @@ struct GpuState {
 
 impl GpuState {
     fn new(gl_ctx: WebGl2RenderingContext) -> Result<Self, JsValue> {
-        let interface = skia_safe::gpu::gl::Interface::new_web_sys(gl_ctx)
+        let id = skia_safe::gpu::gl::register_gl_context(gl_ctx);
+        skia_safe::gpu::gl::set_gl_context(id);
+
+        let interface = skia_safe::gpu::gl::Interface::new_web_sys()
             .ok_or_else(|| JsValue::from_str("failed to create WebGL2 GL interface"))?;
+
         let context = gpu::direct_contexts::make_gl(interface, None)
             .ok_or_else(|| JsValue::from_str("failed to create Skia DirectContext"))?;
         let framebuffer_info = FramebufferInfo {
@@ -29,12 +33,8 @@ impl GpuState {
 }
 
 fn create_surface(gpu_state: &mut GpuState, width: i32, height: i32) -> Result<Surface, JsValue> {
-    let target = gpu::backend_render_targets::make_gl(
-        (width, height),
-        0,
-        8,
-        gpu_state.framebuffer_info,
-    );
+    let target =
+        gpu::backend_render_targets::make_gl((width, height), 0, 8, gpu_state.framebuffer_info);
     gpu::surfaces::wrap_backend_render_target(
         &mut gpu_state.context,
         &target,
