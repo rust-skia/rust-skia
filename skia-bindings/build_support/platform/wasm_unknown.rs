@@ -28,8 +28,12 @@ impl PlatformDetails for WasmUnknown {
             .arg("skia_use_webgl", no());
         builder.cflag("-DSK_BUILD_FOR_UNIX");
         builder.cflag("-D_WASI_EMULATED_MMAN");
+        builder.cflag("-D_WASI_EMULATED_SIGNAL");
         builder.cflag("-D__wasi__=1");
         builder.cflag("-D_LIBCPP_DISABLE_AVAILABILITY");
+        builder.cflag("-DU_HAVE_TZSET=0");
+        builder.cflag("-DU_HAVE_TIMEZONE=0");
+        builder.cflag("-DU_HAVE_TZNAME=0");
         builder.cflag("-mllvm");
         builder.cflag("-wasm-enable-sjlj");
         builder.cflag(format!("--sysroot={}", sysroot.display()));
@@ -110,6 +114,7 @@ impl PlatformDetails for WasmUnknown {
             "static=c++".into(),
             "static=c++abi".into(),
             "static=wasi-emulated-mman".into(),
+            "static=wasi-emulated-signal".into(),
             "static=wasi-shim".into(),
         ]);
         libraries
