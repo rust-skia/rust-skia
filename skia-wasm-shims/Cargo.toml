@@ -26,14 +26,13 @@ rust-version.workspace = true
 doctest = false
 
 [features]
-default = ["glemu"]
 glemu = [
+    "dep:js-sys"
     "dep:web-sys"
 ]
 
 [dependencies]
-js-sys = { version = "0.3" }
-wasm-bindgen = { version = "0.2" }
+js-sys = { version = "0.3", optional = true }
 web-sys = { version = "0.3", features = [
     "WebGl2RenderingContext",
     "WebGlBuffer",
