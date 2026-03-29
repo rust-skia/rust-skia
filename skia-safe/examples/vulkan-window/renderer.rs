@@ -18,14 +18,9 @@ use skia_safe::{
 
 use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
 
-struct SwapchainFrame {
-    image: Arc<Image>,
-    image_layout: vk::ImageLayout,
-}
-
 pub struct VulkanRenderer {
     queue: Arc<Queue>,
-    frames: Vec<SwapchainFrame>,
+    images: Vec<Arc<Image>>,
     last_render: Option<Box<dyn GpuFuture>>,
 
     // Keep `skia_ctx` before `swapchain`: struct fields are dropped in declaration order, and
@@ -122,8 +117,8 @@ impl VulkanRenderer {
         };
 
         // Swapchain images are wrapped directly into Skia backend render targets during draw.
-        // We'll wait until the first `prepare_swapchain` call to populate frame metadata.
-        let frames = Vec::new();
+        // We'll wait until the first `prepare_swapchain` call to populate the image list.
+        let images = Vec::new();
 
         // In some situations, the swapchain will become invalid by itself. This includes for
         // example when the window is resized (as the images of the swapchain will no longer match
@@ -194,7 +189,7 @@ impl VulkanRenderer {
 
         VulkanRenderer {
             queue,
-            frames,
+            images,
             last_render,
             skia_ctx,
             swapchain,
@@ -232,13 +227,7 @@ impl VulkanRenderer {
 
             self.swapchain = new_swapchain;
 
-            self.frames = new_images
-                .iter()
-                .map(|image| SwapchainFrame {
-                    image: image.clone(),
-                    image_layout: vk::ImageLayout::UNDEFINED,
-                })
-                .collect::<Vec<_>>();
+            self.images = new_images.to_vec();
 
             self.swapchain_is_valid = true;
         }
@@ -299,11 +288,8 @@ impl VulkanRenderer {
 
         if let Some((image_index, acquire_future)) = next_frame {
             // pull the appropriate image from the swapchain and attach a skia Surface to it
-            let (image, current_layout) = {
-                let frame = &self.frames[image_index as usize];
-                (frame.image.clone(), frame.image_layout)
-            };
-            let mut surface = surface_for_image(&mut self.skia_ctx, image, current_layout);
+            let image = self.images[image_index as usize].clone();
+            let mut surface = surface_for_image(&mut self.skia_ctx, image);
             let canvas = surface.canvas();
 
             // use the display's DPI to convert the window size to logical coords and pre-scale the
@@ -337,7 +323,6 @@ impl VulkanRenderer {
                 sync: gpu::SyncCpu::Yes,
                 ..gpu::SubmitInfo::default()
             });
-            self.frames[image_index as usize].image_layout = vk::ImageLayout::PRESENT_SRC_KHR;
 
             // submit work for this image to the GPU and present it on screen
             self.last_render = self
@@ -360,11 +345,7 @@ impl VulkanRenderer {
 }
 
 // Create a skia `Surface` (and its associated `.canvas()`) whose render target is the specified image.
-fn surface_for_image(
-    skia_ctx: &mut gpu::DirectContext,
-    image: Arc<Image>,
-    current_layout: vk::ImageLayout,
-) -> skia_safe::Surface {
+fn surface_for_image(skia_ctx: &mut gpu::DirectContext, image: Arc<Image>) -> skia_safe::Surface {
     let [width, height, _] = image.extent();
     let image_object = image.handle().as_raw();
 
@@ -384,7 +365,7 @@ fn surface_for_image(
             image_object as _,
             alloc,
             vk::ImageTiling::OPTIMAL,
-            current_layout,
+            vk::ImageLayout::UNDEFINED,
             vk_format,
             1,
             None,
