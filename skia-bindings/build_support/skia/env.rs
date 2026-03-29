@@ -92,7 +92,6 @@ fn download_to_path(url: &str, destination: &Path, artifact_name: &str) {
             .unwrap_or_else(|e| panic!("failed to download {artifact_name} from {url}: {e}"));
         fs::write(destination, bytes)
             .unwrap_or_else(|e| panic!("failed to write {artifact_name} archive: {e}"));
-        return;
     }
 
     #[cfg(not(feature = "binary-cache"))]
