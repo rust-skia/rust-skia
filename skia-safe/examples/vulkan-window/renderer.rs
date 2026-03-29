@@ -135,8 +135,8 @@ impl VulkanRenderer {
         // work. To continue rendering, we need to recreate the swapchain by creating a new
         // swapchain. Here, we remember that we need to do this for the next loop iteration.
         //
-        // Since we haven't allocated framebuffers yet, we'll start in an invalid state to flag that
-        // they need to be recreated before we render.
+        // Since we haven't populated per-image metadata yet, we'll start in an invalid state to
+        // flag that swapchain-dependent state needs to be recreated before we render.
         let swapchain_is_valid = false;
 
         // In the `draw_and_present` method below we are going to submit commands to the GPU.
@@ -172,7 +172,7 @@ impl VulkanRenderer {
             };
 
             // We then pass skia_safe references to the whole shebang, resulting in a DirectContext
-            // from which we'll be able to get a canvas reference that draws directly to framebuffers
+            // from which we'll be able to get a canvas reference that draws directly to swapchain images
             // on the swapchain.
             let direct_context = direct_contexts::make_vulkan(
                 &vk::BackendContext::new(
@@ -204,7 +204,7 @@ impl VulkanRenderer {
     }
 
     pub fn invalidate_swapchain(&mut self) {
-        // Typically called when the window size changes and we need to recreate framebufffers
+        // Typically called when the window size changes and we need to recreate swapchain resources.
         self.swapchain_is_valid = false;
     }
 
@@ -245,7 +245,7 @@ impl VulkanRenderer {
     }
 
     fn get_next_frame(&mut self) -> Option<(u32, SwapchainAcquireFuture)> {
-        // prepare to render by identifying the next framebuffer to draw to and acquiring the
+        // prepare to render by identifying the next swapchain image to draw to and acquiring the
         // GpuFuture that we'll be replacing `last_render` with once we submit the frame
         let (image_index, suboptimal, acquire_future) =
             match acquire_next_image(self.swapchain.clone(), None).map_err(Validated::unwrap) {
@@ -290,7 +290,7 @@ impl VulkanRenderer {
     where
         F: FnOnce(&skia_safe::Canvas, LogicalSize<f32>),
     {
-        // find the next framebuffer to render into and acquire a new GpuFuture to block on
+        // find the next swapchain image to render into and acquire a new GpuFuture to block on
         let next_frame = self.get_next_frame().or_else(|| {
             // if suboptimal or out-of-date, recreate the swapchain and try once more
             self.prepare_swapchain();
@@ -339,7 +339,7 @@ impl VulkanRenderer {
             });
             self.frames[image_index as usize].image_layout = vk::ImageLayout::PRESENT_SRC_KHR;
 
-            // send the framebuffer to the gpu and display it on screen
+            // submit work for this image to the GPU and present it on screen
             self.last_render = self
                 .last_render
                 .take()
