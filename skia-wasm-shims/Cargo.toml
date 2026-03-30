@@ -27,7 +27,7 @@ doctest = false
 
 [features]
 glemu = [
-    "dep:js-sys"
+    "dep:js-sys",
     "dep:web-sys"
 ]
 
