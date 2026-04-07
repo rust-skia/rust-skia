@@ -31,7 +31,7 @@ default = ["binary-cache", "embed-icudtl", "pdf", "jpeg"]
 all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "skottie", "webp"]
 all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "webp"]
 all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "skottie", "webp"]
-gl = ["gpu", "skia-bindings/gl", "skia-wasm-shims/glemu"]
+gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
 wayland = ["egl", "skia-bindings/wayland"]
@@ -79,9 +79,6 @@ ureq = { version = "3.0.4", optional = true }
 base64 = { version = "0.22.0", optional = true }
 percent-encoding = { version = "2.3.1", optional = true }
 skia-svg-macros = { version = "0.1.0", path = "../skia-svg-macros", optional = true }
-
-[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
-skia-wasm-shims = { version = "0.1.0", path = "../skia-wasm-shims" }
 
 [dev-dependencies]
 

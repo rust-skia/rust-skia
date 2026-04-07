@@ -42,12 +42,10 @@ impl Interface {
     /// ```
     #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
     pub fn new_web_sys() -> Option<Self> {
-        use skia_wasm_shims;
-
         Self::from_ptr(unsafe {
             skia_bindings::C_GrGLInterface_MakeAssembledInterface(
                 std::ptr::null_mut(),
-                Some(skia_wasm_shims::web_sys_get_proc),
+                Some(sb::web_sys_get_proc),
             ) as *mut _
         })
     }
