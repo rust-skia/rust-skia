@@ -1,42 +1,13 @@
-# WebAssembly Sample
+# WebAssembly examples
 
-## Build and Run the Example
+This directory groups the repository's WebAssembly samples and browser-side stress tests.
 
-To build this sample you will need to install Emscripten. By default the build script looks for the current installed [asdf](http://asdf-vm.com/) version of `emsdk`. If Emscripten is installed by other means on your system, you can customize its location by setting the `EMSDK` environment variable.
+## Samples
 
-Then build the example:
+- [`emscripten/`](emscripten/README.md): the original `wasm32-unknown-emscripten` WebGL sample.
+- [`unknown/`](unknown/README.md): a `wasm32-unknown-unknown` sample with a default raster backend and an optional `gl` feature for WebGL2.
 
-```shell
-make build
-```
+## Stress tests
 
-Start a web server (requires Python 3):
-
-```shell
-make serve
-```
-
-Then open http://localhost:8000/web/ in your browser.
-
-## Notes
-
-This sample uses the `wasm32-unknown-emscripten` target because it demonstrates the Emscripten/WebGL integration path.
-
-For this reason there is a bit of ceremony involved both for building and for running the Rust code.
-
-The build requires to set several environment variables:
-
-- `EMSDK` -- required by the rust-skia build script to retrieve Emscripten's include files.
-
-- `EMCC_CFLAGS` -- used to customize the Emscripten build, specifically:
-- `-s ERROR_ON_UNDEFINED_SYMBOLS=0` -- required for Emscripten > 2.0.9, which stopped providing a stub for the `__gxx_personality_v0` C++ function.
-    
-  - `-s MAX_WEBGL_VERSION=2` -- enable Emscripten WebGL (1 & 2) support.
-
-  - `-s MODULARIZE=1` -- make Emscripten output module-ish JS. This does not output proper ES6 modules, but without it the init relies on global variables and modules loading order.
-  
-  - `-s EXPORT_NAME=createRustSkiaModule` -- customize Emscripten's load function.
-  
-- `-s EXPORTED_RUNTIME_METHODS=GL` -- give access to Emscripten's GL group of functions, required to bind Emscripten to the WebGL context.
-
-This repository also supports `wasm32-unknown-unknown` (experimental) for `rust-skia`, but this sample currently targets Emscripten/WebGL and intentionally keeps using `wasm32-unknown-emscripten`.
+- `testing/emscripten/`: allocation stress app for `wasm32-unknown-emscripten`.
+- `testing/unknown/`: allocation stress app for `wasm32-unknown-unknown`.
