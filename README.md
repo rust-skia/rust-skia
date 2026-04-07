@@ -239,28 +239,33 @@ export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
 cargo build --target wasm32-unknown-emscripten
 ```
 
-For an end-to-end browser sample on this target, see [`wasm-example/`](wasm-example/README.md).
+For an end-to-end browser sample on this target, see [`wasm-example/emscripten/`](wasm-example/emscripten/README.md).
 
 #### `wasm32-unknown-unknown` (experimental)
 
-Build with the target directly (no Emscripten setup required):
+Build with the target directly:
 
 ```bash
 rustup target add wasm32-unknown-unknown
 cargo build --target wasm32-unknown-unknown
 ```
 
-The build script automatically provisions a WASI SDK/sysroot runtime (including libc and libc++) and configures clang/linking for this target.
+The build downloads a pinned WASI SDK by default. To override it, set
+`SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK`, or set
+`SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` and `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT`
+explicitly instead.
 
 Current support status:
 
-- Supported: default feature set, `webp`
-- Not yet supported: `gl`, `textlayout`, `svg`, `skottie`
+- Supported: default feature set, `gl`, `webp`
+- Not yet fully tested: `textlayout`, `svg`, `skottie`
 
-For an end-to-end browser sample on this target, see [`wasm-unknown-example/`](wasm-unknown-example/README.md). It follows the currently supported subset (no `gl`, `textlayout`, `svg`, or `skottie`).
+For an end-to-end browser sample on this target, see
+[`wasm-example/unknown/`](wasm-example/unknown/README.md). It defaults to the raster path and
+supports the WebGL2 path with `FEATURES=gl`.
 
 ```bash
-cd wasm-unknown-example
+cd wasm-example/unknown
 rustup target add wasm32-unknown-unknown
 cargo install wasm-bindgen-cli
 make build
@@ -270,7 +275,14 @@ make serve
 
 Then open http://localhost:8000/ in your browser.
 
-For advanced runtime override environment variables, see the [`skia-bindings` README](skia-bindings/README.md).
+To build the WebGL2 variant:
+
+```bash
+cd wasm-example/unknown
+FEATURES=gl make build
+```
+
+For advanced toolchain environment variables, see the [`skia-bindings` README](skia-bindings/README.md).
 
 ### Skia
 

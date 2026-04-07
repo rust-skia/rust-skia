@@ -64,21 +64,23 @@ dependencies.
 
 Additional arguments for the `gn` executable can be specified by setting the `SKIA_GN_ARGS` environment variable.
 
-### WebAssembly (`wasm32-unknown-unknown`) runtime provisioning
+### WebAssembly (`wasm32-unknown-unknown`) toolchain setup
 
-When targeting `wasm32-unknown-unknown`, the build support auto-provisions a WASI runtime toolchain (WASI SDK + sysroot with libc/libc++) into `OUT_DIR/.cache/skia-wasm-runtime` and configures clang/linker arguments automatically.
+When targeting `wasm32-unknown-unknown`, the build support downloads a pinned WASI SDK by default
+and uses it to locate `clang`, `clang++`, `llvm-ar`, and the WASI sysroot.
 
-No Emscripten setup is required for this target.
+To override the bundled version, set `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK` to an existing SDK
+root, or set `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` and
+`SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` explicitly.
 
-Optional advanced overrides:
+Supported environment variables:
 
 | Variable | Description |
 | --- | --- |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_URL` | Override the download URL used for the pinned WASI SDK archive. |
 | `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK` | Use an existing WASI SDK root directory (must contain `bin/` and `share/wasi-sysroot/`). |
 | `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` | Use an existing WASI SDK `bin/` directory directly. |
-| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_URL` | Override the download URL for the WASI SDK archive. |
-| `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` | Use an explicit sysroot directory instead of the auto-provisioned one. |
-| `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT_URL` | Override the download URL for the standalone WASI sysroot archive. |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` | Use an explicit sysroot directory instead of inferring `share/wasi-sysroot` from the SDK root or downloaded SDK. |
 
 ### Using system libraries
 
