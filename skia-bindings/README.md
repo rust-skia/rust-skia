@@ -82,6 +82,11 @@ Supported environment variables:
 | `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` | Use an existing WASI SDK `bin/` directory directly. |
 | `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` | Use an explicit sysroot directory instead of inferring `share/wasi-sysroot` from the SDK root or downloaded SDK. |
 
+On `wasm32-unknown-unknown`, enabling JPEG support (`jpeg-encode`, `jpeg-decode`, `jpeg`, or the
+default `pdf` feature that depends on it) links the WASI `setjmp` runtime. Those builds require a
+runtime with WebAssembly exception / SJLJ support; if your runtime does not provide that, disable
+those features for the wasm build.
+
 ### Using system libraries
 
 By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event that this is not wanted (say, if the crate is being built as part of a package's build routine,) this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
