@@ -50,7 +50,38 @@ fn main() -> Result<(), io::Error> {
     //
     // skip attempting to download?
     //
-    if let Some(source_dir) = env::source_dir() {
+    if let Some(shared_lib_path) = env::skia_shared_lib_path() {
+        // Shared library mode: link against a pre-built libskia.so.
+        // Only needs installed headers (SKIA_HEADER_DIR), not the full source tree.
+        let header_dir = env::skia_header_dir()
+            .or_else(env::source_dir)
+            .expect("SKIA_HEADER_DIR (or SKIA_SOURCE_DIR) must be set when using SKIA_SHARED_LIB_PATH");
+
+        println!("STARTING BIND AGAINST SHARED SYSTEM SKIA (headers: {})", header_dir.display());
+
+        let mut definitions = skia_bindgen::definitions::from_env();
+
+        // When compiling the bindings wrapper against pre-built headers we need
+        // the full API surface visible.  SK_HIDE_PATH_EDIT_METHODS is set by
+        // Skia's `is_official_build=true` to hide deprecated SkPath mutation
+        // methods at the header level, but the symbols still exist in the
+        // compiled library.  Remove it so the C wrapper can call them.
+        definitions.retain(|(name, _)| name != "SK_HIDE_PATH_EDIT_METHODS");
+
+        generate_bindings(
+            &features,
+            definitions,
+            &binaries_config,
+            &header_dir,
+            cargo_target,
+            None,
+        );
+
+        // Override linking: use the shared lib instead of static archives.
+        binaries_config.commit_to_cargo_shared(&shared_lib_path);
+
+        return Ok(());
+    } else if let Some(source_dir) = env::source_dir() {
         if let Some(search_path) = env::skia_lib_search_path() {
             println!("STARTING BIND AGAINST SYSTEM SKIA");
 
@@ -225,6 +256,23 @@ mod env {
     /// The path to where a pre-built Skia library can be found.
     pub fn skia_lib_search_path() -> Option<PathBuf> {
         cargo::env_var("SKIA_LIBRARY_SEARCH_PATH").map(PathBuf::from)
+    }
+
+    /// Path to a directory containing a pre-built shared libskia.so.
+    /// When set (together with SKIA_HEADER_DIR or SKIA_SOURCE_DIR), the build
+    /// links dynamically against the system shared library instead of
+    /// statically embedding Skia.
+    pub fn skia_shared_lib_path() -> Option<PathBuf> {
+        cargo::env_var("SKIA_SHARED_LIB_PATH").map(PathBuf::from)
+    }
+
+    /// Path to installed Skia headers that mirror the source-tree layout
+    /// (i.e. the directory must contain `include/`, `modules/`, and the few
+    /// private headers under `src/` and `third_party/`).
+    /// Used by the shared-library path so that full Skia source is not needed.
+    /// Falls back to SKIA_SOURCE_DIR if not set.
+    pub fn skia_header_dir() -> Option<PathBuf> {
+        cargo::env_var("SKIA_HEADER_DIR").map(PathBuf::from)
     }
 
     pub fn is_skia_debug() -> bool {
