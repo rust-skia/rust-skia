@@ -255,10 +255,10 @@ The build downloads a pinned WASI SDK by default. To override it, set
 `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` and `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT`
 explicitly instead.
 
-When JPEG support is enabled on this target (`jpeg-encode`, `jpeg-decode`, `jpeg`, or any feature
-such as the default `pdf` feature that enables them), the build links the WASI `setjmp` runtime.
-Those builds require a runtime with WebAssembly exception / SJLJ support; if your runtime does not
-provide that, disable those features for the wasm build.
+This target currently always links the WASI `setjmp` runtime. In practice that is needed because
+the current Skia build configuration keeps PNG support enabled, and some feature sets (such as the
+default `pdf` feature) also enable JPEG support. These builds require a runtime with WebAssembly
+exception / SJLJ support.
 
 Current support status:
 

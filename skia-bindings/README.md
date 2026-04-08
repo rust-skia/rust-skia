@@ -82,10 +82,10 @@ Supported environment variables:
 | `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` | Use an existing WASI SDK `bin/` directory directly. |
 | `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` | Use an explicit sysroot directory instead of inferring `share/wasi-sysroot` from the SDK root or downloaded SDK. |
 
-On `wasm32-unknown-unknown`, enabling JPEG support (`jpeg-encode`, `jpeg-decode`, `jpeg`, or the
-default `pdf` feature that depends on it) links the WASI `setjmp` runtime. Those builds require a
-runtime with WebAssembly exception / SJLJ support; if your runtime does not provide that, disable
-those features for the wasm build.
+On `wasm32-unknown-unknown`, the build currently always links the WASI `setjmp` runtime. In
+practice that is needed because the current Skia build configuration keeps PNG support enabled, and
+some feature sets (such as the default `pdf` feature) also enable JPEG support. These builds
+require a runtime with WebAssembly exception / SJLJ support.
 
 ### Using system libraries
 

@@ -105,19 +105,17 @@ impl PlatformDetails for WasmUnknown {
         compile_malloc_shim(output_directory);
     }
 
-    fn link_libraries(&self, features: &Features) -> Vec<String> {
+    fn link_libraries(&self, _features: &Features) -> Vec<String> {
         let mut libraries = Vec::new();
         libraries.extend([
             "static=malloc-shim".into(),
             "static=c".into(),
             "static=c++".into(),
             "static=c++abi".into(),
+            "static=setjmp".into(),
             "static=wasi-emulated-mman".into(),
             "static=wasi-emulated-signal".into(),
         ]);
-        if features[feature::JPEG_ENCODE] || features[feature::JPEG_DECODE] {
-            libraries.push("static=setjmp".into());
-        }
         libraries
     }
 
