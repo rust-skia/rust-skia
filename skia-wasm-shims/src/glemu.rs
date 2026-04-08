@@ -3,8 +3,10 @@
 //! Translates OpenGL ES function calls (as dispatched by Skia's Ganesh renderer
 //! via `GrGLMakeAssembledInterface`) into WebGL2 API calls via `web-sys`.
 //!
-//! The approach mirrors Emscripten's `libglemu.js`: OpenGL integer object handles
-//! are mapped to JavaScript WebGL objects stored in thread-local tables.
+//! The approach mirrors Emscripten's `libglemu.js`
+//! (<https://github.com/emscripten-core/emscripten/blob/main/src/lib/libglemu.js>):
+//! OpenGL integer object handles are mapped to JavaScript WebGL objects stored in
+//! thread-local tables.
 //!
 //! # Usage
 //! Call `Interface::new_web_sys(ctx)` with a `WebGl2RenderingContext` obtained

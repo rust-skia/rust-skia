@@ -9,13 +9,11 @@ pub type __wasi_timestamp_t = u64;
 pub type __wasi_whence_t = u16;
 pub type __wasi_errno_t = u16;
 pub type __wasi_size_t = u32;
-
-#[repr(C)]
-#[derive(Copy, Clone, Debug)]
-pub struct __wasi_ciovec_t {
-    pub buf: *const c_void,
-    pub buf_len: usize,
-}
+pub type __wasi_rights_t = u64;
+pub type __wasi_fdflags_t = u16;
+pub type __wasi_lookupflags_t = u32;
+pub type __wasi_oflags_t = u16;
+pub type __wasi_dircookie_t = u64;
 
 // __WASI_ERRNO_BADF
 const WASI_BADF: __wasi_errno_t = 8;
@@ -27,11 +25,6 @@ pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_clock_time_get(
     _precision: __wasi_timestamp_t,
     time: *mut __wasi_timestamp_t,
 ) -> __wasi_errno_t {
-    if !time.is_null() {
-        unsafe {
-            *time = 0;
-        }
-    }
     WASI_OK
 }
 
@@ -47,13 +40,43 @@ pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_seek(
     _fd: __wasi_fd_t,
     _offset: __wasi_filesize_t,
     _whence: __wasi_whence_t,
-    newoffset: *mut __wasi_filesize_t,
+    _newoffset: *mut c_void,
 ) -> __wasi_errno_t {
-    if !newoffset.is_null() {
-        unsafe {
-            *newoffset = 0;
-        }
-    }
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_fdstat_get(
+    _fd: __wasi_fd_t,
+    _retptr0: *mut c_void,
+) -> __wasi_errno_t {
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_fdstat_set_flags(
+    _fd: __wasi_fd_t,
+    _flags: __wasi_fdflags_t,
+) -> __wasi_errno_t {
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_filestat_get(
+    _fd: __wasi_fd_t,
+    _retptr0: *mut c_void,
+) -> __wasi_errno_t {
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_pread(
+    _fd: __wasi_fd_t,
+    _iovs: *const c_void,
+    _iovs_len: usize,
+    _offset: __wasi_filesize_t,
+    _retptr0: *mut c_void,
+) -> __wasi_errno_t {
     WASI_BADF
 }
 
@@ -70,16 +93,6 @@ pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_environ_sizes_get(
     environ_count: *mut __wasi_size_t,
     environ_buf_size: *mut __wasi_size_t,
 ) -> __wasi_errno_t {
-    if !environ_count.is_null() {
-        unsafe {
-            *environ_count = 0;
-        }
-    }
-    if !environ_buf_size.is_null() {
-        unsafe {
-            *environ_buf_size = 0;
-        }
-    }
     WASI_OK
 }
 
@@ -126,14 +139,54 @@ pub unsafe extern "C" fn sem_init(_sem: *mut c_void, _pshared: i32, _value: u32)
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_write(
     _fd: __wasi_fd_t,
-    _iovs: *const __wasi_ciovec_t,
+    _iovs: *const c_void,
     _iovs_len: usize,
-    nwritten: *mut usize,
+    _nwritten: *mut c_void,
 ) -> __wasi_errno_t {
-    if !nwritten.is_null() {
-        unsafe {
-            *nwritten = 0;
-        }
-    }
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_read(
+    _fd: __wasi_fd_t,
+    _iovs: *const c_void,
+    _iovs_len: usize,
+    _retptr0: *mut c_void,
+) -> __wasi_errno_t {
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_fd_readdir(
+    _fd: __wasi_fd_t,
+    _buf: *mut c_void,
+    _buf_len: __wasi_size_t,
+    _cookie: __wasi_dircookie_t,
+    _retptr0: *mut c_void,
+) -> __wasi_errno_t {
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_path_filestat_get(
+    _fd: __wasi_fd_t,
+    _flags: __wasi_lookupflags_t,
+    _path: *const c_char,
+    _retptr0: *mut c_void,
+) -> __wasi_errno_t {
+    WASI_BADF
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_path_open(
+    _fd: __wasi_fd_t,
+    _dirflags: __wasi_lookupflags_t,
+    _path: *const c_char,
+    _oflags: __wasi_oflags_t,
+    _fs_rights_base: __wasi_rights_t,
+    _fs_rights_inheriting: __wasi_rights_t,
+    _fdflags: __wasi_fdflags_t,
+    _retptr0: *mut c_void,
+) -> __wasi_errno_t {
     WASI_BADF
 }
