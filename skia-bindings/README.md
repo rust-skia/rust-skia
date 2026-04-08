@@ -38,10 +38,12 @@ And whenever the build script detects that `skia-bindings` is built from inside 
 
 Some users may not have a stable internet connection or are building `skia-bindings` in an offline environment. It is possible to download binaries manually from the [skia-binaries repository](<https://github.com/rust-skia/skia-binaries/releases>) in an environment where internet access is available.
 
-To use the binaries in an offline build, the environment variable `SKIA_BINARIES_URL` must be set. This environment variable must point to the `tar.gz` file where the binaries are located, prepended with `file://`.
+To use the binaries in an offline build, the environment variable `SKIA_BINARIES_URL` must be set. This environment variable must point to the `tar.gz` file where the binaries are located, prepended with `file://` (for relative path) or `file:///` (for absolute path).
 
 ```bash
-export SKIA_BINARIES_URL='file://path/to/skia-binaries.tar.gz'
+export SKIA_BINARIES_URL='file://relative/path/to/skia-binaries.tar.gz'
+# or, if using absolute path:
+export SKIA_BINARIES_URL='file:///home/path/to/skia-binaries.tar.gz'
 ```
 
 ### Changing the executable used as `ninja` and `gn`
