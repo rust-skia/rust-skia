@@ -23,7 +23,7 @@ const WASI_OK: __wasi_errno_t = 0;
 pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_clock_time_get(
     _id: __wasi_clockid_t,
     _precision: __wasi_timestamp_t,
-    time: *mut __wasi_timestamp_t,
+    _time: *mut __wasi_timestamp_t,
 ) -> __wasi_errno_t {
     WASI_OK
 }
@@ -90,8 +90,8 @@ pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_environ_get(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn __imported_wasi_snapshot_preview1_environ_sizes_get(
-    environ_count: *mut __wasi_size_t,
-    environ_buf_size: *mut __wasi_size_t,
+    _environ_count: *mut __wasi_size_t,
+    _environ_buf_size: *mut __wasi_size_t,
 ) -> __wasi_errno_t {
     WASI_OK
 }
