@@ -1,9 +1,0 @@
-[package]
-name = "wasm-emscripten-testing"
-version = "0.1.0"
-edition = "2024"
-
-[workspace]
-
-[dependencies]
-skia-safe = { path = "../../../skia-safe", default-features = false }
