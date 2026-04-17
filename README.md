@@ -289,6 +289,8 @@ FEATURES=gl make build
 
 For advanced toolchain environment variables, see the [`skia-bindings` README](skia-bindings/README.md).
 
+**Note:** Clang 20 is required to build for wasm32-unknown-unknown, as libc++ isn't supported in earlier versions.
+
 ### Skia
 
 For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details take a look at the [README of the skia-bindings package](skia-bindings/README.md).
