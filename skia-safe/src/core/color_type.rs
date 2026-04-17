@@ -88,13 +88,16 @@ pub enum ColorType {
     /// Bits: [A:127..96 B:95..64 G:63..32 R:31..0]
     RGBAF32 = SkColorType::kRGBA_F32_SkColorType as _,
 
-    // The following 6 color types are just for reading from - not for rendering to
     /// Two channel RG data (8 bits per channel). Blue is forced to 0, alpha is forced to opaque.
     /// Bits: [G:15..8 R:7..0]
     R8G8UNorm = SkColorType::kR8G8_unorm_SkColorType as _,
     /// Single channel data (16-bit half-float) interpreted as alpha. RGB are 0.
     /// Bits: [A:15..0]
     A16Float = SkColorType::kA16_float_SkColorType as _,
+    /// Single channel data (16 bits half-float) interpreted as red. G and B are forced to 0, alpha
+    /// is forced to opaque.
+    /// Bits: [R:15..0]
+    R16Float = SkColorType::kR16_float_SkColorType as _,
     /// Two channel RG data (16-bit half-float per channel) packed into a LE 32-bit word.
     /// Blue is forced to 0, alpha is forced to opaque.
     /// Bits: [G:31..16 R:15..0]
