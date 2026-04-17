@@ -14,7 +14,6 @@
   - `src/modules/shaper/` → `modules/skshaper/include/`
   - `src/modules/paragraph/` → `modules/skparagraph/include/`
   - etc.
-- `docs/wiki/` — Local copies of GitHub wiki pages (e.g. milestone update template)
 
 ## Binding generation
 
@@ -36,18 +35,9 @@
 
 ## Skia milestone update checklist
 
-Reference: `docs/wiki/Template-Skia-Milestone-Update-PR.md`
+See the [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR) wiki page.
 
-Files to update:
-1. `README.md` — Branch name (`chrome/mXX`) and submodule tag in compare links
-2. `skia-bindings/skia` submodule — Point to new tag on `rust-skia/skia` fork
-3. `skia-bindings/Cargo.toml` — `version` bump, `[package.metadata] skia` tag
-4. `skia-safe/Cargo.toml` — `version` bump, `skia-bindings` dependency version
-5. `skia-safe/src/core/milestone.rs` — `MILESTONE` const
-6. `skia-safe/src/core/color_type.rs` — New `SkColorType` variants (check `include/core/SkColorType.h`)
-7. Wrapper updates in `skia-safe/src/` — Diff the Skia include headers between milestones
-8. `skia-bindings/src/*.cpp` — New C wrapper functions for changed APIs
-9. Deprecated attributes — Use new version number for any new `#[deprecated(since = "X.Y.Z")]`
+Version numbering: Each milestone bump increments the minor version (e.g. 0.95.0 → 0.96.0).
 
 Key diffs to check between milestones (in `skia-bindings/skia/`):
 ```
@@ -61,7 +51,3 @@ Build organization diffs:
 git diff OLD_TAG..NEW_TAG -- BUILD.gn gn/ modules/skshaper/BUILD.gn modules/skshaper/skshaper.gni \
   modules/paragraph/BUILD.gn modules/paragraph/skparagraph.gni modules/svg/BUILD.gn modules/svg/svg.gni
 ```
-
-Version numbering: Each milestone bump increments the minor version (e.g. 0.95.0 → 0.96.0).
-
-Final steps: `make diff-skia`, `make diff-api`, `make doc`, scan for `todo!()` macros, review Send/Sync/Debug impls.
