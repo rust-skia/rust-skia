@@ -774,6 +774,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("IsAnimated", rewrite::k_xxx),
     // m142: PngRustEncoder::CompressionLevel
     ("CompressionLevel", rewrite::k_opt_xxx),
+    // m148: SkShapers::CT::LineBreakMode
+    ("LineBreakMode", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

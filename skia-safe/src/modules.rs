@@ -22,6 +22,7 @@ pub mod shapers {
     // Re-exports `shapers::primitive`.
     pub use crate::shaper::shapers::*;
 
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
     pub mod ct {
         pub use crate::shaper::core_text::*;
     }

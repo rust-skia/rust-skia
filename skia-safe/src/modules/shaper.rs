@@ -14,6 +14,7 @@ use skia_bindings::{
 use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
 
 // The following three are re-exported in `modules.rs` via `mod shapers {}`.
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(crate) mod core_text;
 pub(crate) mod harfbuzz;
 pub(crate) mod unicode;
@@ -71,11 +72,12 @@ impl Shaper {
         unsafe { sb::SkShaper_PurgeHarfBuzzCache() }
     }
 
-    pub fn new_core_text() -> Option<Self> {
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    pub fn new_core_text(line_break_mode: crate::shapers::ct::LineBreakMode) -> Self {
         #[cfg(feature = "embed-icudtl")]
         crate::icu::init();
 
-        Self::from_ptr(unsafe { sb::C_SkShaper_MakeCoreText() })
+        Self::from_ptr(unsafe { sb::C_SkShaper_MakeCoreText(line_break_mode) }).unwrap()
     }
 
     pub fn new(font_mgr: impl Into<Option<FontMgr>>) -> Self {
