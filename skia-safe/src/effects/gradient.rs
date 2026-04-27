@@ -186,12 +186,12 @@ pub mod shaders {
         Shader::from_ptr(unsafe {
             sb::C_SkShaders_LinearGradient(
                 points.native().as_ptr(),
-                colors.colors().as_ptr() as *const _,
+                colors.colors().native().as_ptr(),
                 colors.colors().len(),
                 positions.map_or(ptr::null(), |pos| pos.as_ptr()),
                 positions.map_or(0, |pos| pos.len()),
                 colors.tile_mode(),
-                color_space.into_ptr_or_null() as *mut _,
+                color_space.into_ptr_or_null(),
                 interpolation.native(),
                 local_matrix.native_ptr_or_null(),
             )
@@ -220,12 +220,12 @@ pub mod shaders {
             sb::C_SkShaders_RadialGradient(
                 center.native(),
                 radius,
-                colors.colors().as_ptr() as *const _,
+                colors.colors().native().as_ptr(),
                 colors.colors().len(),
                 positions.map_or(ptr::null(), |pos| pos.as_ptr()),
                 positions.map_or(0, |pos| pos.len()),
                 colors.tile_mode(),
-                color_space.into_ptr_or_null() as *mut _,
+                color_space.into_ptr_or_null(),
                 interpolation.native(),
                 local_matrix.native_ptr_or_null(),
             )
@@ -264,12 +264,12 @@ pub mod shaders {
                 start_radius,
                 end.native(),
                 end_radius,
-                colors.colors().as_ptr() as *const _,
+                colors.colors().native().as_ptr(),
                 colors.colors().len(),
                 positions.map_or(ptr::null(), |pos| pos.as_ptr()),
                 positions.map_or(0, |pos| pos.len()),
                 colors.tile_mode(),
-                color_space.into_ptr_or_null() as *mut _,
+                color_space.into_ptr_or_null(),
                 interpolation.native(),
                 local_matrix.native_ptr_or_null(),
             )
@@ -305,12 +305,12 @@ pub mod shaders {
                 center.native(),
                 start_angle,
                 end_angle,
-                colors.colors().as_ptr() as *const _,
+                colors.colors().native().as_ptr(),
                 colors.colors().len(),
                 positions.map_or(ptr::null(), |pos| pos.as_ptr()),
                 positions.map_or(0, |pos| pos.len()),
                 colors.tile_mode(),
-                color_space.into_ptr_or_null() as *mut _,
+                color_space.into_ptr_or_null(),
                 interpolation.native(),
                 local_matrix.native_ptr_or_null(),
             )
@@ -323,7 +323,7 @@ mod tests {
     use super::*;
     use crate::{
         prelude::{NativeAccess, RefCount},
-        Color, ColorSpace, Paint, Point, Rect,
+        Color, ColorSpace, Paint, Point, Rect, Shader,
     };
 
     #[test]
@@ -374,91 +374,58 @@ mod tests {
     }
 
     #[test]
-    #[serial_test::serial]
     fn linear_gradient_with_explicit_colorspace_keeps_refcount_balanced() {
-        let colors = [Color::RED.into(), Color::BLUE.into()];
-        let color_space = ColorSpace::new_srgb();
-
-        let gradient_colors =
-            Colors::new_evenly_spaced(&colors, TileMode::Clamp, Some(color_space.clone()));
-        let gradient = Gradient::new(gradient_colors, Interpolation::default());
-
-        let ref_cnt_before = color_space.native().ref_cnt();
-
-        let shader = shaders::linear_gradient(
-            (Point::new(0.0, 0.0), Point::new(100.0, 0.0)),
-            &gradient,
-            None,
-        )
-        .unwrap();
-        drop(shader);
-
-        let ref_cnt_after = color_space.native().ref_cnt();
-        assert_eq!(ref_cnt_after, ref_cnt_before);
+        assert_refcount_balanced(|gradient| {
+            shaders::linear_gradient(
+                (Point::new(0.0, 0.0), Point::new(100.0, 0.0)),
+                gradient,
+                None,
+            )
+        });
     }
 
     #[test]
-    #[serial_test::serial]
     fn radial_gradient_with_explicit_colorspace_keeps_refcount_balanced() {
-        let colors = [Color::RED.into(), Color::BLUE.into()];
-        let color_space = ColorSpace::new_srgb();
-
-        let gradient_colors =
-            Colors::new_evenly_spaced(&colors, TileMode::Clamp, Some(color_space.clone()));
-        let gradient = Gradient::new(gradient_colors, Interpolation::default());
-
-        let ref_cnt_before = color_space.native().ref_cnt();
-
-        let shader =
-            shaders::radial_gradient((Point::new(50.0, 50.0), 25.0), &gradient, None).unwrap();
-        drop(shader);
-
-        let ref_cnt_after = color_space.native().ref_cnt();
-        assert_eq!(ref_cnt_after, ref_cnt_before);
+        assert_refcount_balanced(|gradient| {
+            shaders::radial_gradient((Point::new(50.0, 50.0), 25.0), gradient, None)
+        });
     }
 
     #[test]
-    #[serial_test::serial]
     fn two_point_conical_gradient_with_explicit_colorspace_keeps_refcount_balanced() {
-        let colors = [Color::RED.into(), Color::BLUE.into()];
-        let color_space = ColorSpace::new_srgb();
-
-        let gradient_colors =
-            Colors::new_evenly_spaced(&colors, TileMode::Clamp, Some(color_space.clone()));
-        let gradient = Gradient::new(gradient_colors, Interpolation::default());
-
-        let ref_cnt_before = color_space.native().ref_cnt();
-
-        let shader = shaders::two_point_conical_gradient(
-            (Point::new(25.0, 50.0), 10.0),
-            (Point::new(75.0, 50.0), 40.0),
-            &gradient,
-            None,
-        )
-        .unwrap();
-        drop(shader);
-
-        let ref_cnt_after = color_space.native().ref_cnt();
-        assert_eq!(ref_cnt_after, ref_cnt_before);
+        assert_refcount_balanced(|gradient| {
+            shaders::two_point_conical_gradient(
+                (Point::new(25.0, 50.0), 10.0),
+                (Point::new(75.0, 50.0), 40.0),
+                gradient,
+                None,
+            )
+        });
     }
 
     #[test]
-    #[serial_test::serial]
     fn sweep_gradient_with_explicit_colorspace_keeps_refcount_balanced() {
-        let colors = [Color::RED.into(), Color::BLUE.into()];
-        let color_space = ColorSpace::new_srgb();
+        assert_refcount_balanced(|gradient| {
+            shaders::sweep_gradient(Point::new(50.0, 50.0), (0.0, 360.0), gradient, None)
+        });
+    }
 
+    fn test_color_space() -> ColorSpace {
+        ColorSpace::new_srgb().with_color_spin()
+    }
+
+    fn assert_refcount_balanced(build_shader: impl FnOnce(&Gradient<'_>) -> Option<Shader>) {
+        let colors = [Color::RED.into(), Color::BLUE.into()];
+        let color_space = test_color_space();
         let gradient_colors =
             Colors::new_evenly_spaced(&colors, TileMode::Clamp, Some(color_space.clone()));
         let gradient = Gradient::new(gradient_colors, Interpolation::default());
 
         let ref_cnt_before = color_space.native().ref_cnt();
-
-        let shader =
-            shaders::sweep_gradient(Point::new(50.0, 50.0), (0.0, 360.0), &gradient, None).unwrap();
+        let shader = build_shader(&gradient).unwrap();
         drop(shader);
-
         let ref_cnt_after = color_space.native().ref_cnt();
+
         assert_eq!(ref_cnt_after, ref_cnt_before);
     }
 }
