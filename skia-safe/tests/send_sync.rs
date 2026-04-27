@@ -331,6 +331,10 @@ mod textlayout {
 mod shaper {
     use skia_safe::shaper::*;
     use static_assertions::*;
+
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    assert_impl_all!(skia_safe::shapers::ct::LineBreakMode: Send, Sync);
+
     assert_impl_all!(Shaper: Send, Sync);
     assert_not_impl_any!(FontRunIterator: Send, Sync);
     assert_not_impl_any!(BiDiRunIterator: Send, Sync);
