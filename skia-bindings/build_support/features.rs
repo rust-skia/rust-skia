@@ -78,6 +78,10 @@ impl Features {
             features += feature::JPEG_DECODE;
         }
 
+        if cfg!(feature = "avif") {
+            features += feature::AVIF;
+        }
+
         features
     }
 
@@ -218,6 +222,8 @@ pub mod feature {
 
     pub const JPEG_ENCODE: &str = "jpeg-encode";
     pub const JPEG_DECODE: &str = "jpeg-decode";
+
+    pub const AVIF: &str = "avif";
 
     pub const FREETYPE_SPECIFIC: &[&str] = &[EMBED_FREETYPE, FREETYPE_WOFF2];
 

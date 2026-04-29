@@ -46,6 +46,7 @@ textlayout = []
 webp = ["webp-encode", "webp-decode"]
 webp-encode = []
 webp-decode = []
+avif = []
 pdf = ["jpeg"]
 # sys libraries
 use-system-jpeg-turbo = ["dep:mozjpeg-sys"]

@@ -146,6 +146,7 @@ impl FinalBuildConfiguration {
                     "skia_use_libjpeg_turbo_encode",
                     yes_if(features[feature::JPEG_ENCODE]),
                 )
+                .arg("skia_use_libavif", yes_if(features[feature::AVIF]))
                 .arg("cc", quote(&build.cc))
                 .arg("cxx", quote(&build.cxx));
             if features[feature::VULKAN] {
