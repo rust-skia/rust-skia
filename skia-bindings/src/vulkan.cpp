@@ -9,8 +9,8 @@
 #include "include/gpu/vk/VulkanExtensions.h"
 #include "include/gpu/vk/VulkanMutableTextureState.h"
 #include "include/gpu/vk/VulkanTypes.h"
-#include "src/gpu/GpuTypesPriv.h"
-#include "src/gpu/vk/vulkanmemoryallocator/VulkanMemoryAllocatorPriv.h"
+// #include "src/gpu/GpuTypesPriv.h"
+// #include "src/gpu/vk/vulkanmemoryallocator/VulkanMemoryAllocatorPriv.h"
 
 // Additional types not referenced.
 extern "C" void C_GrVkTypes(GrVkSurfaceInfo*, VkQueue*, VkPhysicalDevice*) {};
@@ -101,7 +101,7 @@ extern "C" void *C_VulkanBackendContext_new(
     context.fGetProc = vkGetProc;
     // Since Skia m147, fMemoryAllocator is required for Vulkan context creation.
     // The binding initializes it here so Rust callers do not need to wire one manually.
-    context.fMemoryAllocator = skgpu::VulkanMemoryAllocators::Make(context, skgpu::ThreadSafe::kYes);
+    // context.fMemoryAllocator = skgpu::VulkanMemoryAllocators::Make(context, skgpu::ThreadSafe::kYes);
     return &context;
 }
 
