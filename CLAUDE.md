@@ -51,3 +51,9 @@ Build organization diffs:
 git diff OLD_TAG..NEW_TAG -- BUILD.gn gn/ modules/skshaper/BUILD.gn modules/skshaper/skshaper.gni \
   modules/paragraph/BUILD.gn modules/paragraph/skparagraph.gni modules/svg/BUILD.gn modules/svg/svg.gni
 ```
+
+## Release notes
+
+For rust-skia release notes format and authoring rules, use:
+
+- `.github/release-notes-guidelines.md`
