@@ -51,5 +51,8 @@ Update it whenever you learn something new about the project's patterns, convent
 - Escape array indexing in comments (e.g., `` `pts[0]` ``) to avoid them being interpreted as links.
 - Use fully qualified paths (e.g., `[`crate::Canvas`]`) if the type is not in the immediate scope.
 
+## Release Notes
+- Follow `.github/release-notes-guidelines.md` for release-note structure, wording, and attribution rules.
+
 ## Deprecation
 - Use `since = "0.0.0"` for deprecated items unless a specific version is more appropriate.

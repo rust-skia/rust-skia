@@ -13,13 +13,11 @@
 #include "third_party/icu/SkLoadICU.h"
 #endif
 
-extern "C" SkShaper* C_SkShaper_MakeCoreText() {
 #ifdef SK_SHAPER_CORETEXT_AVAILABLE
-    return SkShapers::CT::CoreText().release();
-#else
-    return nullptr;
-#endif
+extern "C" SkShaper* C_SkShaper_MakeCoreText(SkShapers::CT::LineBreakMode lineBreakMode) {
+    return SkShapers::CT::CoreText(lineBreakMode).release();
 }
+#endif
 
 extern "C" SkShaper* C_SkShaper_Make(SkFontMgr* fontMgr) {
     return SkShaper::Make(sk_sp<SkFontMgr>(fontMgr)).release();

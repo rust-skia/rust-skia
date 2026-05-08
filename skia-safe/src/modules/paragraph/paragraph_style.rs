@@ -193,6 +193,10 @@ impl fmt::Debug for ParagraphStyle {
             .field("hinting_is_on", &self.hinting_is_on())
             .field("replace_tab_characters", &self.replace_tab_characters())
             .field("fake_missing_font_styles", &self.fake_missing_font_styles())
+            .field(
+                "letter_spacing_by_css_spec",
+                &self.letter_spacing_by_css_spec(),
+            )
             .finish()
     }
 }
@@ -327,6 +331,15 @@ impl ParagraphStyle {
 
     pub fn set_apply_rounding_hack(&mut self, value: bool) -> &mut Self {
         self.native_mut().fApplyRoundingHack = value;
+        self
+    }
+
+    pub fn letter_spacing_by_css_spec(&self) -> bool {
+        self.native().fLetterSpacingByCSSSpec
+    }
+
+    pub fn set_letter_spacing_by_css_spec(&mut self, value: bool) -> &mut Self {
+        self.native_mut().fLetterSpacingByCSSSpec = value;
         self
     }
 }
