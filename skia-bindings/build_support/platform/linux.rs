@@ -12,8 +12,14 @@ impl PlatformDetails for Linux {
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         generic::gn_args(config, builder);
-        // This makes it possible for clang++ to locate the C++ includes.
-        builder.target_str = Some(linux_shortened_target_str(&config.target));
+        // This makes it possible for clang++ to locate the C++ includes when using a
+        // host clang with multi-arch cross packages. Skip when a Yocto SDK is in use
+        // (SDKTARGETSYSROOT set): the SDK's cc/cxx already specify a vendor-qualified
+        // `--target=`, and appending a shortened one here makes clang pick the wrong
+        // gcc toolchain inside the sysroot.
+        if std::env::var("SDKTARGETSYSROOT").is_err() {
+            builder.target_str = Some(linux_shortened_target_str(&config.target));
+        }
 
         let target = &config.target;
         builder.cflags(flags(target));
