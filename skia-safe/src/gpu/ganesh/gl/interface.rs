@@ -18,8 +18,36 @@ impl fmt::Debug for Interface {
 }
 
 impl Interface {
+    /// Creates a GL interface from the native platform GL context.
+    ///
+    /// On `wasm32-unknown-unknown` targets, use [`Interface::new_web_sys()`] instead.
     pub fn new_native() -> Option<Self> {
         Self::from_ptr(unsafe { sb::C_GrGLInterface_MakeNativeInterface() as _ })
+    }
+
+    /// Creates a GL interface using a `web_sys` WebGL2 context.
+    ///
+    /// Before calling this function, the WebGL2 context must be registered and set as the active
+    /// context via [`skia_safe::gpu::gl::register_gl_context`] and
+    /// [`skia_safe::gpu::gl::set_gl_context`]:
+    ///
+    /// ```no_run
+    /// # #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+    /// # {
+    /// // gl_ctx: web_sys::WebGl2RenderingContext
+    /// let id = skia_safe::gpu::gl::register_gl_context(gl_ctx);
+    /// skia_safe::gpu::gl::set_gl_context(id);
+    /// let interface = skia_safe::gpu::gl::Interface::new_web_sys();
+    /// # }
+    /// ```
+    #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+    pub fn new_web_sys() -> Option<Self> {
+        Self::from_ptr(unsafe {
+            skia_bindings::C_GrGLInterface_MakeAssembledInterface(
+                std::ptr::null_mut(),
+                Some(sb::web_sys_get_proc),
+            ) as *mut _
+        })
     }
 
     pub fn new_load_with<F>(load_fn: F) -> Option<Self>

@@ -48,7 +48,8 @@ Because building Skia takes a lot of time and needs tools that may be missing, t
 | macOS                             | `x86_64-apple-darwin`<br/>`aarch64-apple-darwin`           |
 | Android                           | `aarch64-linux-android`<br/>`x86_64-linux-android`         |
 | iOS                               | `aarch64-apple-ios`<br/>`x86_64-apple-ios`                 |
-| WebAssembly                       | `wasm32-unknown-emscripten`                                |
+| WebAssembly (Emscripten)          | `wasm32-unknown-emscripten`                                |
+| WebAssembly (Unknown, experimental) | `wasm32-unknown-unknown` (build from source)             |
 
 ### Wrappers & Codecs & Supported Features
 
@@ -187,11 +188,16 @@ Compilation to iOS is supported on macOS targeting the iOS simulator (`--target 
 
 ### For WebAssembly
 
-Install `emscripten` version 3.1.57 or superior and make sure that llvm / clang 16+ is installed. In the examples below, we assume
-`emsdk` version `3.1.57` was installed with [asdf](http://asdf-vm.com/).
+`rust-skia` currently supports two WebAssembly targets:
 
-Build with the `wasm32-unknown-emscripten` target (`wasm32-unknown-unknown` is
-unsupported because it is [fundamentally incompatible with linking C code](https://github.com/rustwasm/team/issues/291#issuecomment-645482430):
+- `wasm32-unknown-emscripten`
+- `wasm32-unknown-unknown` (experimental)
+
+#### `wasm32-unknown-emscripten`
+
+Install `emscripten` version 3.1.57 or superior and make sure that llvm / clang 16+ is installed. In the examples below, we assume `emsdk` version `3.1.57` was installed with [asdf](http://asdf-vm.com/).
+
+Build with the `wasm32-unknown-emscripten` target:
 
 ```bash
 export EMSDK=~/.asdf/installs/emsdk/3.1.57
@@ -232,6 +238,58 @@ export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
 
 cargo build --target wasm32-unknown-emscripten
 ```
+
+For an end-to-end browser sample on this target, see [`wasm-example/emscripten/`](wasm-example/emscripten/README.md).
+
+#### `wasm32-unknown-unknown` (experimental)
+
+Build with the target directly:
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo build --target wasm32-unknown-unknown
+```
+
+The build downloads a pinned WASI SDK by default. To override it, set
+`SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK`, or set
+`SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` and `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT`
+explicitly instead.
+
+This target currently always links the WASI `setjmp` runtime. In practice that is needed because
+the current Skia build configuration keeps PNG support enabled, and some feature sets (such as the
+default `pdf` feature) also enable JPEG support. These builds require a runtime with WebAssembly
+exception / SJLJ support.
+
+Current support status:
+
+- Supported: default feature set, `gl`, `webp`
+- Not yet fully tested: `textlayout`, `svg`, `skottie`
+
+For an end-to-end browser sample on this target, see
+[`wasm-example/unknown/`](wasm-example/unknown/README.md). It defaults to the raster path and
+supports the WebGL2 path with `FEATURES=gl`.
+
+```bash
+cd wasm-example/unknown
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli
+make build
+make build_release
+make serve
+```
+
+Then open http://localhost:8000/ in your browser.
+
+To build the WebGL2 variant:
+
+```bash
+cd wasm-example/unknown
+FEATURES=gl make build
+```
+
+For advanced toolchain environment variables, see the [`skia-bindings` README](skia-bindings/README.md).
+
+**Note:** Clang 20 is required to build for wasm32-unknown-unknown, as libc++ isn't supported in earlier versions.
 
 ### Skia
 

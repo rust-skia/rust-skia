@@ -22,6 +22,7 @@ include = [
 	"build_support.rs",
 	"build_support/**/*.rs",
 	"src/**/*.h",
+	"src/**/*.c",
 	"src/**/*.cpp",
 	"src/*.rs" ]
 
@@ -35,7 +36,7 @@ skia = "m148-0.97.0"
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf"]
-gl = []
+gl = ["skia-wasm-shims/glemu"]
 egl = []
 wayland = []
 x11 = []
@@ -66,6 +67,9 @@ jpeg-decode = []
 
 [dependencies]
 mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+skia-wasm-shims = { version = "0.1.0", path = "../skia-wasm-shims" }
 
 [build-dependencies]
 cc = { version = "1.1.28" }

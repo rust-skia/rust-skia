@@ -16,6 +16,13 @@ type std___2_string_view = std_string_view;
 type std___1_string = std_string;
 type std___2_string = std_string;
 
+// Keep the target-specific shim crate linked so its exported WASI symbols resolve during final
+// `wasm32-unknown-unknown` linking.
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+use skia_wasm_shims as _;
+#[cfg(all(target_arch = "wasm32", target_os = "unknown", feature = "gl"))]
+pub use skia_wasm_shims::{drop_gl_context, register_gl_context, set_gl_context, web_sys_get_proc};
+
 include!(concat!(env!("OUT_DIR"), "/skia/bindings.rs"));
 
 mod defaults;
@@ -23,6 +30,12 @@ mod defaults;
 pub use defaults::*;
 
 mod impls;
+#[cfg(all(
+    target_arch = "wasm32",
+    target_vendor = "unknown",
+    target_os = "unknown"
+))]
+mod wasm_alloc_shim;
 
 #[cfg(feature = "textlayout")]
 pub mod icu;
