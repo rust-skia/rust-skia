@@ -205,11 +205,22 @@ fn generate_bindings(
 /// On docs.rs, rustdoc runs inside a container with no networking, so copy a pre-generated
 /// `bindings.rs` file.
 fn fake_bindings() -> Result<(), io::Error> {
+    let source = std::path::Path::new("bindings_docs.rs");
+    if !source.exists() {
+        return Err(io::Error::other(
+            "bindings_docs.rs is missing from the published skia-bindings \
+             tarball. The release Makefile must run `make publish-bindings-docs` \
+             (not `make publish-bindings`) so the documentation bindings end up \
+             in the tarball. Without this file, docs.rs builds of skia-safe and \
+             every downstream crate fail here. See \
+             https://github.com/rust-skia/rust-skia/issues/720",
+        ));
+    }
     println!("COPYING bindings_docs.rs to OUT_DIR/skia/bindings.rs");
     let bindings_target = cargo::output_directory()
         .join(binaries_config::SKIA_OUTPUT_DIR)
         .join("bindings.rs");
-    fs::copy("bindings_docs.rs", bindings_target).map(|_| ())
+    fs::copy(source, bindings_target).map(|_| ())
 }
 
 /// Environment variables used by this build script.
