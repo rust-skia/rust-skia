@@ -120,7 +120,7 @@ impl Region {
         unsafe { self.native_mut().setPath(path.native(), clip.native()) }
     }
 
-    // there is also a trait for intersects() below.
+    // There is also a trait for intersects() below.
 
     pub fn intersects_rect(&self, rect: impl AsRef<IRect>) -> bool {
         unsafe { self.native().intersects(rect.as_ref().native()) }
@@ -149,7 +149,7 @@ impl Region {
         unsafe { sb::C_SkRegion_quickContains(self.native(), r.native()) }
     }
 
-    // see also the quick_reject() trait below.
+    // See also the quick_reject() trait below.
 
     pub fn quick_reject_rect(&self, rect: impl AsRef<IRect>) -> bool {
         let rect = rect.as_ref();

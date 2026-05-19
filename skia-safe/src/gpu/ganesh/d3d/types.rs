@@ -63,6 +63,14 @@ pub struct TextureResourceInfo {
 native_transmutable!(GrD3DTextureResourceInfo, TextureResourceInfo);
 unsafe_send_sync!(TextureResourceInfo);
 
+impl PartialEq for TextureResourceInfo {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe { sb::C_GrD3DTextureResourceInfo_Equals(self.native(), rhs.native()) }
+    }
+}
+
+impl Eq for TextureResourceInfo {}
+
 impl TextureResourceInfo {
     pub fn from_resource(resource: ID3D12Resource) -> Self {
         Self {
