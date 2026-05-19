@@ -197,6 +197,7 @@ impl fmt::Debug for ParagraphStyle {
                 "letter_spacing_by_css_spec",
                 &self.letter_spacing_by_css_spec(),
             )
+            .field("render_soft_hyphens", &self.render_soft_hyphens())
             .finish()
     }
 }
@@ -340,6 +341,15 @@ impl ParagraphStyle {
 
     pub fn set_letter_spacing_by_css_spec(&mut self, value: bool) -> &mut Self {
         self.native_mut().fLetterSpacingByCSSSpec = value;
+        self
+    }
+
+    pub fn render_soft_hyphens(&self) -> bool {
+        self.native().fRenderSoftHyphens
+    }
+
+    pub fn set_render_soft_hyphens(&mut self, value: bool) -> &mut Self {
+        self.native_mut().fRenderSoftHyphens = value;
         self
     }
 }
