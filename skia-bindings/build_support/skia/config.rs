@@ -117,6 +117,8 @@ impl FinalBuildConfiguration {
 
         let gn_args = {
             builder
+                // Force non-standalone defaults to avoid building standalone test utilities in debug.
+                .arg("is_skia_standalone", no())
                 .arg("is_official_build", yes_if(!build.skia_debug))
                 .arg("is_debug", yes_if(build.skia_debug))
                 .arg("skia_enable_svg", yes_if(features[feature::SVG]))
