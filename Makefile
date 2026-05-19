@@ -46,15 +46,20 @@ crate-post-release-test:
 #   .cargo/credentials
 
 .PHONY: publish
-publish: package-bindings package-safe publish-bindings wait publish-safe
+publish: package-bindings package-safe publish-bindings-docs wait publish-safe
 
 .PHONY: publish-only
-publish-only: publish-bindings publish-safe
+publish-only: publish-bindings-docs publish-safe
 
 .PHONY: publish-bindings
 publish-bindings:
 	cd skia-bindings && cargo publish -vv --no-verify
 
+# `publish-bindings-docs` is the variant that ships `bindings_docs.rs` in
+# the tarball -- without that file, `DOCS_RS=1` builds of downstream crates
+# fail at the bindings copy step (see rust-skia#720). The aggregate
+# `publish` and `publish-only` targets above always go through this target
+# so released tarballs include the documentation bindings.
 .PHONY: publish-bindings-docs
 publish-bindings-docs: bindings-docs
 	cd skia-bindings && cp /tmp/bindings.rs bindings_docs.rs
