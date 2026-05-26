@@ -217,10 +217,9 @@ fn fake_bindings() -> Result<(), io::Error> {
         ));
     }
     println!("COPYING bindings_docs.rs to OUT_DIR/skia/bindings.rs");
-    let bindings_target = cargo::output_directory()
-        .join(binaries_config::SKIA_OUTPUT_DIR)
-        .join("bindings.rs");
-    fs::copy(source, bindings_target).map(|_| ())
+    let bindings_parent = cargo::output_directory().join(binaries_config::SKIA_OUTPUT_DIR);
+    fs::create_dir_all(&bindings_parent)?;
+    fs::copy(source, bindings_parent.join("bindings.rs")).map(|_| ())
 }
 
 /// Environment variables used by this build script.
