@@ -8,7 +8,7 @@ rust-version.workspace = true
 
 homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
-documentation = "https://rust-skia.github.io/doc/skia_safe"
+documentation = "https://docs.rs/skia-svg-macros"
 license = "MIT"
 
 [lib]
