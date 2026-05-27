@@ -242,62 +242,18 @@ impl FontMgr {
     }
 
     pub fn match_request(&self, request: &Request<'_>) -> Option<Typeface> {
-        let family_name: Option<CString> = request
-            .family_name
-            .and_then(|family_name| CString::new(family_name).ok());
-        let bcp_47: Vec<CString> = request
-            .bcp_47
-            .iter()
-            .map(|s| CString::new(*s).unwrap())
-            .collect();
-        let mut bcp_47_ptrs: Vec<*const c_char> = bcp_47.iter().map(|cs| cs.as_ptr()).collect();
-
-        Typeface::from_ptr(unsafe {
-            sb::C_SkFontMgr_match(
-                self.native(),
-                request.cmap_entries.native().as_ptr(),
-                request.cmap_entries.len(),
-                bcp_47_ptrs.as_mut_ptr(),
-                bcp_47_ptrs.len(),
-                family_name
-                    .as_ref()
-                    .map(|n| n.as_ptr())
-                    .unwrap_or(ptr::null()),
-                request.model.native().as_ptr(),
-                request.model.len(),
-                option_bool_to_ffi(request.synthetic_bold),
-                option_bool_to_ffi(request.synthetic_oblique),
-            )
+        with_ffi_request(request, |ffi_request| {
+            Typeface::from_ptr(unsafe {
+                sb::C_SkFontMgr_match(self.native(), ffi_request)
+            })
         })
     }
 
     pub fn fallback(&self, request: &Request<'_>) -> Option<Typeface> {
-        let family_name: Option<CString> = request
-            .family_name
-            .and_then(|family_name| CString::new(family_name).ok());
-        let bcp_47: Vec<CString> = request
-            .bcp_47
-            .iter()
-            .map(|s| CString::new(*s).unwrap())
-            .collect();
-        let mut bcp_47_ptrs: Vec<*const c_char> = bcp_47.iter().map(|cs| cs.as_ptr()).collect();
-
-        Typeface::from_ptr(unsafe {
-            sb::C_SkFontMgr_fallback(
-                self.native(),
-                request.cmap_entries.native().as_ptr(),
-                request.cmap_entries.len(),
-                bcp_47_ptrs.as_mut_ptr(),
-                bcp_47_ptrs.len(),
-                family_name
-                    .as_ref()
-                    .map(|n| n.as_ptr())
-                    .unwrap_or(ptr::null()),
-                request.model.native().as_ptr(),
-                request.model.len(),
-                option_bool_to_ffi(request.synthetic_bold),
-                option_bool_to_ffi(request.synthetic_oblique),
-            )
+        with_ffi_request(request, |ffi_request| {
+            Typeface::from_ptr(unsafe {
+                sb::C_SkFontMgr_fallback(self.native(), ffi_request)
+            })
         })
     }
 
@@ -366,6 +322,40 @@ impl FontMgr {
     }
 
     // TODO: makeFromStream(.., ttcIndex).
+}
+
+fn with_ffi_request<T>(request: &Request<'_>, f: impl FnOnce(&sb::C_SkFontMgr_Request) -> T) -> T {
+    let family_name = request
+        .family_name
+        .and_then(|family_name| CString::new(family_name).ok());
+    let bcp_47: Vec<CString> = request
+        .bcp_47
+        .iter()
+        .map(|s| CString::new(*s).unwrap())
+        .collect();
+    let mut bcp_47_ptrs: Vec<*const c_char> = bcp_47.iter().map(|cs| cs.as_ptr()).collect();
+    let bcp_47_ptr = if bcp_47_ptrs.is_empty() {
+        ptr::null_mut()
+    } else {
+        bcp_47_ptrs.as_mut_ptr()
+    };
+
+    let ffi_request = sb::C_SkFontMgr_Request {
+        cmapEntries: request.cmap_entries.native().as_ptr(),
+        cmapEntryCount: request.cmap_entries.len(),
+        bcp47: bcp_47_ptr,
+        bcp47Count: bcp_47_ptrs.len(),
+        familyName: family_name
+            .as_ref()
+            .map(|n| n.as_ptr())
+            .unwrap_or(ptr::null()),
+        model: request.model.native().as_ptr(),
+        modelCount: request.model.len(),
+        syntheticBold: option_bool_to_ffi(request.synthetic_bold),
+        syntheticOblique: option_bool_to_ffi(request.synthetic_oblique),
+    };
+
+    f(&ffi_request)
 }
 
 fn option_bool_to_ffi(value: Option<bool>) -> i32 {

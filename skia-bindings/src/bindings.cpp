@@ -2013,60 +2013,55 @@ extern "C" SkTypeface* C_SkFontMgr_matchFamilyStyleCharacter(
     return self->matchFamilyStyleCharacter(familyName, *style, bcp47, bcp47Count, character).release();
 }
 
+struct C_SkFontMgr_Request {
+    const SkFontMgr::Request::CMapEntry* cmapEntries;
+    size_t cmapEntryCount;
+    const char** bcp47;
+    size_t bcp47Count;
+    const char* familyName;
+    const SkFontArguments::VariationPosition::Coordinate* model;
+    size_t modelCount;
+    int syntheticBold;
+    int syntheticOblique;
+};
+
+static SkFontMgr::Request to_font_mgr_request(const C_SkFontMgr_Request& cRequest) {
+    SkFontMgr::Request request{};
+    request.cmapEntries = SkSpan(cRequest.cmapEntries, cRequest.cmapEntryCount);
+    request.bcp47 = SkSpan(cRequest.bcp47, cRequest.bcp47Count);
+    request.familyName = cRequest.familyName;
+    request.model = SkSpan(cRequest.model, cRequest.modelCount);
+    request.syntheticBold = optional_bool(cRequest.syntheticBold);
+    request.syntheticOblique = optional_bool(cRequest.syntheticOblique);
+    return request;
+}
+
 extern "C" SkTypeface* C_SkFontMgr_match(
     const SkFontMgr* self,
-    const SkFontMgr::Request::CMapEntry* cmapEntries,
-    size_t cmapEntryCount,
-    const char* bcp47[],
-    size_t bcp47Count,
-    const char familyName[],
-    const SkFontArguments::VariationPosition::Coordinate* model,
-    size_t modelCount,
-    int syntheticBold,
-    int syntheticOblique) {
-    SkFontMgr::Request request{};
-    request.cmapEntries = SkSpan(cmapEntries, cmapEntryCount);
-    request.bcp47 = SkSpan(bcp47, bcp47Count);
-    request.familyName = familyName;
-    request.model = SkSpan(model, modelCount);
-    request.syntheticBold = optional_bool(syntheticBold);
-    request.syntheticOblique = optional_bool(syntheticOblique);
-    return self->match(request).release();
+    const C_SkFontMgr_Request* request) {
+    return self->match(to_font_mgr_request(*request)).release();
 }
 
 extern "C" SkTypeface* C_SkFontMgr_fallback(
     const SkFontMgr* self,
-    const SkFontMgr::Request::CMapEntry* cmapEntries,
-    size_t cmapEntryCount,
-    const char* bcp47[],
-    size_t bcp47Count,
-    const char familyName[],
-    const SkFontArguments::VariationPosition::Coordinate* model,
-    size_t modelCount,
-    int syntheticBold,
-    int syntheticOblique) {
-    SkFontMgr::Request request{};
-    request.cmapEntries = SkSpan(cmapEntries, cmapEntryCount);
-    request.bcp47 = SkSpan(bcp47, bcp47Count);
-    request.familyName = familyName;
-    request.model = SkSpan(model, modelCount);
-    request.syntheticBold = optional_bool(syntheticBold);
-    request.syntheticOblique = optional_bool(syntheticOblique);
-    return self->fallback(request).release();
+    const C_SkFontMgr_Request* request) {
+    return self->fallback(to_font_mgr_request(*request)).release();
 }
 
 extern "C" void C_SkFontMgr_Request_fontStyleFromModel(
     const SkFontArguments::VariationPosition::Coordinate* model,
     size_t modelCount,
-    SkFontStyle* fontStyle) {
+    SkFontStyle* uninitialized) {
     SkFontMgr::Request request{};
     request.model = SkSpan(model, modelCount);
-    new (fontStyle) SkFontStyle(request.fontStyleFromModel());
+    new (uninitialized) SkFontStyle(request.fontStyleFromModel());
 }
 
 extern "C" void C_SkFontMgr_Request_SetModel(
     const SkFontStyle* style,
     SkFontArguments::VariationPosition::Coordinate model[4]) {
+    // C array parameters decay to element pointers. Rebuild the 4-element array type
+    // because SkFontMgr::Request::SetModel expects Coordinate(&)[4].
     auto* model4 = reinterpret_cast<SkFontArguments::VariationPosition::Coordinate(*)[4]>(model);
     SkFontMgr::Request::SetModel(*style, *model4);
 }
