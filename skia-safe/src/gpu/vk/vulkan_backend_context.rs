@@ -71,7 +71,7 @@ impl BackendContext<'_> {
         device_extensions: &[&str],
     ) -> BackendContext<'a> {
         // Pin the extensions string in memory and provide pointers to the NewWithExtension function,
-        // but there is no need to retain them, because because the implementations copies these strings, too.
+        // but there is no need to retain them, because the implementations copies these strings, too.
         let instance_extensions: Vec<CString> = instance_extensions
             .iter()
             .map(|str| CString::new(*str).unwrap())
