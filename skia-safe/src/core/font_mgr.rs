@@ -243,17 +243,13 @@ impl FontMgr {
 
     pub fn match_request(&self, request: &Request<'_>) -> Option<Typeface> {
         with_ffi_request(request, |ffi_request| {
-            Typeface::from_ptr(unsafe {
-                sb::C_SkFontMgr_match(self.native(), ffi_request)
-            })
+            Typeface::from_ptr(unsafe { sb::C_SkFontMgr_match(self.native(), ffi_request) })
         })
     }
 
     pub fn fallback(&self, request: &Request<'_>) -> Option<Typeface> {
         with_ffi_request(request, |ffi_request| {
-            Typeface::from_ptr(unsafe {
-                sb::C_SkFontMgr_fallback(self.native(), ffi_request)
-            })
+            Typeface::from_ptr(unsafe { sb::C_SkFontMgr_fallback(self.native(), ffi_request) })
         })
     }
 
