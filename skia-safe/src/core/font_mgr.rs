@@ -364,7 +364,10 @@ fn option_bool_to_ffi(value: Option<bool>) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::FontMgr;
+    use crate::{
+        font_mgr::{request, Request},
+        FontMgr, FontStyle,
+    };
 
     #[test]
     #[serial_test::serial]
@@ -374,7 +377,7 @@ mod tests {
         println!("FontMgr families: {families}");
         // This test requires that the default system font manager returns at least one family for now.
         assert!(families > 0);
-        // print all family names and styles
+        // Print all family names and styles
         for i in 0..families {
             let name = font_mgr.family_name(i);
             println!("font_family: {name}");
@@ -388,5 +391,17 @@ mod tests {
                 drop(face);
             }
         }
+    }
+
+    #[test]
+    fn request_apis_accept_default_request() {
+        let font_mgr = FontMgr::empty();
+        let request = Request::default();
+
+        let _ = font_mgr.match_request(&request);
+        let _ = font_mgr.fallback(&request);
+
+        let _ = request::font_style_from_model(&[]);
+        let _ = request::model_from_font_style(FontStyle::default());
     }
 }
