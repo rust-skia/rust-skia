@@ -21,17 +21,11 @@ impl NativeClone for sb::SkStrikeRef {
 
 impl fmt::Debug for StrikeRef {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("StrikeRef")
-            .field("is_valid", &self.is_valid())
-            .finish()
+        f.debug_struct("StrikeRef").finish()
     }
 }
 
 impl StrikeRef {
-    pub fn is_valid(&self) -> bool {
-        unsafe { sb::C_SkStrikeRef_isValid(self.native()) }
-    }
-
     pub fn get_width(&self, glyph: GlyphId) -> scalar {
         unsafe { sb::C_SkStrikeRef_getWidth(self.native(), glyph) }
     }
@@ -100,7 +94,6 @@ mod tests {
         assert!(!glyphs.is_empty());
 
         let strike_ref = font.make_strike_ref();
-        assert!(strike_ref.is_valid());
 
         let mut font_widths = vec![0.0; glyphs.len()];
         font.get_widths(&glyphs, &mut font_widths);

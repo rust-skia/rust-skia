@@ -306,7 +306,13 @@ impl Font {
     }
 
     pub fn make_strike_ref(&self) -> StrikeRef {
-        StrikeRef::construct(|s| unsafe { sb::C_SkFont_makeStrikeRef(self.native(), s) })
+        let strike_ref =
+            StrikeRef::construct(|s| unsafe { sb::C_SkFont_makeStrikeRef(self.native(), s) });
+        assert!(
+            unsafe { sb::C_SkStrikeRef_isValid(strike_ref.native()) },
+            "SkFont::makeStrikeRef() returned an invalid SkStrikeRef"
+        );
+        strike_ref
     }
 
     pub fn get_widths_bounds(
