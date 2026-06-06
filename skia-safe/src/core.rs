@@ -70,6 +70,7 @@ pub mod sampling_options;
 mod scalar_;
 pub mod shader;
 mod size;
+mod strike_ref;
 pub mod stroke_rec;
 pub mod surface;
 mod surface_props;
@@ -158,6 +159,7 @@ pub use sampling_options::{
 pub use scalar_::*;
 pub use shader::Shader;
 pub use size::*;
+pub use strike_ref::StrikeRef;
 pub use stroke_rec::StrokeRec;
 pub use surface::{surfaces, Surface};
 pub use surface_props::*;

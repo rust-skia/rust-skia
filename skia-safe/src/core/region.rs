@@ -107,8 +107,11 @@ impl Region {
 
     pub fn set_rects(&mut self, rects: &[IRect]) -> bool {
         unsafe {
-            self.native_mut()
-                .setRects(rects.native().as_ptr(), rects.len().try_into().unwrap())
+            sb::C_SkRegion_setRects(
+                self.native_mut(),
+                rects.native().as_ptr(),
+                rects.len().try_into().unwrap(),
+            )
         }
     }
 

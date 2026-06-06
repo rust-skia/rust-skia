@@ -124,8 +124,9 @@ impl YUVAPixmapInfo {
         self.native().fDataType
     }
 
-    /// Row bytes for the ith plane. Returns `None` if `i` >= [`Self::num_planes()`] or this
-    /// [YUVAPixmapInfo] is invalid.
+    /// Row bytes for the ith plane.
+    ///
+    /// Returns [None] if `i` is out of range.
     pub fn row_bytes(&self, i: usize) -> Option<usize> {
         (i < self.num_planes()).then(|| unsafe {
             sb::C_SkYUVAPixmapInfo_rowBytes(self.native(), i.try_into().unwrap())
@@ -137,7 +138,9 @@ impl YUVAPixmapInfo {
         (0..self.num_planes()).map(move |i| self.row_bytes(i).unwrap())
     }
 
-    /// Image info for the ith plane, or `None` if `i` >= [`Self::num_planes()`]
+    /// Image info for the ith plane.
+    ///
+    /// Returns [None] if `i` is out of range.
     pub fn plane_info(&self, i: usize) -> Option<&ImageInfo> {
         (i < self.num_planes()).then(|| {
             ImageInfo::from_native_ref(unsafe {
@@ -169,8 +172,7 @@ impl YUVAPixmapInfo {
 
     /// Takes an allocation that is assumed to be at least [compute_total_bytes(&self)] in size and
     /// configures the first [numPlanes(&self)] entries in pixmaps array to point into that memory.
-    /// The remaining entries of pixmaps are default initialized. Returns [None] if this
-    /// [YUVAPixmapInfo] not valid.
+    /// The remaining entries of pixmaps are default initialized.
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn init_pixmaps_from_single_allocation(
         &self,
@@ -313,7 +315,9 @@ impl YUVAPixmaps {
         }
     }
 
-    /// Get the ith [Pixmap] plane. `Pixmap` will be default initialized if i >= numPlanes.
+    /// Get the ith [Pixmap] plane.
+    ///
+    /// Panics if `i` is out of range.
     pub fn plane(&self, i: usize) -> &Pixmap {
         &self.planes()[i]
     }
