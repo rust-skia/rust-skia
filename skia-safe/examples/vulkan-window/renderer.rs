@@ -38,6 +38,14 @@ impl VulkanRenderer {
         let device = queue.device();
         let instance = device.instance();
         let library = instance.library();
+        let backend_max_api_version = {
+            let api_version = device.api_version();
+            (
+                api_version.major as usize,
+                api_version.minor as usize,
+                api_version.patch as usize,
+            )
+        };
 
         // Before we can render to a window, we must first create a `vulkano::swapchain::Surface`
         // object from it, which represents the drawable surface of a window. For that we must wrap
@@ -170,7 +178,7 @@ impl VulkanRenderer {
             // from which we'll be able to get a canvas reference that draws directly to swapchain images
             // on the swapchain.
             let direct_context = direct_contexts::make_vulkan(
-                &vk::BackendContext::new(
+                &vk::BackendContext::new_builder(
                     instance.handle().as_raw() as _,
                     device.physical_device().handle().as_raw() as _,
                     device.handle().as_raw() as _,
@@ -179,7 +187,9 @@ impl VulkanRenderer {
                         queue.queue_family_index() as usize,
                     ),
                     &get_proc,
-                ),
+                    backend_max_api_version,
+                )
+                .build(),
                 None,
             )
             .unwrap();

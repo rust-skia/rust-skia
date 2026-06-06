@@ -78,6 +78,8 @@ extern "C" void *C_VulkanBackendContext_new(
     void *device,
     void *queue,
     uint32_t graphicsQueueIndex,
+    GrProtected protectedContext,
+    uint32_t maxAPIVersion,
 
     /* PFN_vkVoidFunction makes us trouble on the Rust side */
     GetProcFnVoidPtr getProc,
@@ -99,6 +101,8 @@ extern "C" void *C_VulkanBackendContext_new(
     context.fGraphicsQueueIndex = graphicsQueueIndex;
     context.fVkExtensions = &extensions;
     context.fGetProc = vkGetProc;
+    context.fProtectedContext = protectedContext;
+    context.fMaxAPIVersion = maxAPIVersion;
     // Since Skia m147, fMemoryAllocator is required for Vulkan context creation.
     // The binding initializes it here so Rust callers do not need to wire one manually.
     context.fMemoryAllocator = skgpu::VulkanMemoryAllocators::Make(context, skgpu::ThreadSafe::kYes);

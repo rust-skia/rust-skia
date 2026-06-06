@@ -32,7 +32,7 @@ impl DrawingDriver for Vulkan {
             };
 
             let backend_context = unsafe {
-                gpu::vk::BackendContext::new(
+                gpu::vk::BackendContext::new_builder(
                     ash_graphics.instance.handle().as_raw() as _,
                     ash_graphics.physical_device.as_raw() as _,
                     ash_graphics.device.handle().as_raw() as _,
@@ -41,7 +41,9 @@ impl DrawingDriver for Vulkan {
                         ash_graphics.queue_and_index.1,
                     ),
                     &get_proc,
+                    AshGraphics::vulkan_version().unwrap_or((1, 1, 0)),
                 )
+                .build()
             };
 
             gpu::direct_contexts::make_vulkan(&backend_context, None).unwrap()
