@@ -2,10 +2,58 @@ use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
 use std::{ffi::CString, fmt, mem, os::raw::c_char, ptr};
 
 use crate::{
+    font_arguments,
     interop::{self, DynamicMemoryWStream},
     prelude::*,
     FontStyle, Typeface, Unichar,
 };
+
+pub mod request {
+    use skia_bindings::{self as sb, SkFontMgr_Request_CMapEntry};
+
+    use crate::{font_arguments, prelude::*, FontStyle, Unichar};
+
+    #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
+    #[repr(C)]
+    pub struct CMapEntry {
+        pub character: Unichar,
+        pub variation: Unichar,
+    }
+
+    native_transmutable!(SkFontMgr_Request_CMapEntry, CMapEntry);
+
+    pub fn font_style_from_model(
+        model: &[font_arguments::variation_position::Coordinate],
+    ) -> FontStyle {
+        FontStyle::construct(|font_style| unsafe {
+            sb::C_SkFontMgr_Request_fontStyleFromModel(
+                model.native().as_ptr(),
+                model.len(),
+                font_style,
+            )
+        })
+    }
+
+    pub fn model_from_font_style(
+        font_style: FontStyle,
+    ) -> [font_arguments::variation_position::Coordinate; 4] {
+        let mut model = [font_arguments::variation_position::Coordinate::default(); 4];
+        unsafe {
+            sb::C_SkFontMgr_Request_SetModel(font_style.native(), model.native_mut().as_mut_ptr())
+        }
+        model
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct Request<'a> {
+    pub cmap_entries: &'a [request::CMapEntry],
+    pub bcp_47: &'a [&'a str],
+    pub family_name: Option<&'a str>,
+    pub model: &'a [font_arguments::variation_position::Coordinate],
+    pub synthetic_bold: Option<bool>,
+    pub synthetic_oblique: Option<bool>,
+}
 
 pub type FontStyleSet = RCHandle<SkFontStyleSet>;
 
@@ -23,10 +71,7 @@ impl Default for FontStyleSet {
 
 impl fmt::Debug for FontStyleSet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("FontStyleSet")
-            // TODO: clarify why self has to be mut.
-            // .field("count", &self.count())
-            .finish()
+        f.debug_struct("FontStyleSet").finish()
     }
 }
 
@@ -179,9 +224,9 @@ impl FontMgr {
         character: Unichar,
     ) -> Option<Typeface> {
         let family_name = CString::new(family_name.as_ref()).unwrap();
-        // create backing store for the pointer array.
+        // Create backing store for the pointer array.
         let bcp_47: Vec<CString> = bcp_47.iter().map(|s| CString::new(*s).unwrap()).collect();
-        // note: mutability needed to comply to the C type "const char* bcp47[]".
+        // Note: mutability needed to comply to the C type "const char* bcp47[]".
         let mut bcp_47: Vec<*const c_char> = bcp_47.iter().map(|cs| cs.as_ptr()).collect();
 
         Typeface::from_ptr(unsafe {
@@ -194,6 +239,22 @@ impl FontMgr {
                 character,
             )
         })
+    }
+
+    pub fn match_request(&self, request: &Request<'_>) -> Option<Typeface> {
+        with_ffi_request(request, |ffi_request| {
+            Typeface::from_ptr(unsafe { sb::C_SkFontMgr_match(self.native(), ffi_request) })
+        })
+    }
+
+    pub fn fallback(&self, request: &Request<'_>) -> Option<Typeface> {
+        with_ffi_request(request, |ffi_request| {
+            Typeface::from_ptr(unsafe { sb::C_SkFontMgr_fallback(self.native(), ffi_request) })
+        })
+    }
+
+    pub fn fallback_request(&self, request: &Request<'_>) -> Option<Typeface> {
+        self.fallback(request)
     }
 
     #[deprecated(since = "0.35.0", note = "Removed without replacement")]
@@ -259,9 +320,54 @@ impl FontMgr {
     // TODO: makeFromStream(.., ttcIndex).
 }
 
+fn with_ffi_request<T>(request: &Request<'_>, f: impl FnOnce(&sb::C_SkFontMgr_Request) -> T) -> T {
+    let family_name = request
+        .family_name
+        .and_then(|family_name| CString::new(family_name).ok());
+    let bcp_47: Vec<CString> = request
+        .bcp_47
+        .iter()
+        .map(|s| CString::new(*s).unwrap())
+        .collect();
+    let mut bcp_47_ptrs: Vec<*const c_char> = bcp_47.iter().map(|cs| cs.as_ptr()).collect();
+    let bcp_47_ptr = if bcp_47_ptrs.is_empty() {
+        ptr::null_mut()
+    } else {
+        bcp_47_ptrs.as_mut_ptr()
+    };
+
+    let ffi_request = sb::C_SkFontMgr_Request {
+        cmapEntries: request.cmap_entries.native().as_ptr(),
+        cmapEntryCount: request.cmap_entries.len(),
+        bcp47: bcp_47_ptr,
+        bcp47Count: bcp_47_ptrs.len(),
+        familyName: family_name
+            .as_ref()
+            .map(|n| n.as_ptr())
+            .unwrap_or(ptr::null()),
+        model: request.model.native().as_ptr(),
+        modelCount: request.model.len(),
+        syntheticBold: option_bool_to_ffi(request.synthetic_bold),
+        syntheticOblique: option_bool_to_ffi(request.synthetic_oblique),
+    };
+
+    f(&ffi_request)
+}
+
+fn option_bool_to_ffi(value: Option<bool>) -> i32 {
+    match value {
+        Some(true) => 1,
+        Some(false) => 0,
+        None => -1,
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::FontMgr;
+    use crate::{
+        font_mgr::{request, Request},
+        FontMgr, FontStyle,
+    };
 
     #[test]
     #[serial_test::serial]
@@ -271,7 +377,7 @@ mod tests {
         println!("FontMgr families: {families}");
         // This test requires that the default system font manager returns at least one family for now.
         assert!(families > 0);
-        // print all family names and styles
+        // Print all family names and styles
         for i in 0..families {
             let name = font_mgr.family_name(i);
             println!("font_family: {name}");
@@ -285,5 +391,17 @@ mod tests {
                 drop(face);
             }
         }
+    }
+
+    #[test]
+    fn request_apis_accept_default_request() {
+        let font_mgr = FontMgr::empty();
+        let request = Request::default();
+
+        let _ = font_mgr.match_request(&request);
+        let _ = font_mgr.fallback(&request);
+
+        let _ = request::font_style_from_model(&[]);
+        let _ = request::model_from_font_style(FontStyle::default());
     }
 }

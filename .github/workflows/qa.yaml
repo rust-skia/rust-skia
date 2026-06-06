@@ -1,20 +1,24 @@
-name: 'Check Formatting'
+name: 'qa'
 on: [push, pull_request]
 
 jobs:
-  check-fmt:
+  qa:
     runs-on: ubuntu-24.04
+    container: ghcr.io/pragmatrix/rust-skia-linux:latest
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
+    - name: Fetch Skia submodule tags
+      run: |
+        git -C skia-bindings/skia fetch --tags --force
+    - name: Check Skia metadata
+      run: |
+        just check-skia-submodule-tag
     - name: Install Rust
       run: |
         rustup update stable
         rustup default stable 
         rustup component add rustfmt
-    - name: Generate missing bindings.rs file
-      run: |
-        echo > skia-bindings/src/bindings.rs
     - run: | 
         cargo fmt -- --check

@@ -38,6 +38,15 @@ pub mod variation_position {
     }
 
     native_transmutable!(SkFontArguments_VariationPosition_Coordinate, Coordinate);
+
+    #[allow(non_upper_case_globals)]
+    impl Coordinate {
+        pub const wght: FourByteTag = FourByteTag::from_chars('w', 'g', 'h', 't');
+        pub const wdth: FourByteTag = FourByteTag::from_chars('w', 'd', 't', 'h');
+        pub const slnt: FourByteTag = FourByteTag::from_chars('s', 'l', 'n', 't');
+        pub const ital: FourByteTag = FourByteTag::from_chars('i', 't', 'a', 'l');
+        pub const opsz: FourByteTag = FourByteTag::from_chars('o', 'p', 's', 'z');
+    }
 }
 
 /// Specifies a palette to use and overrides for palette entries.

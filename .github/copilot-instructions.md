@@ -30,6 +30,8 @@ Update it whenever you learn something new about the project's patterns, convent
 - If a trait can't be derived due to field constraints, investigate whether the trait is actually needed before implementing it manually.
 - Keep reduced-feature builds and tests working: code and tests that rely on optional components should be gated or provide safe fallbacks when those components are disabled.
 - Before considering a port complete, verify C++↔Rust ordering parity for top-level types, nested types, methods, and debug fields.
+- For C FFI wrappers, do not pass C++ class types like `SkFontStyle` by value across `extern "C"`; use pointers and/or out-parameters.
+- When an out-parameter points to uninitialized storage for a non-trivial C++ type, construct with placement new instead of assignment.
 
 ## Communication
 - Explanations should be concise and strictly relevant.
