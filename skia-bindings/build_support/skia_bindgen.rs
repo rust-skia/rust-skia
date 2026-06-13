@@ -239,11 +239,12 @@ pub fn generate_bindings(
         cc_args.push(std_cpp_arg);
     }
 
-    // Disable RTTI. Otherwise RustWStream may cause compilation errors.
-    bindgen_args.push("-fno-rtti".into());
+    // Disable RTTI on non-MSVC targets. On MSVC, RTTI must stay enabled (/GR)
+    // because std::function in <functional> uses typeid, which fails with /GR-.
     if target.builds_with_msvc() {
-        cc_args.push("/GR-".into());
+        cc_args.push("/GR".into());
     } else {
+        bindgen_args.push("-fno-rtti".into());
         cc_args.push("-fno-rtti".into());
     }
 
