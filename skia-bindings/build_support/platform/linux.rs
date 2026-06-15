@@ -34,8 +34,15 @@ impl PlatformDetails for Linux {
     }
 }
 
+fn cxx_stdlib() -> String {
+    match cc::Build::new().cpp(true).try_get_compiler() {
+        Ok(compiler) if compiler.is_like_clang() => "c++".to_string(),
+        _ => "stdc++".to_string(),
+    }
+}
+
 pub fn link_libraries(features: &Features) -> Vec<String> {
-    let mut libs = vec!["stdc++".to_string()];
+    let mut libs = vec![cxx_stdlib()];
 
     // Use pkg-config for system libraries when available
     add_pkg_config_libs(&mut libs, "freetype2", &["freetype"]);
