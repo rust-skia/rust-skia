@@ -856,7 +856,10 @@ pub(crate) mod definitions {
     };
 
     use super::env;
-    use crate::build_support::features::{self, feature};
+    use crate::build_support::{
+        cargo,
+        features::{self, feature},
+    };
 
     /// A preprocessor definition.
     pub type Definition = (String, Option<String>);
@@ -946,8 +949,13 @@ pub(crate) mod definitions {
                 "obj/modules/skunicode/skunicode_core.ninja".into(),
                 "obj/modules/skunicode/skunicode_icu.ninja".into(),
             ]);
-            // shaper.cpp includes SkLoadICU.h
-            if !use_system_libraries {
+            // shaper.cpp includes SkLoadICU.h — skip bundled ICU ninja when
+            // system ICU is active (either via SKIA_USE_SYSTEM_LIBRARIES or
+            // skia_use_system_icu=true in SKIA_GN_ARGS).
+            let system_icu = use_system_libraries
+                || cargo::env_var("SKIA_GN_ARGS")
+                    .is_some_and(|args| args.contains("skia_use_system_icu=true"));
+            if !system_icu {
                 files.push("obj/third_party/icu/icu.ninja".into())
             }
         }
