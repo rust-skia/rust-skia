@@ -41,7 +41,7 @@ impl DrawingDriver for Vulkan {
                         ash_graphics.queue_and_index.1,
                     ),
                     &get_proc,
-                    AshGraphics::vulkan_version().unwrap_or((1, 1, 0)),
+                    Some(AshGraphics::vulkan_version().unwrap_or((1, 1, 0)).into()),
                 )
                 .build()
             };

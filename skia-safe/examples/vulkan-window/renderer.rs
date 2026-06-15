@@ -187,7 +187,7 @@ impl VulkanRenderer {
                         queue.queue_family_index() as usize,
                     ),
                     &get_proc,
-                    backend_max_api_version,
+                    Some(backend_max_api_version.into()),
                 )
                 .build(),
                 None,

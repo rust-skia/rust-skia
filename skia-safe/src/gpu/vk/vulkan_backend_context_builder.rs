@@ -12,7 +12,7 @@ pub struct BackendContextBuilder<'a> {
     queue: Queue,
     queue_index: usize,
     get_proc: &'a dyn GetProc,
-    max_api_version: Version,
+    max_api_version: Option<Version>,
     instance_extensions: Vec<String>,
     device_extensions: Vec<String>,
     protected_context: Option<gpu::Protected>,
@@ -41,8 +41,11 @@ impl<'a> BackendContextBuilder<'a> {
     /// The `max_api_version` is applied during native context creation, before
     /// the Vulkan memory allocator is initialized.
     ///
-    /// `max_api_version` should match the value provided in
-    /// `VkApplicationInfo::apiVersion` when creating the `VkInstance`.
+    /// If a version is provided, it should match the value provided in
+    /// `VkApplicationInfo::apiVersion` when creating the `VkInstance`. Pass `None` to leave Skia's
+    /// `VulkanBackendContext::fMaxAPIVersion` at its default `0`; Skia then queries
+    /// `vkEnumerateInstanceVersion()` and uses that loader-reported version as the upper limit when
+    /// validating Vulkan entry points and creating the memory allocator.
     ///
     /// Skia requires Vulkan 1.1 as the minimum supported API version.
     pub fn new(
@@ -51,7 +54,7 @@ impl<'a> BackendContextBuilder<'a> {
         device: Device,
         (queue, queue_index): (Queue, usize),
         get_proc: &'a impl GetProc,
-        max_api_version: impl Into<Version>,
+        max_api_version: impl Into<Option<Version>>,
     ) -> Self {
         Self {
             instance,
