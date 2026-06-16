@@ -2,8 +2,8 @@
 use std::io;
 
 use skia_safe::{
-    codec::{self, codecs::Decoder},
     Bitmap, Codec, Data, EncodedImageFormat,
+    codec::{self, codecs::Decoder},
 };
 
 /// The supported encoders.

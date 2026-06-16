@@ -2,11 +2,11 @@ use std::fmt;
 use std::marker::PhantomData;
 
 use skia_bindings::{
-    self as sb, SkContourMeasure, SkContourMeasureIter, SkContourMeasure_ForwardVerbIterator,
-    SkContourMeasure_VerbMeasure, SkRefCntBase,
+    self as sb, SkContourMeasure, SkContourMeasure_ForwardVerbIterator,
+    SkContourMeasure_VerbMeasure, SkContourMeasureIter, SkRefCntBase,
 };
 
-use crate::{prelude::*, scalar, Matrix, Path, PathBuilder, PathVerb, Point, Vector};
+use crate::{Matrix, Path, PathBuilder, PathVerb, Point, Vector, prelude::*, scalar};
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
 unsafe_send_sync!(ContourMeasure);

@@ -134,14 +134,26 @@ fn process_tokens(tokens: &[Token]) -> String {
 fn consume_tokens(tokens: &[RefToken]) -> (usize, String) {
     use RefToken::*;
     match tokens {
-        [Word("@param"), Whitespace(" "), Word(name), Whitespace(_), ..] => {
+        [
+            Word("@param"),
+            Whitespace(" "),
+            Word(name),
+            Whitespace(_),
+            ..,
+        ] => {
             let param = name.to_snake_case();
             (4, format!("* `{param}` - "))
         }
         [Word("@note"), Whitespace(" "), ..] => (2, "Note: ".into()),
         [Word("@return"), Whitespace(_), Word(_), ..] => (2, "Returns: ".into()),
 
-        [Word(word_a), Separator("."), Word(word_b), Separator("()"), ..] => {
+        [
+            Word(word_a),
+            Separator("."),
+            Word(word_b),
+            Separator("()"),
+            ..,
+        ] => {
             // Function reference with a dot.
             process_function(4, &format!("{word_a}.{word_b}"))
         }

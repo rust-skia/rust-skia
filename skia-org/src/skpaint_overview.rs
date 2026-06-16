@@ -1,13 +1,13 @@
 use std::path;
 
 use skia_safe::{
-    color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient,
-    line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar, shaders,
     AutoCanvasRestore, BlendMode, BlurStyle, Canvas, Color, Color4f, Font, MaskFilter, Matrix,
     Paint, Path, PathBuilder, PathEffect, Point, Rect, SamplingOptions, TextBlob, TileMode,
+    color_filters, corner_path_effect, dash_path_effect, discrete_path_effect, gradient,
+    line_2d_path_effect, paint, path_1d_path_effect, path_2d_path_effect, scalar, shaders,
 };
 
-use crate::{helper::default_typeface, resources, DrawingDriver};
+use crate::{DrawingDriver, helper::default_typeface, resources};
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = &path.join("SkPaint-Overview");

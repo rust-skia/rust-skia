@@ -1,6 +1,6 @@
 use crate::{
-    Features, HostOS, Job, JobFeatures, JobName, TargetConf, Workflow, WorkflowKind, LINUX_JOB,
-    MACOS_JOB, WASM_JOB, WINDOWS_ARM_JOB, WINDOWS_JOB,
+    Features, HostOS, Job, JobFeatures, JobName, LINUX_JOB, MACOS_JOB, TargetConf, WASM_JOB,
+    WINDOWS_ARM_JOB, WINDOWS_JOB, Workflow, WorkflowKind,
 };
 
 pub const DEFAULT_ANDROID_API_LEVEL: usize = 26;

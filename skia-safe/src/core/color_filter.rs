@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, BlendMode, Color, Color4f, ColorSpace, NativeFlattenable};
+use crate::{BlendMode, Color, Color4f, ColorSpace, NativeFlattenable, prelude::*, scalar};
 use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkRefCntBase};
 use std::fmt;
 
@@ -108,8 +108,8 @@ impl ColorFilter {
 }
 
 pub mod color_filters {
-    use crate::{prelude::*, Color4f, ColorSpace, ColorTable};
-    use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
+    use crate::{BlendMode, Color, ColorFilter, ColorMatrix, scalar};
+    use crate::{Color4f, ColorSpace, ColorTable, prelude::*};
     use skia_bindings as sb;
 
     pub fn compose(
@@ -241,7 +241,7 @@ pub mod color_filters {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::{color_filters, BlendMode, Color, Color4f, ColorSpace};
+    use crate::{BlendMode, Color, Color4f, ColorSpace, color_filters};
 
     #[test]
     fn color_mode_roundtrip() {

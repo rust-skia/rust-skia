@@ -4,7 +4,7 @@
 #![allow(unknown_lints)]
 #![allow(clippy::unusual_byte_groupings)]
 use skia_safe::{
-    gradient, Color, Color4f, Matrix, Paint, PaintJoin, PaintStyle, PathBuilder, Point, TileMode,
+    Color, Color4f, Matrix, Paint, PaintJoin, PaintStyle, PathBuilder, Point, TileMode, gradient,
 };
 use std::cmp::min;
 

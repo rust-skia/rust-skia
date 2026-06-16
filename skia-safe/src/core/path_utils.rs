@@ -1,4 +1,4 @@
-use crate::{prelude::*, Matrix, Paint, Path, PathBuilder, Rect};
+use crate::{Matrix, Paint, Path, PathBuilder, Rect, prelude::*};
 use skia_bindings as sb;
 
 /// Returns the filled equivalent of the stroked path.

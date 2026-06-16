@@ -1,4 +1,4 @@
-use crate::{interop::RustWStream, prelude::*, Pixmap};
+use crate::{Pixmap, interop::RustWStream, prelude::*};
 use skia_bindings::SkWebpEncoder_Compression;
 use std::io;
 

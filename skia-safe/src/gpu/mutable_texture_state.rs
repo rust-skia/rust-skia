@@ -1,6 +1,6 @@
 use std::fmt;
 
-use skia_bindings::{self as sb, skgpu_MutableTextureState, SkRefCntBase};
+use skia_bindings::{self as sb, SkRefCntBase, skgpu_MutableTextureState};
 
 use super::BackendApi;
 use crate::prelude::*;

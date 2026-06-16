@@ -1,10 +1,10 @@
 use super::{
-    fe, pattern::Pattern, svg_::Svg, Circle, ClipPath, ColorSpace, DebugAttributes, Defs, Display,
-    Ellipse, Fill, FillRule, Filter, FontFamily, FontSize, FontStyle, FontWeight, Image, IriFunc,
-    Length, Line, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, Poly, RadialGradient, Rect,
-    Stop, TSpan, Text, TextAnchor, TextLiteral, TextPath, Use, Visibility, G,
+    Circle, ClipPath, ColorSpace, DebugAttributes, Defs, Display, Ellipse, Fill, FillRule, Filter,
+    FontFamily, FontSize, FontStyle, FontWeight, G, Image, IriFunc, Length, Line, LineCap,
+    LineJoin, LinearGradient, Mask, Paint, Path, Poly, RadialGradient, Rect, Stop, TSpan, Text,
+    TextAnchor, TextLiteral, TextPath, Use, Visibility, fe, pattern::Pattern, svg_::Svg,
 };
-use crate::{prelude::*, scalar, Color};
+use crate::{Color, prelude::*, scalar};
 use skia_bindings as sb;
 
 pub type NodeTag = sb::SkSVGTag;

@@ -6,7 +6,7 @@ use std::{
 
 use skia_bindings::{self as sb, SkM44, SkV2, SkV3, SkV4};
 
-use crate::{prelude::*, private::is_finite, scalar, Matrix, Rect};
+use crate::{Matrix, Rect, prelude::*, private::is_finite, scalar};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
@@ -842,7 +842,7 @@ impl From<Matrix> for M44 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{matrix, Matrix, Rect, M44};
+    use crate::{M44, Matrix, Rect, matrix};
 
     #[test]
     pub fn convert_from_matrix_and_back() {

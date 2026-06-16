@@ -1,6 +1,6 @@
 use skia_bindings::SkTextUtils;
 
-use crate::{prelude::*, Canvas, EncodedText, Font, Paint, Path, Point};
+use crate::{Canvas, EncodedText, Font, Paint, Path, Point, prelude::*};
 
 pub use skia_bindings::SkTextUtils_Align as Align;
 variant_name!(Align::Center);

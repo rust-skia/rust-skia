@@ -1,4 +1,4 @@
-use crate::{scalar, shaders, ISize, Shader};
+use crate::{ISize, Shader, scalar, shaders};
 
 pub fn fractal_noise(
     base_frequency: (scalar, scalar),

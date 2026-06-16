@@ -1,4 +1,4 @@
-use crate::{prelude::*, Canvas, Data, FilterMode, Matrix, Rect, Shader, TileMode};
+use crate::{Canvas, Data, FilterMode, Matrix, Rect, Shader, TileMode, prelude::*};
 use skia_bindings::{self as sb, SkPicture, SkRefCntBase};
 use std::fmt;
 

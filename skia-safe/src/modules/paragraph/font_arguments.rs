@@ -1,4 +1,4 @@
-use crate::{prelude::*, Typeface};
+use crate::{Typeface, prelude::*};
 use skia_bindings::{self as sb, skia_textlayout_FontArguments};
 use std::{fmt, hash};
 

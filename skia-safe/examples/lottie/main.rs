@@ -18,12 +18,14 @@
 
 #[cfg(not(feature = "skottie"))]
 fn main() {
-    println!("To run this example, use: cargo run --example lottie --features \"skottie\" -- <path-to-lottie.json> [output-dir]");
+    println!(
+        "To run this example, use: cargo run --example lottie --features \"skottie\" -- <path-to-lottie.json> [output-dir]"
+    );
 }
 
 #[cfg(feature = "skottie")]
 fn main() {
-    use skia_safe::{skottie::Animation, surfaces, Color, EncodedImageFormat};
+    use skia_safe::{Color, EncodedImageFormat, skottie::Animation, surfaces};
     use std::path::PathBuf;
     use std::{env, fs, fs::File, io::Write};
 
@@ -44,7 +46,9 @@ fn main() {
             );
             eprintln!();
             eprintln!("Example:");
-            eprintln!("  curl -O https://raw.githubusercontent.com/airbnb/lottie-web/master/test/animations/starfish.json");
+            eprintln!(
+                "  curl -O https://raw.githubusercontent.com/airbnb/lottie-web/master/test/animations/starfish.json"
+            );
             eprintln!("  cargo run --example lottie --features \"skottie\" -- starfish.json");
             std::process::exit(1);
         }

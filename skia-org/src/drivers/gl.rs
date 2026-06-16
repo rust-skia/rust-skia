@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use skia_safe::{gpu, Canvas, ImageInfo};
+use skia_safe::{Canvas, ImageInfo, gpu};
 
-use crate::{artifact, drivers::DrawingDriver, Driver};
+use crate::{Driver, artifact, drivers::DrawingDriver};
 
 pub struct Gl {
     context: gpu::DirectContext,

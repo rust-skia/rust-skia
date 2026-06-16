@@ -40,13 +40,17 @@ impl<T: 'static> VecSink<'_, T> {
     }
 
     unsafe extern "C" fn set_fn(ptr: *mut T, len: usize, rust_fn: TraitObject) {
-        let rust_fn: &mut dyn FnMut(&[T]) = mem::transmute(rust_fn);
-        (rust_fn)(safer::from_raw_parts(ptr, len));
+        unsafe {
+            let rust_fn: &mut dyn FnMut(&[T]) = mem::transmute(rust_fn);
+            (rust_fn)(safer::from_raw_parts(ptr, len));
+        }
     }
 
     unsafe extern "C" fn set_fn_mut(ptr: *mut T, len: usize, rust_fn: TraitObject) {
-        let rust_fn: &mut dyn FnMut(&mut [T]) = mem::transmute(rust_fn);
-        (rust_fn)(safer::from_raw_parts_mut(ptr, len));
+        unsafe {
+            let rust_fn: &mut dyn FnMut(&mut [T]) = mem::transmute(rust_fn);
+            (rust_fn)(safer::from_raw_parts_mut(ptr, len));
+        }
     }
 }
 
@@ -74,7 +78,9 @@ impl<T: 'static> Sink<'_, T> {
     }
 
     unsafe extern "C" fn set_fn(ptr: *const T, rust_fn: TraitObject) {
-        let rust_fn: &mut dyn FnMut(&T) = mem::transmute(rust_fn);
-        (rust_fn)(&*ptr);
+        unsafe {
+            let rust_fn: &mut dyn FnMut(&T) = mem::transmute(rust_fn);
+            (rust_fn)(&*ptr);
+        }
     }
 }

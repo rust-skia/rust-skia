@@ -5,10 +5,10 @@ use std::{
 };
 
 use crate::{
+    Canvas, Size,
     interop::{MemoryStream, NativeStreamBase, RustStream},
     prelude::*,
     resources::NativeResourceProvider,
-    Canvas, Size,
 };
 use skia_bindings::{self as sb, SkRefCntBase};
 

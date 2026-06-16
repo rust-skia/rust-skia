@@ -6,13 +6,14 @@ use std::{
 };
 
 use crate::{
+    Data, Image, Surface, TextureCompressionType,
     gpu::{
         BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
         GpuStatsFlags, MutableTextureState, PurgeResourceOptions, RecordingContext,
         SemaphoresSubmitted, SubmitInfo, SyncCpu,
     },
     prelude::*,
-    surfaces, Data, Image, Surface, TextureCompressionType,
+    surfaces,
 };
 use skia_bindings::{self as sb, GrDirectContext, GrDirectContext_DirectContextID, SkRefCntBase};
 

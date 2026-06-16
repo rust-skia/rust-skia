@@ -1,5 +1,5 @@
 use super::color::Fill;
-use crate::{prelude::*, Color};
+use crate::{Color, prelude::*};
 use skia_bindings as sb;
 use std::fmt;
 

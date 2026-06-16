@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, Canvas, Color, Matrix, Path, Point3, Rect};
+use crate::{Canvas, Color, Matrix, Path, Point3, Rect, prelude::*, scalar};
 use skia_bindings::{self as sb, SkShadowUtils};
 
 bitflags! {

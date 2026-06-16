@@ -1,5 +1,5 @@
 #![allow(deprecated)]
-use crate::{prelude::*, scalar, Canvas, Matrix, M44, V3};
+use crate::{Canvas, M44, Matrix, V3, prelude::*, scalar};
 use skia_bindings::{self as sb, Sk3DView, SkCamera3D, SkPatch3D};
 use std::fmt;
 
@@ -170,8 +170,8 @@ impl RefHandle<Sk3DView> {
 
 #[test]
 fn test_canvas_passing_syntax() {
-    use crate::utils::new_null_canvas;
     use crate::Surface;
+    use crate::utils::new_null_canvas;
 
     let null_canvas = new_null_canvas();
     let view = View3D::default();

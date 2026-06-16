@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{prelude::*, Color as SkColor};
+use crate::{Color as SkColor, prelude::*};
 use skia_bindings as sb;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]

@@ -2,7 +2,7 @@ use std::fmt;
 
 use skia_bindings::{self as sb, SkFlattenable, SkRefCntBase, SkShader};
 
-use crate::{prelude::*, ColorFilter, ColorSpace, Image, Matrix, NativeFlattenable, TileMode};
+use crate::{ColorFilter, ColorSpace, Image, Matrix, NativeFlattenable, TileMode, prelude::*};
 
 pub type Shader = RCHandle<SkShader>;
 unsafe_send_sync!(Shader);
@@ -135,8 +135,8 @@ pub mod shaders {
     use skia_bindings as sb;
 
     use crate::{
-        prelude::*, Blender, Color, Color4f, ColorSpace, Image, Matrix, Rect, SamplingOptions,
-        Shader, TileMode,
+        Blender, Color, Color4f, ColorSpace, Image, Matrix, Rect, SamplingOptions, Shader,
+        TileMode, prelude::*,
     };
 
     pub fn empty() -> Shader {

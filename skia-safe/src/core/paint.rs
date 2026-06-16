@@ -1,7 +1,7 @@
 use crate::Blender;
 use crate::{
-    prelude::*, scalar, BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter,
-    MaskFilter, PathEffect, Shader,
+    BlendMode, Color, Color4f, ColorFilter, ColorSpace, ImageFilter, MaskFilter, PathEffect,
+    Shader, prelude::*, scalar,
 };
 use core::fmt;
 

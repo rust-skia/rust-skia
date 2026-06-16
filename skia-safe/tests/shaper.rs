@@ -1,10 +1,10 @@
 #![cfg(feature = "textlayout")]
 use skia_safe::{
-    shaper::{
-        run_handler::{Buffer, RunInfo},
-        RunHandler,
-    },
     GlyphId, Point,
+    shaper::{
+        RunHandler,
+        run_handler::{Buffer, RunInfo},
+    },
 };
 
 #[derive(Default, Debug)]
@@ -47,7 +47,7 @@ impl RunHandler for DebugRunHandler {
 #[cfg(test)]
 mod tests {
     use crate::DebugRunHandler;
-    use skia_safe::{shapers, Font, Shaper};
+    use skia_safe::{Font, Shaper, shapers};
 
     #[test]
     #[serial_test::serial]

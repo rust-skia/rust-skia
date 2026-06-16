@@ -1,5 +1,5 @@
 use crate::{
-    interop::RustWStream, prelude::*, ColorSpace, Data, EncodedOrigin, Pixmap, YUVAPixmaps,
+    ColorSpace, Data, EncodedOrigin, Pixmap, YUVAPixmaps, interop::RustWStream, prelude::*,
 };
 use skia_bindings::{SkJpegEncoder_AlphaOption, SkJpegEncoder_Downsample};
 use std::io;

@@ -3,7 +3,7 @@ use std::fmt;
 use skia_bindings::{self as sb, GrBackendFormat, GrBackendRenderTarget, GrBackendTexture};
 
 use crate::gpu;
-use crate::{interop::AsStr, prelude::*, ISize};
+use crate::{ISize, interop::AsStr, prelude::*};
 #[cfg(feature = "d3d")]
 use gpu::d3d;
 #[cfg(feature = "gl")]
@@ -217,7 +217,7 @@ impl BackendTexture {
         mipmapped: gpu::Mipmapped,
         gl_info: gl::TextureInfo,
     ) -> Self {
-        gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, "")
+        unsafe { gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, "") }
     }
 
     #[cfg(feature = "gl")]
@@ -229,14 +229,14 @@ impl BackendTexture {
         gl_info: gl::TextureInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, label)
+        unsafe { gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, label) }
     }
 
     #[cfg(feature = "vulkan")]
     #[allow(clippy::missing_safety_doc)]
     #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_vk()")]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
-        gpu::backend_textures::make_vk((width, height), vk_info, "")
+        unsafe { gpu::backend_textures::make_vk((width, height), vk_info, "") }
     }
 
     #[cfg(feature = "vulkan")]
@@ -247,7 +247,7 @@ impl BackendTexture {
         vk_info: &vk::ImageInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        gpu::backend_textures::make_vk((width, height), vk_info, label)
+        unsafe { gpu::backend_textures::make_vk((width, height), vk_info, label) }
     }
 
     #[cfg(feature = "metal")]
@@ -258,7 +258,7 @@ impl BackendTexture {
         mipmapped: gpu::Mipmapped,
         mtl_info: &mtl::TextureInfo,
     ) -> Self {
-        gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, "")
+        unsafe { gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, "") }
     }
 
     #[cfg(feature = "metal")]
@@ -270,7 +270,7 @@ impl BackendTexture {
         mtl_info: &mtl::TextureInfo,
         label: impl AsRef<str>,
     ) -> Self {
-        gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, label)
+        unsafe { gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, label) }
     }
 
     #[cfg(feature = "d3d")]
@@ -292,7 +292,7 @@ impl BackendTexture {
     pub(crate) unsafe fn from_native_if_valid(
         backend_texture: *mut GrBackendTexture,
     ) -> Option<BackendTexture> {
-        Self::native_is_valid(backend_texture)
+        unsafe { Self::native_is_valid(backend_texture) }
             .then(|| BackendTexture::from_ptr(backend_texture).unwrap())
     }
 
@@ -389,7 +389,7 @@ impl BackendTexture {
     }
 
     pub(crate) unsafe fn native_is_valid(texture: *const GrBackendTexture) -> bool {
-        (*texture).fIsValid
+        unsafe { (*texture).fIsValid }
     }
 
     #[allow(clippy::wrong_self_convention)]

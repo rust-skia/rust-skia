@@ -1,10 +1,10 @@
 use std::path;
 
 use skia_safe::{
-    paint, scalar, BlendMode, Canvas, Color, Font, Paint, PathBuilder, RRect, Rect, TextBlob,
+    BlendMode, Canvas, Color, Font, Paint, PathBuilder, RRect, Rect, TextBlob, paint, scalar,
 };
 
-use crate::{helper::default_typeface, resources, DrawingDriver};
+use crate::{DrawingDriver, helper::default_typeface, resources};
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkCanvas-Overview");

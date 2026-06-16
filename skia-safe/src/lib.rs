@@ -12,7 +12,7 @@ mod macros;
 pub mod codec;
 #[deprecated(since = "0.33.1", note = "use codec::Result")]
 pub use codec::Result as CodecResult;
-pub use codec::{codecs, Codec, EncodedImageFormat, EncodedOrigin};
+pub use codec::{Codec, EncodedImageFormat, EncodedOrigin, codecs};
 
 mod core;
 #[cfg(feature = "pdf")]
@@ -98,7 +98,7 @@ pub mod gpu {
 
 #[cfg(test)]
 mod transmutation_tests {
-    use crate::{prelude::NativeTransmutableSliceAccess, Point};
+    use crate::{Point, prelude::NativeTransmutableSliceAccess};
     use skia_bindings::SkPoint;
 
     #[test]

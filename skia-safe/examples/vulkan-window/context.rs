@@ -1,8 +1,9 @@
 use std::sync::Arc;
 use vulkano::{
+    VulkanLibrary,
     device::{
-        physical::PhysicalDeviceType, Device, DeviceCreateInfo, DeviceExtensions, Queue,
-        QueueCreateInfo, QueueFlags,
+        Device, DeviceCreateInfo, DeviceExtensions, Queue, QueueCreateInfo, QueueFlags,
+        physical::PhysicalDeviceType,
     },
     instance::debug::{
         DebugUtilsMessageSeverity, DebugUtilsMessageType, DebugUtilsMessengerCallback,
@@ -10,7 +11,6 @@ use vulkano::{
     },
     instance::{Instance, InstanceCreateFlags, InstanceCreateInfo, InstanceExtensions},
     swapchain::Surface,
-    VulkanLibrary,
 };
 
 use winit::{event_loop::ActiveEventLoop, window::Window};

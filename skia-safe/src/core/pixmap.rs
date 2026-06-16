@@ -1,6 +1,6 @@
 use crate::{
-    prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo,
-    SamplingOptions,
+    AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, ImageInfo,
+    SamplingOptions, prelude::*,
 };
 use skia_bindings::{self as sb, SkPixmap};
 use std::{ffi::c_void, fmt, marker::PhantomData, mem, os::raw, ptr, slice};

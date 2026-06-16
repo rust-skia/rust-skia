@@ -1,6 +1,6 @@
 use super::{
-    vulkan_backend_context::BackendContext, Device, GetProc, Instance, PhysicalDevice, Queue,
-    Version,
+    Device, GetProc, Instance, PhysicalDevice, Queue, Version,
+    vulkan_backend_context::BackendContext,
 };
 use crate::gpu;
 
@@ -108,16 +108,18 @@ impl<'a> BackendContextBuilder<'a> {
         let device_extensions: Vec<&str> =
             self.device_extensions.iter().map(String::as_str).collect();
 
-        BackendContext::new_internal(
-            self.instance,
-            self.physical_device,
-            self.device,
-            (self.queue, self.queue_index),
-            self.get_proc,
-            self.max_api_version,
-            self.protected_context.unwrap_or(gpu::Protected::No),
-            &instance_extensions,
-            &device_extensions,
-        )
+        unsafe {
+            BackendContext::new_internal(
+                self.instance,
+                self.physical_device,
+                self.device,
+                (self.queue, self.queue_index),
+                self.get_proc,
+                self.max_api_version,
+                self.protected_context.unwrap_or(gpu::Protected::No),
+                &instance_extensions,
+                &device_extensions,
+            )
+        }
     }
 }

@@ -2,7 +2,7 @@ pub mod direct_contexts {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{vk, ContextOptions, DirectContext},
+        gpu::{ContextOptions, DirectContext, vk},
         prelude::*,
     };
 

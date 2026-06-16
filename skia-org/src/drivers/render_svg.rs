@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use skia_safe::{surfaces, svg, Canvas, FontMgr, Rect};
+use skia_safe::{Canvas, FontMgr, Rect, surfaces, svg};
 
-use crate::{artifact, DrawingDriver, Driver};
+use crate::{DrawingDriver, Driver, artifact};
 
 pub struct RenderSvg {
     font_mgr: FontMgr,

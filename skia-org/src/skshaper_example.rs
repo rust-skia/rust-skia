@@ -1,8 +1,8 @@
 use std::path;
 
-use skia_safe::{shapers, Canvas, Font, FontMgr, Paint, Point, Shaper};
+use skia_safe::{Canvas, Font, FontMgr, Paint, Point, Shaper, shapers};
 
-use crate::{helper::default_typeface, DrawingDriver};
+use crate::{DrawingDriver, helper::default_typeface};
 
 pub fn draw(driver: &mut impl DrawingDriver, path: &path::Path) {
     let path = path.join("SkShaper-Example");

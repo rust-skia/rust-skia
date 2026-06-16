@@ -1,6 +1,6 @@
 use crate::build_support::{
     binaries_config::BinariesConfiguration,
-    binary_cache::{binaries, SKIA_LICENSE},
+    binary_cache::{SKIA_LICENSE, binaries},
 };
 use std::path::Path;
 

@@ -98,7 +98,7 @@ pub use blur_types::*;
 pub use canvas::{AutoCanvasRestore, Canvas, OwnedCanvas};
 pub use clip_op::*;
 pub use color::*;
-pub use color_filter::{color_filters, ColorFilter};
+pub use color_filter::{ColorFilter, color_filters};
 pub use color_space::*;
 pub use color_table::*;
 pub use color_type::*;
@@ -117,7 +117,7 @@ pub use font_mgr::{FontMgr, FontStyleSet};
 pub use font_style::FontStyle;
 pub use font_types::*;
 pub use four_byte_tag::*;
-pub use image::{images, Image};
+pub use image::{Image, images};
 pub use image_filter::ImageFilter;
 pub use image_generator::*;
 pub use image_info::*;
@@ -161,7 +161,7 @@ pub use shader::Shader;
 pub use size::*;
 pub use strike_ref::StrikeRef;
 pub use stroke_rec::StrokeRec;
-pub use surface::{surfaces, Surface};
+pub use surface::{Surface, surfaces};
 pub use surface_props::*;
 pub use swizzle::*;
 pub use text_blob::*;
@@ -176,7 +176,7 @@ pub use types::*;
 pub use un_pre_multiply::*;
 pub use vertices::Vertices;
 pub use yuva_info::YUVAInfo;
-pub use yuva_pixmaps::{yuva_pixmap_info, YUVAPixmapInfo, YUVAPixmaps};
+pub use yuva_pixmaps::{YUVAPixmapInfo, YUVAPixmaps, yuva_pixmap_info};
 //
 // Skia specific traits used for overloading functions.
 //
@@ -191,7 +191,7 @@ pub trait QuickReject<T> {
 
 pub mod shaders {
     pub use super::shader::shaders::*;
-    use crate::{prelude::*, scalar, ISize, Shader};
+    use crate::{ISize, Shader, prelude::*, scalar};
     use skia_bindings as sb;
 
     impl Shader {

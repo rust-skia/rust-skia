@@ -1,8 +1,8 @@
 use std::fmt;
 
 use crate::{
-    path, prelude::*, scalar, Matrix, Path, PathDirection, PathFillType, PathVerb, Point, RRect,
-    Rect, Vector,
+    Matrix, Path, PathDirection, PathFillType, PathVerb, Point, RRect, Rect, Vector, path,
+    prelude::*, scalar,
 };
 use skia_bindings::{self as sb, SkPathBuilder};
 
@@ -1116,7 +1116,7 @@ impl PathBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::{paint, surfaces, Paint};
+    use crate::{Paint, paint, surfaces};
 
     use super::*;
 

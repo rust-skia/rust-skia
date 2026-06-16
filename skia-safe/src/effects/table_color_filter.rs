@@ -1,4 +1,4 @@
-use crate::{color_filters, ColorFilter};
+use crate::{ColorFilter, color_filters};
 
 impl ColorFilter {
     #[deprecated(since = "0.56.0", note = "Use color_filters::table()")]

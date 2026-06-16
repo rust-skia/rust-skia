@@ -1,7 +1,7 @@
 use skia_bindings as sb;
 
 use crate::{
-    gpu::{d3d, BackendSemaphore},
+    gpu::{BackendSemaphore, d3d},
     prelude::*,
 };
 

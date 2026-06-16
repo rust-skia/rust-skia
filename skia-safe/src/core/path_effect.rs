@@ -1,4 +1,4 @@
-use crate::{prelude::*, Matrix, NativeFlattenable, Path, PathBuilder, Rect, StrokeRec};
+use crate::{Matrix, NativeFlattenable, Path, PathBuilder, Rect, StrokeRec, prelude::*};
 use sb::SkPathEffect_INHERITED;
 use skia_bindings::{self as sb, SkFlattenable, SkPathEffect, SkRefCntBase};
 use std::fmt;

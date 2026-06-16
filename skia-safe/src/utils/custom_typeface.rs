@@ -1,6 +1,6 @@
 use crate::{
-    prelude::*, typeface::FactoryId, Data, Drawable, FontArguments, FontMetrics, FontStyle,
-    GlyphId, Path, Rect, Typeface,
+    Data, Drawable, FontArguments, FontMetrics, FontStyle, GlyphId, Path, Rect, Typeface,
+    prelude::*, typeface::FactoryId,
 };
 use skia_bindings::{self as sb, SkCustomTypefaceBuilder};
 use std::fmt;

@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use crate::{interop, prelude::*, Path};
+use crate::{Path, interop, prelude::*};
 
 use skia_bindings as sb;
 

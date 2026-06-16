@@ -2,11 +2,11 @@ use std::{borrow::Cow, ffi::CStr, mem, os::raw, ptr};
 
 use helpers::ResourceKind;
 use skia_bindings::{
-    self as sb, skresources_ImageAsset, RustResourceProvider, RustResourceProvider_Param, SkData,
-    SkFontMgr, SkRefCnt, SkRefCntBase, SkTypeface, TraitObject,
+    self as sb, RustResourceProvider, RustResourceProvider_Param, SkData, SkFontMgr, SkRefCnt,
+    SkRefCntBase, SkTypeface, TraitObject, skresources_ImageAsset,
 };
 
-use crate::{prelude::*, Data, FontMgr, Typeface};
+use crate::{Data, FontMgr, Typeface, prelude::*};
 
 pub type ImageAsset = RCHandle<skresources_ImageAsset>;
 require_base_type!(skresources_ImageAsset, SkRefCnt);
@@ -149,12 +149,12 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
         }
 
         unsafe fn provider_ref(provider: &TraitObject) -> &dyn ResourceProvider {
-            mem::transmute(*provider)
+            unsafe { mem::transmute(*provider) }
         }
 
         unsafe fn uncstr(ptr: *const raw::c_char) -> Cow<'static, str> {
             if !ptr.is_null() {
-                return CStr::from_ptr(ptr).to_string_lossy();
+                return unsafe { CStr::from_ptr(ptr).to_string_lossy() };
             }
             "".into()
         }
@@ -311,12 +311,10 @@ pub mod helpers {
         fn is_html_space(c: char) -> bool {
             HTML_SPACE_CHARACTERS.contains(&c)
         }
-        let without_spaces = value
+        value
             .chars()
             .filter(|&c| !is_html_space(c))
-            .collect::<String>();
-
-        without_spaces
+            .collect::<String>()
     }
 
     fn decode_base64(value: &str) -> Vec<u8> {
@@ -325,9 +323,8 @@ pub mod helpers {
 
     mod base64 {
         use base64::{
-            alphabet,
+            Engine, alphabet,
             engine::{self, GeneralPurposeConfig},
-            Engine,
         };
 
         pub fn decode(input: &str) -> Result<Vec<u8>, base64::DecodeError> {

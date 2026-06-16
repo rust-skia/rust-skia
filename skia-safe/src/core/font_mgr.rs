@@ -2,16 +2,15 @@ use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
 use std::{ffi::CString, fmt, mem, os::raw::c_char, ptr};
 
 use crate::{
-    font_arguments,
+    FontStyle, Typeface, Unichar, font_arguments,
     interop::{self, DynamicMemoryWStream},
     prelude::*,
-    FontStyle, Typeface, Unichar,
 };
 
 pub mod request {
     use skia_bindings::{self as sb, SkFontMgr_Request_CMapEntry};
 
-    use crate::{font_arguments, prelude::*, FontStyle, Unichar};
+    use crate::{FontStyle, Unichar, font_arguments, prelude::*};
 
     #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
     #[repr(C)]
@@ -365,8 +364,8 @@ fn option_bool_to_ffi(value: Option<bool>) -> i32 {
 #[cfg(test)]
 mod tests {
     use crate::{
-        font_mgr::{request, Request},
         FontMgr, FontStyle,
+        font_mgr::{Request, request},
     };
 
     #[test]

@@ -7,17 +7,23 @@ mod renderer;
 
 #[cfg(target_os = "android")]
 fn main() {
-    println!("This example is not supported on Android (https://github.com/rust-windowing/winit/issues/948).")
+    println!(
+        "This example is not supported on Android (https://github.com/rust-windowing/winit/issues/948)."
+    )
 }
 
 #[cfg(target_os = "emscripten")]
 fn main() {
-    println!("This example is not supported on Emscripten (https://github.com/rust-windowing/glutin/issues/1349)")
+    println!(
+        "This example is not supported on Emscripten (https://github.com/rust-windowing/glutin/issues/1349)"
+    )
 }
 
 #[cfg(target_os = "ios")]
 fn main() {
-    println!("This example is not supported on iOS (https://github.com/rust-windowing/glutin/issues/1448)")
+    println!(
+        "This example is not supported on iOS (https://github.com/rust-windowing/glutin/issues/1448)"
+    )
 }
 
 #[cfg(all(
@@ -63,8 +69,8 @@ fn main() {
     };
 
     use skia_safe::{
-        gpu::{self, backend_render_targets, gl::FramebufferInfo, SurfaceOrigin},
         Color, ColorType, Surface,
+        gpu::{self, SurfaceOrigin, backend_render_targets, gl::FramebufferInfo},
     };
 
     let el = EventLoop::new().expect("Failed to create event loop");

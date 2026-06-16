@@ -2,7 +2,7 @@ use std::fmt;
 
 use skia_bindings::{self as sb, SkFlattenable, SkMaskFilter, SkRefCntBase};
 
-use crate::{prelude::*, scalar, BlurStyle, NativeFlattenable};
+use crate::{BlurStyle, NativeFlattenable, prelude::*, scalar};
 
 /// MaskFilter is the base class for object that perform transformations on the mask before drawing
 /// it. An example subclass is Blur.

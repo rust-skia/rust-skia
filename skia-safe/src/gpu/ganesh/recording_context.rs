@@ -1,11 +1,10 @@
 use std::fmt;
 
 use crate::{
-    cpu,
+    ColorType, TextureCompressionType, cpu,
     gpu::{BackendAPI, BackendFormat, DirectContext, Renderable},
     prelude::*,
     recorder::RecorderRef,
-    ColorType, TextureCompressionType,
 };
 use skia_bindings::{self as sb, GrRecordingContext, SkRefCntBase};
 

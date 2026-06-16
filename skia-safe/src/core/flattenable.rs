@@ -1,4 +1,4 @@
-use crate::{prelude::*, Data};
+use crate::{Data, prelude::*};
 use skia_bindings::{self as sb, SkFlattenable};
 use std::ffi::CStr;
 

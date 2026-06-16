@@ -1,4 +1,4 @@
-use crate::{interop, prelude::*, scalar, Matrix, Rect, Vector};
+use crate::{Matrix, Rect, Vector, interop, prelude::*, scalar};
 use skia_bindings::{self as sb, SkRRect};
 use std::{fmt, mem, ptr};
 

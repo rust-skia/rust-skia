@@ -1,4 +1,4 @@
-use crate::{prelude::*, BlendMode, NativeFlattenable};
+use crate::{BlendMode, NativeFlattenable, prelude::*};
 use skia_bindings::{self as sb, SkBlender, SkFlattenable, SkRefCntBase};
 use std::fmt;
 

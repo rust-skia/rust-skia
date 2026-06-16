@@ -1,5 +1,5 @@
 use super::image_info;
-use crate::{prelude::*, EncodedOrigin, ISize, Matrix};
+use crate::{EncodedOrigin, ISize, Matrix, prelude::*};
 use skia_bindings::{self as sb, SkYUVAInfo, SkYUVAInfo_Subsampling};
 use std::{fmt, ptr};
 

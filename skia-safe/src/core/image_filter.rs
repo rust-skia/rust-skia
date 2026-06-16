@@ -1,4 +1,4 @@
-use crate::{prelude::*, ColorFilter, IRect, Matrix, NativeFlattenable, Rect};
+use crate::{ColorFilter, IRect, Matrix, NativeFlattenable, Rect, prelude::*};
 use skia_bindings::{self as sb, SkColorFilter, SkFlattenable, SkImageFilter, SkRefCntBase};
 use std::{fmt, ptr};
 

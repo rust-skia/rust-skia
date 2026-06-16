@@ -1,4 +1,4 @@
-use crate::{prelude::*, Color, Point, Rect};
+use crate::{Color, Point, Rect, prelude::*};
 use sb::SkNVRefCnt;
 use skia_bindings::{self as sb, SkPoint, SkVertices, SkVertices_Builder};
 use std::{fmt, ptr, slice};

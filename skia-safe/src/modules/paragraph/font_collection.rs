@@ -1,8 +1,8 @@
 use crate::{
+    FontMgr, FontStyle, Typeface, Unichar,
     interop::{self, FromStrs, VecSink},
     prelude::*,
     textlayout::ParagraphCache,
-    FontMgr, FontStyle, Typeface, Unichar,
 };
 use skia_bindings::{self as sb, skia_textlayout_FontCollection};
 use std::{ffi, fmt, ptr};

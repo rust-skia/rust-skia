@@ -1,6 +1,6 @@
 use skia_bindings::{self as sb, C_SkTiledImageUtils_DrawImageRect};
 
-use crate::{canvas, prelude::*, scalar, Canvas, Image, Paint, Point, Rect, SamplingOptions};
+use crate::{Canvas, Image, Paint, Point, Rect, SamplingOptions, canvas, prelude::*, scalar};
 
 pub fn draw_image_rect(
     canvas: &Canvas,

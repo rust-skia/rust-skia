@@ -1,7 +1,7 @@
 use crate::{
+    FontMgr, FontStyleSet, Typeface,
     interop::{self, AsStr},
     prelude::*,
-    FontMgr, FontStyleSet, Typeface,
 };
 use skia_bindings as sb;
 use std::{
@@ -135,9 +135,9 @@ impl TypefaceFontProvider {
 mod tests {
     use super::{TypefaceFontProvider, TypefaceFontStyleSet};
     use crate::{
+        FontMgr, FontStyle,
         prelude::{NativeAccess, NativeRefCounted, NativeRefCountedBase},
         textlayout::FontCollection,
-        FontMgr, FontStyle,
     };
 
     #[test]

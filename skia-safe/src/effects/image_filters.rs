@@ -3,9 +3,9 @@ use std::ptr;
 use skia_bindings::{self as sb, SkImageFilter, SkRect};
 
 use crate::{
-    prelude::*, scalar, Blender, Color, Color4f, ColorChannel, ColorFilter, ColorSpace,
-    CubicResampler, IPoint, IRect, ISize, Image, ImageFilter, Matrix, Picture, Point3, Rect,
-    SamplingOptions, Shader, TileMode, Vector,
+    Blender, Color, Color4f, ColorChannel, ColorFilter, ColorSpace, CubicResampler, IPoint, IRect,
+    ISize, Image, ImageFilter, Matrix, Picture, Point3, Rect, SamplingOptions, Shader, TileMode,
+    Vector, prelude::*, scalar,
 };
 
 /// This is just a convenience type to allow passing [`IRect`]s, [`Rect`]s, and optional references

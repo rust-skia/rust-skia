@@ -1,7 +1,7 @@
 use crate::{
-    gpu, prelude::*, AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint,
-    IRect, ISize, ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, Recorder,
-    SamplingOptions, Shader, SurfaceProps, TextureCompressionType, TileMode,
+    AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
+    ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, Recorder,
+    SamplingOptions, Shader, SurfaceProps, TextureCompressionType, TileMode, gpu, prelude::*,
 };
 use skia_bindings::{self as sb, SkImage, SkRefCntBase};
 use std::{fmt, ptr};
@@ -22,8 +22,9 @@ pub mod images {
     #[allow(unused)] // doc only
     use crate::ColorType;
     use crate::{
-        prelude::*, AlphaType, Bitmap, ColorSpace, Data, IPoint, IRect, ISize, Image, ImageFilter,
+        AlphaType, Bitmap, ColorSpace, Data, IPoint, IRect, ISize, Image, ImageFilter,
         ImageGenerator, ImageInfo, Matrix, Paint, Picture, SurfaceProps, TextureCompressionType,
+        prelude::*,
     };
 
     /// Creates a CPU-backed [`Image`] from `bitmap`, sharing or copying `bitmap` pixels. If the bitmap
@@ -1198,8 +1199,10 @@ impl Image {
     ) -> bool {
         let src = src.into();
 
-        self.native()
-            .readPixels1(ptr::null_mut(), dst.native(), src.x, src.y, caching_hint)
+        unsafe {
+            self.native()
+                .readPixels1(ptr::null_mut(), dst.native(), src.x, src.y, caching_hint)
+        }
     }
 
     // TODO:

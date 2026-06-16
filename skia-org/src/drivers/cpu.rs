@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use skia_safe::{surfaces, Canvas};
+use skia_safe::{Canvas, surfaces};
 
-use crate::{artifact, drivers::DrawingDriver, Driver};
+use crate::{Driver, artifact, drivers::DrawingDriver};
 
 pub struct Cpu;
 

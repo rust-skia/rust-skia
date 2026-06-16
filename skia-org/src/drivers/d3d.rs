@@ -1,21 +1,21 @@
 use std::path::Path;
 
 use skia_safe::{
-    gpu::{self, d3d, Budgeted, Protected},
     Canvas, ImageInfo,
+    gpu::{self, Budgeted, Protected, d3d},
 };
 
-use crate::{artifact, drivers::DrawingDriver, Driver};
+use crate::{Driver, artifact, drivers::DrawingDriver};
 
 use windows::Win32::Graphics::{
     Direct3D::D3D_FEATURE_LEVEL_11_0,
     Direct3D12::{
-        D3D12CreateDevice, ID3D12CommandQueue, ID3D12Device, D3D12_COMMAND_LIST_TYPE_DIRECT,
-        D3D12_COMMAND_QUEUE_DESC, D3D12_COMMAND_QUEUE_FLAG_NONE,
+        D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_DESC, D3D12_COMMAND_QUEUE_FLAG_NONE,
+        D3D12CreateDevice, ID3D12CommandQueue, ID3D12Device,
     },
     Dxgi::{
-        CreateDXGIFactory1, IDXGIAdapter1, IDXGIFactory4, DXGI_ADAPTER_FLAG,
-        DXGI_ADAPTER_FLAG_NONE, DXGI_ADAPTER_FLAG_SOFTWARE,
+        CreateDXGIFactory1, DXGI_ADAPTER_FLAG, DXGI_ADAPTER_FLAG_NONE, DXGI_ADAPTER_FLAG_SOFTWARE,
+        IDXGIAdapter1, IDXGIFactory4,
     },
 };
 

@@ -1,6 +1,6 @@
 #![allow(deprecated)]
 
-use crate::{prelude::*, scalar, MaskFilter};
+use crate::{MaskFilter, prelude::*, scalar};
 use skia_bindings::{self as sb};
 
 #[deprecated(

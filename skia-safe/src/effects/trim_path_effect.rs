@@ -1,4 +1,4 @@
-use crate::{scalar, PathEffect};
+use crate::{PathEffect, scalar};
 use skia_bindings as sb;
 
 pub use skia_bindings::SkTrimPathEffect_Mode as Mode;

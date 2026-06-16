@@ -1,5 +1,5 @@
 use super::{DebugAttributes, Length, NodeSubtype, PreserveAspectRatio};
-use crate::{prelude::*, Rect, Size};
+use crate::{Rect, Size, prelude::*};
 use skia_bindings as sb;
 
 pub type SvgKind = sb::SkSVGSVG_Type;

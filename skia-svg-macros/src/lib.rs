@@ -5,10 +5,10 @@ use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use std::fmt::Write;
 use syn::{
-    braced, bracketed, parenthesized,
+    Expr, Ident, LitStr, Token, Type, braced, bracketed, parenthesized,
     parse::{Parse, ParseStream, Parser},
     punctuated::Punctuated,
-    token, Expr, Ident, LitStr, Token, Type,
+    token,
 };
 
 struct Property {

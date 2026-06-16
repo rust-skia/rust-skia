@@ -1,7 +1,7 @@
 pub mod cpu {
     use std::fmt;
 
-    use crate::{prelude::*, recorder, Recorder as _};
+    use crate::{Recorder as _, prelude::*, recorder};
     use skia_bindings::{self as sb, skcpu_Recorder};
 
     #[repr(transparent)]

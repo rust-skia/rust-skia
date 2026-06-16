@@ -1,4 +1,4 @@
-use crate::{prelude::*, Canvas, Drawable, Picture, Rect};
+use crate::{Canvas, Drawable, Picture, Rect, prelude::*};
 use skia_bindings::{self as sb, SkPictureRecorder, SkRect};
 use std::{fmt, ptr};
 

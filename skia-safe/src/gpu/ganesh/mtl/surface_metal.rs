@@ -1,4 +1,4 @@
-use crate::{gpu, prelude::*, Surface, SurfaceProps};
+use crate::{Surface, SurfaceProps, gpu, prelude::*};
 use skia_bindings as sb;
 
 /// Creates [`Surface`] from CAMetalLayer.
@@ -32,16 +32,18 @@ pub unsafe fn wrap_ca_metal_layer(
     surface_props: Option<&SurfaceProps>,
     drawable: *mut gpu::mtl::Handle,
 ) -> Option<Surface> {
-    Surface::from_ptr(sb::C_SkSurfaces_WrapCAMetalLayer(
-        context.native_mut(),
-        layer,
-        origin,
-        sample_cnt.into().unwrap_or(0).try_into().unwrap(),
-        color_type.into_native(),
-        color_space.into().into_ptr_or_null(),
-        surface_props.native_ptr_or_null(),
-        drawable,
-    ))
+    Surface::from_ptr(unsafe {
+        sb::C_SkSurfaces_WrapCAMetalLayer(
+            context.native_mut(),
+            layer,
+            origin,
+            sample_cnt.into().unwrap_or(0).try_into().unwrap(),
+            color_type.into_native(),
+            color_space.into().into_ptr_or_null(),
+            surface_props.native_ptr_or_null(),
+            drawable,
+        )
+    })
 }
 
 /// Creates [`Surface`] from MTKView.
@@ -72,13 +74,15 @@ pub unsafe fn wrap_mtk_view(
     color_space: impl Into<Option<crate::ColorSpace>>,
     surface_props: Option<&SurfaceProps>,
 ) -> Option<Surface> {
-    Surface::from_ptr(sb::C_SkSurfaces_WrapMTKView(
-        context.native_mut(),
-        mtk_view,
-        origin,
-        sample_count.into().unwrap_or(0).try_into().unwrap(),
-        color_type.into_native(),
-        color_space.into().into_ptr_or_null(),
-        surface_props.native_ptr_or_null(),
-    ))
+    Surface::from_ptr(unsafe {
+        sb::C_SkSurfaces_WrapMTKView(
+            context.native_mut(),
+            mtk_view,
+            origin,
+            sample_count.into().unwrap_or(0).try_into().unwrap(),
+            color_type.into_native(),
+            color_space.into().into_ptr_or_null(),
+            surface_props.native_ptr_or_null(),
+        )
+    })
 }

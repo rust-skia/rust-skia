@@ -9,7 +9,7 @@
 
 use std::{fs::File, io::Write};
 
-use skia_safe::{surfaces, Color, EncodedImageFormat};
+use skia_safe::{Color, EncodedImageFormat, surfaces};
 
 mod renderer;
 
@@ -73,7 +73,9 @@ fn main() {
 
     if !single_frame {
         eprintln!("Rendered {frame} frames.          ");
-        eprintln!("Encode as video with:\nffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -crf 15 -b:v 0 -auto-alt-ref 0 -pass 1 -f webm /dev/null && ffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -pix_fmt yuv444p -crf 15 -b:v 0 -auto-alt-ref 0 -pass 2 rust-skia-icon.webm");
+        eprintln!(
+            "Encode as video with:\nffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -crf 15 -b:v 0 -auto-alt-ref 0 -pass 1 -f webm /dev/null && ffmpeg -framerate {fps} -i rust-skia-icon-%04d.png -vcodec libvpx-vp9 -pix_fmt yuv444p -crf 15 -b:v 0 -auto-alt-ref 0 -pass 2 rust-skia-icon.webm"
+        );
         eprintln!("Play in a loop with:\nmpv --loop rust-skia-icon.webm");
     }
 }
