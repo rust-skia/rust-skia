@@ -56,7 +56,10 @@ impl BackendContext<'_> {
         )
     }
 
-    #[deprecated(since = "0.0.0", note = "use BackendContext::new_builder(...).build()")]
+    #[deprecated(
+        since = "0.98.0",
+        note = "use BackendContext::new_builder(...).build()"
+    )]
     #[allow(deprecated)]
     /// # Safety
     /// `instance`, `physical_device`, `device`, and `queue` must outlive the `BackendContext`
@@ -82,7 +85,7 @@ impl BackendContext<'_> {
     }
 
     #[deprecated(
-        since = "0.0.0",
+        since = "0.98.0",
         note = "use BackendContext::new_builder(...).with_extensions(...).build()"
     )]
     /// # Safety
