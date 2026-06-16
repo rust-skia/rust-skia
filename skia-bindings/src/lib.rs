@@ -8,6 +8,7 @@
 // GrVkBackendContext contains u128 fields on macOS
 #![allow(improper_ctypes)]
 #![allow(dead_code)]
+#![allow(unsafe_op_in_unsafe_fn)]
 
 // The following type aliases are needed because of name mangling changes introduced with clang 18,
 // (this works together with `ITEM_RENAMES` in `skia_bindgen.rs`)
