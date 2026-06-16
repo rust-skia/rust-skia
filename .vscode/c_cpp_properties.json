@@ -14,6 +14,8 @@
                 "SK_SHAPER_CORETEXT_AVAILABLE",
                 "SK_CODEC_DECODES_WEBP"
             ],
+            "compilerPath": "/usr/bin/clang++",
+            "intelliSenseMode": "macos-clang-arm64",
             "macFrameworkPath": [],
             "cppStandard": "c++17"
         }

@@ -71,6 +71,7 @@
 #include "include/core/SkRRect.h"
 #include "include/core/SkRSXform.h"
 #include "include/core/SkStream.h"
+#include "include/core/SkStrikeRef.h"
 #include "include/core/SkStrokeRec.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkSwizzle.h"
@@ -1598,6 +1599,10 @@ extern "C" bool C_SkRegion_quickContains(const SkRegion* self, const SkIRect* r)
     return self->quickContains(*r);
 }
 
+extern "C" bool C_SkRegion_setRects(SkRegion* self, const SkIRect* rects, int count) {
+    return self->setRects(SkSpan(rects, count));
+}
+
 extern "C" void C_SkRegion_getBoundaryPath(const SkRegion* self, SkPath* uninitialized) {
     new (uninitialized) SkPath(self->getBoundaryPath());
 }
@@ -1889,6 +1894,49 @@ extern "C" void C_SkFont_getIntercepts(
     VecSink<SkScalar>* vs) {
     auto r = self->getIntercepts(SkSpan(glyphs, count), SkSpan(pos, count), top, bottom, paint);
     vs->set(r);
+}
+
+extern "C" void C_SkFont_makeStrikeRef(const SkFont* self, SkStrikeRef* uninitialized) {
+    new (uninitialized) SkStrikeRef(self->makeStrikeRef());
+}
+
+extern "C" void C_SkStrikeRef_CopyConstruct(SkStrikeRef* uninitialized, const SkStrikeRef* self) {
+    new (uninitialized) SkStrikeRef(*self);
+}
+
+extern "C" void C_SkStrikeRef_destruct(SkStrikeRef* self) {
+    self->~SkStrikeRef();
+}
+
+extern "C" bool C_SkStrikeRef_isValid(const SkStrikeRef* self) {
+    return static_cast<bool>(*self);
+}
+
+extern "C" void C_SkStrikeRef_getWidths(
+    const SkStrikeRef* self,
+    const SkGlyphID* glyphs,
+    size_t glyphCount,
+    SkScalar* widths,
+    size_t widthCount) {
+    self->getWidths(SkSpan(glyphs, glyphCount), SkSpan(widths, widthCount));
+}
+
+extern "C" SkScalar C_SkStrikeRef_getWidth(const SkStrikeRef* self, SkGlyphID glyph) {
+    return self->getWidth(glyph);
+}
+
+extern "C" void C_SkStrikeRef_getWidthsBounds(
+    const SkStrikeRef* self,
+    const SkGlyphID* glyphs,
+    size_t glyphCount,
+    SkScalar* widths,
+    size_t widthCount,
+    SkRect* bounds,
+    size_t boundsCount) {
+    self->getWidthsBounds(
+        SkSpan(glyphs, glyphCount),
+        SkSpan(widths, widthCount),
+        SkSpan(bounds, boundsCount));
 }
 
 extern "C" bool C_SkFont_getPath(const SkFont* self, SkGlyphID glyphID, SkPath* pathR) {

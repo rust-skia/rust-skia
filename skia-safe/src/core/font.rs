@@ -4,7 +4,7 @@ use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
 
 use crate::{
     interop::VecSink, prelude::*, scalar, EncodedText, FontHinting, FontMetrics, GlyphId, Paint,
-    Path, Point, Rect, Typeface, Unichar,
+    Path, Point, Rect, StrikeRef, Typeface, Unichar,
 };
 
 pub type Edging = skia_bindings::SkFont_Edging;
@@ -303,6 +303,16 @@ impl Font {
 
     pub fn get_widths(&self, glyphs: &[GlyphId], widths: &mut [scalar]) {
         self.get_widths_bounds(glyphs, Some(widths), None, None)
+    }
+
+    pub fn make_strike_ref(&self) -> StrikeRef {
+        let strike_ref =
+            StrikeRef::construct(|s| unsafe { sb::C_SkFont_makeStrikeRef(self.native(), s) });
+        assert!(
+            unsafe { sb::C_SkStrikeRef_isValid(strike_ref.native()) },
+            "SkFont::makeStrikeRef() returned an invalid SkStrikeRef"
+        );
+        strike_ref
     }
 
     pub fn get_widths_bounds(
