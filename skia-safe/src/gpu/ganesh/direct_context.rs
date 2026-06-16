@@ -112,7 +112,7 @@ impl DirectContext {
         backend_context: &crate::gpu::d3d::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        crate::gpu::direct_contexts::make_d3d(backend_context, options)
+        unsafe { crate::gpu::direct_contexts::make_d3d(backend_context, options) }
     }
 
     pub fn reset(&mut self, backend_state: Option<u32>) -> &mut Self {
