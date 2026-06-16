@@ -2,7 +2,8 @@ use std::{ops::Deref, ptr};
 
 use skia_bindings as sb;
 
-mod vulkan_backend_context;
+pub mod vulkan_backend_context;
+mod vulkan_backend_context_builder;
 mod vulkan_mutable_texture_state;
 mod vulkan_types;
 
