@@ -270,11 +270,7 @@ impl Typeface {
     /// - `tag`: table tag.
     pub fn get_table_size(&self, tag: FontTableTag) -> Option<usize> {
         let size = unsafe { self.native().getTableSize(tag) };
-        if size != 0 {
-            Some(size)
-        } else {
-            None
-        }
+        if size != 0 { Some(size) } else { None }
     }
 
     /// Copies table `tag` data into `data`.
@@ -304,11 +300,7 @@ impl Typeface {
     /// Returns `None` on error.
     pub fn units_per_em(&self) -> Option<i32> {
         let units = unsafe { self.native().getUnitsPerEm() };
-        if units != 0 {
-            Some(units)
-        } else {
-            None
-        }
+        if units != 0 { Some(units) } else { None }
     }
 
     /// Returns horizontal kerning adjustments for `glyphs`.
@@ -335,6 +327,10 @@ impl Typeface {
     }
 
     /// Returns an iterator over all family names specified by the font.
+    ///
+    /// The iterator may borrow backend-owned data. In particular, Fontations-backed
+    /// typefaces expose localized strings through data tied to the typeface, so this
+    /// iterator must not outlive `self`.
     pub fn new_family_name_iterator(&self) -> impl Iterator<Item = LocalizedString> {
         LocalizedStringsIter::from_ptr(unsafe { self.native().createFamilyNameIterator() }).unwrap()
     }
@@ -462,12 +458,10 @@ mod tests {
     }
 
     #[test]
-    fn family_name_iterator_owns_the_strings_and_returns_at_least_one_name_for_the_default_typeface(
-    ) {
+    fn family_name_iterator_returns_at_least_one_name_for_the_default_typeface() {
         let fm = FontMgr::default();
         let tf = fm.legacy_make_typeface(None, FontStyle::normal()).unwrap();
         let family_names = tf.new_family_name_iterator();
-        drop(tf);
 
         let mut any = false;
         for name in family_names {

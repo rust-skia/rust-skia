@@ -1,6 +1,6 @@
 use std::{fmt, iter, marker::PhantomData, mem, ptr};
 
-use crate::{prelude::*, Contains, IPoint, IRect, IVector, Path, PathBuilder, QuickReject};
+use crate::{Contains, IPoint, IRect, IVector, Path, PathBuilder, QuickReject, prelude::*};
 use skia_bindings::{
     self as sb, SkRegion, SkRegion_Cliperator, SkRegion_Iterator, SkRegion_RunHead,
     SkRegion_Spanerator,

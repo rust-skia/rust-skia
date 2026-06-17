@@ -4,7 +4,7 @@ mod radial;
 pub use self::{linear::Linear as LinearGradient, radial::Radial as RadialGradient};
 
 use super::{BoundingBoxUnits, DebugAttributes, Iri, NodeSubtype, SpreadMethod};
-use crate::{prelude::*, Matrix};
+use crate::{Matrix, prelude::*};
 use skia_bindings as sb;
 
 pub type Gradient = RCHandle<sb::SkSVGGradient>;

@@ -1,11 +1,10 @@
 use super::{FontArguments, FontFamilies, TextBaseline, TextShadow};
 use crate::{
-    font,
+    Color, FontHinting, FontMetrics, FontStyle, Paint, Typeface, font,
     interop::{self, AsStr, FromStrs, SetStr},
     prelude::*,
     scalar,
-    textlayout::{RangeExtensions, EMPTY_INDEX, EMPTY_RANGE},
-    Color, FontHinting, FontMetrics, FontStyle, Paint, Typeface,
+    textlayout::{EMPTY_INDEX, EMPTY_RANGE, RangeExtensions},
 };
 use skia_bindings as sb;
 use std::{fmt, ops::Range};
@@ -500,11 +499,7 @@ impl TextStyle {
 
     pub fn height(&self) -> scalar {
         let n = self.native();
-        if n.fHeightOverride {
-            n.fHeight
-        } else {
-            0.0
-        }
+        if n.fHeightOverride { n.fHeight } else { 0.0 }
     }
 
     pub fn set_height_override(&mut self, height_override: bool) -> &mut Self {

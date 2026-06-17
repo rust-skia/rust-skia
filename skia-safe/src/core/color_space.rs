@@ -1,7 +1,7 @@
 use super::Data;
 use crate::prelude::*;
 use sb::SkNVRefCnt;
-use skia_bindings::{self as sb, skcms_TransferFunction, SkColorSpace, SkColorSpacePrimaries};
+use skia_bindings::{self as sb, SkColorSpace, SkColorSpacePrimaries, skcms_TransferFunction};
 use std::fmt;
 
 #[derive(Clone, PartialEq, Debug)]

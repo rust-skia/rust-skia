@@ -31,13 +31,13 @@ pub use self::{
     mask::Mask,
     node::*,
     node_hierarchy::*,
-    r#use::Use,
     shape::*,
     stop::Stop,
     svg_::*,
     text::{TSpan, Text, TextLiteral, TextPath},
     transformable_node::TransformableNode,
     types::*,
+    r#use::Use,
 };
 
 #[macro_export]
@@ -56,11 +56,11 @@ mod tests {
 
     use super::Dom;
     use crate::{
+        FontMgr, Surface,
         prelude::{NativeAccess, NativeRefCounted},
         resources::NativeResourceProvider,
         surfaces,
         svg::{Length, LengthUnit},
-        FontMgr, Surface,
     };
 
     #[test]

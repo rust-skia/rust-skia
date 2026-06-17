@@ -4,7 +4,7 @@ use skia_bindings::{
     self as sb, SkPath, SkPathContourIter, SkPathContourIter_Rec, SkPathIter, SkPathIter_Rec,
 };
 
-use crate::{prelude::*, PathVerb, Point};
+use crate::{PathVerb, Point, prelude::*};
 
 #[repr(transparent)]
 pub struct PathIter<'a>(SkPathIter, PhantomData<&'a Handle<SkPath>>);

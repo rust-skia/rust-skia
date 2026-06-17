@@ -9,7 +9,7 @@ pub mod skottie;
 #[cfg(feature = "svg")]
 pub mod svg;
 #[cfg(feature = "textlayout")]
-pub use shaper::{icu, Shaper};
+pub use shaper::{Shaper, icu};
 
 // Export everything below paragraph under textlayout
 #[cfg(feature = "textlayout")]

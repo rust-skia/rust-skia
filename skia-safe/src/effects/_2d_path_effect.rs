@@ -1,4 +1,4 @@
-use crate::{scalar, Matrix, Path, PathEffect};
+use crate::{Matrix, Path, PathEffect, scalar};
 
 impl PathEffect {
     pub fn line_2d(width: scalar, matrix: &Matrix) -> Option<PathEffect> {
@@ -11,7 +11,7 @@ impl PathEffect {
 }
 
 pub mod line_2d_path_effect {
-    use crate::{prelude::*, scalar, Matrix, PathEffect};
+    use crate::{Matrix, PathEffect, prelude::*, scalar};
     use skia_bindings as sb;
 
     pub fn new(width: scalar, matrix: &Matrix) -> Option<PathEffect> {
@@ -20,7 +20,7 @@ pub mod line_2d_path_effect {
 }
 
 pub mod path_2d_path_effect {
-    use crate::{prelude::*, Matrix, Path, PathEffect};
+    use crate::{Matrix, Path, PathEffect, prelude::*};
     use skia_bindings as sb;
 
     pub fn new(matrix: &Matrix, path: &Path) -> PathEffect {

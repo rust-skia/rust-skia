@@ -1,6 +1,6 @@
 use skia_bindings as sb;
 
-use crate::{gpu, prelude::*, surface::BackendHandleAccess, ImageInfo, Surface, SurfaceProps};
+use crate::{ImageInfo, Surface, SurfaceProps, gpu, prelude::*, surface::BackendHandleAccess};
 
 /// Returns [`Surface`] on GPU indicated by context. Allocates memory for pixels, based on the
 /// width, height, and [`crate::ColorType`] in [`ImageInfo`].  budgeted selects whether allocation

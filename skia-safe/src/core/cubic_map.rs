@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{scalar, Point, Scalar};
+use crate::{Point, Scalar, scalar};
 use skia_bindings as sb;
 use skia_bindings::SkCubicMap;
 

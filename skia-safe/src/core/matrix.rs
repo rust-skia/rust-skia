@@ -4,7 +4,7 @@ use std::{
 };
 
 use super::scalar_;
-use crate::{prelude::*, scalar, Point, Point3, RSXform, Rect, Scalar, Size, Vector};
+use crate::{Point, Point3, RSXform, Rect, Scalar, Size, Vector, prelude::*, scalar};
 use skia_bindings::{self as sb, SkMatrix};
 
 #[repr(C)]

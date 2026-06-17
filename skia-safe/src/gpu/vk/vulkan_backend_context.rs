@@ -71,17 +71,19 @@ impl BackendContext<'_> {
         (queue, queue_index): (Queue, usize),
         get_proc: &dyn GetProc,
     ) -> BackendContext {
-        Self::new_internal(
-            instance,
-            physical_device,
-            device,
-            (queue, queue_index),
-            get_proc,
-            None,
-            gpu::Protected::No,
-            &[],
-            &[],
-        )
+        unsafe {
+            Self::new_internal(
+                instance,
+                physical_device,
+                device,
+                (queue, queue_index),
+                get_proc,
+                None,
+                gpu::Protected::No,
+                &[],
+                &[],
+            )
+        }
     }
 
     #[deprecated(
@@ -100,17 +102,19 @@ impl BackendContext<'_> {
         instance_extensions: &[&str],
         device_extensions: &[&str],
     ) -> BackendContext<'a> {
-        Self::new_internal(
-            instance,
-            physical_device,
-            device,
-            (queue, queue_index),
-            get_proc,
-            None,
-            gpu::Protected::No,
-            instance_extensions,
-            device_extensions,
-        )
+        unsafe {
+            Self::new_internal(
+                instance,
+                physical_device,
+                device,
+                (queue, queue_index),
+                get_proc,
+                None,
+                gpu::Protected::No,
+                instance_extensions,
+                device_extensions,
+            )
+        }
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -140,21 +144,23 @@ impl BackendContext<'_> {
         let device_extensions: Vec<*const c_char> =
             device_extensions.iter().map(|cs| cs.as_ptr()).collect();
 
-        let resolver = Self::begin_resolving_proc(get_proc);
-        let native = sb::C_VulkanBackendContext_new(
-            instance as _,
-            physical_device as _,
-            device as _,
-            queue as _,
-            queue_index.try_into().unwrap(),
-            protected_context,
-            max_api_version.map(|version| *version).unwrap_or(0),
-            Some(global_get_proc),
-            instance_extensions.as_ptr(),
-            instance_extensions.len(),
-            device_extensions.as_ptr(),
-            device_extensions.len(),
-        );
+        let resolver = unsafe { Self::begin_resolving_proc(get_proc) };
+        let native = unsafe {
+            sb::C_VulkanBackendContext_new(
+                instance as _,
+                physical_device as _,
+                device as _,
+                queue as _,
+                queue_index.try_into().unwrap(),
+                protected_context,
+                max_api_version.map(|version| *version).unwrap_or(0),
+                Some(global_get_proc),
+                instance_extensions.as_ptr(),
+                instance_extensions.len(),
+                device_extensions.as_ptr(),
+                device_extensions.len(),
+            )
+        };
         drop(resolver);
         BackendContext {
             native: ptr::NonNull::new(native).unwrap(),
@@ -188,7 +194,7 @@ impl BackendContext<'_> {
     }
 
     pub(crate) unsafe fn begin_resolving(&self) -> impl Drop {
-        Self::begin_resolving_proc(self.get_proc)
+        unsafe { Self::begin_resolving_proc(self.get_proc) }
     }
 
     // The idea here is to set up a thread local variable with the GetProc function trait
@@ -200,9 +206,8 @@ impl BackendContext<'_> {
     //       by someone who understands Rust better.
     unsafe fn begin_resolving_proc(get_proc_trait_object: &dyn GetProc) -> impl Drop {
         THREAD_LOCAL_GET_PROC.with(|get_proc| {
-            *get_proc.borrow_mut() = Some(mem::transmute::<&dyn GetProc, TraitObject>(
-                get_proc_trait_object,
-            ))
+            *get_proc.borrow_mut() =
+                Some(unsafe { mem::transmute::<&dyn GetProc, TraitObject>(get_proc_trait_object) })
         });
 
         EndResolving {}
@@ -240,7 +245,7 @@ unsafe extern "C" fn global_get_proc(
     THREAD_LOCAL_GET_PROC.with(|get_proc| {
         match *get_proc.borrow() {
             Some(get_proc) => {
-                let get_proc_trait_object: &dyn GetProc = mem::transmute(get_proc);
+                let get_proc_trait_object: &dyn GetProc = unsafe { mem::transmute(get_proc) };
                 if !device.is_null() {
                     get_proc_trait_object(GetProcOf::Device(device, name))
                 } else {

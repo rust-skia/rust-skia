@@ -1,7 +1,7 @@
 use crate::{
+    Point,
     prelude::*,
     svg::{DebugAttributes, NodeSubtype},
-    Point,
 };
 use skia_bindings as sb;
 

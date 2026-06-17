@@ -6,7 +6,7 @@ use std::{
 use super::platform;
 use crate::build_support::{
     cargo,
-    features::{self, feature, Features},
+    features::{self, Features, feature},
 };
 
 pub const SKIA_OUTPUT_DIR: &str = "skia";

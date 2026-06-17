@@ -1,9 +1,9 @@
 use crate::DrawingDriver;
 use skia_safe::{
+    Canvas, FontMgr, Paint, Point,
     textlayout::{
         FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle, TypefaceFontProvider,
     },
-    Canvas, FontMgr, Paint, Point,
 };
 use std::path;
 

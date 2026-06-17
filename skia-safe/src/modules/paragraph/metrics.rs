@@ -1,4 +1,4 @@
-use crate::{paragraph::TextStyle, prelude::*, FontMetrics};
+use crate::{FontMetrics, paragraph::TextStyle, prelude::*};
 use skia_bindings::{self as sb, skia_textlayout_LineMetrics, skia_textlayout_StyleMetrics};
 use std::{marker::PhantomData, ops::Range, ptr};
 

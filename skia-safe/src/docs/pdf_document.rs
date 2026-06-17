@@ -6,9 +6,10 @@ pub mod pdf {
     };
 
     use crate::{
+        Canvas, Document, MILESTONE,
         interop::{AsStr, RustWStream, SetStr},
         prelude::*,
-        scalar, Canvas, Document, MILESTONE,
+        scalar,
     };
 
     #[repr(transparent)]
@@ -496,8 +497,8 @@ mod tests {
     use std::ffi::CString;
 
     use crate::{
-        pdf::{self, Metadata, StructureElementNode},
         Color, Paint, Rect,
+        pdf::{self, Metadata, StructureElementNode},
     };
 
     #[test]

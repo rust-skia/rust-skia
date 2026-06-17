@@ -11,7 +11,7 @@ license = "MIT"
 
 version = "0.99.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
-edition = "2021"
+edition.workspace = true
 rust-version.workspace = true
 build = "build.rs"
 links = "skia"

@@ -1,7 +1,7 @@
 use skia_bindings as sb;
 
 use super::ScriptRunIterator;
-use crate::{prelude::*, Borrows, FontMgr, FourByteTag, Shaper};
+use crate::{Borrows, FontMgr, FourByteTag, Shaper, prelude::*};
 
 pub fn shaper_driven_wrapper(fallback_font_mgr: impl Into<Option<FontMgr>>) -> Option<Shaper> {
     #[cfg(feature = "embed-icudtl")]

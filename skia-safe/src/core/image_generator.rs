@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{prelude::*, yuva_pixmap_info, Data, ImageInfo, Recorder, YUVAPixmapInfo};
+use crate::{Data, ImageInfo, Recorder, YUVAPixmapInfo, prelude::*, yuva_pixmap_info};
 use skia_bindings::{self as sb, SkImageGenerator};
 
 pub type ImageGenerator = RefHandle<SkImageGenerator>;

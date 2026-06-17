@@ -1,4 +1,4 @@
-use crate::{prelude::*, ISize};
+use crate::{ISize, prelude::*};
 use skia_bindings::{self as sb, SkPixelRef, SkRefCntBase};
 use std::{fmt, os::raw::c_void};
 
@@ -38,7 +38,7 @@ impl PixelRef {
 
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn pixels(&self) -> *mut c_void {
-        sb::C_SkPixelRef_pixels(self.native())
+        unsafe { sb::C_SkPixelRef_pixels(self.native()) }
     }
 
     pub fn row_bytes(&self) -> usize {

@@ -3,14 +3,14 @@ use std::{fmt, ptr};
 use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
 
 use crate::{
-    gpu, prelude::*, Bitmap, Canvas, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point,
-    SamplingOptions, SurfaceProps,
+    Bitmap, Canvas, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point, SamplingOptions,
+    SurfaceProps, gpu, prelude::*,
 };
 
 pub mod surfaces {
     use skia_bindings::{self as sb};
 
-    use crate::{prelude::*, ISize, ImageInfo, Surface, SurfaceProps};
+    use crate::{ISize, ImageInfo, Surface, SurfaceProps, prelude::*};
 
     pub use sb::SkSurfaces_BackendSurfaceAccess as BackendSurfaceAccess;
     variant_name!(BackendSurfaceAccess::Present);
@@ -414,16 +414,18 @@ impl Surface {
         surface_props: Option<&SurfaceProps>,
         drawable: *mut gpu::mtl::Handle,
     ) -> Option<Self> {
-        gpu::surfaces::wrap_ca_metal_layer(
-            context,
-            layer,
-            origin,
-            sample_cnt,
-            color_type,
-            color_space,
-            surface_props,
-            drawable,
-        )
+        unsafe {
+            gpu::surfaces::wrap_ca_metal_layer(
+                context,
+                layer,
+                origin,
+                sample_cnt,
+                color_type,
+                color_space,
+                surface_props,
+                drawable,
+            )
+        }
     }
 
     /// Creates [`Surface`] from MTKView.
@@ -455,15 +457,17 @@ impl Surface {
         color_space: impl Into<Option<crate::ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
-        gpu::surfaces::wrap_mtk_view(
-            context,
-            mtk_view,
-            origin,
-            sample_count,
-            color_type,
-            color_space,
-            surface_props,
-        )
+        unsafe {
+            gpu::surfaces::wrap_mtk_view(
+                context,
+                mtk_view,
+                origin,
+                sample_count,
+                color_type,
+                color_space,
+                surface_props,
+            )
+        }
     }
 }
 

@@ -3,8 +3,8 @@ use std::{ffi, fmt, ptr};
 use skia_bindings::{self as sb, SkBitmap};
 
 use crate::{
-    prelude::*, AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, Image,
-    ImageInfo, Matrix, Paint, PixelRef, Pixmap, SamplingOptions, Shader, TileMode,
+    AlphaType, Color, Color4f, ColorSpace, ColorType, IPoint, IRect, ISize, Image, ImageInfo,
+    Matrix, Paint, PixelRef, Pixmap, SamplingOptions, Shader, TileMode, prelude::*,
 };
 
 /// [`Bitmap`] describes a two-dimensional raster pixel array. [`Bitmap`] is built on [`ImageInfo`],
@@ -448,8 +448,10 @@ impl Bitmap {
         pixels: *mut ffi::c_void,
         row_bytes: usize,
     ) -> bool {
-        self.native_mut()
-            .installPixels(info.native(), pixels, row_bytes, None, ptr::null_mut())
+        unsafe {
+            self.native_mut()
+                .installPixels(info.native(), pixels, row_bytes, None, ptr::null_mut())
+        }
     }
 
     // TODO: wrap installPixels with SkPixmap&
@@ -699,8 +701,10 @@ impl Bitmap {
         src_x: i32,
         src_y: i32,
     ) -> bool {
-        self.native()
-            .readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
+        unsafe {
+            self.native()
+                .readPixels(dst_info.native(), dst_pixels, dst_row_bytes, src_x, src_y)
+        }
     }
 
     // TODO: read_pixels(Pixmap)

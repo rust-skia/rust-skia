@@ -2,7 +2,7 @@ pub mod direct_contexts {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{d3d, ContextOptions, DirectContext},
+        gpu::{ContextOptions, DirectContext, d3d},
         prelude::*,
     };
 
@@ -13,9 +13,11 @@ pub mod direct_contexts {
         backend_context: &d3d::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<DirectContext> {
-        DirectContext::from_ptr(sb::C_GrDirectContexts_MakeD3D(
-            backend_context.native(),
-            options.into().native_ptr_or_null(),
-        ))
+        unsafe {
+            DirectContext::from_ptr(sb::C_GrDirectContexts_MakeD3D(
+                backend_context.native(),
+                options.into().native_ptr_or_null(),
+            ))
+        }
     }
 }

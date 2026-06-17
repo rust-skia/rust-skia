@@ -2,13 +2,13 @@ use std::path::Path;
 
 use foreign_types_shared::ForeignType;
 use metal::{CommandQueue, Device};
-use objc2::rc::{autoreleasepool, Retained};
+use objc2::rc::{Retained, autoreleasepool};
 use objc2_foundation::NSAutoreleasePool;
 
-use crate::{artifact, drivers::DrawingDriver, Driver};
+use crate::{Driver, artifact, drivers::DrawingDriver};
 use skia_safe::{
-    gpu::{self, mtl},
     Canvas, ImageInfo,
+    gpu::{self, mtl},
 };
 
 #[allow(dead_code)]

@@ -4,10 +4,11 @@ use skia_bindings as sb;
 
 use super::{FontFamilies, TextAlign, TextDirection, TextStyle};
 use crate::{
+    FontStyle,
     interop::{self, AsStr, FromStrs, SetStr},
     modules::paragraph::TextHeightBehavior,
     prelude::*,
-    scalar, FontStyle,
+    scalar,
 };
 
 pub type StrutStyle = Handle<sb::skia_textlayout_StrutStyle>;

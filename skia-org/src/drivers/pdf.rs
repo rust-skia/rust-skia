@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use skia_safe::{pdf, Canvas};
+use skia_safe::{Canvas, pdf};
 
-use crate::{artifact, drivers::DrawingDriver, Driver};
+use crate::{Driver, artifact, drivers::DrawingDriver};
 
 pub struct Pdf;
 

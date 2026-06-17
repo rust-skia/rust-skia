@@ -16,7 +16,7 @@
 
 use std::{ffi::CString, fmt, path::Path};
 
-use crate::{interop, prelude::*, Canvas, FontMgr, Rect, Size};
+use crate::{Canvas, FontMgr, Rect, Size, interop, prelude::*};
 use skia_bindings::{self as sb, SkNVRefCnt};
 
 use super::resources::NativeResourceProvider;

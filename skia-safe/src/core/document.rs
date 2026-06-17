@@ -2,7 +2,7 @@ use std::{fmt, ptr};
 
 use skia_bindings::{self as sb, SkDocument, SkRefCntBase};
 
-use crate::{interop::RustWStream, prelude::*, Canvas, Rect, Size};
+use crate::{Canvas, Rect, Size, interop::RustWStream, prelude::*};
 
 pub struct Document<'a, State = state::Open> {
     // Order matters here, first the document must be dropped _and then_ the stream.

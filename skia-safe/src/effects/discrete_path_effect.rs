@@ -1,4 +1,4 @@
-use crate::{scalar, PathEffect};
+use crate::{PathEffect, scalar};
 use skia_bindings as sb;
 
 impl PathEffect {

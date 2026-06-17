@@ -1,6 +1,6 @@
 use skia_bindings as sb;
 
-use crate::{scalar, Rect};
+use crate::{Rect, scalar};
 
 pub use sb::SkArc_Type as Type;
 variant_name!(Type::Wedge);

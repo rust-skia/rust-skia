@@ -1,4 +1,4 @@
-use crate::{prelude::*, AlphaType, ColorSpace, ColorType, IPoint, IRect, ISize};
+use crate::{AlphaType, ColorSpace, ColorType, IPoint, IRect, ISize, prelude::*};
 use skia_bindings::{self as sb, SkColorInfo, SkImageInfo};
 use std::{fmt, mem};
 

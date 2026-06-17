@@ -1,5 +1,5 @@
 use crate::PathBuilder;
-use crate::{paint, prelude::*, scalar, Paint, Path};
+use crate::{Paint, Path, paint, prelude::*, scalar};
 use skia_bindings::{self as sb, SkStrokeRec};
 use std::fmt;
 

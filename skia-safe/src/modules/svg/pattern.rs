@@ -1,5 +1,5 @@
 use super::{DebugAttributes, Iri, Length, NodeSubtype};
-use crate::{impl_default_make, prelude::*, Matrix};
+use crate::{Matrix, impl_default_make, prelude::*};
 use skia_bindings as sb;
 
 pub type Pattern = RCHandle<sb::SkSVGPattern>;

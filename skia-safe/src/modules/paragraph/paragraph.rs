@@ -7,9 +7,10 @@ use super::{
     TextIndex, TextRange,
 };
 use crate::{
+    Canvas, Font, GlyphId, Path, Point, Rect, Size, TextBlob, Unichar,
     interop::{Sink, VecSink},
     prelude::*,
-    scalar, Canvas, Font, GlyphId, Path, Point, Rect, Size, TextBlob, Unichar,
+    scalar,
 };
 
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
@@ -213,9 +214,9 @@ impl Paragraph {
             let info = if info.is_null() {
                 None
             } else {
-                Some(VisitorInfo::from_native_ref(&*info))
+                Some(VisitorInfo::from_native_ref(unsafe { &*info }))
             };
-            (*(ctx as *mut F))(index, info)
+            unsafe { (*(ctx as *mut F))(index, info) }
         }
     }
 
@@ -242,9 +243,9 @@ impl Paragraph {
             let info = if info.is_null() {
                 None
             } else {
-                Some(ExtendedVisitorInfo::from_native_ref(&*info))
+                Some(ExtendedVisitorInfo::from_native_ref(unsafe { &*info }))
             };
-            (*(ctx as *mut F))(index, info)
+            unsafe { (*(ctx as *mut F))(index, info) }
         }
     }
 
@@ -683,9 +684,8 @@ impl FontInfo {
 mod tests {
     use super::Paragraph;
     use crate::{
-        icu,
+        FontMgr, icu,
         textlayout::{FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle},
-        FontMgr,
     };
 
     #[test]

@@ -1,19 +1,19 @@
 use ash::vk::Handle;
 use std::{ptr, sync::Arc};
 use vulkano::{
+    Validated, VulkanError, VulkanObject,
     device::Queue,
     image::{Image, ImageUsage},
     swapchain::{
-        acquire_next_image, PresentMode, Surface, Swapchain, SwapchainAcquireFuture,
-        SwapchainCreateInfo, SwapchainPresentInfo,
+        PresentMode, Surface, Swapchain, SwapchainAcquireFuture, SwapchainCreateInfo,
+        SwapchainPresentInfo, acquire_next_image,
     },
     sync::{self, GpuFuture},
-    Validated, VulkanError, VulkanObject,
 };
 
 use skia_safe::{
-    gpu::{self, backend_render_targets, direct_contexts, surfaces, vk},
     ColorType,
+    gpu::{self, backend_render_targets, direct_contexts, surfaces, vk},
 };
 
 use winit::{dpi::LogicalSize, dpi::PhysicalSize, window::Window};
@@ -177,7 +177,7 @@ impl VulkanRenderer {
             // We then pass skia_safe references to the whole shebang, resulting in a DirectContext
             // from which we'll be able to get a canvas reference that draws directly to swapchain images
             // on the swapchain.
-            let direct_context = direct_contexts::make_vulkan(
+            direct_contexts::make_vulkan(
                 &vk::BackendContext::new_builder(
                     instance.handle().as_raw() as _,
                     device.physical_device().handle().as_raw() as _,
@@ -192,9 +192,7 @@ impl VulkanRenderer {
                 .build(),
                 None,
             )
-            .unwrap();
-
-            direct_context
+            .unwrap()
         };
 
         VulkanRenderer {

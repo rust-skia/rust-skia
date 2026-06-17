@@ -1,4 +1,4 @@
-use skia_safe::{color_filters, BlendMode, Color, ColorFilter, ConditionallySend, Sendable};
+use skia_safe::{BlendMode, Color, ColorFilter, ConditionallySend, Sendable, color_filters};
 
 /// Test if RCHandle<> types can be wrapped into a Sendable and unwrapped.
 #[test]
@@ -17,7 +17,7 @@ fn sendable_implements_send() {
 }
 
 mod codec {
-    use skia_safe::{codec, codecs, Codec};
+    use skia_safe::{Codec, codec, codecs};
     use static_assertions::*;
 
     // Codec seems to call into SkPngChunkReader*
@@ -178,7 +178,7 @@ mod docs {
 }
 
 mod effects {
-    use skia_safe::{gradient, image_filters, runtime_effect, RuntimeEffect};
+    use skia_safe::{RuntimeEffect, gradient, image_filters, runtime_effect};
     use static_assertions::*;
 
     assert_impl_all!(gradient::Interpolation: Send, Sync);

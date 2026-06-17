@@ -2,7 +2,7 @@ use std::fmt;
 
 use skia_bindings as sb;
 
-use crate::{prelude::*, scalar, GlyphId, Rect};
+use crate::{GlyphId, Rect, prelude::*, scalar};
 
 pub type StrikeRef = Handle<sb::SkStrikeRef>;
 unsafe_send_sync!(StrikeRef);

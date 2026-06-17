@@ -1,4 +1,4 @@
-use crate::{prelude::*, MaskFilter, Shader};
+use crate::{MaskFilter, Shader, prelude::*};
 use skia_bindings as sb;
 
 impl MaskFilter {

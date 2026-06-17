@@ -1,4 +1,4 @@
-use crate::{prelude::*, AlphaType};
+use crate::{AlphaType, prelude::*};
 use sb::SkColorType;
 use skia_bindings as sb;
 

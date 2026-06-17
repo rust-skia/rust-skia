@@ -1,11 +1,11 @@
 use std::{fmt, ptr, slice};
 
 use skia_bindings::{
-    self as sb, SkTextBlob, SkTextBlobBuilder, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTypeface,
+    self as sb, SkTextBlob, SkTextBlob_Iter, SkTextBlob_Iter_Run, SkTextBlobBuilder, SkTypeface,
 };
 
 use crate::{
-    prelude::*, scalar, EncodedText, Font, GlyphId, Paint, Point, RSXform, Rect, Typeface,
+    EncodedText, Font, GlyphId, Paint, Point, RSXform, Rect, Typeface, prelude::*, scalar,
 };
 
 pub type TextBlob = RCHandle<SkTextBlob>;

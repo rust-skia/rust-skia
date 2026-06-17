@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::{encode, interop::RustWStream, prelude::*, Pixmap};
+use crate::{Pixmap, encode, interop::RustWStream, prelude::*};
 use skia_bindings as sb;
 
 bitflags! {

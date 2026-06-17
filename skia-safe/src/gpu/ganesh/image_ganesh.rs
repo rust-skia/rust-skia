@@ -1,12 +1,12 @@
 use skia_bindings as sb;
 
 use crate::{
+    AlphaType, ColorSpace, ColorType, Data, IRect, ISize, Image, Pixmap, TextureCompressionType,
     gpu::{
         BackendTexture, Budgeted, DirectContext, Mipmapped, Protected, RecordingContext,
         SurfaceOrigin, YUVABackendTextures,
     },
     prelude::*,
-    AlphaType, ColorSpace, ColorType, Data, IRect, ISize, Image, Pixmap, TextureCompressionType,
 };
 #[allow(unused)] // docs only
 use crate::{ImageInfo, Surface, YUVAInfo, YUVAPixmaps};

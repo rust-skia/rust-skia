@@ -6,8 +6,8 @@ fn main() {
 #[cfg(feature = "svg")]
 fn main() {
     use skia_safe::{
-        svg::{Dom, Length, LengthUnit},
         Color, FontMgr,
+        svg::{Dom, Length, LengthUnit},
     };
 
     let data = r#"

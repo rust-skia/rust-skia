@@ -5,14 +5,14 @@ use skia_bindings::{
     GrD3DTextureResourceInfo, SkRefCntBase,
 };
 use windows::Win32::Graphics::{
-    Direct3D12::{ID3D12Fence, D3D12_RESOURCE_STATE_COMMON},
+    Direct3D12::{D3D12_RESOURCE_STATE_COMMON, ID3D12Fence},
     Dxgi::Common::{DXGI_FORMAT_UNKNOWN, DXGI_STANDARD_MULTISAMPLE_QUALITY_PATTERN},
 };
 
 use crate::{
     gpu::{
         self,
-        d3d::{ID3D12Resource, D3D12_RESOURCE_STATES, DXGI_FORMAT},
+        d3d::{D3D12_RESOURCE_STATES, DXGI_FORMAT, ID3D12Resource},
     },
     prelude::*,
 };

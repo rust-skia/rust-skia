@@ -49,7 +49,7 @@ impl TextureInfo {
     ///
     /// This function retains the texture and releases it as soon TextureInfo is dropped.
     pub unsafe fn new(texture: Handle) -> Self {
-        Self::construct(|ti| sb::C_GrMtlTextureInfo_Construct(ti, texture))
+        Self::construct(|ti| unsafe { sb::C_GrMtlTextureInfo_Construct(ti, texture) })
     }
 
     pub fn texture(&self) -> Handle {

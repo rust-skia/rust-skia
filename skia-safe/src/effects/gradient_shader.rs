@@ -1,10 +1,10 @@
 #![allow(deprecated)]
 
 use crate::{
-    gradient, scalar, shaders, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode,
+    Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode, gradient, scalar, shaders,
 };
 
-pub use gradient::{interpolation, Colors as GradientColors, Gradient, Interpolation};
+pub use gradient::{Colors as GradientColors, Gradient, Interpolation, interpolation};
 
 impl From<Flags> for Interpolation {
     fn from(flags: Flags) -> Self {

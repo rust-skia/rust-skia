@@ -1,4 +1,4 @@
-use crate::{prelude::*, Color, Point};
+use crate::{Color, Point, prelude::*};
 use skia_bindings as sb;
 
 #[repr(C)]

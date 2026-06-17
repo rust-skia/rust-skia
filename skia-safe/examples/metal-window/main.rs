@@ -13,7 +13,7 @@ fn main() {
 #[cfg(all(target_os = "macos", feature = "metal"))]
 fn main() {
     use objc2::{
-        rc::{autoreleasepool, Retained},
+        rc::{Retained, autoreleasepool},
         runtime::ProtocolObject,
     };
     use objc2_core_foundation::CGSize;
@@ -28,8 +28,9 @@ fn main() {
     };
 
     use skia_safe::{
-        gpu::{self, backend_render_targets, mtl, SurfaceOrigin},
-        scalar, ColorType,
+        ColorType,
+        gpu::{self, SurfaceOrigin, backend_render_targets, mtl},
+        scalar,
     };
 
     let event_loop = EventLoop::new().expect("Failed to create event loop");
@@ -133,8 +134,8 @@ mod window {
     use objc2_ui_kit::UIView;
 
     use skia_safe::{
-        gpu::{self, mtl, DirectContext},
         Canvas, Color4f, Paint, Point, Rect,
+        gpu::{self, DirectContext, mtl},
     };
     use winit::{
         dpi::{LogicalSize, Size},

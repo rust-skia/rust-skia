@@ -3,7 +3,7 @@ use std::fmt;
 use skia_bindings::{self as sb, GrBackendDrawableInfo};
 
 use crate::{
-    gpu::{vk, BackendAPI},
+    gpu::{BackendAPI, vk},
     prelude::*,
 };
 

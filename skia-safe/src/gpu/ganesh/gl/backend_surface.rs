@@ -2,7 +2,7 @@ pub mod backend_formats {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{gl, BackendFormat},
+        gpu::{BackendFormat, gl},
         prelude::*,
     };
 
@@ -42,7 +42,7 @@ pub mod backend_textures {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{gl, BackendTexture, Mipmapped},
+        gpu::{BackendTexture, Mipmapped, gl},
         prelude::*,
     };
 
@@ -54,14 +54,16 @@ pub mod backend_textures {
         label: impl AsRef<str>,
     ) -> BackendTexture {
         let str = label.as_ref().as_bytes();
-        BackendTexture::from_ptr(sb::C_GrBackendTextures_newGL(
-            width,
-            height,
-            mipmapped,
-            gl_info.native(),
-            str.as_ptr() as _,
-            str.len(),
-        ))
+        BackendTexture::from_ptr(unsafe {
+            sb::C_GrBackendTextures_newGL(
+                width,
+                height,
+                mipmapped,
+                gl_info.native(),
+                str.as_ptr() as _,
+                str.len(),
+            )
+        })
         .unwrap()
     }
 
@@ -82,7 +84,7 @@ pub mod backend_render_targets {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{gl, BackendRenderTarget},
+        gpu::{BackendRenderTarget, gl},
         prelude::*,
     };
 

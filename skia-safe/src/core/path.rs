@@ -4,8 +4,8 @@ use skia_bindings::{self as sb, SkPath, SkPath_Iter, SkPath_RawIter};
 
 use crate::PathIter;
 use crate::{
-    interop::DynamicMemoryWStream, path_types, prelude::*, scalar, Data, Matrix, PathDirection,
-    PathFillType, PathVerb, Point, RRect, Rect, Vector,
+    Data, Matrix, PathDirection, PathFillType, PathVerb, Point, RRect, Rect, Vector,
+    interop::DynamicMemoryWStream, path_types, prelude::*, scalar,
 };
 
 /// [`Path`] contain geometry. [`Path`] may be empty, or contain one or more verbs that

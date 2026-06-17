@@ -24,5 +24,5 @@ pub mod trim_path_effect;
 pub use _1d_path_effect::*;
 pub use _2d_path_effect::*;
 pub use color_matrix::ColorMatrix;
-pub use high_contrast_filter::{high_contrast_config, HighContrastConfig};
+pub use high_contrast_filter::{HighContrastConfig, high_contrast_config};
 pub use runtime_effect::RuntimeEffect;

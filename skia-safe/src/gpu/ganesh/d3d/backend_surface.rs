@@ -2,7 +2,7 @@ pub mod backend_formats {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{d3d::DXGI_FORMAT, BackendFormat},
+        gpu::{BackendFormat, d3d::DXGI_FORMAT},
         prelude::*,
     };
 
@@ -24,7 +24,7 @@ pub mod backend_textures {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{d3d, BackendTexture},
+        gpu::{BackendTexture, d3d},
         prelude::*,
     };
 
@@ -78,7 +78,7 @@ pub mod backend_render_targets {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{d3d, BackendRenderTarget},
+        gpu::{BackendRenderTarget, d3d},
         prelude::*,
     };
 

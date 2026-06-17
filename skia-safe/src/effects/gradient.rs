@@ -1,4 +1,4 @@
-use crate::{scalar, Color4f, ColorSpace, TileMode};
+use crate::{Color4f, ColorSpace, TileMode, scalar};
 use skia_bindings as sb;
 
 /// Gradient interpolation settings.
@@ -161,8 +161,8 @@ impl<'a> Gradient<'a> {
 ///
 /// These functions correspond to the C++ `SkShaders` namespace gradient functions.
 pub mod shaders {
-    use super::{scalar, Gradient};
-    use crate::{prelude::*, Matrix, Point, Shader};
+    use super::{Gradient, scalar};
+    use crate::{Matrix, Point, Shader, prelude::*};
     use skia_bindings as sb;
     use std::ptr;
 
@@ -322,8 +322,8 @@ pub mod shaders {
 mod tests {
     use super::*;
     use crate::{
-        prelude::{NativeAccess, RefCount},
         Color, ColorSpace, Paint, Point, Rect, Shader,
+        prelude::{NativeAccess, RefCount},
     };
 
     #[test]

@@ -3,8 +3,8 @@ use std::{fmt, ptr};
 use skia_bindings::{self as sb, SkFont, SkFont_PrivFlags};
 
 use crate::{
-    interop::VecSink, prelude::*, scalar, EncodedText, FontHinting, FontMetrics, GlyphId, Paint,
-    Path, Point, Rect, StrikeRef, Typeface, Unichar,
+    EncodedText, FontHinting, FontMetrics, GlyphId, Paint, Path, Point, Rect, StrikeRef, Typeface,
+    Unichar, interop::VecSink, prelude::*, scalar,
 };
 
 pub type Edging = skia_bindings::SkFont_Edging;

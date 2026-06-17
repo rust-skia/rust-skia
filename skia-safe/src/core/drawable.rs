@@ -2,7 +2,7 @@ use std::fmt;
 
 use skia_bindings::{self as sb, SkDrawable, SkFlattenable, SkRefCntBase};
 
-use crate::{prelude::*, Canvas, Matrix, NativeFlattenable, Picture, Point, Rect};
+use crate::{Canvas, Matrix, NativeFlattenable, Picture, Point, Rect, prelude::*};
 
 pub type Drawable = RCHandle<SkDrawable>;
 

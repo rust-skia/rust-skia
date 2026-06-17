@@ -2,7 +2,7 @@ pub mod mutable_texture_states {
     use skia_bindings as sb;
 
     use crate::{
-        gpu::{vk::ImageLayout, BackendApi, MutableTextureState},
+        gpu::{BackendApi, MutableTextureState, vk::ImageLayout},
         prelude::*,
     };
 

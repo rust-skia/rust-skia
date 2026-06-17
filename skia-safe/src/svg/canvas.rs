@@ -2,7 +2,7 @@ use std::{fmt, ops::Deref, pin::Pin, ptr};
 
 use skia_bindings::{self as sb, SkCanvas};
 
-use crate::{interop::DynamicMemoryWStream, prelude::*, Data, Rect};
+use crate::{Data, Rect, interop::DynamicMemoryWStream, prelude::*};
 
 pub struct Canvas {
     canvas: *mut SkCanvas,

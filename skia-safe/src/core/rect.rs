@@ -4,13 +4,12 @@ use std::{
 };
 
 use crate::{
-    interop,
+    Contains, IPoint, ISize, IVector, PathDirection, Point, Size, Vector, interop,
     prelude::*,
     private::{
         is_finite,
         safe32::{sk32, sk64},
     },
-    Contains, IPoint, ISize, IVector, PathDirection, Point, Size, Vector,
 };
 use skia_bindings::{self as sb, SkIRect, SkRect};
 

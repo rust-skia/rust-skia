@@ -23,15 +23,17 @@
 
 #[cfg(not(feature = "skottie"))]
 fn main() {
-    println!("To run this example, use: cargo run --example dotlottie --features \"skottie\" -- <path-to-file.lottie> [output-dir]");
+    println!(
+        "To run this example, use: cargo run --example dotlottie --features \"skottie\" -- <path-to-file.lottie> [output-dir]"
+    );
 }
 
 #[cfg(feature = "skottie")]
 fn main() {
     use serde::Deserialize;
     use skia_safe::{
-        resources::ResourceProvider, skottie::Builder, surfaces, Color, Data, EncodedImageFormat,
-        FontMgr, Typeface,
+        Color, Data, EncodedImageFormat, FontMgr, Typeface, resources::ResourceProvider,
+        skottie::Builder, surfaces,
     };
     use std::collections::HashMap;
     use std::io::Read;
@@ -148,7 +150,9 @@ fn main() {
             );
             eprintln!();
             eprintln!("Example:");
-            eprintln!("  curl -LO https://github.com/LottieFiles/dotlottie-android/raw/main/sample-compose/src/main/assets/animations/pigeon.lottie");
+            eprintln!(
+                "  curl -LO https://github.com/LottieFiles/dotlottie-android/raw/main/sample-compose/src/main/assets/animations/pigeon.lottie"
+            );
             eprintln!("  cargo run --example dotlottie --features \"skottie\" -- pigeon.lottie");
             std::process::exit(1);
         }

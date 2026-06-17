@@ -3,8 +3,8 @@ pub mod backend_formats {
 
     use crate::{
         gpu::{
-            vk::{Format, YcbcrConversionInfo},
             BackendFormat,
+            vk::{Format, YcbcrConversionInfo},
         },
         prelude::*,
     };
@@ -58,8 +58,8 @@ pub mod backend_textures {
 
     use crate::{
         gpu::{
-            vk::{ImageInfo, ImageLayout},
             BackendTexture,
+            vk::{ImageInfo, ImageLayout},
         },
         prelude::*,
     };
@@ -71,13 +71,15 @@ pub mod backend_textures {
         label: impl AsRef<str>,
     ) -> BackendTexture {
         let label = label.as_ref().as_bytes();
-        BackendTexture::from_native_if_valid(sb::C_GrBackendTexture_newVk(
-            width,
-            height,
-            vk_info.native(),
-            label.as_ptr() as _,
-            label.len(),
-        ))
+        unsafe {
+            BackendTexture::from_native_if_valid(sb::C_GrBackendTexture_newVk(
+                width,
+                height,
+                vk_info.native(),
+                label.as_ptr() as _,
+                label.len(),
+            ))
+        }
         .unwrap()
     }
 
@@ -105,8 +107,8 @@ pub mod backend_render_targets {
 
     use crate::{
         gpu::{
-            vk::{ImageInfo, ImageLayout},
             BackendRenderTarget,
+            vk::{ImageInfo, ImageLayout},
         },
         prelude::*,
     };

@@ -20,7 +20,7 @@ license = "MIT"
 
 version = "0.99.0"
 authors = ["Armin Sander <armin@replicator.org>"]
-edition = "2021"
+edition.workspace = true
 rust-version.workspace = true
 
 [lib]

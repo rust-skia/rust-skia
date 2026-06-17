@@ -1,6 +1,6 @@
 use std::{fmt, mem::transmute, ops::Deref};
 
-use crate::{prelude::*, FontMgr};
+use crate::{FontMgr, prelude::*};
 use skia_bindings::{self as sb, SkOrderedFontMgr, SkRefCntBase};
 
 pub type OrderedFontMgr = RCHandle<SkOrderedFontMgr>;

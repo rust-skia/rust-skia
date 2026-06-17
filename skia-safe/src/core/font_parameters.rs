@@ -1,7 +1,7 @@
 pub use variation::Axis as VariationAxis;
 
 pub mod variation {
-    use crate::{prelude::*, FourByteTag};
+    use crate::{FourByteTag, prelude::*};
     use skia_bindings::{self as sb, SkFontParameters_Variation_Axis};
 
     #[repr(C)]

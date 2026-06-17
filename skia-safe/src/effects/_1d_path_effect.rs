@@ -1,4 +1,4 @@
-use crate::{scalar, Path, PathEffect};
+use crate::{Path, PathEffect, scalar};
 
 impl PathEffect {
     pub fn path_1d(
@@ -12,7 +12,7 @@ impl PathEffect {
 }
 
 pub mod path_1d_path_effect {
-    use crate::{prelude::*, scalar, Path, PathEffect};
+    use crate::{Path, PathEffect, prelude::*, scalar};
     use skia_bindings::C_SkPath1DPathEffect_Make;
 
     pub use skia_bindings::SkPath1DPathEffect_Style as Style;

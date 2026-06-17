@@ -390,7 +390,9 @@ mod prerequisites {
             }
         }
 
-        panic!(">>>>> Probing for Python 3 failed, please make sure that it's available in PATH, probed executables are: {PYTHON_CMDS:?} <<<<<");
+        panic!(
+            ">>>>> Probing for Python 3 failed, please make sure that it's available in PATH, probed executables are: {PYTHON_CMDS:?} <<<<<"
+        );
     }
 
     /// Returns `true` if the given python executable identifies itself as a python version 3

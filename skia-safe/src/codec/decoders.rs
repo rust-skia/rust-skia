@@ -1,7 +1,7 @@
 pub mod bmp_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)
@@ -15,7 +15,7 @@ pub mod bmp_decoder {
 pub mod gif_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)
@@ -29,7 +29,7 @@ pub mod gif_decoder {
 pub mod ico_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)
@@ -44,7 +44,7 @@ pub mod ico_decoder {
 pub mod jpeg_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)
@@ -58,7 +58,7 @@ pub mod jpeg_decoder {
 pub mod png_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)
@@ -73,7 +73,7 @@ pub mod png_decoder {
 pub mod png_rust_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)
@@ -87,7 +87,7 @@ pub mod png_rust_decoder {
 pub mod wbmp_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)
@@ -102,7 +102,7 @@ pub mod wbmp_decoder {
 pub mod webp_decoder {
     use std::{io, result};
 
-    use crate::{codec::codecs::Decoder, codec::Result, Codec};
+    use crate::{Codec, codec::Result, codec::codecs::Decoder};
 
     pub fn decode_stream(stream: &mut impl io::Read) -> result::Result<Codec, Result> {
         decoder().from_stream(stream)

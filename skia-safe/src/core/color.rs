@@ -389,7 +389,7 @@ pub mod colors {
 
 #[cfg(test)]
 mod tests {
-    use super::{colors, Color, Color4f};
+    use super::{Color, Color4f, colors};
 
     #[test]
     #[allow(clippy::float_cmp)]

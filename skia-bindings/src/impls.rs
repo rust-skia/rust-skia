@@ -6,7 +6,7 @@
 //! See also: <https://github.com/rust-lang/rfcs/issues/1880>
 
 use crate::{
-    SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkPathFillType, SkPathVerb, SkPath_Verb,
+    SkAlphaType, SkBlendMode, SkBlendModeCoeff, SkPath_Verb, SkPathFillType, SkPathVerb,
     SkYUVColorSpace,
 };
 use std::ffi::CStr;

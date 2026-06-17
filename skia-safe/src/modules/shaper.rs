@@ -11,7 +11,7 @@ use skia_bindings::{
     SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler,
 };
 
-use crate::{prelude::*, scalar, Font, FontMgr, FourByteTag, Point, TextBlob};
+use crate::{Font, FontMgr, FourByteTag, Point, TextBlob, prelude::*, scalar};
 
 // The following three are re-exported in `modules.rs` via `mod shapers {}`.
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -339,7 +339,7 @@ pub mod run_handler {
 
     use skia_bindings::{SkShaper_RunHandler_Buffer, SkShaper_RunHandler_RunInfo};
 
-    use crate::{prelude::*, Font, FourByteTag, GlyphId, Point, Vector};
+    use crate::{Font, FourByteTag, GlyphId, Point, Vector, prelude::*};
 
     pub trait RunHandler {
         fn begin_line(&mut self);
@@ -411,21 +411,22 @@ pub mod run_handler {
             buffer: &SkShaper_RunHandler_Buffer,
             glyph_count: usize,
         ) -> Buffer {
-            let offsets = buffer.offsets.into_non_null().map(|mut offsets| {
+            let offsets = buffer.offsets.into_non_null().map(|mut offsets| unsafe {
                 slice::from_raw_parts_mut(Point::from_native_ref_mut(offsets.as_mut()), glyph_count)
             });
 
-            let clusters = buffer
-                .clusters
-                .into_non_null()
-                .map(|clusters| slice::from_raw_parts_mut(clusters.as_ptr(), glyph_count));
+            let clusters = buffer.clusters.into_non_null().map(|clusters| unsafe {
+                slice::from_raw_parts_mut(clusters.as_ptr(), glyph_count)
+            });
 
             Buffer {
-                glyphs: safer::from_raw_parts_mut(buffer.glyphs, glyph_count),
-                positions: safer::from_raw_parts_mut(
-                    Point::from_native_ptr_mut(buffer.positions),
-                    glyph_count,
-                ),
+                glyphs: unsafe { safer::from_raw_parts_mut(buffer.glyphs, glyph_count) },
+                positions: unsafe {
+                    safer::from_raw_parts_mut(
+                        Point::from_native_ptr_mut(buffer.positions),
+                        glyph_count,
+                    )
+                },
                 offsets,
                 clusters,
                 point: Point::from_native_c(buffer.point),
@@ -577,7 +578,7 @@ mod rust_run_handler {
 
     use crate::{
         prelude::*,
-        shaper::{run_handler::RunInfo, AsNativeRunHandler, RunHandler},
+        shaper::{AsNativeRunHandler, RunHandler, run_handler::RunInfo},
     };
 
     impl NativeBase<SkShaper_RunHandler> for RustRunHandler {}
@@ -590,7 +591,7 @@ mod rust_run_handler {
 
     pub unsafe fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
         RustRunHandler_Param {
-            trait_: mem::transmute::<&mut dyn RunHandler, TraitObject>(run_handler),
+            trait_: unsafe { mem::transmute::<&mut dyn RunHandler, TraitObject>(run_handler) },
             beginLine: Some(begin_line),
             runInfo: Some(run_info),
             commitRunInfo: Some(commit_run_info),

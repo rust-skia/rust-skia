@@ -1,4 +1,4 @@
-use crate::{prelude::*, scalar, Point, Size, Vector};
+use crate::{Point, Size, Vector, prelude::*, scalar};
 use skia_bindings::SkRSXform;
 
 #[derive(Copy, Clone, PartialEq, Debug)]

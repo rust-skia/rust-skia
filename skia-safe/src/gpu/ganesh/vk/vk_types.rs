@@ -3,9 +3,8 @@ use std::{ffi::CStr, os::raw, ptr};
 use skia_bindings::{GrVkDrawableInfo, GrVkImageInfo, GrVkSurfaceInfo};
 
 use crate::gpu::{
-    self,
+    self, Protected,
     vk::{self, Alloc, YcbcrConversionInfo},
-    Protected,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -87,18 +86,20 @@ impl ImageInfo {
     /// # Safety
     /// The Vulkan `info.image` and `info.alloc` must outlive the lifetime of the ImageInfo returned.
     pub unsafe fn from_info(info: &ImageInfo, layout: vk::ImageLayout) -> Self {
-        Self::new(
-            info.image,
-            info.alloc,
-            info.tiling,
-            layout,
-            info.format,
-            info.level_count,
-            info.current_queue_family,
-            info.ycbcr_conversion_info,
-            info.protected,
-            info.sharing_mode,
-        )
+        unsafe {
+            Self::new(
+                info.image,
+                info.alloc,
+                info.tiling,
+                layout,
+                info.format,
+                info.level_count,
+                info.current_queue_family,
+                info.ycbcr_conversion_info,
+                info.protected,
+                info.sharing_mode,
+            )
+        }
     }
 
     /// # Safety
@@ -108,18 +109,20 @@ impl ImageInfo {
         layout: vk::ImageLayout,
         family_queue_index: u32,
     ) -> Self {
-        Self::new(
-            info.image,
-            info.alloc,
-            info.tiling,
-            layout,
-            info.format,
-            info.level_count,
-            family_queue_index,
-            info.ycbcr_conversion_info,
-            info.protected,
-            info.sharing_mode,
-        )
+        unsafe {
+            Self::new(
+                info.image,
+                info.alloc,
+                info.tiling,
+                layout,
+                info.format,
+                info.level_count,
+                family_queue_index,
+                info.ycbcr_conversion_info,
+                info.protected,
+                info.sharing_mode,
+            )
+        }
     }
 }
 
@@ -158,8 +161,8 @@ impl GetProcOf {
     /// The referred raw `name` strings must outlive the returned CStr reference.
     pub unsafe fn name(&self) -> &CStr {
         match *self {
-            GetProcOf::Instance(_, name) => CStr::from_ptr(name),
-            GetProcOf::Device(_, name) => CStr::from_ptr(name),
+            GetProcOf::Instance(_, name) => unsafe { CStr::from_ptr(name) },
+            GetProcOf::Device(_, name) => unsafe { CStr::from_ptr(name) },
         }
     }
 }
