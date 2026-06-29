@@ -364,10 +364,10 @@ impl Typeface {
         Some(name.as_str().into())
     }
 
-    /// Returns raw font data bytes and the TTC index.
+    /// Returns raw font data bytes and the TTC index (or 0 if not a collection).
     ///
     /// Returns `None` on failure.
-    pub fn to_font_data(&self) -> Option<(Vec<u8>, usize)> {
+    pub fn to_font_bytes(&self) -> Option<(Vec<u8>, u32)> {
         let mut ttc_index = 0;
         StreamAsset::from_ptr(unsafe { sb::C_SkTypeface_openStream(self.native(), &mut ttc_index) })
             .and_then(|mut stream| {
@@ -380,7 +380,19 @@ impl Typeface {
             })
     }
 
-    // TODO: openExistingStream()
+    /// Attempts to re-use existing font data when possible, avoiding additional memory
+    /// allocation, otherwise this is the similar to calling `to_font_bytes`. Returns a
+    /// `Data` object which can access the font data and the TTC index (or 0 if not a collection).
+    ///
+    /// Returns `None` on failure.
+    pub fn to_existing_font_data(&self) -> Option<(Data, u32)> {
+        let mut ttc_index = 0;
+        let stream = unsafe { sb::C_SkTypeface_openExistingStream(self.native(), &mut ttc_index) };
+        StreamAsset::from_ptr(stream).and_then(|stream| {
+            let data = unsafe { sb::C_SkStreamAsset_getData(stream.native()) };
+            Data::from_ptr_const(data).map(|data| (data, ttc_index.try_into().unwrap()))
+        })
+    }
 
     // TODO: createScalerContext()
 
@@ -472,11 +484,20 @@ mod tests {
     }
 
     #[test]
-    fn get_font_data_of_default() {
+    fn get_font_bytes_of_default() {
         let tf = FontMgr::new()
             .legacy_make_typeface(None, FontStyle::normal())
             .unwrap();
-        let (data, _ttc_index) = tf.to_font_data().unwrap();
+        let (data, _ttc_index) = tf.to_font_bytes().unwrap();
+        assert!(!data.is_empty());
+    }
+
+    #[test]
+    fn get_existing_font_data_of_default() {
+        let tf = FontMgr::new()
+            .legacy_make_typeface(None, FontStyle::normal())
+            .unwrap();
+        let (data, _ttc_index) = tf.to_existing_font_data().unwrap();
         assert!(!data.is_empty());
     }
 }
