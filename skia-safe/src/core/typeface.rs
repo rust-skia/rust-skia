@@ -380,9 +380,13 @@ impl Typeface {
             })
     }
 
-    /// Attempts to re-use existing font data when possible, avoiding additional memory
-    /// allocation, otherwise this is the similar to calling `to_font_bytes`. Returns a
-    /// `Data` object which can access the font data and the TTC index (or 0 if not a collection).
+    /// Attempts to re-use existing font data when possible, avoiding additional
+    /// memory allocation. If existing font data is not available, the typical
+    /// way to access font data is via tables using `copy_table_data` (or
+    /// `get_table_data`).
+    ///
+    /// Returns a `Data` object which can access the font data and the TTC
+    /// index (or 0 if not a collection).
     ///
     /// Returns `None` on failure.
     pub fn to_existing_font_data(&self) -> Option<(Data, u32)> {
@@ -497,7 +501,13 @@ mod tests {
         let tf = FontMgr::new()
             .legacy_make_typeface(None, FontStyle::normal())
             .unwrap();
-        let (data, _ttc_index) = tf.to_existing_font_data().unwrap();
-        assert!(!data.is_empty());
+
+        // If the font manager can supply data for the default font check
+        // that it isn't empty - this is a pretty trivial test
+        if let Some((data, _ttc_index)) = tf.to_existing_font_data() {
+            assert!(!data.is_empty());
+        } else {
+            println!("On this platform the default font does not supply existing font data.");
+        }
     }
 }

@@ -414,8 +414,14 @@ mod tests {
         let default_typeface = font_mgr
             .legacy_make_typeface(None, FontStyle::normal())
             .unwrap();
-        let (data, ttc_index) = default_typeface.to_existing_font_data().unwrap();
-        let duplicate_face = font_mgr.new_from_data(data, ttc_index);
-        assert!(duplicate_face.is_some());
+
+        // If the underlying platform can provide the existing font data as Data
+        // test that it round trips
+        if let Some((data, ttc_index)) = default_typeface.to_existing_font_data() {
+            let duplicate_face = font_mgr.new_from_data(data, ttc_index);
+            assert!(duplicate_face.is_some());
+        } else {
+            println!("On this platform the default font does not supply existing font data.");
+        }
     }
 }
