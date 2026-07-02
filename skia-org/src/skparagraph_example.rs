@@ -35,7 +35,7 @@ fn draw_lorem_ipsum_ubuntu_font(canvas: &Canvas) {
         // We need a system font manager to be able to load typefaces.
         let font_mgr = FontMgr::new();
         let typeface = font_mgr
-            .new_from_data(UBUNTU_REGULAR, None)
+            .new_from_bytes(UBUNTU_REGULAR, None)
             .expect("Failed to load Ubuntu font");
 
         typeface_font_provider.register_typeface(typeface, TYPEFACE_ALIAS);

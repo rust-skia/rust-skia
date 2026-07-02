@@ -1764,6 +1764,10 @@ extern "C" SkStreamAsset* C_SkTypeface_openStream(const SkTypeface* self, int* t
     return self->openStream(ttcIndex).release();
 }
 
+extern "C" SkStreamAsset* C_SkTypeface_openExistingStream(const SkTypeface* self, int* ttcIndex) {
+    return self->openExistingStream(ttcIndex).release();
+}
+
 extern "C" void C_SkTypeface_getBounds(const SkTypeface* self, SkRect* uninitialized) {
     new (uninitialized) SkRect(self->getBounds());
 }
@@ -2838,6 +2842,10 @@ extern "C" size_t C_SkStream_read(SkStream* stream, void* buffer, size_t len) {
 
 extern "C" size_t C_SkStreamAsset_getLength(const SkStreamAsset* self) {
     return self->getLength();
+}
+
+extern "C" const SkData* C_SkStreamAsset_getData(const SkStreamAsset* self) {
+    return self->getData().release();
 }
 
 extern "C" void C_SkWStream_destruct(SkWStream* self) {

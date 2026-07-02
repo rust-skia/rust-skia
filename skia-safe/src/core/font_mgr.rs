@@ -2,7 +2,7 @@ use skia_bindings::{self as sb, SkFontMgr, SkFontStyleSet, SkRefCntBase};
 use std::{ffi::CString, fmt, mem, os::raw::c_char, ptr};
 
 use crate::{
-    FontStyle, Typeface, Unichar, font_arguments,
+    Data, FontStyle, Typeface, Unichar, font_arguments,
     interop::{self, DynamicMemoryWStream},
     prelude::*,
 };
@@ -261,25 +261,29 @@ impl FontMgr {
         panic!("Removed without replacement")
     }
 
-    // pub fn new_from_data(
-    //     &self,
-    //     bytes: &[u8],
-    //     ttc_index: impl Into<Option<usize>>,
-    // ) -> Option<Typeface> {
-    //     let data: Data = Data::new_copy(bytes);
-    //     Typeface::from_ptr(unsafe {
-    //         sb::C_SkFontMgr_makeFromData(
-    //             self.native(),
-    //             data.into_ptr(),
-    //             ttc_index.into().unwrap_or_default().try_into().unwrap(),
-    //         )
-    //     })
-    // }
+    /// Create a typeface for the supplied data and TTC index (use 0 for files
+    /// that are not collections). When possible the underlying data allocation
+    /// is shared, but otherwise will be copied.
+    ///
+    /// Returns `None` if the the data is unrecognized.
+    pub fn new_from_data(&self, data: Data, ttc_index: impl Into<Option<u32>>) -> Option<Typeface> {
+        Typeface::from_ptr(unsafe {
+            sb::C_SkFontMgr_makeFromData(
+                self.native(),
+                data.into_ptr(),
+                ttc_index.into().unwrap_or_default().try_into().unwrap(),
+            )
+        })
+    }
 
-    pub fn new_from_data(
+    /// Create a typeface from the supplied byte and TTC index (0 for files
+    /// that are not collections). The bytes will be copied.
+    ///
+    /// Returns `None` if the the data is unrecognized.
+    pub fn new_from_bytes(
         &self,
         bytes: &[u8],
-        ttc_index: impl Into<Option<usize>>,
+        ttc_index: impl Into<Option<u32>>,
     ) -> Option<Typeface> {
         let mut stream = DynamicMemoryWStream::from_bytes(bytes);
         let mut stream = stream.detach_as_stream();
@@ -402,5 +406,22 @@ mod tests {
 
         let _ = request::font_style_from_model(&[]);
         let _ = request::model_from_font_style(FontStyle::default());
+    }
+
+    #[test]
+    fn new_typeface_from_data_using_default() {
+        let font_mgr = FontMgr::default();
+        let default_typeface = font_mgr
+            .legacy_make_typeface(None, FontStyle::normal())
+            .unwrap();
+
+        // If the underlying platform can provide the existing font data as Data
+        // test that it round trips
+        if let Some((data, ttc_index)) = default_typeface.to_existing_font_data() {
+            let duplicate_face = font_mgr.new_from_data(data, ttc_index);
+            assert!(duplicate_face.is_some());
+        } else {
+            println!("On this platform the default font does not supply existing font data.");
+        }
     }
 }
