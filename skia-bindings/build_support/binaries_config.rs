@@ -154,6 +154,25 @@ impl BinariesConfiguration {
         cargo::add_link_libs(&self.link_libraries);
     }
 
+    /// Like [`commit_to_cargo`] but links the ninja-built Skia modules as a
+    /// single combined shared library (`libskia.so`) found in
+    /// `shared_lib_dir`, while the FFI bridge (`libskia-bindings.a`) is still
+    /// statically linked from the build output directory.
+    pub fn commit_to_cargo_shared(&self, shared_lib_dir: &std::path::Path) {
+        let target = cargo::target();
+
+        // The FFI bridge is always statically linked (it lives in output_directory).
+        cargo::add_link_search(self.output_directory.to_str().unwrap());
+        cargo::add_static_link_libs(&target, self.binding_libraries.iter().map(|s| s.as_str()));
+
+        // The combined shared Skia library.
+        cargo::add_link_search(shared_lib_dir.to_str().unwrap());
+        cargo::add_link_lib("skia");
+
+        // Platform / system libraries (freetype, fontconfig, stdc++ …).
+        cargo::add_link_libs(&self.link_libraries);
+    }
+
     /// Import library and additional files from `from_dir` to the output directory.
     pub fn import(&self, from_dir: &Path, import_bindings: bool) -> io::Result<()> {
         let output_directory = &self.output_directory;
