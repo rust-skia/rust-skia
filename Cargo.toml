@@ -5,6 +5,7 @@ members = [
     "skia-svg-macros",
     "skia-bindings",
     "skia-org",
+    "skia-wasm-shims",
     "mk-workflows",
     "comment-converter",
 ]

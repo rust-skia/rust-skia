@@ -66,6 +66,29 @@ dependencies.
 
 Additional arguments for the `gn` executable can be specified by setting the `SKIA_GN_ARGS` environment variable.
 
+### WebAssembly (`wasm32-unknown-unknown`) toolchain setup
+
+When targeting `wasm32-unknown-unknown`, the build support downloads a pinned WASI SDK by default
+and uses it to locate `clang`, `clang++`, `llvm-ar`, and the WASI sysroot.
+
+To override the bundled version, set `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK` to an existing SDK
+root, or set `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` and
+`SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` explicitly.
+
+Supported environment variables:
+
+| Variable | Description |
+| --- | --- |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_URL` | Override the download URL used for the pinned WASI SDK archive. |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK` | Use an existing WASI SDK root directory (must contain `bin/` and `share/wasi-sysroot/`). |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_WASI_SDK_BIN` | Use an existing WASI SDK `bin/` directory directly. |
+| `SKIA_WASM32_UNKNOWN_UNKNOWN_SYSROOT` | Use an explicit sysroot directory instead of inferring `share/wasi-sysroot` from the SDK root or downloaded SDK. |
+
+On `wasm32-unknown-unknown`, the build currently always links the WASI `setjmp` runtime. In
+practice that is needed because the current Skia build configuration keeps PNG support enabled, and
+some feature sets (such as the default `pdf` feature) also enable JPEG support. These builds
+require a runtime with WebAssembly exception / SJLJ support.
+
 ### Using system libraries
 
 By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event that this is not wanted (say, if the crate is being built as part of a package's build routine,) this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
@@ -102,4 +125,3 @@ It's possible to cross compile Skia and the Rust bindings for different architec
 
  * `CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-poky-linux-g++`
  * `RUSTFLAGS="-Clink-args=--sysroot=$SDKTARGETSYSROOT"`
-
