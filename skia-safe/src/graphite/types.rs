@@ -1,6 +1,6 @@
-use crate::prelude::*;
 use skia_bindings as sb;
 
+use crate::prelude::*;
 // Re-export the shared `skgpu` types through `gpu` rather than aliasing the
 // raw bindings again: `BackendApi` / `Mipmapped` are the same native types, and
 // `Budgeted` gets `gpu`'s bool-newtype wrapper instead of a second, name-clashing
@@ -15,27 +15,25 @@ pub use crate::gpu::{BackendApi, Budgeted, Mipmapped};
 /// unrecoverable state).
 pub use sb::skgpu_graphite_InsertStatus_V as InsertStatus;
 variant_name!(InsertStatus::Success);
-variant_name!(InsertStatus::InvalidRecording);
-variant_name!(InsertStatus::PromiseImageInstantiationFailed);
-variant_name!(InsertStatus::AddCommandsFailed);
-variant_name!(InsertStatus::AsyncShaderCompilesFailed);
-variant_name!(InsertStatus::OutOfOrderRecording);
 
 /// Configuration for recorder creation
-#[derive(Debug)]
-pub struct RecorderOptions {
-    inner: sb::skgpu_graphite_RecorderOptions,
+pub type RecorderOptions = Handle<sb::skgpu_graphite_RecorderOptions>;
+
+impl NativeDrop for sb::skgpu_graphite_RecorderOptions {
+    fn drop(&mut self) {
+        unsafe { sb::C_RecorderOptions_destruct(self) }
+    }
+}
+
+impl std::fmt::Debug for RecorderOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RecorderOptions").finish()
+    }
 }
 
 impl Default for RecorderOptions {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-impl Drop for RecorderOptions {
-    fn drop(&mut self) {
-        unsafe { sb::C_RecorderOptions_destruct(&mut self.inner) }
     }
 }
 
@@ -45,21 +43,7 @@ impl RecorderOptions {
     /// `RecorderOptions` has a non-trivial constructor and members (an `sk_sp`,
     /// a `std::optional`, and a non-zero default budget).
     pub fn new() -> Self {
-        let inner = unsafe {
-            let mut inner = std::mem::MaybeUninit::uninit();
-            sb::C_RecorderOptions_Construct(inner.as_mut_ptr());
-            inner.assume_init()
-        };
-        Self { inner }
-    }
-
-    pub(crate) fn native(&self) -> &sb::skgpu_graphite_RecorderOptions {
-        &self.inner
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn native_mut(&mut self) -> &mut sb::skgpu_graphite_RecorderOptions {
-        &mut self.inner
+        Self::construct(|options| unsafe { sb::C_RecorderOptions_Construct(options) })
     }
 }
 

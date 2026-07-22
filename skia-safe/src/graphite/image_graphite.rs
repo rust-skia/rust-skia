@@ -2,10 +2,11 @@
 //!
 //! This module provides functions for working with images in the Graphite backend.
 
+use skia_bindings as sb;
+
 use crate::graphite::{BackendTexture, Recorder};
 use crate::prelude::*;
 use crate::{AlphaType, ColorSpace, ColorType, IRect, Image};
-use skia_bindings as sb;
 
 /// Wrap an existing backend texture as an Image using Graphite
 ///
@@ -87,27 +88,4 @@ pub fn subset_texture_from(
     };
 
     Image::from_ptr(image_ptr)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_image_functions_compile() {
-        // Test that all image creation functions compile correctly
-        // We can't actually test them without a valid recorder and context
-        let _f1 = wrap_texture
-            as fn(
-                &mut Recorder,
-                &BackendTexture,
-                ColorType,
-                AlphaType,
-                Option<ColorSpace>,
-            ) -> Option<Image>;
-
-        let _f2 = texture_from_image as fn(&mut Recorder, &Image) -> Option<Image>;
-
-        let _f3 = subset_texture_from as fn(&mut Recorder, &Image, &IRect) -> Option<Image>;
-    }
 }

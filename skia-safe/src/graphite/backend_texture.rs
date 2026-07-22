@@ -1,13 +1,17 @@
-use crate::graphite::{TextureInfo, types::BackendApi};
-use crate::prelude::*;
-use skia_bindings as sb;
 use std::fmt;
 
-// `repr(transparent)` guarantees the layout the `native_transmutable!` below
-// relies on (a repr(Rust) single-field struct only matches de facto).
-#[repr(transparent)]
-pub struct BackendTexture {
-    inner: sb::skgpu_graphite_BackendTexture,
+use skia_bindings as sb;
+
+use crate::graphite::TextureInfo;
+use crate::graphite::types::BackendApi;
+use crate::{ISize, prelude::*};
+
+pub type BackendTexture = Handle<sb::skgpu_graphite_BackendTexture>;
+
+impl NativeDrop for sb::skgpu_graphite_BackendTexture {
+    fn drop(&mut self) {
+        unsafe { sb::C_BackendTexture_destruct(self) }
+    }
 }
 
 impl fmt::Debug for BackendTexture {
@@ -26,34 +30,17 @@ impl Default for BackendTexture {
     }
 }
 
-impl Drop for BackendTexture {
-    fn drop(&mut self) {
-        unsafe { sb::C_BackendTexture_destruct(&mut self.inner) }
-    }
-}
-
 impl BackendTexture {
     /// Create a new BackendTexture with default settings
     pub fn new() -> Self {
-        // Construct directly into uninitialized memory rather than zeroing first
-        // (zeroing would require a valid all-zero representation, which is not
-        // guaranteed for an arbitrary C++ type).
-        let inner = unsafe {
-            let mut inner = std::mem::MaybeUninit::uninit();
-            sb::C_BackendTexture_Construct(inner.as_mut_ptr());
-            inner.assume_init()
-        };
-        Self { inner }
+        BackendTexture::construct(|texture| unsafe { sb::C_BackendTexture_Construct(texture) })
     }
 
     /// Create a BackendTexture by copying from another
     pub fn from_backend_texture(other: &BackendTexture) -> Self {
-        let inner = unsafe {
-            let mut inner = std::mem::MaybeUninit::uninit();
-            sb::C_BackendTexture_CopyConstruct(inner.as_mut_ptr(), other.native());
-            inner.assume_init()
-        };
-        Self { inner }
+        BackendTexture::construct(|texture| unsafe {
+            sb::C_BackendTexture_CopyConstruct(texture, other.native())
+        })
     }
 
     /// Check if this BackendTexture is valid
@@ -76,8 +63,8 @@ impl BackendTexture {
     ///
     /// # Returns
     /// The width and height of the texture
-    pub fn dimensions(&self) -> crate::ISize {
-        let mut dimensions = crate::ISize::default();
+    pub fn dimensions(&self) -> ISize {
+        let mut dimensions = ISize::default();
         unsafe {
             sb::C_BackendTexture_dimensions(self.native(), dimensions.native_mut());
         }
@@ -95,18 +82,7 @@ impl BackendTexture {
         }
         info
     }
-
-    pub(crate) fn native(&self) -> &sb::skgpu_graphite_BackendTexture {
-        &self.inner
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn native_mut(&mut self) -> &mut sb::skgpu_graphite_BackendTexture {
-        &mut self.inner
-    }
 }
-
-native_transmutable!(sb::skgpu_graphite_BackendTexture, BackendTexture);
 
 #[cfg(test)]
 mod tests {

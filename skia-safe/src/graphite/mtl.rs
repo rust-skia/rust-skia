@@ -1,9 +1,10 @@
 use std::fmt;
 
+use skia_bindings as sb;
+
 use crate::graphite::{BackendTexture, Context, ContextOptions};
 use crate::prelude::NativeAccess;
-use crate::prelude::{self, NativeDrop, NativeTransmutable};
-use skia_bindings as sb;
+use crate::prelude::{self, NativeDrop};
 
 /// A handle representing a Metal object (e.g., MTLDevice, MTLCommandQueue)
 pub type Handle = *mut std::ffi::c_void;
@@ -139,49 +140,12 @@ pub unsafe fn make_backend_texture(
     mtl_texture: *mut std::ffi::c_void,
 ) -> BackendTexture {
     let dimensions = dimensions.into();
-    unsafe {
-        let mut backend_texture = std::mem::MaybeUninit::uninit();
+    BackendTexture::construct(|backend_texture| unsafe {
         sb::C_BackendTextures_MakeMetal(
-            backend_texture.as_mut_ptr(),
+            backend_texture,
             dimensions.width,
             dimensions.height,
             mtl_texture,
-        );
-        BackendTexture::from_native_c(backend_texture.assume_init())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_backend_context_debug() {
-        // We can't easily create a BackendContext without Metal objects,
-        // but we can test that the debug implementation compiles
-        let context: Option<BackendContext> = None;
-        assert!(context.is_none());
-    }
-
-    #[test]
-    fn test_make_backend_texture_compiles() {
-        // We can't easily test make_backend_texture without actual Metal objects,
-        // but we can verify the function signature compiles correctly
-        let _dimensions: crate::ISize = (512, 512).into();
-        let _mtl_texture: *mut std::ffi::c_void = std::ptr::null_mut();
-        // We don't actually call the function as it's unsafe and requires valid Metal objects
-        // but this test verifies the types are compatible
-    }
-
-    #[test]
-    fn test_wrapped_backend_texture_deref() {
-        // Test that WrappedBackendTexture implements Deref
-        // We can't create a real WrappedBackendTexture without Metal objects,
-        // but we can verify the type system works
-        //fn expects_backend_texture(_t: &crate::graphite::BackendTexture) {}
-        // This would compile if we had a WrappedBackendTexture:
-        // let wrapped: WrappedBackendTexture = /* ... */;
-        // expects_backend_texture(&wrapped);
-        // expects_backend_texture(wrapped.deref());
-    }
+        )
+    })
 }

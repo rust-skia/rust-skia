@@ -1,11 +1,15 @@
-use skia_bindings as sb;
 use std::fmt;
 
-// `repr(transparent)` guarantees the layout the `native_transmutable!` below
-// relies on (a repr(Rust) single-field struct only matches de facto).
-#[repr(transparent)]
-pub struct ContextOptions {
-    inner: sb::skgpu_graphite_ContextOptions,
+use skia_bindings as sb;
+
+use crate::prelude::*;
+
+pub type ContextOptions = Handle<sb::skgpu_graphite_ContextOptions>;
+
+impl NativeDrop for sb::skgpu_graphite_ContextOptions {
+    fn drop(&mut self) {
+        unsafe { sb::C_ContextOptions_destruct(self) }
+    }
 }
 
 impl fmt::Debug for ContextOptions {
@@ -23,28 +27,9 @@ impl Default for ContextOptions {
 impl ContextOptions {
     /// Create new ContextOptions with default settings
     pub fn new() -> Self {
-        // Construct directly into uninitialized memory rather than zeroing first
-        // (zeroing would require a valid all-zero representation, which is not
-        // guaranteed for an arbitrary C++ type).
-        let inner = unsafe {
-            let mut inner = std::mem::MaybeUninit::uninit();
-            sb::C_ContextOptions_Construct(inner.as_mut_ptr());
-            inner.assume_init()
-        };
-        Self { inner }
-    }
-
-    pub(crate) fn native(&self) -> &sb::skgpu_graphite_ContextOptions {
-        &self.inner
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn native_mut(&mut self) -> &mut sb::skgpu_graphite_ContextOptions {
-        &mut self.inner
+        Self::construct(|options| unsafe { sb::C_ContextOptions_Construct(options) })
     }
 }
-
-native_transmutable!(sb::skgpu_graphite_ContextOptions, ContextOptions);
 
 #[cfg(test)]
 mod tests {

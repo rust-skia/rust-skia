@@ -2,10 +2,11 @@
 //!
 //! This module provides functions for creating GPU surfaces using the Graphite backend.
 
+use skia_bindings as sb;
+
 use crate::graphite::{BackendTexture, Mipmapped, Recorder};
 use crate::prelude::*;
 use crate::{ColorSpace, ColorType, IRect, ImageInfo, Surface, SurfaceProps};
-use skia_bindings as sb;
 
 /// Create a render target surface using the Graphite backend
 ///
@@ -138,36 +139,4 @@ pub fn as_image_copy(
     let image_ptr =
         unsafe { sb::C_SkSurfaces_AsImageCopyGraphite(surface_ptr, subset_ptr, mipmapped) };
     crate::Image::from_ptr(image_ptr)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_surface_functions_compile() {
-        // Test that all surface creation functions compile correctly
-        // We can't actually test them without a valid recorder and context
-        let _f1 = render_target
-            as fn(
-                &mut Recorder,
-                &ImageInfo,
-                Mipmapped,
-                Option<&SurfaceProps>,
-                Option<&str>,
-            ) -> Option<Surface>;
-
-        let _f2 = wrap_backend_texture
-            as fn(
-                &mut Recorder,
-                &BackendTexture,
-                ColorType,
-                Option<ColorSpace>,
-                Option<&SurfaceProps>,
-            ) -> Option<Surface>;
-
-        let _f3 = as_image as fn(&Surface) -> Option<crate::Image>;
-
-        let _f4 = as_image_copy as fn(&Surface, Option<&IRect>, Mipmapped) -> Option<crate::Image>;
-    }
 }

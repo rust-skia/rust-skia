@@ -4,6 +4,7 @@ use skia_bindings as sb;
 
 use crate::gpu::vk;
 use crate::graphite::{Context, ContextOptions};
+use crate::prelude::NativeAccess;
 
 /// Create a new Graphite [`Context`] for Vulkan rendering.
 ///

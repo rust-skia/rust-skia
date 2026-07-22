@@ -1,6 +1,9 @@
 code-macos:
     code .vscode/rust-skia-macos.code-workspace
 
+code-graphite:
+    code .vscode/rust-skia-graphite.code-workspace
+
 code-macos-gl:
     code .vscode/rust-skia-macos-gl.code-workspace
 

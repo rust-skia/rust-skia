@@ -231,6 +231,10 @@ extern "C" void C_ContextOptions_Construct(skgpu::graphite::ContextOptions* unin
     new(uninitialized) skgpu::graphite::ContextOptions();
 }
 
+extern "C" void C_ContextOptions_destruct(skgpu::graphite::ContextOptions* self) {
+    self->~ContextOptions();
+}
+
 //
 // gpu/graphite/Recorder.h
 //

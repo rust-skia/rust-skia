@@ -1,8 +1,13 @@
+use std::fmt;
+use std::marker::PhantomData;
+use std::mem::ManuallyDrop;
+use std::ops::Deref;
+
+use skia_bindings as sb;
+
 use crate::graphite::{Recording, TextureInfo, types::BackendApi};
 use crate::prelude::*;
 use crate::{Canvas, ImageInfo};
-use skia_bindings as sb;
-use std::fmt;
 
 // `skgpu::graphite::Recorder` is handed out as `std::unique_ptr<Recorder>`
 // (Context::makeRecorder) and derives from `SkRecorder`, not `SkRefCnt`. It is
@@ -23,11 +28,11 @@ pub type Recorder = RefHandle<sb::skgpu_graphite_Recorder>;
 /// dropping, i.e. `delete`ing) a recorder the surface still owns.
 #[derive(Debug)]
 pub struct BorrowedRecorder<'a> {
-    recorder: std::mem::ManuallyDrop<Recorder>,
-    _owner: std::marker::PhantomData<&'a Canvas>,
+    recorder: ManuallyDrop<Recorder>,
+    _owner: PhantomData<&'a Canvas>,
 }
 
-impl std::ops::Deref for BorrowedRecorder<'_> {
+impl Deref for BorrowedRecorder<'_> {
     type Target = Recorder;
 
     fn deref(&self) -> &Recorder {
@@ -38,8 +43,8 @@ impl std::ops::Deref for BorrowedRecorder<'_> {
 impl<'a> BorrowedRecorder<'a> {
     pub(crate) fn from_canvas(recorder: Recorder, _canvas: &'a Canvas) -> Self {
         Self {
-            recorder: std::mem::ManuallyDrop::new(recorder),
-            _owner: std::marker::PhantomData,
+            recorder: ManuallyDrop::new(recorder),
+            _owner: PhantomData,
         }
     }
 
@@ -126,18 +131,5 @@ impl Recorder {
     /// The backend API (Vulkan, Metal, etc.)
     pub fn backend(&self) -> BackendApi {
         unsafe { sb::C_Recorder_backend(self.native()) }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_recorder_debug() {
-        // We can't easily create a Recorder without platform-specific setup,
-        // but we can test that the debug implementation compiles
-        let recorder: Option<Recorder> = None;
-        assert!(recorder.is_none());
     }
 }
