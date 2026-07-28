@@ -36,7 +36,7 @@ impl Deref for Data {
 
 impl AsRef<[u8]> for Data {
     fn as_ref(&self) -> &[u8] {
-        self.deref().as_ref()
+        self.deref()
     }
 }
 
