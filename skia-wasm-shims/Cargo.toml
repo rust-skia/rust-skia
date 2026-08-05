@@ -1,0 +1,51 @@
+[package]
+name = "skia-wasm-shims"
+
+description = "WASI/OpenGL shims for the wasm32-unknown-unknown target"
+homepage = "https://github.com/rust-skia/rust-skia/tree/master/skia-wasm-shims"
+repository = "https://github.com/rust-skia/rust-skia"
+documentation = "https://rust-skia.github.io/doc/skia_safe"
+readme = "README.md"
+# 5 max
+keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
+# 6 max
+categories = [
+    "api-bindings",
+    "graphics",
+    "multimedia::images",
+    "rendering::graphics-api",
+    "visualization",
+]
+license = "MIT"
+
+version = "0.1.0"
+edition = "2021"
+rust-version.workspace = true
+
+[lib]
+doctest = false
+
+[features]
+glemu = [
+    "dep:wasm-bindgen",
+    "dep:js-sys",
+    "dep:web-sys"
+]
+
+[dependencies]
+wasm-bindgen = { version = "0.2", optional = true }
+js-sys = { version = "0.3", optional = true }
+web-sys = { version = "0.3", features = [
+    "WebGl2RenderingContext",
+    "WebGlBuffer",
+    "WebGlFramebuffer",
+    "WebGlProgram",
+    "WebGlQuery",
+    "WebGlRenderbuffer",
+    "WebGlShader",
+    "WebGlTexture",
+    "WebGlUniformLocation",
+    "WebGlVertexArrayObject",
+    "WebGlSync",
+    "WebGlSampler",
+], optional = true }

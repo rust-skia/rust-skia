@@ -9,6 +9,7 @@ use super::{
     skia::BuildConfiguration,
 };
 use crate::build_support::features::feature;
+use std::path::Path;
 
 pub mod alpine;
 pub mod android;
@@ -18,6 +19,7 @@ pub mod ios;
 pub mod linux;
 pub mod macos;
 mod ohos;
+mod wasm_unknown;
 mod windows;
 
 /// Returns the list of redundant features for the given platform.
@@ -58,8 +60,20 @@ pub fn bindgen_and_cc_args(target: &Target, sysroot: Option<&str>) -> BindgenAnd
     builder.into_bindgen_and_cc_args()
 }
 
+pub fn configure_build_environment(target: &Target, output_directory: &Path) {
+    details(target).configure_build_environment(target, output_directory)
+}
+
+pub fn prepare_build_support(target: &Target, output_directory: &Path) {
+    details(target).prepare_build_support(output_directory)
+}
+
 pub fn link_libraries(features: &Features, target: &Target) -> Vec<String> {
     details(target).link_libraries(features)
+}
+
+pub fn link_search_paths(target: &Target) -> Vec<String> {
+    details(target).link_search_paths()
 }
 
 pub fn filter_features(
@@ -75,7 +89,12 @@ pub trait PlatformDetails {
     fn uses_freetype(&self) -> bool;
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
     fn bindgen_args(&self, _target: &Target, _builder: &mut BindgenArgsBuilder) {}
+    fn configure_build_environment(&self, _target: &Target, _output_directory: &Path) {}
+    fn prepare_build_support(&self, _output_directory: &Path) {}
     fn link_libraries(&self, features: &Features) -> Vec<String>;
+    fn link_search_paths(&self) -> Vec<String> {
+        Vec::new()
+    }
     fn filter_platform_features(
         &self,
         _use_system_libraries: bool,
@@ -89,6 +108,7 @@ fn details(target: &Target) -> &dyn PlatformDetails {
     let host = cargo::host();
     match target.as_strs() {
         ("wasm32", "unknown", "emscripten", _) => &emscripten::Emscripten,
+        ("wasm32", "unknown", "unknown", _) => &wasm_unknown::WasmUnknown,
         (_, "linux", "android", _) | (_, "linux", "androideabi", _) => &android::Android,
         (_, "apple", "darwin", _) => &macos::MacOs,
         (_, "apple", "ios", _) => &ios::Ios,

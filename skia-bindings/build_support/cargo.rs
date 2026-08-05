@@ -76,6 +76,10 @@ impl Target {
         self.system == "emscripten"
     }
 
+    pub fn is_wasm_unknown_unknown(&self) -> bool {
+        self.architecture == "wasm32" && self.vendor == "unknown" && self.system == "unknown"
+    }
+
     pub fn builds_with_msvc(&self) -> bool {
         self.abi.as_deref() == Some("msvc")
     }
