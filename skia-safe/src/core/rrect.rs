@@ -1,4 +1,4 @@
-use crate::{Matrix, Rect, Vector, interop, prelude::*, scalar};
+use crate::{Matrix, Point, Rect, Vector, interop, prelude::*, scalar};
 use skia_bindings::{self as sb, SkRRect};
 use std::{fmt, mem, ptr};
 
@@ -231,8 +231,15 @@ impl RRect {
         copied
     }
 
+    /// Returns true if `point` is inside the bounds and corner radii, and this rounded rectangle is
+    /// not empty.
+    pub fn contains_point(&self, point: impl Into<Point>) -> bool {
+        let point = point.into();
+        unsafe { sb::C_SkRRect_containsPoint(self.native(), point.native()) }
+    }
+
     pub fn contains(&self, rect: impl AsRef<Rect>) -> bool {
-        unsafe { self.native().contains(rect.as_ref().native()) }
+        unsafe { sb::C_SkRRect_containsRect(self.native(), rect.as_ref().native()) }
     }
 
     pub fn is_valid(&self) -> bool {

@@ -75,6 +75,12 @@ impl Data {
         self
     }
 
+    /// Returns data that shares a subset of this data's storage without copying it.
+    /// Returns `None` when `offset + length` exceeds this data's size.
+    pub fn share_subset(&self, offset: usize, length: usize) -> Option<Self> {
+        Self::from_ptr(unsafe { sb::C_SkData_shareSubset(self.native(), offset, length) })
+    }
+
     // TODO: rename to copy_from() ? or from_bytes()?
     pub fn new_copy(data: &[u8]) -> Self {
         Data::from_ptr(unsafe { sb::C_SkData_MakeWithCopy(data.as_ptr() as _, data.len()) })
@@ -159,6 +165,13 @@ mod tests {
         let d1 = Data::new_copy(x);
         let d2 = Data::new_copy(x);
         assert!(d1 == d2)
+    }
+
+    #[test]
+    fn share_subset() {
+        let data = Data::new_copy(&[1, 2, 3]);
+        assert_eq!(data.share_subset(1, 2).unwrap().as_bytes(), &[2, 3]);
+        assert!(data.share_subset(2, 2).is_none());
     }
 
     #[test]
