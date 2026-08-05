@@ -84,7 +84,7 @@ skia-svg-macros = { version = "0.1.0", path = "../skia-svg-macros", optional = t
 
 [dev-dependencies]
 
-serial_test = "3.0"
+serial_test = "4.0"
 static_assertions = "1.1"
 winit = "0.30.2"
 
