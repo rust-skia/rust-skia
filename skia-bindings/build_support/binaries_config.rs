@@ -137,7 +137,7 @@ impl BinariesConfiguration {
         cargo::add_link_libs(&self.link_libraries);
     }
 
-    pub fn prepare_emscripten_archives(&self) {
+    pub fn copy_emscripten_ninja_archives_for_linking(&self) {
         // Since Skia milestone 148, the wasm GN toolchain emits static archives as
         // `*.wasm.a`.
         for lib in &self.ninja_built_libraries {

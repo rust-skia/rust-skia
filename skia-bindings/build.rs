@@ -178,7 +178,7 @@ fn build_from_source(
         offline,
     );
     if final_configuration.target.is_emscripten() {
-        binaries_config.prepare_emscripten_archives();
+        binaries_config.copy_emscripten_ninja_archives_for_linking();
     }
 
     final_configuration
