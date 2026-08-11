@@ -177,6 +177,9 @@ fn build_from_source(
         skia::env::gn_command(),
         offline,
     );
+    if final_configuration.target.is_emscripten() {
+        binaries_config.prepare_emscripten_archives();
+    }
 
     final_configuration
 }
