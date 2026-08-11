@@ -1,22 +1,23 @@
 use std::path::Path;
 
-use foreign_types_shared::ForeignType;
-use metal::{CommandQueue, Device};
-use objc2::rc::{Retained, autoreleasepool};
+use objc2::rc::Retained;
+use objc2::rc::autoreleasepool;
+use objc2::runtime::ProtocolObject;
 use objc2_foundation::NSAutoreleasePool;
+use objc2_metal::{MTLCommandQueue, MTLCreateSystemDefaultDevice, MTLDevice};
 
-use crate::{Driver, artifact, drivers::DrawingDriver};
-use skia_safe::{
-    Canvas, ImageInfo,
-    gpu::{self, mtl},
-};
+use crate::Driver;
+use crate::artifact;
+use crate::drivers::DrawingDriver;
+use skia_safe::gpu::{self, mtl};
+use skia_safe::{Canvas, ImageInfo};
 
 #[allow(dead_code)]
 pub struct Metal {
     // note: ordered for drop order
     context: gpu::DirectContext,
-    queue: CommandQueue,
-    device: Device,
+    queue: Retained<ProtocolObject<dyn MTLCommandQueue>>,
+    device: Retained<ProtocolObject<dyn MTLDevice>>,
     pool: Retained<NSAutoreleasePool>,
 }
 
@@ -26,13 +27,13 @@ impl DrawingDriver for Metal {
     fn new() -> Self {
         let pool = unsafe { NSAutoreleasePool::new() };
 
-        let device = Device::system_default().expect("no Metal device");
-        let queue = device.new_command_queue();
+        let device = MTLCreateSystemDefaultDevice().expect("no Metal device");
+        let queue = device.newCommandQueue().expect("no Metal command queue");
 
         let backend = unsafe {
             mtl::BackendContext::new(
-                device.as_ptr() as mtl::Handle,
-                queue.as_ptr() as mtl::Handle,
+                Retained::as_ptr(&device) as mtl::Handle,
+                Retained::as_ptr(&queue) as mtl::Handle,
             )
         };
 
