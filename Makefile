@@ -39,6 +39,8 @@ crate-post-release-test:
 	cd /tmp && cargo new skia-test
 	cd /tmp/skia-test && cargo add skia-safe
 	cd /tmp/skia-test && cargo run
+	# https://github.com/rust-skia/rust-skia/issues/1310
+	cd /tmp/skia-test && cargo build --target wasm32-unknown-emscripten
 
 # Publishes skia-bindings and skia-safe to crates.io
 # This is temporary and should be automated.

@@ -131,27 +131,27 @@ impl BinariesConfiguration {
 
         let target = cargo::target();
 
-        if target.is_emscripten() {
-            // Since Skia milestone 148, the wasm GN toolchain emits static archives as
-            // `*.wasm.a`.
-            for lib in &self.ninja_built_libraries {
-                let from = self.output_directory.join(format!("lib{lib}.wasm.a"));
-                let to = self.output_directory.join(format!("lib{lib}.a"));
-                fs::copy(&from, &to).unwrap_or_else(|e| {
-                    panic!(
-                        "failed to prepare emscripten archive for linking: from '{}' to '{}': {}",
-                        from.display(),
-                        to.display(),
-                        e
-                    )
-                });
-            }
-        }
-
         // On Linux, the order is significant, first the static libraries we built, and then
         // the system libraries.
         cargo::add_static_link_libs(&target, self.built_libraries(true));
         cargo::add_link_libs(&self.link_libraries);
+    }
+
+    pub fn copy_emscripten_ninja_archives_for_linking(&self) {
+        // Since Skia milestone 148, the wasm GN toolchain emits static archives as
+        // `*.wasm.a`.
+        for lib in &self.ninja_built_libraries {
+            let from = self.output_directory.join(format!("lib{lib}.wasm.a"));
+            let to = self.output_directory.join(format!("lib{lib}.a"));
+            fs::copy(&from, &to).unwrap_or_else(|e| {
+                panic!(
+                    "failed to prepare emscripten archive for linking: from '{}' to '{}': {}",
+                    from.display(),
+                    to.display(),
+                    e
+                )
+            });
+        }
     }
 
     /// Import library and additional files from `from_dir` to the output directory.
