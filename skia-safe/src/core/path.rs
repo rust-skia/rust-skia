@@ -22,8 +22,7 @@ use crate::{
 /// outside the geometry. [`Path`] also describes the winding rule used to fill
 /// overlapping contours.
 ///
-/// Internally, [`Path`] lazily computes metrics likes bounds and convexity. Call
-/// [`Path::update_bounds_cache`] to make [`Path`] thread safe.
+/// Internally, [`Path`] lazily computes convexity.
 pub type Path = Handle<SkPath>;
 unsafe impl Send for Path {}
 
@@ -114,8 +113,7 @@ impl fmt::Debug for Path {
 /// outside the geometry. [`Path`] also describes the winding rule used to fill
 /// overlapping contours.
 ///
-/// Internally, [`Path`] lazily computes metrics likes bounds and convexity. Call
-/// [`Path::update_bounds_cache`] to make [`Path`] thread safe.
+/// Internally, [`Path`] lazily computes convexity.
 impl Path {
     /// Create a new path with the specified spans.
     ///
@@ -720,13 +718,11 @@ impl Path {
         Rect::from_native_ref(unsafe { &*sb::C_SkPath_getBounds(self.native()) })
     }
 
-    /// Updates internal bounds so that subsequent calls to `bounds()` are instantaneous.
-    /// Unaltered copies of [`Path`] may also access cached bounds through `bounds()`.
-    ///
-    /// For now, identical to calling `bounds()` and ignoring the returned value.
-    ///
-    /// Call to prepare [`Path`] subsequently drawn from multiple threads,
-    /// to avoid a race condition where each draw separately computes the bounds.
+    /// Calls [`Self::bounds()`] and ignores the result.
+    #[deprecated(
+        since = "0.100.0",
+        note = "SkPath bounds are no longer computed lazily"
+    )]
     pub fn update_bounds_cache(&mut self) -> &mut Self {
         self.bounds();
         self

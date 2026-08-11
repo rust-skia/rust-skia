@@ -537,6 +537,11 @@ extern "C" bool C_SkData_unique(const SkData* self) {
     return self->unique();
 }
 
+extern "C" SkData* C_SkData_shareSubset(const SkData* self, size_t offset, size_t length) {
+    auto subset = self->shareSubset(offset, length);
+    return const_cast<SkData*>(subset.release());
+}
+
 extern "C" SkData* C_SkData_MakeWithCopy(const void* data, size_t length) {
     return SkData::MakeWithCopy(data, length).release();
 }
@@ -1571,6 +1576,14 @@ extern "C" void C_SkRRect_setRect(SkRRect* self, const SkRect* rect) {
     self->setRect(*rect);
 }
 
+extern "C" bool C_SkRRect_containsPoint(const SkRRect* self, const SkPoint* point) {
+    return self->contains(*point);
+}
+
+extern "C" bool C_SkRRect_containsRect(const SkRRect* self, const SkRect* rect) {
+    return self->contains(*rect);
+}
+
 extern "C" void C_SkRRect_dumpToString(const SkRRect* self, bool asHex, SkString* str) {
     *str = self->dumpToString(asHex);
 }
@@ -1737,7 +1750,7 @@ extern "C" void C_SkTypeface_serialize2(const SkTypeface* self, SkWStream* strea
 }
 
 extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream, SkFontMgr* lastResortFontMgr) {
-    return SkTypeface::MakeDeserialize(stream, sp(lastResortFontMgr)).release();
+    return SkTypeface::MakeDeserialize(stream, sp(lastResortFontMgr), nullptr).release();
 }
 
 extern "C" void C_SkTypeface_unicharsToGlyphs(const SkTypeface* self, const SkUnichar* uni, size_t uniCount, SkGlyphID* glyphs, size_t glyphsCount) {

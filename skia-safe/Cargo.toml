@@ -18,7 +18,7 @@ categories = [
 ]
 license = "MIT"
 
-version = "0.100.0"
+version = "0.101.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition.workspace = true
 rust-version.workspace = true
@@ -62,7 +62,7 @@ graphite = ["skia-bindings/graphite"]
 
 [dependencies]
 bitflags = "2.0"
-skia-bindings = { version = "=0.100.0", path = "../skia-bindings", default-features = false }
+skia-bindings = { version = "=0.101.0", path = "../skia-bindings", default-features = false }
 
 
 # D3D types & ComPtr
