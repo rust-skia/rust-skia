@@ -96,6 +96,10 @@ impl<'pixels> Pixmap<'pixels> {
         self.info().height()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.info().is_empty()
+    }
+
     pub fn dimensions(&self) -> ISize {
         self.info().dimensions()
     }

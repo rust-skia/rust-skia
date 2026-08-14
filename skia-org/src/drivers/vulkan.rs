@@ -18,6 +18,8 @@ pub struct Vulkan {
 impl DrawingDriver for Vulkan {
     const DRIVER: Driver = Driver::Vulkan;
 
+    // Not sure why this is needed to satisfy clippy with 1.97.0
+    #[allow(unused)]
     fn new() -> Self {
         let ash_graphics = unsafe { AshGraphics::new("skia-org") };
         let context = {
@@ -79,6 +81,7 @@ impl DrawingDriver for Vulkan {
     }
 }
 
+#[allow(unused)]
 pub struct AshGraphics {
     pub entry: Entry,
     pub instance: Instance,

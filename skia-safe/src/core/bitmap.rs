@@ -139,7 +139,7 @@ impl Bitmap {
     /// Does not check if [`PixelRef`] is `None`; call `draws_nothing()` to check `width()`,
     /// `height()`, and [`PixelRef`].
     pub fn is_empty(&self) -> bool {
-        self.info().is_empty()
+        self.pixmap().is_empty()
     }
 
     /// Returns `true` if [`PixelRef`] is `None`.

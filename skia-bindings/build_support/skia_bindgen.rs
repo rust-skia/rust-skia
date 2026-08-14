@@ -63,6 +63,9 @@ impl Configuration {
             if features.gpu() {
                 sources.push("src/gpu.cpp".into());
             }
+            if features.graphite() {
+                sources.push("src/graphite.cpp".into());
+            }
             if features[feature::TEXTLAYOUT] {
                 sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
             }
@@ -492,6 +495,8 @@ const OPAQUE_TYPES: &[&str] = &[
     "sksg::BlurImageFilter",
     // m147
     "std::unordered_map.*",
+    // Graphite types that expose std::unordered_set in public fields
+    "skgpu::graphite::Recording",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
@@ -777,6 +782,11 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     ("CompressionLevel", rewrite::k_opt_xxx),
     // m148: SkShapers::CT::LineBreakMode
     ("LineBreakMode", rewrite::k_xxx),
+    // graphite: skgpu::graphite::InsertStatus::V (the class-enum migration
+    // shim for Context::insertRecording's status)
+    ("V", rewrite::k_xxx),
+    // graphite: skgpu::graphite::SyncToCpu
+    ("SyncToCpu", rewrite::k_xxx),
 ];
 
 pub(crate) mod rewrite {

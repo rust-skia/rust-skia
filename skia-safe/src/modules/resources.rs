@@ -257,7 +257,7 @@ pub mod helpers {
         url: &str,
     ) -> Option<Typeface> {
         if let Some(data) = provider.load(url, name) {
-            return font_mgr.new_from_data(&data, None);
+            return font_mgr.new_from_bytes(&data, None);
         }
         // Try to provide the default font if downloading fails.
         font_mgr.legacy_make_typeface(None, FontStyle::default())

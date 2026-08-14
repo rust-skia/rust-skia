@@ -107,11 +107,7 @@ impl Target {
 
 impl Display for Target {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}-{}-{}",
-            &self.architecture, &self.vendor, &self.system
-        )?;
+        write!(f, "{}-{}-{}", self.architecture, self.vendor, self.system)?;
 
         if let Some(ref abi) = self.abi {
             write!(f, "-{abi}")

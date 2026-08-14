@@ -14,7 +14,7 @@ This package contains three components.
 
 Building Skia is quite exceptional, a number of prerequisites need to be available and configured properly for the target platform.
 
-To configure and build Skia, [`build_support/skia.rs`](build_support/skia.rs) does all the hard work: it pulls `depot_tools/` and `skia/` from Google's repositories and a number of additional dependencies by executing `skia/tools/git-sync-deps` with Python. After that, it configures Skia with Google's [GN](https://gn.googlesource.com/gn/+/refs/heads/master/README.md) tool, and finally builds it by giving control to the `ninja` executable from the `depot_tools/` package.
+To configure and build Skia, [`build_support/skia.rs`](build_support/skia.rs) does all the hard work: it synchronizes Skia's additional dependencies by executing `skia/tools/git-sync-deps` with Python. After that, it configures Skia with Google's [GN](https://gn.googlesource.com/gn/+/refs/heads/master/README.md) tool, and finally builds it with the configured `ninja` executable.
 
 ### Binding Generation
 

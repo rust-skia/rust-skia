@@ -77,7 +77,7 @@ mod tests {
         let single_font_provider = |filename: &str| {
             let path = Path::new(filename);
             let font_data = fs::read(path).unwrap();
-            let font = sys_mgr.new_from_data(&font_data, None).unwrap();
+            let font = sys_mgr.new_from_bytes(&font_data, None).unwrap();
             let mut provider = TypefaceFontProvider::new();
             provider.register_typeface(font, None);
             provider

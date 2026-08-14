@@ -37,17 +37,14 @@ Update it whenever you learn something new about the project's patterns, convent
 - Explanations should be concise and strictly relevant.
 - When unsure, ask clarifying questions before making assumptions.
 
+## Skills
+The following is the complete list of workspace skills:
+- [`cpp-to-rust-documentation`](skills/cpp-to-rust-documentation/SKILL.md): use when porting documentation from Skia C++ headers to Rust APIs.
+- [`skia-milestone-update`](skills/skia-milestone-update/SKILL.md): use when updating Skia to a milestone or refreshing the current milestone from its upstream `chrome/mXX` branch.
+
 ## Documentation
 - Markdown documentation updates to existing files are fine.
 - Ask before creating new Markdown documentation files.
-- When porting documentation from C++ headers:
-    - Stay close to the original wording.
-    - Document parameters using a list (e.g. `- param: description`).
-    - Link types using brackets (e.g. `[`Type`]`).
-    - Use Rust equivalents for C++ types and constants (e.g. `SkPoint` -> `[`Point`]`, `kMove_Verb` -> `[`PathVerb::Move`]`).
-    - Do not rename functions when generating documentation.
-    - If the Rust function name differs from the C++ function name, use the Rust name in the documentation text.
-    - Ensure documentation parameter names match the Rust function parameter names.
 - Verify documentation links with `make doc`.
 - Use `[`Self::method()`]` instead of `[`method(&self)`]` for intra-doc links to methods.
 - Escape array indexing in comments (e.g., `` `pts[0]` ``) to avoid them being interpreted as links.

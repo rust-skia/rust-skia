@@ -192,6 +192,23 @@ fn should_try_download_binaries(
 }
 
 fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
+    let url = url.as_ref();
+    download_and_unpack(url, output_directory).or_else(|err| {
+        // A stale cached download, for example one restored from an outdated CI cache, can make
+        // the download fail (servers reject resuming a file that is already complete or too
+        // large with HTTP 416, which newer curl versions may also silently ignore) or produce a
+        // corrupt archive. Delete the cached file and retry once from scratch.
+        let Some(cache_file_path) = utils::download_cache_path(url).filter(|p| p.exists()) else {
+            return Err(err);
+        };
+        println!("DOWNLOAD OR UNPACK FAILED: {err}");
+        println!("DELETING THE CACHED DOWNLOAD AND RETRYING");
+        fs::remove_file(cache_file_path)?;
+        download_and_unpack(url, output_directory)
+    })
+}
+
+fn download_and_unpack(url: &str, output_directory: &Path) -> io::Result<()> {
     let archive = utils::download(url, true)?;
     println!(
         "UNPACKING ARCHIVE INTO: {}",

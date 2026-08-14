@@ -66,6 +66,8 @@ pub mod backend_render_targets {
 pub mod backend_semaphores {
     #[cfg(feature = "d3d")]
     pub use super::ganesh::d3d::backend_semaphores::*;
+    #[cfg(feature = "vulkan")]
+    pub use super::ganesh::vk::backend_semaphores::*;
 }
 
 pub mod direct_contexts {

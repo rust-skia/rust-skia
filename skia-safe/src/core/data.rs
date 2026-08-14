@@ -34,6 +34,12 @@ impl Deref for Data {
     }
 }
 
+impl AsRef<[u8]> for Data {
+    fn as_ref(&self) -> &[u8] {
+        self.deref()
+    }
+}
+
 impl PartialEq for Data {
     // Although there is an implementation in SkData for equality testing, we
     // prefer to stay on the Rust side for that.
@@ -67,6 +73,12 @@ impl Data {
     pub fn copy_range(&self, offset: usize, buffer: &mut [u8]) -> &Self {
         buffer.copy_from_slice(&self.as_bytes()[offset..offset + buffer.len()]);
         self
+    }
+
+    /// Returns data that shares a subset of this data's storage without copying it.
+    /// Returns `None` when `offset + length` exceeds this data's size.
+    pub fn share_subset(&self, offset: usize, length: usize) -> Option<Self> {
+        Self::from_ptr(unsafe { sb::C_SkData_shareSubset(self.native(), offset, length) })
     }
 
     // TODO: rename to copy_from() ? or from_bytes()?
@@ -156,6 +168,13 @@ mod tests {
     }
 
     #[test]
+    fn share_subset() {
+        let data = Data::new_copy(&[1, 2, 3]);
+        assert_eq!(data.share_subset(1, 2).unwrap().as_bytes(), &[2, 3]);
+        assert!(data.share_subset(2, 2).is_none());
+    }
+
+    #[test]
     fn from_stream_empty() {
         let data = [];
         let cursor = io::Cursor::new(data);
@@ -170,5 +189,52 @@ mod tests {
         let data = Data::from_stream(cursor, 1).unwrap();
         assert_eq!(data.len(), 1);
         assert_eq!(data[0], 1u8);
+    }
+
+    #[test]
+    fn data_deref_and_asref() {
+        fn sample(_t: &[u8]) {}
+        fn sample_asref(_t: &(impl AsRef<[u8]> + ?Sized)) {}
+        fn sample_arc_asref(_t: std::sync::Arc<dyn AsRef<[u8]> + Sync + Send>) {}
+        fn sample_rc_asref(_t: std::rc::Rc<dyn AsRef<[u8]>>) {}
+
+        let data = Data::new_str("Test Case");
+
+        // Explicitly calling as_bytes
+        sample(data.as_bytes());
+        sample_asref(data.as_bytes());
+
+        // Passing a reference to the data itself - sample is deduced from Deref but AsRef is not
+        sample(&data);
+        sample_asref(&data);
+
+        // Index access, from Deref
+        let _x = data[0];
+        let _y = &data[0..2];
+
+        // Placing the Data into more common owners - other libraries expose these in their APIs
+        let data_arc = std::sync::Arc::new(data.clone());
+        sample(&data_arc);
+        sample_asref(&*data_arc);
+        sample_arc_asref(data_arc.clone());
+
+        let data_rc = std::rc::Rc::new(data.clone());
+        sample_rc_asref(data_rc.clone());
+
+        // The primary goal of this test case is to ensure that it type checks
+        // however, sanity check the conversions too
+        assert_eq!(data.as_bytes(), &*data);
+
+        let data_as_ref: &[u8] = data.as_ref();
+        assert_eq!(data_as_ref, data.deref());
+
+        let data_as_ref: &[u8] = &data;
+        assert_eq!(data_as_ref, data.as_bytes());
+
+        let data_as_ref: &[u8] = &data_arc;
+        assert_eq!(data_as_ref, data.as_bytes());
+
+        let data_as_ref: &[u8] = &data_rc;
+        assert_eq!(data_as_ref, data.as_bytes());
     }
 }

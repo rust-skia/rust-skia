@@ -349,6 +349,12 @@ pub mod pdf {
         /// quality setting.
         pub encoding_quality: Option<i32>,
 
+        /// If `true`, rasterize gradients with non-opaque stops for print compatibility.
+        ///
+        /// Intended only for physical printing; it trades vector fidelity and file size to avoid
+        /// PDF-to-PostScript converter bugs.
+        pub rasterize_alpha_gradients_for_printing: bool,
+
         /// An optional tree of structured document tags that provide a semantic representation of
         /// the content. The caller should retain ownership.
         pub structure_element_tree_root: Option<StructureElementNode<'a>>,
@@ -375,6 +381,7 @@ pub mod pdf {
                 raster_dpi: Default::default(),
                 pdf_a: Default::default(),
                 encoding_quality: Default::default(),
+                rasterize_alpha_gradients_for_printing: Default::default(),
                 structure_element_tree_root: None,
                 outline: Outline::None,
                 compression_level: Default::default(),
@@ -426,6 +433,8 @@ pub mod pdf {
             if let Some(encoding_quality) = metadata.encoding_quality {
                 internal.fEncodingQuality = encoding_quality
             }
+            internal.fRasterizeAlphaGradientsForPrinting =
+                metadata.rasterize_alpha_gradients_for_printing;
             if let Some(structure_element_tree) = &metadata.structure_element_tree_root {
                 internal.fStructureElementTreeRoot = structure_element_tree.0.as_ptr();
             }

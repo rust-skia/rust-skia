@@ -18,7 +18,7 @@ categories = [
 ]
 license = "MIT"
 
-version = "0.99.0"
+version = "0.101.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition.workspace = true
 rust-version.workspace = true
@@ -28,9 +28,9 @@ doctest = false
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf", "jpeg"]
-all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "skottie", "webp"]
-all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "webp"]
-all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "skottie", "webp"]
+all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "skottie", "webp", "graphite"]
+all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "webp", "graphite"]
+all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "skottie", "webp", "graphite"]
 gl = ["gpu", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
@@ -58,10 +58,11 @@ save-svg-images = []
 
 # implied only, do not use
 gpu = []
+graphite = ["skia-bindings/graphite"]
 
 [dependencies]
 bitflags = "2.0"
-skia-bindings = { version = "=0.99.0", path = "../skia-bindings", default-features = false }
+skia-bindings = { version = "=0.101.0", path = "../skia-bindings", default-features = false }
 
 
 # D3D types & ComPtr
@@ -77,13 +78,13 @@ windows = { version = "0.62.0", features = [
 
 # svg
 ureq = { version = "3.0.4", optional = true }
-base64 = { version = "0.22.0", optional = true }
+base64 = { version = "0.23.0", optional = true }
 percent-encoding = { version = "2.3.1", optional = true }
 skia-svg-macros = { version = "0.1.0", path = "../skia-svg-macros", optional = true }
 
 [dev-dependencies]
 
-serial_test = "3.0"
+serial_test = "4.0"
 static_assertions = "1.1"
 winit = "0.30.2"
 
@@ -102,7 +103,7 @@ vulkano = { version = "0.35" }
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dev-dependencies]
 objc2 = { version = "0.6.3", default-features = false }
 objc2-core-foundation = { version = "0.3.2", default-features = false }
-objc2-metal = { version = "0.3.2", default-features = false, features = ["MTLCommandBuffer", "MTLCommandQueue", "MTLDrawable", "MTLPixelFormat"] }
+objc2-metal = { version = "0.3.2", default-features = false, features = ["MTLDevice", "MTLCommandBuffer", "MTLCommandQueue", "MTLDrawable", "MTLPixelFormat"] }
 objc2-quartz-core = { version = "0.3.2", default-features = false, features = ["objc2-core-foundation", "objc2-metal", "CAMetalLayer"] }
 raw-window-handle = "0.6.0"
 

@@ -290,11 +290,13 @@ impl PathBuilder {
     ///
     /// Appends [`PathVerb::Move`] to verb array and (0, 0) to [`Point`] array, if needed.
     ///
-    /// If w is finite and not one, appends [`PathVerb::Conic`] to verb array;
+    /// If w is finite, positive, and not one, appends [`PathVerb::Conic`] to verb array;
     /// and pt1, pt2 to [`Point`] array; and w to conic weights.
     ///
     /// If w is one, appends [`PathVerb::Quad`] to verb array, and
     /// pt1, pt2 to [`Point`] array.
+    ///
+    /// If w is zero, this is the same as `line_to(pt2)`.
     ///
     /// If w is not finite, appends [`PathVerb::Line`] twice to verb array, and
     /// pt1, pt2 to [`Point`] array.
@@ -443,10 +445,10 @@ impl PathBuilder {
     /// Appends [`PathVerb::Move`] to verb array and (0, 0) to [`Point`] array,
     /// if needed.
     ///
-    /// If w is finite and not one, next appends [`PathVerb::Conic`] to verb array,
+    /// If w is finite, positive, and not one, next appends [`PathVerb::Conic`] to verb array,
     /// and w is recorded as conic weight; otherwise, if w is one, appends
-    /// [`PathVerb::Quad`] to verb array; or if w is not finite, appends [`PathVerb::Line`]
-    /// twice to verb array.
+    /// [`PathVerb::Quad`] to verb array; or if w is zero, this is the same as
+    /// `r_line_to(pt2)`; or if w is not finite, appends [`PathVerb::Line`] twice to verb array.
     ///
     /// In all cases appends [`Point`] control and end to [`Point`] array.
     /// control is last point plus vector p1.

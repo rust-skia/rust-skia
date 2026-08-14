@@ -943,7 +943,39 @@ impl Surface {
         SurfaceProps::from_native_ref(unsafe { &*sb::C_SkSurface_props(self.native()) })
     }
 
-    // TODO: wait()
+    /// Inserts a list of GPU semaphores that the current GPU-backed API
+    /// must wait on before executing any more commands on the GPU for
+    /// this surface. If this call returns `false`, then the GPU back-end
+    /// will not wait on any passed-in semaphores, and the client will
+    /// still own the semaphores, regardless of the value of
+    /// `delete_semaphores_after_wait`.
+    ///
+    /// If `delete_semaphores_after_wait` is `false` then Skia will not
+    /// delete the semaphores. In this case it is the client's
+    /// responsibility to not destroy or attempt to reuse the semaphores
+    /// until it knows that Skia has finished waiting on them. This can
+    /// be done by using `finished_proc`s on flush calls.
+    ///
+    /// Returns: `true` if the GPU is waiting on the semaphores
+    #[cfg(feature = "gpu")]
+    pub fn wait(
+        &mut self,
+        wait_semaphores: &[crate::gpu::BackendSemaphore],
+        delete_semaphores_after_wait: impl Into<Option<bool>>,
+    ) -> bool {
+        let delete_after_wait = delete_semaphores_after_wait.into().unwrap_or(true);
+        unsafe {
+            sb::SkSurface_wait(
+                self.native_mut(),
+                wait_semaphores
+                    .len()
+                    .try_into()
+                    .expect("wait_semaphores length exceeds c_int"),
+                wait_semaphores.native().as_ptr(),
+                delete_after_wait,
+            )
+        }
+    }
 }
 
 pub use surfaces::BackendSurfaceAccess;

@@ -39,6 +39,8 @@ crate-post-release-test:
 	cd /tmp && cargo new skia-test
 	cd /tmp/skia-test && cargo add skia-safe
 	cd /tmp/skia-test && cargo run
+	# https://github.com/rust-skia/rust-skia/issues/1310
+	cd /tmp/skia-test && cargo build --target wasm32-unknown-emscripten
 
 # Publishes skia-bindings and skia-safe to crates.io
 # This is temporary and should be automated.
@@ -124,6 +126,13 @@ update-doc:
 .PHONY: doc
 doc:
 	cargo doc --no-deps --features ${doc-features-mac}
+
+# Runs all tests that can be run on macOS with the full macOS feature set.
+.PHONY: test-macos
+test-macos:
+	cargo test -p skia-safe --features "all-macos,ureq" --lib
+	cargo test -p skia-safe --features "all-macos,ureq" --tests
+	cargo build -p skia-safe --features "all-macos,ureq" --examples
 
 build-flags-win=--release --features "gl,vulkan,d3d,textlayout,webp"
 

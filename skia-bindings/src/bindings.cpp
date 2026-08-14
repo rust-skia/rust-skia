@@ -537,6 +537,11 @@ extern "C" bool C_SkData_unique(const SkData* self) {
     return self->unique();
 }
 
+extern "C" SkData* C_SkData_shareSubset(const SkData* self, size_t offset, size_t length) {
+    auto subset = self->shareSubset(offset, length);
+    return const_cast<SkData*>(subset.release());
+}
+
 extern "C" SkData* C_SkData_MakeWithCopy(const void* data, size_t length) {
     return SkData::MakeWithCopy(data, length).release();
 }
@@ -1571,6 +1576,14 @@ extern "C" void C_SkRRect_setRect(SkRRect* self, const SkRect* rect) {
     self->setRect(*rect);
 }
 
+extern "C" bool C_SkRRect_containsPoint(const SkRRect* self, const SkPoint* point) {
+    return self->contains(*point);
+}
+
+extern "C" bool C_SkRRect_containsRect(const SkRRect* self, const SkRect* rect) {
+    return self->contains(*rect);
+}
+
 extern "C" void C_SkRRect_dumpToString(const SkRRect* self, bool asHex, SkString* str) {
     *str = self->dumpToString(asHex);
 }
@@ -1737,7 +1750,7 @@ extern "C" void C_SkTypeface_serialize2(const SkTypeface* self, SkWStream* strea
 }
 
 extern "C" SkTypeface* C_SkTypeface_MakeDeserialize(SkStream* stream, SkFontMgr* lastResortFontMgr) {
-    return SkTypeface::MakeDeserialize(stream, sp(lastResortFontMgr)).release();
+    return SkTypeface::MakeDeserialize(stream, sp(lastResortFontMgr), nullptr).release();
 }
 
 extern "C" void C_SkTypeface_unicharsToGlyphs(const SkTypeface* self, const SkUnichar* uni, size_t uniCount, SkGlyphID* glyphs, size_t glyphsCount) {
@@ -1762,6 +1775,10 @@ extern "C" bool C_SkTypeface_getKerningPairAdjustments(const SkTypeface* self, c
 
 extern "C" SkStreamAsset* C_SkTypeface_openStream(const SkTypeface* self, int* ttcIndex) {
     return self->openStream(ttcIndex).release();
+}
+
+extern "C" SkStreamAsset* C_SkTypeface_openExistingStream(const SkTypeface* self, int* ttcIndex) {
+    return self->openExistingStream(ttcIndex).release();
 }
 
 extern "C" void C_SkTypeface_getBounds(const SkTypeface* self, SkRect* uninitialized) {
@@ -1923,6 +1940,16 @@ extern "C" void C_SkStrikeRef_getWidths(
 
 extern "C" SkScalar C_SkStrikeRef_getWidth(const SkStrikeRef* self, SkGlyphID glyph) {
     return self->getWidth(glyph);
+}
+
+extern "C" void C_SkStrikeRef_getWidthsStrided(
+    const SkStrikeRef* self,
+    unsigned count,
+    const uint32_t* firstGlyph,
+    unsigned glyphStride32,
+    SkScalar* firstAdvance,
+    unsigned advanceStride32) {
+    self->getWidthsStrided(count, firstGlyph, glyphStride32, firstAdvance, advanceStride32);
 }
 
 extern "C" void C_SkStrikeRef_getWidthsBounds(
@@ -2838,6 +2865,10 @@ extern "C" size_t C_SkStream_read(SkStream* stream, void* buffer, size_t len) {
 
 extern "C" size_t C_SkStreamAsset_getLength(const SkStreamAsset* self) {
     return self->getLength();
+}
+
+extern "C" const SkData* C_SkStreamAsset_getData(const SkStreamAsset* self) {
+    return self->getData().release();
 }
 
 extern "C" void C_SkWStream_destruct(SkWStream* self) {

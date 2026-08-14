@@ -39,20 +39,11 @@ See the [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-s
 
 Version numbering: Each milestone bump increments the minor version (e.g. 0.95.0 -> 0.96.0).
 
-Key diffs to check between milestones (in `skia-bindings/skia/`):
-
-```sh
-git diff OLD_TAG..NEW_TAG -- include/core include/codec include/docs include/effects \
-  include/encode include/gpu include/pathops include/svg include/utils include/private/base \
-  modules/skparagraph/include modules/skshaper/include modules/svg/include modules/skresources/include
-```
-
-Build organization diffs:
-
-```sh
-git diff OLD_TAG..NEW_TAG -- BUILD.gn gn/ modules/skshaper/BUILD.gn modules/skshaper/skshaper.gni \
-  modules/paragraph/BUILD.gn modules/paragraph/skparagraph.gni modules/svg/BUILD.gn modules/svg/svg.gni
-```
+For Skia submodule milestone include/API diffs, use direct
+`git -C skia-bindings/skia diff OLD_TAG..NEW_TAG -- ...` commands. Do not use
+`make diff-skia` for this; that target only compares rust-skia-specific commits
+in the Skia submodule against master (it is the "Do the `rust-skia:` commits ...
+match with `master`" checklist item, not an include-diff tool).
 
 ## Release notes
 

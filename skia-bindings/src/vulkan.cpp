@@ -1,7 +1,9 @@
 #include "include/gpu/MutableTextureState.h"
 #include "include/gpu/ganesh/vk/GrBackendDrawableInfo.h"
+#include "include/gpu/ganesh/GrBackendSemaphore.h"
 #include "include/gpu/ganesh/GrBackendSurface.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
+#include "include/gpu/ganesh/vk/GrVkBackendSemaphore.h"
 #include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "include/gpu/ganesh/vk/GrVkTypes.h"
@@ -218,5 +220,20 @@ extern "C" void C_VulkanYcbcrConversionInfo_Construct_Format(
     VkFormatFeatureFlags formatFeatures) {
     new (uninitialized) skgpu::VulkanYcbcrConversionInfo(
         format, ycbcrModel, ycbcrRange, xChromaOffset, yChromaOffset, chromaFilter, forceExplicitReconstruction, components, formatFeatures);
+}
+
+//
+// gpu/ganesh/vk/GrVkBackendSemaphore.h
+//
+
+extern "C" void C_GrBackendSemaphore_ConstructVk(
+    GrBackendSemaphore* uninitialized,
+    VkSemaphore semaphore) {
+    new(uninitialized) GrBackendSemaphore(GrBackendSemaphores::MakeVk(semaphore));
+}
+
+extern "C" VkSemaphore C_GrBackendSemaphores_GetVkSemaphore(
+    const GrBackendSemaphore* semaphore) {
+    return GrBackendSemaphores::GetVkSemaphore(*semaphore);
 }
 

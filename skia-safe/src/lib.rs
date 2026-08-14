@@ -21,6 +21,8 @@ mod effects;
 mod encode_;
 #[cfg(feature = "gpu")]
 pub mod gpu;
+#[cfg(feature = "graphite")]
+pub mod graphite;
 mod interop;
 mod modules;
 mod pathops;

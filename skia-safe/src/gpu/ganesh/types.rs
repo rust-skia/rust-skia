@@ -2,6 +2,7 @@ use std::ptr;
 
 use crate::gpu;
 use crate::gpu::GpuStatsFlags;
+use crate::prelude::NativeSliceAccess;
 use skia_bindings as sb;
 
 pub use skia_bindings::GrBackendApi as BackendApi;
@@ -54,6 +55,28 @@ impl Default for FlushInfo {
 }
 
 native_transmutable!(sb::GrFlushInfo, FlushInfo);
+
+impl FlushInfo {
+    /// Sets the signal-semaphore array Skia will signal when work
+    /// submitted by the next flush call has executed on the GPU. Each
+    /// entry is treated as in/out by Skia: initialized semaphores are
+    /// signaled directly, uninitialized entries are filled with a
+    /// freshly-created semaphore.
+    ///
+    /// # Safety
+    /// `semaphores` must outlive any flush call that consumes this
+    /// [`FlushInfo`]. The flush operation may write back into the slice,
+    /// so the caller must keep it borrowed mutably until the flush
+    /// returns.
+    pub unsafe fn set_signal_semaphores(
+        &mut self,
+        semaphores: &mut [gpu::BackendSemaphore],
+    ) -> &mut Self {
+        self.num_semaphores = semaphores.len();
+        self.signal_semaphores = semaphores.native_mut().as_mut_ptr();
+        self
+    }
+}
 
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
 variant_name!(SemaphoresSubmitted::Yes);

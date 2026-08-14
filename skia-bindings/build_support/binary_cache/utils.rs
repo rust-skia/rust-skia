@@ -1,10 +1,27 @@
 use std::{
-    env,
-    fs::{self, File},
-    io::{self, Error, ErrorKind, Read},
+    env, fs,
+    io::{self, Error, ErrorKind},
     path::{Path, PathBuf},
     str,
 };
+
+/// The path under which [`download`] caches the downloaded file when invoked with
+/// `resume_and_cache`, or `None` when there is no usable cache location.
+pub fn download_cache_path(url: impl AsRef<str>) -> Option<PathBuf> {
+    // Specify the directory where the downloaded files are stored.
+    let Ok(out_dir) = env::var("OUT_DIR") else {
+        eprintln!("OUT_DIR not available");
+        return None;
+    };
+
+    let url = url.as_ref();
+    let Some(file_name) = url.split('/').next_back() else {
+        eprintln!("Failed to extract filename from `{url}`");
+        return None;
+    };
+
+    Some(PathBuf::from(out_dir).join(".cache").join(file_name))
+}
 
 /// Downloads a file from a URL,
 ///
@@ -25,17 +42,13 @@ pub fn download(url: impl AsRef<str>, resume_and_cache: bool) -> io::Result<Vec<
         return Err(ErrorKind::Unsupported.into());
     }
 
-    // Specify the directory where the downloaded files are stored.
-    let Ok(out_dir) = env::var("OUT_DIR") else {
-        eprintln!("OUT_DIR not available");
-        return Err(ErrorKind::Unsupported.into());
-    };
-
-    let mut out_dir = PathBuf::from(&out_dir);
-
-    let Some(file_name) = url.split('/').next_back() else {
-        eprintln!("Failed to extract filename from `{url}`");
-        return Err(ErrorKind::InvalidInput.into());
+    let cache_file_path = if resume_and_cache {
+        let Some(path) = download_cache_path(url) else {
+            return Err(ErrorKind::Unsupported.into());
+        };
+        Some(path)
+    } else {
+        None
     };
 
     let mut command = std::process::Command::new("curl");
@@ -48,8 +61,7 @@ pub fn download(url: impl AsRef<str>, resume_and_cache: bool) -> io::Result<Vec<
         // no progress meter but keep error messages.
         .arg("-sS");
 
-    let cache_file_path = out_dir.join(".cache").join(file_name);
-    if resume_and_cache {
+    if let Some(cache_file_path) = &cache_file_path {
         // resumed transfer offset
         command
             .arg("-C")
@@ -67,11 +79,8 @@ pub fn download(url: impl AsRef<str>, resume_and_cache: bool) -> io::Result<Vec<
         Ok(out) => {
             // read bytes from the file
             if out.status.success() {
-                if resume_and_cache {
-                    let mut file = File::open(cache_file_path)?;
-                    let mut result = Vec::with_capacity(file.metadata()?.len() as usize);
-                    file.read_to_end(&mut result)?;
-                    Ok(result)
+                if let Some(cache_file_path) = cache_file_path {
+                    fs::read(cache_file_path)
                 } else {
                     Ok(out.stdout)
                 }

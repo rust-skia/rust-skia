@@ -8,6 +8,8 @@ use skia_bindings::{
 
 #[cfg(feature = "gpu")]
 use crate::gpu;
+#[cfg(feature = "graphite")]
+use crate::graphite;
 use crate::{Arc, ColorSpace};
 use crate::{
     Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode, Font, GlyphId, IPoint,
@@ -511,6 +513,21 @@ impl Canvas {
     pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.recording_context()
             .and_then(|mut c| c.as_direct_context())
+    }
+
+    /// Returns the [`graphite::Recorder`] for the GPU surface backing this
+    /// canvas, if it is Graphite-backed.
+    ///
+    /// `SkCanvas::recorder()` returns a *borrowed* pointer — the recorder is
+    /// owned by the surface/canvas — so the result is a
+    /// [`graphite::BorrowedRecorder`] that does not delete the recorder on drop
+    /// and is bound to this canvas's lifetime. Wrapping it in an owning handle
+    /// would double-free the recorder.
+    #[cfg(feature = "graphite")]
+    pub fn recorder(&self) -> Option<graphite::BorrowedRecorder<'_>> {
+        let recorder =
+            graphite::Recorder::from_ptr(unsafe { sb::C_SkCanvas_recorder(self.native()) })?;
+        Some(graphite::BorrowedRecorder::from_canvas(recorder, self))
     }
 
     /// Sometimes a canvas is owned by a surface. If it is, [`Self::surface()`] will return a bare

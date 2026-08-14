@@ -4,4 +4,5 @@ target/
 /cmake-build-debug/
 .direnv/
 /tmp/
+.DS_Store
 
