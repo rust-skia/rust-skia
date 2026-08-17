@@ -30,7 +30,10 @@ impl PlatformDetails for VisionOs {
 
         // Without this, Skia auto-resolves `xcode_sysroot` to the iphoneos/iphonesimulator SDK
         // (see `gn/skia/BUILD.gn`). Point it at the visionOS SDK instead.
-        builder.arg("xcode_sysroot", quote(platform.sdk_path().to_str().unwrap()));
+        builder.arg(
+            "xcode_sysroot",
+            quote(platform.sdk_path().to_str().unwrap()),
+        );
 
         // Override the target triple with the visionOS (`xros`) triple. This sets the
         // platform/version-min via the triple, so no separate `-m..-version-min` flag is needed.
