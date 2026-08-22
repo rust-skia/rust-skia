@@ -185,6 +185,10 @@ _Notes:_
 
 Compilation to iOS is supported on macOS targeting the iOS simulator (`--target x86_64-apple-ios`) and 64 bit ARM devices (`--target aarch64-apple-ios`). The ARM64**e** architecture is [not supported yet](https://github.com/rust-lang/rust/issues/73628).
 
+### For visionOS
+
+Compilation to visionOS is supported on macOS targeting visionOS devices (`--target aarch64-apple-visionos`) and the visionOS simulator (`--target aarch64-apple-visionos-sim`). These are Rust [tier 3 targets](https://doc.rust-lang.org/rustc/platform-support.html), so a nightly toolchain and `-Z build-std` are required, and the visionOS SDK must be installed via Xcode. Skia itself has no dedicated visionOS configuration, so it is built using its iOS code paths against the visionOS (`xros`) SDK. Prebuilt binaries are not provided; Skia is built from source. Only Metal is available as a GPU backend (visionOS has no OpenGL).
+
 ### For WebAssembly
 
 Install `emscripten` version 3.1.57 or superior and make sure that llvm / clang 16+ is installed. In the examples below, we assume

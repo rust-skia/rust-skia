@@ -18,6 +18,7 @@ pub mod ios;
 pub mod linux;
 pub mod macos;
 mod ohos;
+pub mod visionos;
 mod windows;
 
 /// Returns the list of redundant features for the given platform.
@@ -92,6 +93,7 @@ fn details(target: &Target) -> &dyn PlatformDetails {
         (_, "linux", "android", _) | (_, "linux", "androideabi", _) => &android::Android,
         (_, "apple", "darwin", _) => &macos::MacOs,
         (_, "apple", "ios", _) => &ios::Ios,
+        (_, "apple", "visionos", _) => &visionos::VisionOs,
         (_, _, "windows", Some("msvc")) if host.is_windows() => &windows::Msvc,
         (_, _, "windows", _) => &windows::Generic,
         (_, "unknown", "linux", Some("ohos")) => &ohos::OpenHarmony,
