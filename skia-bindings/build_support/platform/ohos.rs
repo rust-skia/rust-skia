@@ -84,7 +84,7 @@ pub fn additional_clang_args(target: &str, target_arch: &str) -> Vec<String> {
 }
 
 pub fn extra_skia_cflags() -> Vec<String> {
-    vec![format!("-D__MUSL__")]
+    vec!["-D__MUSL__".to_string()]
 }
 
 pub fn link_libraries(features: &Features) -> Vec<&str> {
