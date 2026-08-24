@@ -144,6 +144,7 @@ pub fn binaries_jobs(workflow: &Workflow) -> Vec<Job> {
     features.extend(vizia_binaries_features(workflow));
     features.extend(skia_canvas_binaries_features(workflow));
     features.extend(grida_canvas_binaries_features(workflow));
+    features.extend(slint_binaries_features(workflow));
 
     features.sort();
     features.dedup();
@@ -234,6 +235,30 @@ fn grida_canvas_binaries_features(workflow: &Workflow) -> Vec<Features> {
             vec!["gl,textlayout,svg,webp".into()]
         }
         _ => Vec::new(),
+    }
+}
+
+/// Specific binary releases for the Slint UI toolkit <https://github.com/slint-ui/slint>
+///
+/// Slint shapes and lays out text itself, so it combines `gl` with the platform's
+/// accelerator but does not use `textlayout`. Every published combination of `gl`
+/// plus an accelerator currently enables `textlayout`, which embeds Skia's ICU data
+/// and adds about 10 MB to the resulting binary.
+fn slint_binaries_features(workflow: &Workflow) -> Vec<Features> {
+    match workflow.host_os {
+        HostOS::MacOS => {
+            vec!["gl,metal".into()]
+        }
+        HostOS::Windows | HostOS::WindowsArm => {
+            vec!["d3d,gl".into()]
+        }
+        // Covers the Android targets built by the Linux workflow as well.
+        HostOS::Linux => {
+            vec!["gl,vulkan".into()]
+        }
+        HostOS::Wasm => {
+            vec![]
+        }
     }
 }
 
