@@ -3713,12 +3713,13 @@ C_SkImageFilters_SpotLitSpecular(const SkPoint3 &location,
 }
 
 SkImageFilter *C_SkImageFilters_RuntimeShader(
-    const SkRuntimeShaderBuilder &builder, const char *childShaderName,
-    size_t childShaderNameCount, SkImageFilter *input,
-    bool restrictOutputToInputBounds) {
+    const SkRuntimeShaderBuilder &builder, SkScalar sampleRadius,
+    const char *childShaderName, size_t childShaderNameCount,
+    SkImageFilter *input, bool restrictOutputToInputBounds) {
   auto imageFilter = SkImageFilters::RuntimeShader(
-      builder, 0.0f, std::string_view(childShaderName, childShaderNameCount),
-      sp(input), restrictOutputToInputBounds);
+      builder, sampleRadius,
+      std::string_view(childShaderName, childShaderNameCount), sp(input),
+      restrictOutputToInputBounds);
   return imageFilter.release();
 }
 }
