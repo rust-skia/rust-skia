@@ -255,6 +255,16 @@ pub fn generate_bindings(
     {
         let args = platform::bindgen_and_cc_args(&target, sysroot);
 
+        if target.system == "darwin" {
+            let sdk = args
+                .args
+                .iter()
+                .find_map(|arg| arg.strip_prefix("-isysroot"))
+                .expect("macOS SDK path missing from bindgen arguments");
+            bindgen_args.push("-nostdinc++".into());
+            bindgen_args.push(format!("-isystem{sdk}/usr/include/c++/v1"));
+        }
+
         bindgen_args.extend(args.args.clone());
         cc_args.extend(args.args);
 
