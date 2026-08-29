@@ -137,6 +137,7 @@ pub fn generate_bindings(
         .blocklist_type("GrContextPriv")
         .raw_line("pub enum GrContextPriv {}")
         .blocklist_function("GrContext_priv.*")
+        .blocklist_function("SkContext_priv.*")
         .blocklist_function("SkDeferredDisplayList_priv.*")
         .raw_line("pub enum SkVerticesPriv {}")
         .blocklist_type("SkVerticesPriv")
