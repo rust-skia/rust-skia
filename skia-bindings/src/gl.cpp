@@ -6,6 +6,7 @@
     #define SK_GL
 #endif
 
+#include "include/core/SkContext.h"
 #include "include/gpu/ganesh/GrBackendSurface.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
@@ -161,6 +162,12 @@ extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface, c
         return GrDirectContexts::MakeGL(*options).release();
     }
     return GrDirectContexts::MakeGL().release();
+}
+
+extern "C" SkContext* C_SkContexts_MakeGaneshGL(
+    GrGLInterface* interface,
+    const SkContextOptions* options) {
+    return SkContexts::MakeGanesh(sp(interface), *options).release();
 }
 
 //

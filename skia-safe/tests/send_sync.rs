@@ -56,6 +56,8 @@ mod core {
     assert_impl_all!(ColorTable: Send, Sync);
     assert_impl_all!(ContourMeasure: Send, Sync);
     assert_impl_all!(ContourMeasureIter: Send, Sync);
+    assert_not_impl_any!(Context: Send, Sync);
+    assert_impl_all!(ContextOptions: Send, Sync);
     assert_impl_all!(ForwardVerbIterator: Send, Sync);
     assert_impl_all!(VerbMeasure: Send, Sync);
     assert_impl_all!(CubicMap: Send, Sync);

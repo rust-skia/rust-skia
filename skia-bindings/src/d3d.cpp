@@ -1,5 +1,6 @@
 #include "bindings.h"
 
+#include "include/core/SkContext.h"
 #include "include/gpu/ganesh/GrBackendSurface.h"
 #include "include/gpu/ganesh/GrBackendSemaphore.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
@@ -126,4 +127,10 @@ extern "C" GrDirectContext* C_GrDirectContext_MakeD3D(
     const GrD3DBackendContext* backendContext,
     const GrContextOptions* options) {
     return C_GrDirectContexts_MakeD3D(backendContext, options);
+}
+
+extern "C" SkContext* C_SkContexts_MakeGaneshD3D(
+    const GrD3DBackendContext* backendContext,
+    const SkContextOptions* options) {
+    return SkContexts::MakeGanesh(*backendContext, *options).release();
 }
