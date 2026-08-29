@@ -2,7 +2,7 @@
 name = "skia-svg-macros"
 
 description = "Skia SVG Macros for Dom bindings"
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 rust-version.workspace = true
 
@@ -17,4 +17,4 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
-syn = "2.0.77"
+syn = { version = "3.0.3", features = ["full"] }
