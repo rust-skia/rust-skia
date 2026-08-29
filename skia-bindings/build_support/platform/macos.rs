@@ -3,7 +3,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use super::prelude::*;
+use super::{apple, prelude::*};
 
 pub struct MacOs;
 
@@ -37,6 +37,10 @@ impl PlatformDetails for MacOs {
             } else {
                 cargo::warning("failed to get macosx SDK path")
             }
+        }
+
+        if let Some(sdk) = builder.sysroot().map(PathBuf::from) {
+            apple::use_sdk_libcxx(builder, &sdk);
         }
 
         builder.args(flags());

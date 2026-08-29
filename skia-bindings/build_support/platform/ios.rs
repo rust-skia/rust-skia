@@ -1,9 +1,9 @@
 use std::{
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::{Command, Stdio},
 };
 
-use super::prelude::*;
+use super::{apple, prelude::*};
 
 pub struct Ios;
 
@@ -41,10 +41,10 @@ impl PlatformDetails for Ios {
     }
 
     fn bindgen_args(&self, target: &Target, builder: &mut BindgenArgsBuilder) {
-        builder.args(additional_clang_args(
-            &target.architecture,
-            target.abi.as_deref(),
-        ));
+        let platform = IosPlatform::new(&target.architecture, target.abi.as_deref());
+        let sdk = platform.sdk_path();
+        builder.args(additional_clang_args(&target.architecture, platform, &sdk));
+        apple::use_sdk_libcxx(builder, &sdk);
 
         // TODO: duplicated from gn_args, target overrides should probably a separated from Gn and
         // bindgen args.
@@ -90,10 +90,8 @@ fn extra_skia_cflags(arch: &str, abi: Option<&str>) -> Vec<String> {
     IosPlatform::new(arch, abi).flags()
 }
 
-fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
+fn additional_clang_args(arch: &str, platform: IosPlatform, sdk: &Path) -> Vec<String> {
     let mut args: Vec<String> = Vec::new();
-
-    let platform = IosPlatform::new(arch, abi);
 
     args.extend(platform.flags());
 
@@ -109,7 +107,7 @@ fn additional_clang_args(arch: &str, abi: Option<&str>) -> Vec<String> {
     }
 
     args.push("-isysroot".into());
-    args.push(platform.sdk_path().to_str().unwrap().into());
+    args.push(sdk.to_str().unwrap().into());
     args.push("-fembed-bitcode".into());
 
     args
