@@ -144,6 +144,7 @@ pub fn binaries_jobs(workflow: &Workflow) -> Vec<Job> {
     features.extend(vizia_binaries_features(workflow));
     features.extend(skia_canvas_binaries_features(workflow));
     features.extend(grida_canvas_binaries_features(workflow));
+    features.extend(neovide_binaries_features(workflow));
     features.extend(slint_binaries_features(workflow));
 
     features.sort();
@@ -238,6 +239,15 @@ fn grida_canvas_binaries_features(workflow: &Workflow) -> Vec<Features> {
     }
 }
 
+// Binaries for Neovide: <https://github.com/neovide/neovide>
+// <https://github.com/neovide/neovide/pull/3544>
+fn neovide_binaries_features(workflow: &Workflow) -> Vec<Features> {
+    match workflow.host_os {
+        HostOS::Linux => vec!["embed-freetype,gl,textlayout".into()],
+        _ => Vec::new(),
+    }
+}
+
 /// Specific binary releases for the Slint UI toolkit <https://github.com/slint-ui/slint>
 ///
 /// Slint shapes and lays out text itself, so it combines `gl` with the platform's
@@ -300,10 +310,11 @@ fn linux_aarch64_targets() -> Vec<TargetConf> {
 }
 
 fn android_targets() -> Vec<TargetConf> {
+    // Android already embeds FreeType, so an explicit feature would duplicate existing binaries.
     [
-        TargetConf::new("aarch64-linux-android", "").disable("egl,x11,wayland"),
-        TargetConf::new("x86_64-linux-android", "").disable("egl,x11,wayland"),
-        TargetConf::new("i686-linux-android", "").disable("egl,x11,wayland"),
+        TargetConf::new("aarch64-linux-android", "").disable("egl,embed-freetype,x11,wayland"),
+        TargetConf::new("x86_64-linux-android", "").disable("egl,embed-freetype,x11,wayland"),
+        TargetConf::new("i686-linux-android", "").disable("egl,embed-freetype,x11,wayland"),
     ]
     .into()
 }
