@@ -491,13 +491,49 @@ pub fn runtime_shader(
     child_shader_name: impl AsRef<str>,
     input: impl Into<Option<ImageFilter>>,
 ) -> Option<ImageFilter> {
+    runtime_shader_with_options(builder, 0.0, child_shader_name, input, false)
+}
+
+/// Creates a runtime-shader image filter and optionally restricts its output to its input bounds.
+///
+/// Set `restrict_output_to_input_bounds` only when the shader evaluates to transparent black
+/// wherever its child shader does. This allows downstream filters to retain finite content bounds.
+pub fn runtime_shader_with_output_bounds(
+    builder: &RuntimeShaderBuilder,
+    child_shader_name: impl AsRef<str>,
+    input: impl Into<Option<ImageFilter>>,
+    restrict_output_to_input_bounds: bool,
+) -> Option<ImageFilter> {
+    runtime_shader_with_options(
+        builder,
+        0.0,
+        child_shader_name,
+        input,
+        restrict_output_to_input_bounds,
+    )
+}
+
+/// Creates a runtime-shader image filter with a child-shader sampling radius and optionally
+/// restricts its output to its input bounds.
+///
+/// `sample_radius` is the maximum absolute offset in either axis between coordinates passed to the
+/// runtime shader and coordinates used to sample its child shader.
+pub fn runtime_shader_with_options(
+    builder: &RuntimeShaderBuilder,
+    sample_radius: scalar,
+    child_shader_name: impl AsRef<str>,
+    input: impl Into<Option<ImageFilter>>,
+    restrict_output_to_input_bounds: bool,
+) -> Option<ImageFilter> {
     let child_shader_name = child_shader_name.as_ref();
     unsafe {
         ImageFilter::from_ptr(sb::C_SkImageFilters_RuntimeShader(
             builder.native() as *const _,
+            sample_radius,
             child_shader_name.as_ptr() as *const _,
             child_shader_name.len(),
             input.into().into_ptr_or_null(),
+            restrict_output_to_input_bounds,
         ))
     }
 }

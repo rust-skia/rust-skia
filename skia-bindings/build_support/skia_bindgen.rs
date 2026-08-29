@@ -137,6 +137,7 @@ pub fn generate_bindings(
         .blocklist_type("GrContextPriv")
         .raw_line("pub enum GrContextPriv {}")
         .blocklist_function("GrContext_priv.*")
+        .blocklist_function("SkContext_priv.*")
         .blocklist_function("SkDeferredDisplayList_priv.*")
         .raw_line("pub enum SkVerticesPriv {}")
         .blocklist_type("SkVerticesPriv")
@@ -255,8 +256,9 @@ pub fn generate_bindings(
     {
         let args = platform::bindgen_and_cc_args(&target, sysroot);
 
-        bindgen_args.extend(args.args.clone());
-        cc_args.extend(args.args);
+        bindgen_args.extend(args.bindgen_only_args);
+        bindgen_args.extend(args.shared_args.clone());
+        cc_args.extend(args.shared_args);
 
         let mut target_str = &target.to_string();
         let mut override_target = false;

@@ -1,3 +1,4 @@
+#include "include/core/SkContext.h"
 #include "include/gpu/MutableTextureState.h"
 #include "include/gpu/ganesh/vk/GrBackendDrawableInfo.h"
 #include "include/gpu/ganesh/GrBackendSemaphore.h"
@@ -174,6 +175,12 @@ extern "C" GrDirectContext* C_GrDirectContexts_MakeVulkan(
         return GrDirectContexts::MakeVulkan(*vkBackendContext, *options).release();
     }
     return GrDirectContexts::MakeVulkan(*vkBackendContext).release();
+}
+
+extern "C" SkContext* C_SkContexts_MakeGaneshVulkan(
+    const skgpu::VulkanBackendContext* backendContext,
+    const SkContextOptions* options) {
+    return SkContexts::MakeGanesh(*backendContext, *options).release();
 }
 
 // MutableTextureState.h

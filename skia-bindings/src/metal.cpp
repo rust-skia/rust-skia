@@ -5,6 +5,7 @@
 #include "bindings.h"
 
 #include "include/core/SkColorSpace.h"
+#include "include/core/SkContext.h"
 #include "include/core/SkSurface.h"
 #include "include/gpu/ganesh/GrBackendSurface.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
@@ -88,6 +89,12 @@ extern "C" GrDirectContext *C_GrContext_MakeMetal(
         return GrDirectContexts::MakeMetal(*context, *options).release();
     }
     return GrDirectContexts::MakeMetal(*context).release();
+}
+
+extern "C" SkContext* C_SkContexts_MakeGaneshMetal(
+    const GrMtlBackendContext* context,
+    const SkContextOptions* options) {
+    return SkContexts::MakeGanesh(*context, *options).release();
 }
 
 //

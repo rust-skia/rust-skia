@@ -6,6 +6,7 @@
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
+#include "include/core/SkContext.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkSize.h"
@@ -387,6 +388,12 @@ extern "C" skgpu::graphite::Context* C_ContextFactory_MakeMetal(
     return skgpu::graphite::ContextFactory::MakeMetal(*backendContext, *options).release();
 }
 
+extern "C" SkContext* C_SkContexts_MakeGraphiteMetal(
+    const skgpu::graphite::MtlBackendContext* backendContext,
+    const SkContextOptions* options) {
+    return SkContexts::MakeGraphite(*backendContext, *options).release();
+}
+
 extern "C" void C_BackendTextures_MakeMetal(
     skgpu::graphite::BackendTexture* uninitialized,
     int width,
@@ -411,6 +418,13 @@ extern "C" skgpu::graphite::Context* C_ContextFactory_MakeVulkan(
     const void* backendContext,
     const skgpu::graphite::ContextOptions* options) {
     return skgpu::graphite::ContextFactory::MakeVulkan(
+        *static_cast<const skgpu::VulkanBackendContext*>(backendContext), *options).release();
+}
+
+extern "C" SkContext* C_SkContexts_MakeGraphiteVulkan(
+    const void* backendContext,
+    const SkContextOptions* options) {
+    return SkContexts::MakeGraphite(
         *static_cast<const skgpu::VulkanBackendContext*>(backendContext), *options).release();
 }
 #endif

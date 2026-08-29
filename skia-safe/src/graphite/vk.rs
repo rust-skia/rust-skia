@@ -50,3 +50,24 @@ pub fn make_context<'a>(
         context
     }
 }
+
+pub mod contexts {
+    use skia_bindings as sb;
+
+    use crate::{Context, ContextOptions, gpu::vk, prelude::*};
+
+    pub fn make_graphite(
+        backend_context: &vk::BackendContext,
+        options: &ContextOptions,
+    ) -> Option<Context> {
+        unsafe {
+            let end_resolving = backend_context.begin_resolving();
+            let context = Context::from_ptr(sb::C_SkContexts_MakeGraphiteVulkan(
+                backend_context.native.as_ptr() as _,
+                options.native(),
+            ));
+            drop(end_resolving);
+            context
+        }
+    }
+}

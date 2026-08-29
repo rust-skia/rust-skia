@@ -21,3 +21,15 @@ pub mod direct_contexts {
         })
     }
 }
+
+pub mod contexts {
+    use skia_bindings as sb;
+
+    use crate::{Context, ContextOptions, gpu::mtl, prelude::*};
+
+    pub fn make_ganesh(backend: &mtl::BackendContext, options: &ContextOptions) -> Option<Context> {
+        Context::from_ptr(unsafe {
+            sb::C_SkContexts_MakeGaneshMetal(backend.native(), options.native())
+        })
+    }
+}

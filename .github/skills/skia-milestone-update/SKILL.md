@@ -6,15 +6,16 @@ description: Perform a Skia milestone update for rust-skia or refresh the curren
 # Skia Milestone Update
 
 This skill performs a Skia milestone update for rust-skia, aligning it with a new
-Skia `chrome/mXX` branch. The authoritative checklist is the
+Skia `chrome/mXX` branch. Use the bundled [`PR_TEMPLATE.md`](PR_TEMPLATE.md) as
+the working PR checklist and follow every item. It is based on the
 [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR)
-wiki page; follow every item there. Project-specific conventions and the
-`make diff-skia` caveat live in `AGENTS.md` — read it before starting.
+wiki page and extends it with project-specific coverage such as Graphite. The
+`make diff-skia` caveat lives in `AGENTS.md` — read it before starting.
 
 ## Inputs
 
-- `OLD_TAG`: the current Skia submodule tag (e.g. `m150-0.98.1`)
-- `NEW_TAG`: the target Skia submodule tag (e.g. `m151-0.99.0`)
+- `OLD_TAG`: the current Skia submodule tag (e.g. `m152-0.152.1`)
+- `NEW_TAG`: the target Skia submodule tag (e.g. `m153-0.153.0`)
 - `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `150` / `151`)
 
 Determine these from `skia-bindings/Cargo.toml` (`[package.metadata] skia = "..."`)
@@ -62,7 +63,7 @@ the fork tag.
    where `N` is the number of rust-skia patches.
 
 5. Increment the patch component of the Skia fork tag (for example,
-   `m151-0.99.0` -> `m151-0.99.1`) and tag the rebased tip. Do not bump the Rust crate
+  `m153-0.153.0` -> `m153-0.153.1`) and tag the rebased tip. Do not bump the Rust crate
    versions for a same-milestone upstream refresh.
 
 6. Update `[package.metadata].skia`, the README comparison links, and the parent
@@ -89,9 +90,17 @@ the fork tag.
 
 ## Notes that go beyond the wiki checklist
 
-- **Versioning:** each milestone bump increments the minor version
-  (e.g. `0.98.0` -> `0.99.0`). Add the version to any new `deprecated` attributes
-  (`since = "0.X.Y"`).
+- **Versioning:** synchronize the Rust crate minor version with the numeric Skia
+  milestone: milestone `mXX` uses version `0.XX.0` (for example, `m153` uses
+  `0.153.0`). Update all of these together:
+  - `skia-bindings/Cargo.toml` package version;
+  - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
+  - `skia-bindings/Cargo.toml` `[package.metadata].skia` tag
+    (for example, `m153-0.153.0`);
+  - both package entries in `Cargo.lock`.
+  Add the synchronized crate version to any new `deprecated` attributes
+  (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
+  versions unchanged and increment only the Skia fork tag's patch component.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff OLD_TAG..NEW_TAG -- ...`
   commands. Do not use `make diff-skia` for include/API diffs; that target only
   compares rust-skia-specific commits in the Skia submodule against master (it is the

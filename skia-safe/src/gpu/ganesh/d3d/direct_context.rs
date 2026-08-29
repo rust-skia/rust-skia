@@ -21,3 +21,22 @@ pub mod direct_contexts {
         }
     }
 }
+
+pub mod contexts {
+    use skia_bindings as sb;
+
+    use crate::{Context, ContextOptions, gpu::d3d, prelude::*};
+
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn make_ganesh(
+        backend_context: &d3d::BackendContext,
+        options: &ContextOptions,
+    ) -> Option<Context> {
+        unsafe {
+            Context::from_ptr(sb::C_SkContexts_MakeGaneshD3D(
+                backend_context.native(),
+                options.native(),
+            ))
+        }
+    }
+}

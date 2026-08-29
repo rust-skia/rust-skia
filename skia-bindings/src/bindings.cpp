@@ -34,6 +34,8 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkColorTable.h"
+#include "include/core/SkContext.h"
+#include "include/core/SkContextOptions.h"
 #include "include/core/SkCPURecorder.h"
 #include "include/core/SkContourMeasure.h"
 #include "include/core/SkCoverageMode.h"
@@ -81,6 +83,7 @@
 #include "include/core/SkTypeface.h"
 #include "include/core/SkTypes.h"
 #include "include/core/SkVertices.h"
+#include "include/core/RasterContext.h"
 // docs/
 #include "include/docs/SkPDFDocument.h"
 #include "include/docs/SkPDFJpegHelpers.h"
@@ -320,6 +323,26 @@ extern "C" void C_Core_Types(
     SkArc *, SkGraphics *, SkCoverageMode *, SkColorChannelFlag *, SkSurfaces::BackendSurfaceAccess) {};
 
 extern "C" void C_SkDocument_Types(SkDocument*) {}
+
+//
+// core/SkContext.h, core/SkContextOptions.h, core/RasterContext.h
+//
+
+extern "C" void C_SkContextOptions_Construct(SkContextOptions* uninitialized) {
+    new (uninitialized) SkContextOptions();
+}
+
+extern "C" void C_SkContextOptions_destruct(SkContextOptions* self) {
+    self->~SkContextOptions();
+}
+
+extern "C" SkContext* C_SkContexts_MakeRaster(const SkContextOptions& options) {
+    return SkContexts::MakeRaster(options).release();
+}
+
+extern "C" void C_SkContext_delete(SkContext* self) {
+    delete self;
+}
 
 //
 // core/SkBlender.h
@@ -3690,11 +3713,13 @@ C_SkImageFilters_SpotLitSpecular(const SkPoint3 &location,
 }
 
 SkImageFilter *C_SkImageFilters_RuntimeShader(
-    const SkRuntimeShaderBuilder &builder, const char *childShaderName,
-    size_t childShaderNameCount, SkImageFilter *input) {
+    const SkRuntimeShaderBuilder &builder, SkScalar sampleRadius,
+    const char *childShaderName, size_t childShaderNameCount,
+    SkImageFilter *input, bool restrictOutputToInputBounds) {
   auto imageFilter = SkImageFilters::RuntimeShader(
-      builder, std::string_view(childShaderName, childShaderNameCount),
-      sp(input));
+      builder, sampleRadius,
+      std::string_view(childShaderName, childShaderNameCount), sp(input),
+      restrictOutputToInputBounds);
   return imageFilter.release();
 }
 }
