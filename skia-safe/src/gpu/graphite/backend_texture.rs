@@ -2,8 +2,8 @@ use std::fmt;
 
 use skia_bindings as sb;
 
-use crate::graphite::TextureInfo;
-use crate::graphite::types::BackendApi;
+use super::TextureInfo;
+use crate::gpu::BackendApi;
 use crate::{ISize, prelude::*};
 
 pub type BackendTexture = Handle<sb::skgpu_graphite_BackendTexture>;

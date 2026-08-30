@@ -9,7 +9,7 @@ use skia_bindings::{
 #[cfg(feature = "gpu")]
 use crate::gpu;
 #[cfg(feature = "graphite")]
-use crate::graphite;
+use crate::gpu::graphite;
 use crate::{Arc, ColorSpace};
 use crate::{
     Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode, Font, GlyphId, IPoint,

@@ -5,9 +5,41 @@ use std::ops::Deref;
 
 use skia_bindings as sb;
 
-use crate::graphite::{Recording, TextureInfo, types::BackendApi};
+use super::{Recording, TextureInfo};
+use crate::gpu::BackendApi;
 use crate::prelude::*;
 use crate::{Canvas, ImageInfo};
+
+/// Configuration for recorder creation
+pub type RecorderOptions = Handle<sb::skgpu_graphite_RecorderOptions>;
+
+impl NativeDrop for sb::skgpu_graphite_RecorderOptions {
+    fn drop(&mut self) {
+        unsafe { sb::C_RecorderOptions_destruct(self) }
+    }
+}
+
+impl fmt::Debug for RecorderOptions {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RecorderOptions").finish()
+    }
+}
+
+impl Default for RecorderOptions {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl RecorderOptions {
+    /// Create new recorder options with the C++ defaults (e.g. a 256 MiB GPU
+    /// budget). Placement-constructed rather than zero-initialized, because
+    /// `RecorderOptions` has a non-trivial constructor and members (an `sk_sp`,
+    /// a `std::optional`, and a non-zero default budget).
+    pub fn new() -> Self {
+        Self::construct(|options| unsafe { sb::C_RecorderOptions_Construct(options) })
+    }
+}
 
 // `skgpu::graphite::Recorder` is handed out as `std::unique_ptr<Recorder>`
 // (Context::makeRecorder) and derives from `SkRecorder`, not `SkRefCnt`. It is
@@ -96,7 +128,7 @@ impl Recorder {
 
     // Note: Canvas creation in Graphite is typically done through Surface creation
     // Surface::canvas() is the recommended way to get a canvas for drawing
-    // See graphite::surfaces module for surface creation functions
+    // See the `surfaces` module for surface creation functions.
 
     /// Returns a canvas that records into a proxy surface (instantiated on
     /// replay), targeting a texture with the given `image_info` / `texture_info`.
@@ -131,5 +163,17 @@ impl Recorder {
     /// The backend API (Vulkan, Metal, etc.)
     pub fn backend(&self) -> BackendApi {
         unsafe { sb::C_Recorder_backend(self.native()) }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_recorder_options_creation() {
+        let options = RecorderOptions::new();
+        let _default_options = RecorderOptions::default();
+        let _ = format!("{:?}", options);
     }
 }

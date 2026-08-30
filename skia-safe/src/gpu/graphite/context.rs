@@ -2,7 +2,9 @@ use std::fmt;
 
 use skia_bindings as sb;
 
-use crate::graphite::{InsertRecordingInfo, InsertStatus, Recorder, RecorderOptions, SubmitInfo};
+use super::{
+    BackendTexture, InsertRecordingInfo, InsertStatus, Recorder, RecorderOptions, SubmitInfo,
+};
 use crate::prelude::*;
 use crate::{IPoint, ImageInfo, Surface};
 
@@ -113,7 +115,7 @@ impl Context {
     ///
     /// # Arguments
     /// - `texture` - The backend texture to delete
-    pub fn delete_backend_texture(&mut self, texture: &crate::graphite::BackendTexture) {
+    pub fn delete_backend_texture(&mut self, texture: &BackendTexture) {
         unsafe {
             sb::C_Context_deleteBackendTexture(self.native_mut(), texture.native());
         }
@@ -141,7 +143,7 @@ impl Context {
     /// insert the recording first:
     ///
     /// ```no_run
-    /// # use skia_safe::graphite;
+    /// # use skia_safe::gpu::graphite;
     /// # fn f(context: &mut graphite::Context, recorder: &mut graphite::Recorder,
     /// #      surface: &mut skia_safe::Surface) {
     /// // ... draw to surface.canvas() ...

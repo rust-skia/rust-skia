@@ -2,7 +2,7 @@ use std::fmt;
 
 use skia_bindings as sb;
 
-use crate::{graphite::types::BackendApi, prelude::*};
+use crate::{gpu::BackendApi, prelude::*};
 
 pub type TextureInfo = Handle<sb::skgpu_graphite_TextureInfo>;
 

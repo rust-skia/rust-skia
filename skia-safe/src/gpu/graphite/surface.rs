@@ -4,7 +4,8 @@
 
 use skia_bindings as sb;
 
-use crate::graphite::{BackendTexture, Mipmapped, Recorder};
+use super::{BackendTexture, Recorder};
+use crate::gpu::Mipmapped;
 use crate::prelude::*;
 use crate::{ColorSpace, ColorType, IRect, ImageInfo, Surface, SurfaceProps};
 

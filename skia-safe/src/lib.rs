@@ -18,10 +18,7 @@ mod core;
 mod docs;
 mod effects;
 mod encode_;
-#[cfg(feature = "gpu")]
 pub mod gpu;
-#[cfg(feature = "graphite")]
-pub mod graphite;
 mod interop;
 mod modules;
 mod pathops;
@@ -48,54 +45,6 @@ pub use encode_::*;
 #[allow(unused_imports)]
 pub use modules::*;
 pub use pathops::*;
-
-/// Stubs for types that are only available with the `gpu` feature.
-#[allow(unknown_lints, clippy::uninhabited_references)]
-#[cfg(not(feature = "gpu"))]
-pub mod gpu {
-    use std::{
-        ops::{Deref, DerefMut},
-        ptr,
-    };
-
-    use crate::prelude::*;
-
-    #[derive(Debug)]
-    pub enum RecordingContext {}
-
-    impl NativePointerOrNullMut for Option<&mut RecordingContext> {
-        type Native = skia_bindings::GrRecordingContext;
-
-        fn native_ptr_or_null_mut(&mut self) -> *mut skia_bindings::GrRecordingContext {
-            ptr::null_mut()
-        }
-    }
-
-    #[derive(Debug)]
-    pub enum DirectContext {}
-
-    impl Deref for DirectContext {
-        type Target = RecordingContext;
-
-        fn deref(&self) -> &Self::Target {
-            unsafe { transmute_ref(self) }
-        }
-    }
-
-    impl DerefMut for DirectContext {
-        fn deref_mut(&mut self) -> &mut Self::Target {
-            unsafe { transmute_ref_mut(self) }
-        }
-    }
-
-    impl NativePointerOrNullMut for Option<&mut DirectContext> {
-        type Native = skia_bindings::GrDirectContext;
-
-        fn native_ptr_or_null_mut(&mut self) -> *mut skia_bindings::GrDirectContext {
-            ptr::null_mut()
-        }
-    }
-}
 
 #[cfg(test)]
 mod transmutation_tests {

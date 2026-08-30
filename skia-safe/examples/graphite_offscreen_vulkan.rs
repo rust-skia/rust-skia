@@ -17,10 +17,8 @@ fn main() {
 fn main() {
     use ash::vk::{self, Handle};
 
-    use skia_safe::{
-        AlphaType, Color4f, ColorType, ImageInfo, Paint, Rect, gpu,
-        graphite::{self, vk as gvk},
-    };
+    use skia_safe::gpu::graphite::{self, vk as gvk};
+    use skia_safe::{AlphaType, Color4f, ColorType, ImageInfo, Paint, Rect, gpu};
 
     let iters: usize = std::env::args()
         .nth(1)
@@ -117,7 +115,8 @@ fn main() {
     // is only needed to build the Context and is dropped immediately after).
     let mut shared = if reuse {
         let backend = make_backend();
-        let mut context = gvk::make_context(&backend, None).expect("make_context returned None");
+        let mut context =
+            gvk::context_factory::make_vulkan(&backend, None).expect("make_vulkan returned None");
         let recorder = context
             .make_recorder(None)
             .expect("make_recorder returned None");
@@ -131,8 +130,8 @@ fn main() {
             None
         } else {
             let backend = make_backend();
-            let mut context =
-                gvk::make_context(&backend, None).expect("make_context returned None");
+            let mut context = gvk::context_factory::make_vulkan(&backend, None)
+                .expect("make_vulkan returned None");
             let recorder = context
                 .make_recorder(None)
                 .expect("make_recorder returned None");
@@ -148,7 +147,7 @@ fn main() {
         let mut surface = graphite::surfaces::render_target(
             recorder,
             &image_info,
-            graphite::Mipmapped::No,
+            gpu::Mipmapped::No,
             None,
             Some("graphite_offscreen_vulkan_verify"),
         )

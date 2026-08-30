@@ -23,10 +23,14 @@ pub use skia_bindings::skgpu_Mipmapped as Mipmapped;
 pub use skia_bindings::skgpu_Protected as Protected;
 variant_name!(Protected::Yes);
 
+#[cfg(feature = "gpu")]
 pub use skia_bindings::skgpu_Renderable as Renderable;
+#[cfg(feature = "gpu")]
 variant_name!(Renderable::No);
 
+#[cfg(feature = "gpu")]
 pub use skia_bindings::skgpu_Origin as Origin;
+#[cfg(feature = "gpu")]
 variant_name!(Origin::TopLeft);
 
 bitflags! {

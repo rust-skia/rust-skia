@@ -4,7 +4,7 @@
 
 use skia_bindings as sb;
 
-use crate::graphite::{BackendTexture, Recorder};
+use super::{BackendTexture, Recorder};
 use crate::prelude::*;
 use crate::{AlphaType, ColorSpace, ColorType, IRect, Image};
 
