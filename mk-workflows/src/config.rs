@@ -320,7 +320,6 @@ fn android_targets() -> Vec<TargetConf> {
     [
         TargetConf::new("aarch64-linux-android", "").disable("egl,embed-freetype,x11,wayland"),
         TargetConf::new("x86_64-linux-android", "").disable("egl,embed-freetype,x11,wayland"),
-        TargetConf::new("i686-linux-android", "").disable("egl,embed-freetype,x11,wayland"),
     ]
     .into()
 }

@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "aarch64-linux-android", "x86_64-linux-android", "i686-linux-android"]
+        target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "aarch64-linux-android", "x86_64-linux-android"]
         include:
           - target: x86_64-unknown-linux-gnu
             androidEnv: false
@@ -47,14 +47,6 @@ jobs:
             generateArtifacts: false
             features: 'ganesh,gl,graphite,skottie,svg,textlayout,ureq,vulkan,webp'
           - target: x86_64-linux-android
-            androidEnv: true
-            emscriptenEnv: false
-            runClippy: false
-            runTests: false
-            exampleArgs: ''
-            generateArtifacts: false
-            features: 'ganesh,gl,graphite,skottie,svg,textlayout,ureq,vulkan,webp'
-          - target: i686-linux-android
             androidEnv: true
             emscriptenEnv: false
             runClippy: false

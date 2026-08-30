@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         features: ["", "gl", "textlayout", "ganesh,vulkan", "gl,x11", "graphite,vulkan", "embed-freetype,gl,textlayout", "ganesh,gl,textlayout", "ganesh,gl,vulkan", "ganesh,textlayout,vulkan", "gl,textlayout,x11", "ganesh,gl,textlayout,vulkan", "gl,svg,textlayout,x11", "ganesh,svg,textlayout,vulkan,webp", "gl,svg,textlayout,wayland,x11", "egl,ganesh,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11"]
-        target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "aarch64-linux-android", "x86_64-linux-android", "i686-linux-android"]
+        target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "aarch64-linux-android", "x86_64-linux-android"]
         include:
           - target: x86_64-unknown-linux-gnu
             androidEnv: false
@@ -46,49 +46,30 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-          - target: i686-linux-android
-            androidEnv: true
-            emscriptenEnv: false
-            runClippy: false
-            runTests: false
-            exampleArgs: ''
-            generateArtifacts: false
         exclude:
           - target: aarch64-linux-android
             features: 'gl,x11'
           - target: x86_64-linux-android
             features: 'gl,x11'
-          - target: i686-linux-android
-            features: 'gl,x11'
           - target: aarch64-linux-android
             features: 'embed-freetype,gl,textlayout'
           - target: x86_64-linux-android
             features: 'embed-freetype,gl,textlayout'
-          - target: i686-linux-android
-            features: 'embed-freetype,gl,textlayout'
           - target: aarch64-linux-android
             features: 'gl,textlayout,x11'
           - target: x86_64-linux-android
-            features: 'gl,textlayout,x11'
-          - target: i686-linux-android
             features: 'gl,textlayout,x11'
           - target: aarch64-linux-android
             features: 'gl,svg,textlayout,x11'
           - target: x86_64-linux-android
-            features: 'gl,svg,textlayout,x11'
-          - target: i686-linux-android
             features: 'gl,svg,textlayout,x11'
           - target: aarch64-linux-android
             features: 'gl,svg,textlayout,wayland,x11'
           - target: x86_64-linux-android
-            features: 'gl,svg,textlayout,wayland,x11'
-          - target: i686-linux-android
             features: 'gl,svg,textlayout,wayland,x11'
           - target: aarch64-linux-android
             features: 'egl,ganesh,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11'
           - target: x86_64-linux-android
-            features: 'egl,ganesh,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11'
-          - target: i686-linux-android
             features: 'egl,ganesh,gl,skottie,svg,textlayout,vulkan,wayland,webp,x11'
     runs-on: ubuntu-22.04
     container: ghcr.io/pragmatrix/rust-skia-linux:latest
