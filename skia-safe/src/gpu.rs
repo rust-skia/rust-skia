@@ -133,6 +133,9 @@ mod tests {
     }
 }
 
+// CPU-only APIs such as image encoding retain optional Ganesh context parameters even when
+// Ganesh is disabled. These uninhabited placeholders preserve those signatures and convert the
+// absent contexts to null pointers; Graphite does not provide replacements for these Ganesh types.
 #[allow(unknown_lints, clippy::uninhabited_references)]
 #[cfg(not(feature = "ganesh"))]
 mod stubs {
