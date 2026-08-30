@@ -47,14 +47,6 @@ impl fmt::Debug for BackendFormat {
 }
 
 impl BackendFormat {
-    #[deprecated(
-        note = "The creation of invalid BackendFormats isn't supported anymore",
-        since = "0.37.0"
-    )]
-    pub fn new() -> Self {
-        Self::new_invalid()
-    }
-
     pub(crate) fn new_invalid() -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_Construct(bf) })
     }
@@ -63,42 +55,6 @@ impl BackendFormat {
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormats_ConstructGL(bf, format, target) })
             .assert_valid()
-    }
-
-    #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_formats::make_vk()")]
-    pub fn new_vulkan(
-        format: vk::Format,
-        will_use_drm_format_modifiers: impl Into<Option<bool>>,
-    ) -> Self {
-        gpu::backend_formats::make_vk(format, will_use_drm_format_modifiers)
-    }
-
-    #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_formats::make_vk_ycbcr()")]
-    pub fn new_vulkan_ycbcr(
-        conversion_info: &vk::YcbcrConversionInfo,
-        will_use_drm_format_modifiers: impl Into<Option<bool>>,
-    ) -> Self {
-        gpu::backend_formats::make_vk_ycbcr(conversion_info, will_use_drm_format_modifiers)
-    }
-
-    #[cfg(feature = "metal")]
-    #[deprecated(since = "0.74.0", note = "use gpu::backend_formats::make_mtl()")]
-    pub fn new_metal(format: mtl::PixelFormat) -> Self {
-        gpu::backend_formats::make_mtl(format)
-    }
-
-    #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.95.0", note = "use gpu::backend_formats::make_d3d()")]
-    pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
-        gpu::backend_formats::make_d3d(format)
-    }
-
-    #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.95.0", note = "use gpu::backend_formats::make_d3d()")]
-    pub fn new_d3d(format: d3d::DXGI_FORMAT) -> Self {
-        gpu::backend_formats::make_d3d(format)
     }
 
     pub fn backend(&self) -> BackendAPI {
@@ -143,14 +99,6 @@ impl BackendFormat {
         unsafe { sb::C_GrBackendFormat_makeTexture2D(self.native(), new.native_mut()) };
         assert!(Self::native_is_valid(new.native()));
         new
-    }
-
-    #[deprecated(
-        note = "Invalid BackendFormats are not supported anymore",
-        since = "0.37.0"
-    )]
-    pub fn is_valid(&self) -> bool {
-        self.native().fValid
     }
 
     pub(crate) fn native_is_valid(format: &GrBackendFormat) -> bool {
@@ -209,86 +157,6 @@ impl BackendTexture {
         Self::from_ptr(unsafe { sb::C_GrBackendTexture_new() }).unwrap()
     }
 
-    #[cfg(feature = "gl")]
-    #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_gl()")]
-    pub unsafe fn new_gl(
-        (width, height): (i32, i32),
-        mipmapped: gpu::Mipmapped,
-        gl_info: gl::TextureInfo,
-    ) -> Self {
-        unsafe { gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, "") }
-    }
-
-    #[cfg(feature = "gl")]
-    #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_gl()")]
-    pub unsafe fn new_gl_with_label(
-        (width, height): (i32, i32),
-        mipmapped: gpu::Mipmapped,
-        gl_info: gl::TextureInfo,
-        label: impl AsRef<str>,
-    ) -> Self {
-        unsafe { gpu::backend_textures::make_gl((width, height), mipmapped, gl_info, label) }
-    }
-
-    #[cfg(feature = "vulkan")]
-    #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_vk()")]
-    pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
-        unsafe { gpu::backend_textures::make_vk((width, height), vk_info, "") }
-    }
-
-    #[cfg(feature = "vulkan")]
-    #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_textures::make_vk()")]
-    pub unsafe fn new_vulkan_with_label(
-        (width, height): (i32, i32),
-        vk_info: &vk::ImageInfo,
-        label: impl AsRef<str>,
-    ) -> Self {
-        unsafe { gpu::backend_textures::make_vk((width, height), vk_info, label) }
-    }
-
-    #[cfg(feature = "metal")]
-    #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
-    pub unsafe fn new_metal(
-        (width, height): (i32, i32),
-        mipmapped: gpu::Mipmapped,
-        mtl_info: &mtl::TextureInfo,
-    ) -> Self {
-        unsafe { gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, "") }
-    }
-
-    #[cfg(feature = "metal")]
-    #[allow(clippy::missing_safety_doc)]
-    #[deprecated(since = "0.74.0", note = "use gpu::backend_textures::make_mtl()")]
-    pub unsafe fn new_metal_with_label(
-        (width, height): (i32, i32),
-        mipmapped: gpu::Mipmapped,
-        mtl_info: &mtl::TextureInfo,
-        label: impl AsRef<str>,
-    ) -> Self {
-        unsafe { gpu::backend_textures::make_mtl((width, height), mipmapped, mtl_info, label) }
-    }
-
-    #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.95.0", note = "use gpu::backend_textures::make_d3d()")]
-    pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
-        gpu::backend_textures::make_d3d((width, height), d3d_info, "")
-    }
-
-    #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.95.0", note = "use gpu::backend_textures::make_d3d()")]
-    pub fn new_d3d_with_label(
-        (width, height): (i32, i32),
-        d3d_info: &d3d::TextureResourceInfo,
-        label: impl AsRef<str>,
-    ) -> Self {
-        gpu::backend_textures::make_d3d((width, height), d3d_info, label)
-    }
-
     pub(crate) unsafe fn from_native_if_valid(
         backend_texture: *mut GrBackendTexture,
     ) -> Option<BackendTexture> {
@@ -314,11 +182,6 @@ impl BackendTexture {
 
     pub fn mipmapped(&self) -> Mipmapped {
         self.native().fMipmapped
-    }
-
-    #[deprecated(since = "0.35.0", note = "Use has_mipmaps()")]
-    pub fn has_mip_maps(&self) -> bool {
-        self.has_mipmaps()
     }
 
     pub fn has_mipmaps(&self) -> bool {
@@ -383,11 +246,6 @@ impl BackendTexture {
         unsafe { self.native().isProtected() }
     }
 
-    #[deprecated(note = "Invalid BackendTextures aren't supported", since = "0.37.0")]
-    pub fn is_valid(&self) -> bool {
-        self.native().fIsValid
-    }
-
     pub(crate) unsafe fn native_is_valid(texture: *const GrBackendTexture) -> bool {
         unsafe { (*texture).fIsValid }
     }
@@ -441,35 +299,6 @@ impl fmt::Debug for BackendRenderTarget {
 }
 
 impl BackendRenderTarget {
-    #[cfg(feature = "gl")]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_render_targets::make_gl()")]
-    pub fn new_gl(
-        (width, height): (i32, i32),
-        sample_count: impl Into<Option<usize>>,
-        stencil_bits: usize,
-        info: gl::FramebufferInfo,
-    ) -> Self {
-        gpu::backend_render_targets::make_gl((width, height), sample_count, stencil_bits, info)
-    }
-
-    #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.67.0", note = "use gpu::backend_render_targets::make_vk()")]
-    pub fn new_vulkan((width, height): (i32, i32), info: &vk::ImageInfo) -> Self {
-        gpu::backend_render_targets::make_vk((width, height), info)
-    }
-
-    #[cfg(feature = "metal")]
-    #[deprecated(since = "0.74.0", note = "use gpu::backend_render_targets::make_mtl()")]
-    pub fn new_metal((width, height): (i32, i32), mtl_info: &mtl::TextureInfo) -> Self {
-        gpu::backend_render_targets::make_mtl((width, height), mtl_info)
-    }
-
-    #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.95.0", note = "use gpu::backend_render_targets::make_d3d()")]
-    pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
-        gpu::backend_render_targets::make_d3d((width, height), d3d_info)
-    }
-
     pub(crate) fn from_native_c_if_valid(
         native: GrBackendRenderTarget,
     ) -> Option<BackendRenderTarget> {
@@ -550,14 +379,6 @@ impl BackendRenderTarget {
 
     pub fn is_protected(&self) -> bool {
         unsafe { self.native().isProtected() }
-    }
-
-    #[deprecated(
-        since = "0.37.0",
-        note = "Exposed BackendRenderTargets are always valid."
-    )]
-    pub fn is_valid(&self) -> bool {
-        self.native().fIsValid
     }
 
     pub(crate) fn native_is_valid(rt: &GrBackendRenderTarget) -> bool {

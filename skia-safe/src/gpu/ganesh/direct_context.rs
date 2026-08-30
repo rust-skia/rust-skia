@@ -8,9 +8,9 @@ use std::{
 use crate::{
     Data, Image, Surface, TextureCompressionType,
     gpu::{
-        BackendFormat, BackendRenderTarget, BackendTexture, ContextOptions, FlushInfo,
-        GpuStatsFlags, MutableTextureState, PurgeResourceOptions, RecordingContext,
-        SemaphoresSubmitted, SubmitInfo, SyncCpu,
+        BackendFormat, BackendRenderTarget, BackendTexture, FlushInfo, GpuStatsFlags,
+        MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted,
+        SubmitInfo, SyncCpu,
     },
     prelude::*,
     surfaces,
@@ -76,45 +76,6 @@ impl fmt::Debug for DirectContext {
 }
 
 impl DirectContext {
-    // Removed from Skia
-    #[cfg(feature = "gl")]
-    #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_gl()")]
-    pub fn new_gl<'a>(
-        interface: impl Into<crate::gpu::gl::Interface>,
-        options: impl Into<Option<&'a ContextOptions>>,
-    ) -> Option<DirectContext> {
-        crate::gpu::direct_contexts::make_gl(interface, options)
-    }
-
-    // Removed from Skia
-    #[cfg(feature = "vulkan")]
-    #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_vulkan()")]
-    pub fn new_vulkan<'a>(
-        backend_context: &crate::gpu::vk::BackendContext,
-        options: impl Into<Option<&'a ContextOptions>>,
-    ) -> Option<DirectContext> {
-        crate::gpu::direct_contexts::make_vulkan(backend_context, options)
-    }
-
-    #[cfg(feature = "metal")]
-    #[deprecated(since = "0.74.0", note = "use gpu::direct_contexts::make_metal()")]
-    pub fn new_metal<'a>(
-        backend_context: &crate::gpu::mtl::BackendContext,
-        options: impl Into<Option<&'a ContextOptions>>,
-    ) -> Option<DirectContext> {
-        crate::gpu::direct_contexts::make_metal(backend_context, options)
-    }
-
-    #[cfg(feature = "d3d")]
-    #[deprecated(since = "0.95.0", note = "use gpu::direct_contexts::make_d3d()")]
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn new_d3d<'a>(
-        backend_context: &crate::gpu::d3d::BackendContext,
-        options: impl Into<Option<&'a ContextOptions>>,
-    ) -> Option<DirectContext> {
-        unsafe { crate::gpu::direct_contexts::make_d3d(backend_context, options) }
-    }
-
     pub fn reset(&mut self, backend_state: Option<u32>) -> &mut Self {
         unsafe {
             self.native_mut()
@@ -239,11 +200,6 @@ impl DirectContext {
         self.flush(&FlushInfo::default());
         self.submit(SyncCpu::Yes);
         self
-    }
-
-    #[deprecated(since = "0.37.0", note = "Use flush()")]
-    pub fn flush_with_info(&mut self, info: &FlushInfo) -> SemaphoresSubmitted {
-        self.flush(info)
     }
 
     pub fn flush<'a>(&mut self, info: impl Into<Option<&'a FlushInfo>>) -> SemaphoresSubmitted {
