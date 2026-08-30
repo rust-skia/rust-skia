@@ -23,7 +23,9 @@ pub use skia_bindings::skgpu_Mipmapped as Mipmapped;
 pub use skia_bindings::skgpu_Protected as Protected;
 variant_name!(Protected::Yes);
 
+#[cfg(feature = "ganesh")]
 pub use skia_bindings::skgpu_Renderable as Renderable;
+#[cfg(feature = "ganesh")]
 variant_name!(Renderable::No);
 
 pub use skia_bindings::skgpu_Origin as Origin;

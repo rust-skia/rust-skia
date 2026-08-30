@@ -14,7 +14,7 @@
 //! # Basic Usage
 //!
 //! ```no_run
-//! use skia_safe::graphite;
+//! use skia_safe::gpu::graphite;
 //!
 //! // Context creation is platform-specific (see `graphite::mtl` / `graphite::vk`).
 //! # let context = None::<graphite::Context>;
@@ -34,22 +34,22 @@
 mod backend_texture;
 mod context;
 mod context_options;
-mod image_graphite;
+mod graphite_types;
+mod image;
 mod recorder;
 mod recording;
-mod surface_graphite;
+mod surface;
 mod texture_info;
-mod types;
 
 mod implementation {
     // Core types
     pub use super::context::Context;
-    pub use super::recorder::{BorrowedRecorder, Recorder};
+    pub use super::recorder::{BorrowedRecorder, Recorder, RecorderOptions};
     pub use super::recording::Recording;
 
     // Configuration and options
     pub use super::context_options::ContextOptions;
-    pub use super::types::*;
+    pub use super::graphite_types::*;
 
     // Texture and backend types
     pub use super::backend_texture::BackendTexture;
@@ -59,18 +59,16 @@ mod implementation {
 // Surface and image creation functions - re-export as modules
 pub mod surfaces {
     //! Surface creation functions for Graphite
-    pub use super::surface_graphite::*;
+    pub use super::surface::*;
 }
 
 pub mod images {
     //! Image utilities for Graphite
-    pub use super::image_graphite::*;
+    pub use super::image::*;
 }
 
-// Backend entry points are kept module-qualified for a symmetric API and to
-// avoid the two backends' `make_context` clashing at the `graphite` root:
-// `graphite::mtl::make_context` / `graphite::vk::make_context` (mirrors the
-// `gpu::mtl` / `gpu::vk` namespacing). `vk` reuses `gpu::vk::BackendContext`.
+// Backend entry points mirror the C++ header directories and namespaces.
+// Vulkan reuses `gpu::vk::BackendContext`.
 #[cfg(feature = "metal")]
 pub mod mtl;
 

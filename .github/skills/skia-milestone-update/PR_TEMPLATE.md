@@ -29,7 +29,7 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
   - [ ] `encode/`
   - [ ] `gpu/`
     - [ ] `ganesh/`
-    - [ ] `graphite/` (`include/gpu/graphite/` and `skia-safe/src/graphite/`)
+    - [ ] `graphite/` (`include/gpu/graphite/` and `skia-safe/src/gpu/graphite/`)
     - [ ] `mtl/`
     - [ ] `vk/`
   - [ ] `pathops/`

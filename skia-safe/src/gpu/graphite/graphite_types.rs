@@ -1,11 +1,6 @@
-use crate::prelude::*;
 use skia_bindings as sb;
 
-// Re-export the shared `skgpu` types through `gpu` rather than aliasing the
-// raw bindings again: `BackendApi` / `Mipmapped` are the same native types, and
-// `Budgeted` gets `gpu`'s bool-newtype wrapper instead of a second, name-clashing
-// incompatible type.
-pub use crate::gpu::{BackendApi, Budgeted, Mipmapped};
+use crate::prelude::*;
 
 /// Status of recording insertion (`skgpu::graphite::InsertStatus::V`).
 ///
@@ -15,63 +10,16 @@ pub use crate::gpu::{BackendApi, Budgeted, Mipmapped};
 /// unrecoverable state).
 pub use sb::skgpu_graphite_InsertStatus_V as InsertStatus;
 variant_name!(InsertStatus::Success);
-variant_name!(InsertStatus::InvalidRecording);
-variant_name!(InsertStatus::PromiseImageInstantiationFailed);
-variant_name!(InsertStatus::AddCommandsFailed);
-variant_name!(InsertStatus::AsyncShaderCompilesFailed);
-variant_name!(InsertStatus::OutOfOrderRecording);
-
-/// Configuration for recorder creation
-#[derive(Debug)]
-pub struct RecorderOptions {
-    inner: sb::skgpu_graphite_RecorderOptions,
-}
-
-impl Default for RecorderOptions {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Drop for RecorderOptions {
-    fn drop(&mut self) {
-        unsafe { sb::C_RecorderOptions_destruct(&mut self.inner) }
-    }
-}
-
-impl RecorderOptions {
-    /// Create new recorder options with the C++ defaults (e.g. a 256 MiB GPU
-    /// budget). Placement-constructed rather than zero-initialized, because
-    /// `RecorderOptions` has a non-trivial constructor and members (an `sk_sp`,
-    /// a `std::optional`, and a non-zero default budget).
-    pub fn new() -> Self {
-        let inner = unsafe {
-            let mut inner = std::mem::MaybeUninit::uninit();
-            sb::C_RecorderOptions_Construct(inner.as_mut_ptr());
-            inner.assume_init()
-        };
-        Self { inner }
-    }
-
-    pub(crate) fn native(&self) -> &sb::skgpu_graphite_RecorderOptions {
-        &self.inner
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn native_mut(&mut self) -> &mut sb::skgpu_graphite_RecorderOptions {
-        &mut self.inner
-    }
-}
 
 /// Information for inserting a recording into the context.
 ///
-/// Borrows the [`Recording`](crate::graphite::Recording) it references (it stores
+/// Borrows the [`Recording`](super::Recording) it references (it stores
 /// a raw `fRecording` pointer), so the borrow checker keeps the `Recording` alive
 /// for as long as this info — and any `insert_recording` call using it — is in use.
 #[derive(Debug)]
 pub struct InsertRecordingInfo<'a> {
     inner: std::ptr::NonNull<sb::skgpu_graphite_InsertRecordingInfo>,
-    _recording: std::marker::PhantomData<&'a mut crate::graphite::Recording>,
+    _recording: std::marker::PhantomData<&'a mut super::Recording>,
 }
 
 impl Drop for InsertRecordingInfo<'_> {
@@ -86,7 +34,7 @@ impl<'a> InsertRecordingInfo<'a> {
     /// Takes the recording as `&mut` because `Context::insert_recording`
     /// mutates it through the stored pointer (it sets failure results for
     /// finished procs and deinstantiates volatile lazy proxies).
-    pub fn new(recording: &'a mut crate::graphite::Recording) -> Self {
+    pub fn new(recording: &'a mut super::Recording) -> Self {
         // `InsertRecordingInfo` is not POD — `fSimulatedStatus` is an
         // `InsertStatus` holding a `std::string` — and a libstdc++
         // `std::string` in SSO state points into itself, so the struct cannot
@@ -151,14 +99,6 @@ variant_name!(SyncToCpu::Yes);
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_recorder_options_creation() {
-        let options = RecorderOptions::new();
-        let _default_options = RecorderOptions::default();
-        // Should not panic and should create valid options
-        let _ = format!("{:?}", options);
-    }
 
     #[test]
     fn test_submit_info_creation() {

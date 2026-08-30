@@ -19,6 +19,11 @@ fn main() -> Result<(), io::Error> {
 
     let features = {
         let mut features = features::Features::from_cargo_env();
+        if features.backend_without_engine() {
+            return Err(io::Error::other(
+                "the `vulkan` and `metal` features require at least one rendering engine: `ganesh` or `graphite`",
+            ));
+        }
         let missing_dependencies = features.missing_dependencies();
         if !missing_dependencies.is_empty() {
             return Err(io::Error::other(format!(

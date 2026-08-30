@@ -15,7 +15,7 @@ impl PlatformDetails for Emscripten {
 
         builder
             .arg("skia_gl_standard", quote("webgl"))
-            .arg("skia_use_webgl", yes_if(features.gpu()))
+            .arg("skia_use_webgl", yes_if(features.ganesh()))
             .arg("target_cpu", quote("wasm"))
             .arg("skia_emsdk_dir", quote(&emsdk_base_dir));
 

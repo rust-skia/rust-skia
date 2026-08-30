@@ -66,22 +66,9 @@ fn flags() -> Vec<String> {
     let deployment_target = cargo::env_var("MACOSX_DEPLOYMENT_TARGET");
 
     if let Some(deployment_target) = deployment_target {
-        let deployment_target = deployment_target_6(&deployment_target);
-        // Both of them are needed, so that GR_METAL_SDK_VERSION is set to the correct version.
-        return vec![
-            format!("-D__MAC_OS_X_VERSION_MIN_REQUIRED={deployment_target}"),
-            format!("-D__MAC_OS_X_VERSION_MAX_ALLOWED={deployment_target}"),
-        ];
+        return vec![format!("-mmacosx-version-min={deployment_target}")];
     }
     Vec::new()
-}
-
-/// 6 digit deployment target.
-fn deployment_target_6(macosx_deployment_target: &str) -> String {
-    // use remove_matches as soon it's stable.
-    let split: Vec<_> = macosx_deployment_target.split('.').collect();
-    let joined = split.join("");
-    format!("{joined:0<6}")
 }
 
 /// Returns the current SDK path.
@@ -96,14 +83,4 @@ pub fn get_sdk_path(sdk: impl AsRef<str>) -> Option<PathBuf> {
         let str = String::from_utf8(output.stdout).unwrap();
         PathBuf::from(str.trim())
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::deployment_target_6;
-
-    #[test]
-    fn deployment_target_6_digit_conversion() {
-        assert_eq!(deployment_target_6("10.16"), "101600")
-    }
 }

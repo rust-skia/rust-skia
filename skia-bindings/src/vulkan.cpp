@@ -1,5 +1,6 @@
 #include "include/core/SkContext.h"
 #include "include/gpu/MutableTextureState.h"
+#if defined(SK_GANESH)
 #include "include/gpu/ganesh/vk/GrBackendDrawableInfo.h"
 #include "include/gpu/ganesh/GrBackendSemaphore.h"
 #include "include/gpu/ganesh/GrBackendSurface.h"
@@ -8,6 +9,7 @@
 #include "include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "include/gpu/ganesh/vk/GrVkTypes.h"
+#endif
 #include "include/gpu/vk/VulkanBackendContext.h"
 #include "include/gpu/vk/VulkanExtensions.h"
 #include "include/gpu/vk/VulkanMutableTextureState.h"
@@ -15,7 +17,8 @@
 #include "src/gpu/GpuTypesPriv.h"
 #include "src/gpu/vk/vulkanmemoryallocator/VulkanMemoryAllocatorPriv.h"
 
-// Additional types not referenced.
+#if defined(SK_GANESH)
+// Additional Ganesh types not referenced.
 extern "C" void C_GrVkTypes(GrVkSurfaceInfo*, VkQueue*, VkPhysicalDevice*) {};
 
 //
@@ -69,6 +72,7 @@ extern "C" void C_GrBackendRenderTargets_ConstructVk(GrBackendRenderTarget* unin
 extern "C" bool C_GrBackendDrawableInfo_getVkDrawableInfo(const GrBackendDrawableInfo* self, GrVkDrawableInfo* info) {
     return self->getVkDrawableInfo(info);
 }
+#endif
 
 extern "C" void C_GPU_VK_Types(VkBuffer *) {}
 
@@ -140,10 +144,7 @@ extern "C" bool C_VulkanYcbcrConversionInfo_Equals(const skgpu::VulkanYcbcrConve
     return *lhs == *rhs;
 }
 
-//
-// gpu/ganesh/vk
-//
-
+#if defined(SK_GANESH)
 extern "C" bool C_GrBackendFormats_AsVkFormat(const GrBackendFormat* format, VkFormat* vkFormat) {
     return GrBackendFormats::AsVkFormat(*format, vkFormat);
 }
@@ -182,6 +183,7 @@ extern "C" SkContext* C_SkContexts_MakeGaneshVulkan(
     const SkContextOptions* options) {
     return SkContexts::MakeGanesh(*backendContext, *options).release();
 }
+#endif
 
 // MutableTextureState.h
 
@@ -229,10 +231,7 @@ extern "C" void C_VulkanYcbcrConversionInfo_Construct_Format(
         format, ycbcrModel, ycbcrRange, xChromaOffset, yChromaOffset, chromaFilter, forceExplicitReconstruction, components, formatFeatures);
 }
 
-//
-// gpu/ganesh/vk/GrVkBackendSemaphore.h
-//
-
+#if defined(SK_GANESH)
 extern "C" void C_GrBackendSemaphore_ConstructVk(
     GrBackendSemaphore* uninitialized,
     VkSemaphore semaphore) {
@@ -243,4 +242,5 @@ extern "C" VkSemaphore C_GrBackendSemaphores_GetVkSemaphore(
     const GrBackendSemaphore* semaphore) {
     return GrBackendSemaphores::GetVkSemaphore(*semaphore);
 }
+#endif
 

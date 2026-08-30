@@ -26,10 +26,8 @@ fn main() {
     use objc2::rc::Retained;
     use objc2_metal::{MTLCreateSystemDefaultDevice, MTLDevice};
 
-    use skia_safe::{
-        AlphaType, Color4f, ColorType, ImageInfo, Paint, Rect,
-        graphite::{self, mtl as gmtl},
-    };
+    use skia_safe::gpu::graphite::{self, mtl as gmtl};
+    use skia_safe::{AlphaType, Color4f, ColorType, ImageInfo, Paint, Rect, gpu};
 
     let iters: usize = std::env::args()
         .nth(1)
@@ -53,7 +51,8 @@ fn main() {
     // In reuse mode, one Context + Recorder live for the whole run.
     let mut shared = if reuse {
         let backend = unsafe { gmtl::BackendContext::new(device_ptr, queue_ptr) };
-        let mut context = gmtl::make_context(&backend, None).expect("make_context returned None");
+        let mut context =
+            gmtl::context_factory::make_metal(&backend, None).expect("make_metal returned None");
         let recorder = context
             .make_recorder(None)
             .expect("make_recorder returned None");
@@ -69,8 +68,8 @@ fn main() {
             None
         } else {
             let backend = unsafe { gmtl::BackendContext::new(device_ptr, queue_ptr) };
-            let mut context =
-                gmtl::make_context(&backend, None).expect("make_context returned None");
+            let mut context = gmtl::context_factory::make_metal(&backend, None)
+                .expect("make_metal returned None");
             let recorder = context
                 .make_recorder(None)
                 .expect("make_recorder returned None");
@@ -86,7 +85,7 @@ fn main() {
         let mut surface = graphite::surfaces::render_target(
             recorder,
             &image_info,
-            graphite::Mipmapped::No,
+            gpu::Mipmapped::No,
             None,
             Some("graphite_offscreen_verify"),
         )

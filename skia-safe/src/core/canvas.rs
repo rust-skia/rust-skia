@@ -6,10 +6,10 @@ use skia_bindings::{
     SkPaint, SkRect, U8CPU,
 };
 
-#[cfg(feature = "gpu")]
-use crate::gpu;
 #[cfg(feature = "graphite")]
-use crate::graphite;
+use crate::gpu::graphite;
+#[cfg(feature = "ganesh")]
+use crate::gpu::{DirectContext, RecordingContext};
 use crate::{Arc, ColorSpace};
 use crate::{
     Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode, Font, GlyphId, IPoint,
@@ -500,17 +500,17 @@ impl Canvas {
     /// Returns GPU context, if available; `None` otherwise
     ///
     /// example: <https://fiddle.skia.org/c/@Canvas_recordingContext>
-    #[cfg(feature = "gpu")]
-    pub fn recording_context(&self) -> Option<gpu::RecordingContext> {
-        gpu::RecordingContext::from_unshared_ptr(unsafe {
+    #[cfg(feature = "ganesh")]
+    pub fn recording_context(&self) -> Option<RecordingContext> {
+        RecordingContext::from_unshared_ptr(unsafe {
             sb::C_SkCanvas_recordingContext(self.native())
         })
     }
 
-    /// Returns the [`gpu::DirectContext`].
+    /// Returns the [`DirectContext`].
     /// This is a rust-skia helper for that makes it simpler to call [`Image::encode`].
-    #[cfg(feature = "gpu")]
-    pub fn direct_context(&self) -> Option<gpu::DirectContext> {
+    #[cfg(feature = "ganesh")]
+    pub fn direct_context(&self) -> Option<DirectContext> {
         self.recording_context()
             .and_then(|mut c| c.as_direct_context())
     }

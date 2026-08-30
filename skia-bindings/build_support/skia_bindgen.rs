@@ -60,8 +60,11 @@ impl Configuration {
             if features[feature::D3D] {
                 sources.push("src/d3d.cpp".into());
             }
-            if features.gpu() {
+            if features.has_gpu_engine() {
                 sources.push("src/gpu.cpp".into());
+            }
+            if features.ganesh() {
+                sources.push("src/ganesh.cpp".into());
             }
             if features.graphite() {
                 sources.push("src/graphite.cpp".into());
@@ -162,21 +165,6 @@ pub fn generate_bindings(
         .clang_arg(format!("-std=c++{CPP_VERSION}"))
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
-
-    // gpu builds
-
-    if build.features.gpu() {
-        builder = builder
-            // bindgen 0.70 alignment problems on i686-linux-android
-            .blocklist_type("GrBackendFormat_AnyFormatData")
-            .raw_line("#[repr(C, align(8))] pub struct GrBackendFormat_AnyFormatData { data: [u8;GrBackendFormat_kMaxSubclassSize + 1] }")
-            .blocklist_type("GrBackendTexture_AnyTextureData")
-            .raw_line("#[repr(C, align(8))] pub struct GrBackendTexture_AnyTextureData { data: [u8;GrBackendTexture_kMaxSubclassSize + 1] }")
-            .blocklist_type("GrBackendRenderTarget_AnyRenderTargetData")
-            .raw_line("#[repr(C, align(8))] pub struct GrBackendRenderTarget_AnyRenderTargetData { data: [u8;GrBackendRenderTarget_kMaxSubclassSize + 1] }")
-            .blocklist_type("GrBackendSemaphore_AnySemaphoreData")
-            .raw_line("#[repr(C, align(8))] pub struct GrBackendSemaphore_AnySemaphoreData { data: [u8;GrBackendSemaphore_kMaxSubclassSize + 1] }");
-    }
 
     // Don't generate destructors for Windows targets:
     // <https://github.com/rust-skia/rust-skia/issues/318>
@@ -951,7 +939,7 @@ pub(crate) mod definitions {
         use_system_libraries: bool,
     ) -> Vec<PathBuf> {
         let mut files = vec!["obj/skia.ninja".into()];
-        if features.gpu() {
+        if features.ganesh() {
             files.push("obj/gpu.ninja".into());
         }
         if features[feature::TEXTLAYOUT] {

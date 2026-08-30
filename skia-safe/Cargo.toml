@@ -28,16 +28,16 @@ doctest = false
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf", "jpeg"]
-all-linux = ["gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "skottie", "webp", "graphite"]
-all-windows = ["gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "webp", "graphite"]
-all-macos = ["gl", "vulkan", "metal", "textlayout", "svg", "skottie", "webp", "graphite"]
-gl = ["gpu", "skia-bindings/gl"]
+all-linux = ["ganesh", "gl", "egl", "vulkan", "x11", "wayland", "textlayout", "svg", "skottie", "webp", "graphite"]
+all-windows = ["ganesh", "gl", "vulkan", "d3d", "textlayout", "svg", "skottie", "webp", "graphite"]
+all-macos = ["ganesh", "gl", "vulkan", "metal", "textlayout", "svg", "skottie", "webp", "graphite"]
+gl = ["ganesh", "skia-bindings/gl"]
 egl = ["gl", "skia-bindings/egl"]
 x11 = ["gl", "skia-bindings/x11"]
 wayland = ["egl", "skia-bindings/wayland"]
-vulkan = ["gpu", "skia-bindings/vulkan"]
-metal = ["gpu", "skia-bindings/metal"]
-d3d = ["gpu", "windows", "skia-bindings/d3d"]
+vulkan = ["skia-bindings/vulkan"]
+metal = ["skia-bindings/metal"]
+d3d = ["ganesh", "windows", "skia-bindings/d3d"]
 textlayout = ["skia-bindings/textlayout"]
 svg = ["skia-bindings/svg", "dep:base64", "dep:percent-encoding", "skia-svg-macros"]
 skottie = ["skia-bindings/skottie", "textlayout", "dep:base64", "dep:percent-encoding"]
@@ -56,8 +56,9 @@ no-compile = ["skia-bindings/no-compile"]
 # test only
 save-svg-images = []
 
-# implied only, do not use
+# Deprecated feature name; enabling it produces a migration error.
 gpu = []
+ganesh = ["skia-bindings/ganesh"]
 graphite = ["skia-bindings/graphite"]
 
 [dependencies]

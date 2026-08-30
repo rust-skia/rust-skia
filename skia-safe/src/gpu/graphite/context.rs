@@ -1,8 +1,12 @@
-use crate::graphite::{InsertRecordingInfo, InsertStatus, Recorder, RecorderOptions, SubmitInfo};
+use std::fmt;
+
+use skia_bindings as sb;
+
+use super::{
+    BackendTexture, InsertRecordingInfo, InsertStatus, Recorder, RecorderOptions, SubmitInfo,
+};
 use crate::prelude::*;
 use crate::{IPoint, ImageInfo, Surface};
-use skia_bindings as sb;
-use std::fmt;
 
 // `skgpu::graphite::Context` is `final` with no base class and is handed out as
 // `std::unique_ptr<Context>` (Context::MakeMetal etc.). It is NOT ref-counted,
@@ -111,7 +115,7 @@ impl Context {
     ///
     /// # Arguments
     /// - `texture` - The backend texture to delete
-    pub fn delete_backend_texture(&mut self, texture: &crate::graphite::BackendTexture) {
+    pub fn delete_backend_texture(&mut self, texture: &BackendTexture) {
         unsafe {
             sb::C_Context_deleteBackendTexture(self.native_mut(), texture.native());
         }
@@ -139,7 +143,7 @@ impl Context {
     /// insert the recording first:
     ///
     /// ```no_run
-    /// # use skia_safe::graphite;
+    /// # use skia_safe::gpu::graphite;
     /// # fn f(context: &mut graphite::Context, recorder: &mut graphite::Recorder,
     /// #      surface: &mut skia_safe::Surface) {
     /// // ... draw to surface.canvas() ...
@@ -188,18 +192,5 @@ impl Context {
                 src.y,
             )
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_context_debug() {
-        // We can't easily create a Context without platform-specific setup,
-        // but we can test that the debug implementation compiles
-        let context: Option<Context> = None;
-        assert!(context.is_none());
     }
 }

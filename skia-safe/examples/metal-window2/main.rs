@@ -34,7 +34,7 @@ fn main() {
 
     use skia_safe::{
         ColorType,
-        graphite::{self, mtl as graphite_mtl},
+        gpu::graphite::{self, mtl as graphite_mtl},
     };
 
     let event_loop = EventLoop::new().expect("Failed to create event loop");
@@ -82,7 +82,7 @@ fn main() {
 
                         // Create backend texture from Metal drawable
                         let backend_texture = unsafe {
-                            graphite_mtl::make_backend_texture(
+                            graphite_mtl::backend_textures::make_metal(
                                 (drawable_width, drawable_height),
                                 Retained::as_ptr(&drawable.texture()) as graphite_mtl::Handle,
                             )
@@ -146,7 +146,7 @@ mod window {
     use objc2_quartz_core::CAMetalLayer;
     use skia_safe::{
         Canvas, Color4f, Paint, Point, Rect,
-        graphite::{self, Context as GraphiteContext, mtl as graphite_mtl},
+        gpu::graphite::{self, Context as GraphiteContext, mtl as graphite_mtl},
     };
     use winit::{
         dpi::{LogicalSize, Size},
@@ -213,8 +213,9 @@ mod window {
 
             // Create Graphite context
             let context_options = graphite::ContextOptions::default();
-            let skia_context = graphite_mtl::make_context(&backend, Some(&context_options))
-                .expect("Failed to create Graphite context");
+            let skia_context =
+                graphite_mtl::context_factory::make_metal(&backend, Some(&context_options))
+                    .expect("Failed to create Graphite context");
 
             Self {
                 window,

@@ -48,6 +48,9 @@ impl Features {
             features += feature::D3D;
         }
 
+        if cfg!(feature = "ganesh") {
+            features += feature::GANESH;
+        }
         if cfg!(feature = "graphite") {
             features += feature::GRAPHITE;
         }
@@ -85,12 +88,20 @@ impl Features {
         features
     }
 
-    pub fn gpu(&self) -> bool {
-        self[feature::GL] || self[feature::VULKAN] || self[feature::METAL] || self[feature::D3D]
+    pub fn ganesh(&self) -> bool {
+        self[feature::GANESH]
     }
 
     pub fn graphite(&self) -> bool {
         self[feature::GRAPHITE]
+    }
+
+    pub fn has_gpu_engine(&self) -> bool {
+        self.ganesh() || self.graphite()
+    }
+
+    pub fn backend_without_engine(&self) -> bool {
+        (self[feature::VULKAN] || self[feature::METAL]) && !self.has_gpu_engine()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -208,6 +219,8 @@ pub mod feature {
     /// Build with Direct3D support
     pub const D3D: &str = "d3d";
 
+    /// Build with Ganesh support
+    pub const GANESH: &str = "ganesh";
     /// Build with Graphite support
     pub const GRAPHITE: &str = "graphite";
 
@@ -233,9 +246,11 @@ pub mod feature {
     pub const FREETYPE_SPECIFIC: &[&str] = &[EMBED_FREETYPE, FREETYPE_WOFF2];
 
     pub const DEPENDENCIES: &[(&str, &[&str])] = &[
+        (GL, &[GANESH]),
         (EGL, &[GL]),
         (X11, &[GL]),
         (WAYLAND, &[EGL]),
+        (D3D, &[GANESH]),
         (SKOTTIE, &[TEXTLAYOUT]),
         (PDF, &[JPEG_ENCODE, JPEG_DECODE]),
     ];

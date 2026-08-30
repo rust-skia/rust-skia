@@ -4,8 +4,8 @@
 
 Skia Submodule Status: chrome/m153 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m153-0.101.0...google:chrome/m153
-[skia-ours]: https://github.com/google/skia/compare/chrome/m153...rust-skia:m153-0.101.0
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m153-0.101.1...google:chrome/m153
+[skia-ours]: https://github.com/google/skia/compare/chrome/m153...rust-skia:m153-0.101.1
 
 ## About
 
@@ -264,13 +264,13 @@ cargo run --example gl-window --features gl,x11
 An example application that opens a Window and renders a blue rectangle using [Vulkano](https://github.com/vulkano-rs/vulkano) (contributed by [@samizdatco](https://github.com/samizdatco) in [#1066](https://github.com/rust-skia/rust-skia/pull/1066))
 
 ```bash
-cargo run --example vulkan-window --features "vulkan"
+cargo run --example vulkan-window --features "ganesh,vulkan"
 ```
 
 To enable Vulkan validation layer messages and debug output in this example:
 
 ```bash
-cargo run --example vulkan-window --features "vulkan" -- --validate
+cargo run --example vulkan-window --features "ganesh,vulkan" -- --validate
 ```
 
 To add Vulkan support to your system, the easiest way is to install the [LunarG SDK](https://vulkan.lunarg.com/sdk/home), and enable "System Global Installation" in the installer.

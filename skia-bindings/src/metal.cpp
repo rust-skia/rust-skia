@@ -4,6 +4,7 @@
 
 #include "bindings.h"
 
+#if defined(SK_GANESH)
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkContext.h"
 #include "include/core/SkSurface.h"
@@ -129,3 +130,4 @@ extern "C" void C_GrMtlTextureInfo_Destruct(GrMtlTextureInfo* self) {
 extern "C" bool C_GrMtlTextureInfo_Equals(const GrMtlTextureInfo* lhs, const GrMtlTextureInfo* rhs) {
     return *lhs == *rhs;
 }
+#endif
