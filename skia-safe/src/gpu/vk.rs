@@ -7,11 +7,13 @@ mod vulkan_backend_context_builder;
 mod vulkan_mutable_texture_state;
 mod vulkan_types;
 
+#[cfg(feature = "ganesh")]
 pub use super::ganesh::vk::vk_types::*;
 pub use vulkan_backend_context::*;
 pub use vulkan_mutable_texture_state::*;
 pub use vulkan_types::*;
 
+#[cfg(feature = "ganesh")]
 pub use crate::gpu::ganesh::vk::BackendDrawableInfo;
 
 //

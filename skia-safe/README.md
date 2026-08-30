@@ -48,6 +48,8 @@ In addition to that, support for the WEBP image format can be enabled through th
 
 Skia-safe supports the following features that can be configured [via cargo](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section):
 
+Skia provides the `ganesh` and `graphite` GPU rendering engines. Vulkan and Metal require one of these engine features to be selected explicitly. OpenGL and Direct3D use Ganesh and enable it implicitly.
+
 ### `gl`
 
 Platform support for OpenGL or OpenGL ES can be enabled by adding the feature `gl`. Since version `0.25.0`, rust-skia is configured by default to enable CPU rendering only. Before that, OpenGL support was included in every feature configuration. To render the examples with OpenGL, use
@@ -68,17 +70,17 @@ These features are configure the Window manager integration. They are supported 
 
 ### `vulkan`
 
-Vulkan support can be enabled by adding the feature `vulkan`. To render the examples with Vulkan, use
+Vulkan support can be enabled by adding `vulkan` and either `ganesh` or `graphite`. To render the Ganesh examples with Vulkan, use
 
 ```bash
-(cd skia-org && cargo run --features vulkan [OUTPUT_DIR] --driver vulkan)
+(cd skia-org && cargo run --features ganesh,vulkan [OUTPUT_DIR] --driver vulkan)
 ```
 
 Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on macOS with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.
 
 ### `metal`
 
-Support for Metal on macOS and iOS targets can be enabled by adding the feature `metal`.
+Support for Metal on macOS and iOS targets can be enabled by adding `metal` and either `ganesh` or `graphite`.
 
 ### `d3d`
 

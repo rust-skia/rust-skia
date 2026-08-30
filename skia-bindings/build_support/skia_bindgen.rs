@@ -60,8 +60,11 @@ impl Configuration {
             if features[feature::D3D] {
                 sources.push("src/d3d.cpp".into());
             }
-            if features.gpu() {
+            if features.has_gpu_engine() {
                 sources.push("src/gpu.cpp".into());
+            }
+            if features.ganesh() {
+                sources.push("src/ganesh.cpp".into());
             }
             if features.graphite() {
                 sources.push("src/graphite.cpp".into());
@@ -163,9 +166,9 @@ pub fn generate_bindings(
         .clang_args(&["-x", "c++"])
         .clang_arg("-v");
 
-    // gpu builds
+    // Ganesh backend storage types
 
-    if build.features.gpu() {
+    if build.features.ganesh() {
         builder = builder
             // bindgen 0.70 alignment problems on i686-linux-android
             .blocklist_type("GrBackendFormat_AnyFormatData")
@@ -951,7 +954,7 @@ pub(crate) mod definitions {
         use_system_libraries: bool,
     ) -> Vec<PathBuf> {
         let mut files = vec!["obj/skia.ninja".into()];
-        if features.gpu() {
+        if features.ganesh() {
             files.push("obj/gpu.ninja".into());
         }
         if features[feature::TEXTLAYOUT] {

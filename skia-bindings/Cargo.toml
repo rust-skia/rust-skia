@@ -35,6 +35,8 @@ skia = "m153-0.101.0"
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf"]
+gpu = []
+ganesh = []
 gl = []
 egl = []
 wayland = []

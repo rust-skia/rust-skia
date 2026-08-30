@@ -200,50 +200,54 @@ mod effects {
     assert_impl_all!(runtime_effect::Options: Send, Sync);
 }
 
-#[cfg(feature = "gpu")]
+#[cfg(any(feature = "ganesh", feature = "graphite"))]
 mod gpu {
-    use ganesh::MarkFrameBoundary;
     use skia_safe::gpu::*;
     use static_assertions::*;
-    assert_impl_all!(BackendFormat: Send, Sync);
-    assert_impl_all!(BackendSemaphore: Send, Sync);
-    assert_impl_all!(BackendTexture: Send, Sync);
-    assert_impl_all!(BackendRenderTarget: Send, Sync);
-    assert_impl_all!(ContextOptions: Send, Sync);
-    assert_impl_all!(DriverBugWorkarounds: Send, Sync);
-    // The Context* implementations check for single ownership before mutation, so no Send and Sync
-    // can be supported.
-    // If RC is 1, it can be sent to other threads with `Sendable` / `ConditionallySend`.
-    assert_not_impl_any!(DirectContext: Send, Sync);
-    assert_impl_all!(DirectContextId: Send, Sync);
-    assert_not_impl_any!(RecordingContext: Send, Sync);
-    // gpu/yuva_backend_textures.rs
-    assert_impl_all!(YUVABackendTextureInfo: Send, Sync);
-    assert_impl_all!(YUVABackendTextures: Send, Sync);
 
     assert_impl_all!(MutableTextureState: Send, Sync);
     assert_impl_all!(BackendApi: Send, Sync);
 
     // gpu/types.rs
-    assert_impl_all!(BackendAPI: Send, Sync);
     assert_impl_all!(Budgeted: Send, Sync);
     assert_impl_all!(Mipmapped: Send, Sync);
     assert_impl_all!(Protected: Send, Sync);
-    assert_impl_all!(Renderable: Send, Sync);
     assert_impl_all!(Origin: Send, Sync);
     assert_impl_all!(GpuStatsFlags: Send, Sync);
     assert_impl_all!(GpuStats: Send, Sync);
 
-    // gpu/ganesh/types.rs
-    assert_impl_all!(SurfaceOrigin: Send, Sync);
-    assert_not_impl_any!(FlushInfo: Send, Sync);
-    assert_impl_all!(SemaphoresSubmitted: Send, Sync);
-    assert_impl_all!(PurgeResourceOptions: Send, Sync);
-    assert_impl_all!(SyncCpu: Send, Sync);
-    assert_impl_all!(MarkFrameBoundary: Send, Sync);
-    assert_impl_all!(SubmitInfo: Send, Sync);
+    #[cfg(feature = "ganesh")]
+    mod ganesh {
+        use skia_safe::gpu::{self, ganesh::MarkFrameBoundary};
+        use static_assertions::*;
 
-    #[cfg(feature = "gl")]
+        assert_impl_all!(gpu::BackendFormat: Send, Sync);
+        assert_impl_all!(gpu::BackendSemaphore: Send, Sync);
+        assert_impl_all!(gpu::BackendTexture: Send, Sync);
+        assert_impl_all!(gpu::BackendRenderTarget: Send, Sync);
+        assert_impl_all!(gpu::ContextOptions: Send, Sync);
+        assert_impl_all!(gpu::DriverBugWorkarounds: Send, Sync);
+        // The Context* implementations check for single ownership before mutation, so no Send and
+        // Sync can be supported. If RC is 1, it can be sent to other threads with `Sendable` /
+        // `ConditionallySend`.
+        assert_not_impl_any!(gpu::DirectContext: Send, Sync);
+        assert_impl_all!(gpu::DirectContextId: Send, Sync);
+        assert_not_impl_any!(gpu::RecordingContext: Send, Sync);
+        assert_impl_all!(gpu::YUVABackendTextureInfo: Send, Sync);
+        assert_impl_all!(gpu::YUVABackendTextures: Send, Sync);
+
+        assert_impl_all!(gpu::BackendAPI: Send, Sync);
+        assert_impl_all!(gpu::Renderable: Send, Sync);
+        assert_impl_all!(gpu::SurfaceOrigin: Send, Sync);
+        assert_not_impl_any!(gpu::FlushInfo: Send, Sync);
+        assert_impl_all!(gpu::SemaphoresSubmitted: Send, Sync);
+        assert_impl_all!(gpu::PurgeResourceOptions: Send, Sync);
+        assert_impl_all!(gpu::SyncCpu: Send, Sync);
+        assert_impl_all!(MarkFrameBoundary: Send, Sync);
+        assert_impl_all!(gpu::SubmitInfo: Send, Sync);
+    }
+
+    #[cfg(all(feature = "ganesh", feature = "gl"))]
     mod gl {
         use skia_safe::gpu::gl::*;
         use static_assertions::*;
@@ -255,7 +259,7 @@ mod gpu {
         assert_impl_all!(SurfaceInfo: Send, Sync);
     }
 
-    #[cfg(feature = "metal")]
+    #[cfg(all(feature = "ganesh", feature = "metal"))]
     mod mtl {
         use skia_safe::gpu::mtl::*;
         use static_assertions::*;
@@ -274,18 +278,25 @@ mod gpu {
         // already Copy & Clone, and highly unsafe.
         assert_impl_all!(Alloc: Send, Sync);
         assert_impl_all!(YcbcrConversionInfo: Send, Sync);
-        assert_impl_all!(ImageInfo: Send, Sync);
         // GetProc could be Send & Sync , but does it make sense (it's already Copy & Clone)
         assert_not_impl_any!(GetProcOf: Send, Sync);
-        assert_impl_all!(DrawableInfo: Send, Sync);
-        assert_impl_all!(SurfaceInfo: Send, Sync);
-        assert_impl_all!(BackendDrawableInfo: Send, Sync);
+
+        #[cfg(feature = "ganesh")]
+        mod ganesh {
+            use skia_safe::gpu::vk::{BackendDrawableInfo, DrawableInfo, ImageInfo, SurfaceInfo};
+            use static_assertions::*;
+
+            assert_impl_all!(ImageInfo: Send, Sync);
+            assert_impl_all!(DrawableInfo: Send, Sync);
+            assert_impl_all!(SurfaceInfo: Send, Sync);
+            assert_impl_all!(BackendDrawableInfo: Send, Sync);
+        }
         // Note that we can't make most of vk.rs re-export of native Vulkan types Send nor Sync,
         // because they are just re-exports of simple pointers, which already implement
         // !Send & !Sync that can not be overridden...
     }
 
-    #[cfg(feature = "d3d")]
+    #[cfg(all(feature = "ganesh", feature = "d3d"))]
     mod d3d {
         use skia_safe::gpu::d3d::*;
         use static_assertions::*;

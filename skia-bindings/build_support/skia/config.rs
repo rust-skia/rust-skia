@@ -124,7 +124,7 @@ impl FinalBuildConfiguration {
                 .arg("skia_use_partition_alloc", no())
                 .arg("is_debug", yes_if(build.skia_debug))
                 .arg("skia_enable_svg", yes_if(features[feature::SVG]))
-                .arg("skia_enable_ganesh", yes_if(features.gpu()))
+                .arg("skia_enable_ganesh", yes_if(features.ganesh()))
                 .arg("skia_enable_graphite", yes_if(features.graphite()))
                 .arg("skia_enable_skottie", yes_if(features[feature::SKOTTIE]))
                 .arg("skia_enable_pdf", yes_if(features[feature::PDF]))

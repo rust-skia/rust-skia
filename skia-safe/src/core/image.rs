@@ -293,7 +293,6 @@ impl fmt::Debug for Image {
             .field("color_type", &self.color_type())
             .field("color_space", &self.color_space())
             .field("is_texture_backed", &self.is_texture_backed());
-        #[cfg(feature = "gpu")]
         let d = d.field("texture_size", &self.texture_size());
         d.field("has_mipmaps", &self.has_mipmaps())
             .field("is_lazy_generated", &self.is_lazy_generated())
@@ -480,58 +479,6 @@ impl Image {
         )
     }
 
-    /// Creates a GPU-backed [`Image`] from compressed data.
-    ///
-    /// This method will return an [`Image`] representing the compressed data.
-    /// If the GPU doesn't support the specified compression method, the data
-    /// will be decompressed and then wrapped in a GPU-backed image.
-    ///
-    /// Note: one can query the supported compression formats via
-    /// [`gpu::RecordingContext::compressed_backend_format`].
-    ///
-    /// - `context`      GPU context
-    /// - `data`         compressed data to store in [`Image`]
-    /// - `width`        width of full [`Image`]
-    /// - `height`       height of full [`Image`]
-    /// - `ty`           type of compression used
-    /// - `mipmapped`    does 'data' contain data for all the mipmap levels?
-    /// - `is_protected`  do the contents of 'data' require DRM protection (on Vulkan)?
-    ///
-    /// Returns: created [`Image`], or `None`
-    #[cfg(feature = "gpu")]
-    #[deprecated(
-        since = "0.63.0",
-        note = "use gpu::images::texture_from_compressed_texture_data()"
-    )]
-    pub fn new_texture_from_compressed(
-        context: &mut gpu::DirectContext,
-        data: Data,
-        dimensions: impl Into<ISize>,
-        ty: TextureCompressionType,
-        mipmapped: impl Into<Option<gpu::Mipmapped>>,
-        is_protected: impl Into<Option<gpu::Protected>>,
-    ) -> Option<Image> {
-        gpu::images::texture_from_compressed_texture_data(
-            context,
-            data,
-            dimensions,
-            ty,
-            mipmapped,
-            is_protected,
-        )
-    }
-
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.35.0", note = "Removed without replacement")]
-    pub fn from_compressed(
-        _context: &mut gpu::RecordingContext,
-        _data: Data,
-        _dimensions: impl Into<ISize>,
-        _ct: TextureCompressionType,
-    ) -> ! {
-        panic!("Removed without replacement.")
-    }
-
     /// Creates [`Image`] from GPU texture associated with context. GPU texture must stay
     /// valid and unchanged until `texture_release_proc` is called. `texture_release_proc` is
     /// passed `release_context` when [`Image`] is deleted or no longer refers to texture.
@@ -558,7 +505,7 @@ impl Image {
     /// * `release_context`       State passed to `texture_release_proc`
     ///
     /// Returns: Created [`Image`], or `None`
-    #[cfg(feature = "gpu")]
+    #[cfg(feature = "ganesh")]
     pub fn from_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
@@ -575,181 +522,6 @@ impl Image {
             alpha_type,
             color_space,
         )
-    }
-
-    #[deprecated(since = "0.27.0", note = "renamed, use new_cross_context_from_pixmap")]
-    #[cfg(feature = "gpu")]
-    pub fn from_pixmap_cross_context(
-        context: &mut gpu::DirectContext,
-        pixmap: &Pixmap,
-        build_mips: bool,
-        limit_to_max_texture_size: impl Into<Option<bool>>,
-    ) -> Option<Image> {
-        gpu::images::cross_context_texture_from_pixmap(
-            context,
-            pixmap,
-            build_mips,
-            limit_to_max_texture_size,
-        )
-    }
-
-    /// Creates [`Image`] from pixmap. [`Image`] is uploaded to GPU back-end using context.
-    ///
-    /// Created [`Image`] is available to other GPU contexts, and is available across thread
-    /// boundaries. All contexts must be in the same GPU share group, or otherwise
-    /// share resources.
-    ///
-    /// When [`Image`] is no longer referenced, context releases texture memory
-    /// asynchronously.
-    ///
-    /// [`ColorSpace`] of [`Image`] is determined by `pixmap.color_space()`.
-    ///
-    /// [`Image`] is returned referring to GPU back-end if context is not `None`,
-    /// format of data is recognized and supported, and if context supports moving
-    /// resources between contexts. Otherwise, pixmap pixel data is copied and [`Image`]
-    /// as returned in raster format if possible; `None` may be returned.
-    /// Recognized GPU formats vary by platform and GPU back-end.
-    ///
-    /// - `context`                 GPU context
-    /// - `pixmap`                  [`ImageInfo`], pixel address, and row bytes
-    /// - `build_mips`               create [`Image`] as mip map if `true`
-    /// - `limit_to_max_texture_size`   downscale image to GPU maximum texture size, if necessary
-    ///
-    /// Returns: created [`Image`], or `None`
-    #[cfg(feature = "gpu")]
-    #[deprecated(
-        since = "0.63.0",
-        note = "use gpu::images::cross_context_texture_from_pixmap()"
-    )]
-    pub fn new_cross_context_from_pixmap(
-        context: &mut gpu::DirectContext,
-        pixmap: &Pixmap,
-        build_mips: bool,
-        limit_to_max_texture_size: impl Into<Option<bool>>,
-    ) -> Option<Image> {
-        gpu::images::cross_context_texture_from_pixmap(
-            context,
-            pixmap,
-            build_mips,
-            limit_to_max_texture_size,
-        )
-    }
-
-    /// Creates [`Image`] from `backend_texture` associated with context. `backend_texture` and
-    /// returned [`Image`] are managed internally, and are released when no longer needed.
-    ///
-    /// [`Image`] is returned if format of `backend_texture` is recognized and supported.
-    /// Recognized formats vary by GPU back-end.
-    ///
-    /// - `context`          GPU context
-    /// - `backend_texture`   texture residing on GPU
-    /// - `texture_origin`    origin of `backend_texture`
-    /// - `color_type`        color type of the resulting image
-    /// - `alpha_type`        alpha type of the resulting image
-    /// - `color_space`       range of colors; may be `None`
-    ///
-    /// Returns: created [`Image`], or `None`
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.63.0", note = "use gpu::images::adopt_texture_from()")]
-    pub fn from_adopted_texture(
-        context: &mut gpu::RecordingContext,
-        backend_texture: &gpu::BackendTexture,
-        texture_origin: gpu::SurfaceOrigin,
-        color_type: ColorType,
-        alpha_type: impl Into<Option<AlphaType>>,
-        color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        gpu::images::adopt_texture_from(
-            context,
-            backend_texture,
-            texture_origin,
-            color_type,
-            alpha_type,
-            color_space,
-        )
-    }
-
-    /// Creates an [`Image`] from `YUV[A]` planar textures. This requires that the textures stay valid
-    /// for the lifetime of the image. The `ReleaseContext` can be used to know when it is safe to
-    /// either delete or overwrite the textures. If `ReleaseProc` is provided it is also called before
-    /// return on failure.
-    ///
-    /// - `context`             GPU context
-    /// - `yuva_textures`        A set of textures containing YUVA data and a description of the
-    ///                           data and transformation to RGBA.
-    /// - `image_color_space`     range of colors of the resulting image after conversion to RGB;
-    ///                           may be `None`
-    /// - `texture_release_proc`  called when the backend textures can be released
-    /// - `release_context`      state passed to `texture_release_proc`
-    ///
-    /// Returns: created [`Image`], or `None`
-    #[cfg(feature = "gpu")]
-    #[deprecated(
-        since = "0.63.0",
-        note = "use gpu::images::texture_from_yuva_textures()"
-    )]
-    pub fn from_yuva_textures(
-        context: &mut gpu::RecordingContext,
-        yuva_textures: &gpu::YUVABackendTextures,
-        image_color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        gpu::images::texture_from_yuva_textures(context, yuva_textures, image_color_space)
-    }
-
-    /// Creates [`Image`] from [`crate::YUVAPixmaps`].
-    ///
-    /// The image will remain planar with each plane converted to a texture using the passed
-    /// [`gpu::RecordingContext`].
-    ///
-    /// [`crate::YUVAPixmaps`] has a [`crate::YUVAInfo`] which specifies the transformation from YUV to RGB.
-    /// The [`ColorSpace`] of the resulting RGB values is specified by `image_color_space`. This will
-    /// be the [`ColorSpace`] reported by the image and when drawn the RGB values will be converted
-    /// from this space into the destination space (if the destination is tagged).
-    ///
-    /// Currently, this is only supported using the GPU backend and will fail if context is `None`.
-    ///
-    /// [`crate::YUVAPixmaps`] does not need to remain valid after this returns.
-    ///
-    /// - `context`                 GPU context
-    /// - `pixmaps`                 The planes as pixmaps with supported [`crate::YUVAInfo`] that
-    ///                               specifies conversion to RGB.
-    /// - `build_mips`               create internal YUVA textures as mip map if `Yes`. This is
-    ///                               silently ignored if the context does not support mip maps.
-    /// - `limit_to_max_texture_size`   downscale image to GPU maximum texture size, if necessary
-    /// - `image_color_space`         range of colors of the resulting image; may be `None`
-    ///
-    /// Returns: created [`Image`], or `None`
-    #[cfg(feature = "gpu")]
-    #[deprecated(
-        since = "0.63.0",
-        note = "use gpu::images::texture_from_yuva_pixmaps()"
-    )]
-    pub fn from_yuva_pixmaps(
-        context: &mut gpu::RecordingContext,
-        yuva_pixmaps: &crate::YUVAPixmaps,
-        build_mips: impl Into<Option<gpu::Mipmapped>>,
-        limit_to_max_texture_size: impl Into<Option<bool>>,
-        image_color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        gpu::images::texture_from_yuva_pixmaps(
-            context,
-            yuva_pixmaps,
-            build_mips,
-            limit_to_max_texture_size,
-            image_color_space,
-        )
-    }
-
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.37.0", note = "Removed without replacement")]
-    pub fn from_nv12_textures_copy(
-        _context: &mut gpu::DirectContext,
-        _yuv_color_space: crate::YUVColorSpace,
-        _nv12_textures: &[gpu::BackendTexture; 2],
-        _image_origin: gpu::SurfaceOrigin,
-        _image_color_space: impl Into<Option<ColorSpace>>,
-    ) -> ! {
-        panic!("Removed without replacement")
     }
 
     /// Returns a [`ImageInfo`] describing the width, height, color type, alpha type, and color space
@@ -979,66 +751,6 @@ impl Image {
         })
     }
 
-    /// See [`Self::flush_with_info()`]
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.63.0", note = "use gpu::DirectContext::flush()")]
-    pub fn flush<'a>(
-        &self,
-        context: &mut gpu::DirectContext,
-        flush_info: impl Into<Option<&'a gpu::FlushInfo>>,
-    ) -> gpu::SemaphoresSubmitted {
-        context.flush(flush_info)
-    }
-
-    /// Flushes any pending uses of texture-backed images in the GPU backend. If the image is not
-    /// texture-backed (including promise texture images) or if the [`gpu::DirectContext`] does not
-    /// have the same context ID as the context backing the image then this is a no-op.
-    ///
-    /// If the image was not used in any non-culled draws in the current queue of work for the
-    /// passed [`gpu::DirectContext`] then this is a no-op unless the [`gpu::FlushInfo`] contains semaphores or
-    /// a finish proc. Those are respected even when the image has not been used.
-    ///
-    /// - `context`   the context on which to flush pending usages of the image.
-    /// - `info`      flush options
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.46.0", note = "use gpu::DirectContext::flush()")]
-    pub fn flush_with_info(
-        &self,
-        context: &mut gpu::DirectContext,
-        flush_info: &gpu::FlushInfo,
-    ) -> gpu::SemaphoresSubmitted {
-        context.flush(flush_info)
-    }
-
-    /// Version of `flush()` that uses a default [`gpu::FlushInfo`]. Also submits the flushed work to the
-    /// GPU.
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.63.0", note = "use gpu::DirectContext::flush_and_submit()")]
-    pub fn flush_and_submit(&self, context: &mut gpu::DirectContext) {
-        context.flush_and_submit();
-    }
-
-    /// Retrieves the back-end texture. If [`Image`] has no back-end texture, `None`is returned.
-    ///
-    /// If `flush_pending_gr_context_io` is `true`, completes deferred I/O operations.
-    ///
-    /// If origin in not `None`, copies location of content drawn into [`Image`].
-    ///
-    /// - `flush_pending_gr_context_io`   flag to flush outstanding requests
-    ///
-    /// Returns: back-end API texture handle; invalid on failure
-    #[cfg(feature = "gpu")]
-    #[deprecated(
-        since = "0.63.0",
-        note = "use gpu::images::get_backend_texture_from_image()"
-    )]
-    pub fn backend_texture(
-        &self,
-        flush_pending_gr_context_io: bool,
-    ) -> Option<(gpu::BackendTexture, gpu::SurfaceOrigin)> {
-        gpu::images::get_backend_texture_from_image(self, flush_pending_gr_context_io)
-    }
-
     /// Copies [`crate::Rect`] of pixels from [`Image`] to `dst_pixels`. Copy starts at offset (`src_x`, `src_y`),
     /// and does not exceed [`Image`] (width(), height()).
     ///
@@ -1075,7 +787,7 @@ impl Image {
     /// - `caching_hint`   whether the pixels should be cached locally
     ///
     /// Returns: `true` if pixels are copied to `dst_pixels`
-    #[cfg(feature = "gpu")]
+    #[cfg(feature = "ganesh")]
     pub fn read_pixels_with_context<'a, P>(
         &self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
@@ -1138,7 +850,7 @@ impl Image {
     /// - `caching_hint`   whether the pixels should be cached `locally_z`
     ///
     /// Returns: `true` if pixels are copied to dst
-    #[cfg(feature = "gpu")]
+    #[cfg(feature = "ganesh")]
     pub fn read_pixels_to_pixmap_with_context<'a>(
         &self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
@@ -1159,7 +871,7 @@ impl Image {
         }
     }
 
-    // _not_ deprecated, because we support separate functions in `gpu` feature builds.
+    // _not_ deprecated, because we support separate functions in `ganesh` feature builds.
     /// See [`Self::read_pixels_with_context()`]
     pub fn read_pixels<P>(
         &self,
@@ -1189,7 +901,6 @@ impl Image {
     }
 
     /// See [`Self::read_pixels_to_pixmap_with_context()`]
-    #[cfg(feature = "gpu")]
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn read_pixels_to_pixmap(
         &self,
@@ -1247,42 +958,6 @@ impl Image {
                 caching_hint.into().unwrap_or(CachingHint::Allow),
             )
         }
-    }
-
-    /// Encodes [`Image`] pixels, returning result as [`Data`].
-    ///
-    ///  Returns `None` if encoding fails, or if `encoded_image_format` is not supported.
-    ///
-    ///  [`Image`] encoding in a format requires both building with one or more of:
-    ///  SK_ENCODE_JPEG, SK_ENCODE_PNG, SK_ENCODE_WEBP; and platform support
-    ///  for the encoded format.
-    ///
-    ///  If SK_BUILD_FOR_MAC or SK_BUILD_FOR_IOS is defined, `encoded_image_format` can
-    ///  additionally be one of: [`EncodedImageFormat::ICO`], [`EncodedImageFormat::BMP`],
-    ///  [`EncodedImageFormat::GIF`].
-    ///
-    ///  quality is a platform and format specific metric trading off size and encoding
-    ///  error. When used, quality equaling 100 encodes with the least error. quality may
-    ///  be ignored by the encoder.
-    ///
-    ///  * `context` - the [`gpu::DirectContext`] in play, if it exists; can be `None`
-    ///  * `encoded_image_format` - one of: [`EncodedImageFormat::JPEG`], [`EncodedImageFormat::PNG`],
-    ///                             [`EncodedImageFormat::WEBP`]
-    ///  * `quality` - encoder specific metric with 100 equaling best
-    ///
-    ///  Returns: encoded [`Image`], or `None`
-    ///
-    ///  example: <https://fiddle.skia.org/c/@Image_encodeToData>
-    #[cfg(feature = "gpu")]
-    #[deprecated(since = "0.63.0", note = "Use encode")]
-    pub fn encode_to_data_with_context(
-        &self,
-        context: impl Into<Option<gpu::DirectContext>>,
-        image_format: EncodedImageFormat,
-        quality: impl Into<Option<u32>>,
-    ) -> Option<Data> {
-        let mut context = context.into();
-        self.encode(context.as_mut(), image_format, quality)
     }
 
     /// See [`Self::encode_to_data_with_quality`]
@@ -1390,7 +1065,7 @@ impl Image {
     }
 
     /// See [`Self::new_texture_image_budgeted`]
-    #[cfg(feature = "gpu")]
+    #[cfg(feature = "ganesh")]
     pub fn new_texture_image(
         &self,
         context: &mut gpu::DirectContext,
@@ -1419,7 +1094,7 @@ impl Image {
     ///                     counts against the context's budget.
     ///
     /// Returns: created [`Image`], or `None`
-    #[cfg(feature = "gpu")]
+    #[cfg(feature = "ganesh")]
     pub fn new_texture_image_budgeted(
         &self,
         direct_context: &mut gpu::DirectContext,

@@ -6,6 +6,19 @@
 #![allow(clippy::doc_overindented_list_items)]
 #![allow(mismatched_lifetime_syntaxes)]
 
+#[cfg(feature = "gpu")]
+compile_error!(
+    "feature `gpu` has been renamed to `ganesh`; replace `gpu` with `ganesh`. The `vulkan` and `metal` features require either `ganesh` or `graphite`."
+);
+
+#[cfg(all(
+    any(feature = "vulkan", feature = "metal"),
+    not(any(feature = "ganesh", feature = "graphite"))
+))]
+compile_error!(
+    "the `vulkan` and `metal` features require at least one rendering engine: `ganesh` or `graphite`"
+);
+
 mod macros;
 
 pub mod codec;

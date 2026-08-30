@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features: ["", "d3d", "gl", "textlayout", "vulkan", "d3d,gl", "d3d,textlayout", "gl,textlayout", "textlayout,vulkan", "d3d,gl,textlayout", "gl,svg,textlayout", "gl,textlayout,vulkan", "svg,textlayout,vulkan,webp", "d3d,gl,svg,textlayout,vulkan"]
+        features: ["", "d3d", "gl", "textlayout", "d3d,gl", "d3d,textlayout", "ganesh,vulkan", "graphite,vulkan", "d3d,gl,textlayout", "ganesh,gl,textlayout", "ganesh,textlayout,vulkan", "gl,svg,textlayout", "ganesh,gl,textlayout,vulkan", "ganesh,svg,textlayout,vulkan,webp", "d3d,ganesh,gl,svg,textlayout,vulkan"]
         target: ["x86_64-pc-windows-msvc"]
         include:
           - target: x86_64-pc-windows-msvc

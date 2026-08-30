@@ -10,6 +10,19 @@
 #![allow(dead_code)]
 #![allow(unsafe_op_in_unsafe_fn)]
 
+#[cfg(feature = "gpu")]
+compile_error!(
+    "feature `gpu` has been renamed to `ganesh`; replace `gpu` with `ganesh`. The `vulkan` and `metal` features require either `ganesh` or `graphite`."
+);
+
+#[cfg(all(
+    any(feature = "vulkan", feature = "metal"),
+    not(any(feature = "ganesh", feature = "graphite"))
+))]
+compile_error!(
+    "the `vulkan` and `metal` features require at least one rendering engine: `ganesh` or `graphite`"
+);
+
 // The following type aliases are needed because of name mangling changes introduced with clang 18,
 // (this works together with `ITEM_RENAMES` in `skia_bindgen.rs`)
 type std___1_string_view = std_string_view;

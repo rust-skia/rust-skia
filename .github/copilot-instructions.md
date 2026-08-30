@@ -6,6 +6,7 @@ Update it whenever you learn something new about the project's patterns, convent
 ## Project
 - Follow the existing project structure and idioms.
 - Prefer small, self-contained changes unless explicitly asked for broader refactors.
+- Update generated GitHub workflows through `mk-workflows`, then run `make workflows`; do not edit generated workflow YAML directly.
 - For targeted ports (for example, "add missing bindings"), keep diffs strictly scoped to the missing API surface.
 - Do not refactor adjacent working code unless it is required for correctness, compatibility, or explicitly requested.
 

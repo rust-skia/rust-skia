@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features: ["", "gl", "metal", "textlayout", "vulkan", "gl,metal", "gl,textlayout", "metal,textlayout", "textlayout,vulkan", "gl,metal,textlayout", "gl,textlayout,vulkan", "svg,textlayout,webp", "gl,metal,svg,textlayout", "gl,svg,textlayout,vulkan", "metal,svg,textlayout,webp"]
+        features: ["", "gl", "textlayout", "ganesh,metal", "ganesh,vulkan", "graphite,metal", "ganesh,gl,metal", "ganesh,gl,textlayout", "ganesh,metal,textlayout", "ganesh,textlayout,vulkan", "svg,textlayout,webp", "ganesh,gl,metal,textlayout", "ganesh,gl,textlayout,vulkan", "ganesh,gl,metal,svg,textlayout", "ganesh,gl,svg,textlayout,vulkan", "ganesh,metal,svg,textlayout,webp"]
         target: ["aarch64-apple-darwin", "x86_64-apple-darwin", "aarch64-apple-ios", "aarch64-apple-ios-sim", "x86_64-apple-ios"]
         include:
           - target: aarch64-apple-darwin
@@ -57,57 +57,59 @@ jobs:
             macosxDeploymentTarget: '10.13'
           - features: 'gl'
             macosxDeploymentTarget: '10.13'
-          - features: 'metal'
-            macosxDeploymentTarget: '10.14'
           - features: 'textlayout'
             macosxDeploymentTarget: '10.13'
-          - features: 'vulkan'
-            macosxDeploymentTarget: '10.13'
-          - features: 'gl,metal'
+          - features: 'ganesh,metal'
             macosxDeploymentTarget: '10.14'
-          - features: 'gl,textlayout'
+          - features: 'ganesh,vulkan'
             macosxDeploymentTarget: '10.13'
-          - features: 'metal,textlayout'
+          - features: 'graphite,metal'
             macosxDeploymentTarget: '10.14'
-          - features: 'textlayout,vulkan'
+          - features: 'ganesh,gl,metal'
+            macosxDeploymentTarget: '10.14'
+          - features: 'ganesh,gl,textlayout'
             macosxDeploymentTarget: '10.13'
-          - features: 'gl,metal,textlayout'
+          - features: 'ganesh,metal,textlayout'
             macosxDeploymentTarget: '10.14'
-          - features: 'gl,textlayout,vulkan'
+          - features: 'ganesh,textlayout,vulkan'
             macosxDeploymentTarget: '10.13'
           - features: 'svg,textlayout,webp'
             macosxDeploymentTarget: '10.13'
-          - features: 'gl,metal,svg,textlayout'
+          - features: 'ganesh,gl,metal,textlayout'
             macosxDeploymentTarget: '10.14'
-          - features: 'gl,svg,textlayout,vulkan'
+          - features: 'ganesh,gl,textlayout,vulkan'
             macosxDeploymentTarget: '10.13'
-          - features: 'metal,svg,textlayout,webp'
+          - features: 'ganesh,gl,metal,svg,textlayout'
+            macosxDeploymentTarget: '10.14'
+          - features: 'ganesh,gl,svg,textlayout,vulkan'
+            macosxDeploymentTarget: '10.13'
+          - features: 'ganesh,metal,svg,textlayout,webp'
             macosxDeploymentTarget: '10.14'
         exclude:
           - target: aarch64-apple-ios
-            features: 'vulkan'
+            features: 'ganesh,vulkan'
           - target: aarch64-apple-ios-sim
-            features: 'vulkan'
+            features: 'ganesh,vulkan'
           - target: x86_64-apple-ios
-            features: 'vulkan'
+            features: 'ganesh,vulkan'
           - target: aarch64-apple-ios
-            features: 'textlayout,vulkan'
+            features: 'ganesh,textlayout,vulkan'
           - target: aarch64-apple-ios-sim
-            features: 'textlayout,vulkan'
+            features: 'ganesh,textlayout,vulkan'
           - target: x86_64-apple-ios
-            features: 'textlayout,vulkan'
+            features: 'ganesh,textlayout,vulkan'
           - target: aarch64-apple-ios
-            features: 'gl,textlayout,vulkan'
+            features: 'ganesh,gl,textlayout,vulkan'
           - target: aarch64-apple-ios-sim
-            features: 'gl,textlayout,vulkan'
+            features: 'ganesh,gl,textlayout,vulkan'
           - target: x86_64-apple-ios
-            features: 'gl,textlayout,vulkan'
+            features: 'ganesh,gl,textlayout,vulkan'
           - target: aarch64-apple-ios
-            features: 'gl,svg,textlayout,vulkan'
+            features: 'ganesh,gl,svg,textlayout,vulkan'
           - target: aarch64-apple-ios-sim
-            features: 'gl,svg,textlayout,vulkan'
+            features: 'ganesh,gl,svg,textlayout,vulkan'
           - target: x86_64-apple-ios
-            features: 'gl,svg,textlayout,vulkan'
+            features: 'ganesh,gl,svg,textlayout,vulkan'
     runs-on: macos-15
     env:
       SKIA_DEBUG: 0
