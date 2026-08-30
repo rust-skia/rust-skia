@@ -247,6 +247,36 @@ mod gpu {
         assert_impl_all!(gpu::SubmitInfo: Send, Sync);
     }
 
+    #[cfg(feature = "graphite")]
+    mod graphite {
+        use skia_safe::gpu::graphite::*;
+        use static_assertions::*;
+
+        assert_not_impl_any!(Context: Send, Sync);
+        assert_not_impl_any!(Recorder: Send, Sync);
+        assert_not_impl_any!(BorrowedRecorder<'static>: Send, Sync);
+        assert_impl_all!(Recording: Send);
+        assert_not_impl_any!(Recording: Sync);
+
+        assert_not_impl_any!(ContextOptions: Send, Sync);
+        assert_not_impl_any!(RecorderOptions: Send, Sync);
+        assert_not_impl_any!(BackendTexture: Send, Sync);
+        assert_not_impl_any!(TextureInfo: Send, Sync);
+        assert_not_impl_any!(InsertRecordingInfo<'static>: Send, Sync);
+        assert_not_impl_any!(SubmitInfo: Send, Sync);
+        assert_impl_all!(InsertStatus: Send, Sync);
+        assert_impl_all!(SyncToCpu: Send, Sync);
+
+        #[cfg(feature = "metal")]
+        mod metal {
+            use skia_safe::gpu::graphite::mtl::{BackendContext, Handle};
+            use static_assertions::*;
+
+            assert_impl_all!(BackendContext: Send, Sync);
+            assert_not_impl_any!(Handle: Send, Sync);
+        }
+    }
+
     #[cfg(all(feature = "ganesh", feature = "gl"))]
     mod gl {
         use skia_safe::gpu::gl::*;
@@ -272,6 +302,7 @@ mod gpu {
     mod vulkan {
         use skia_safe::gpu::vk::*;
         use static_assertions::*;
+        // Graphite reuses this BackendContext through gpu::graphite::vk.
         // TODO: BackendContext is referencing get_proc and is used only temporarily for building
         //       the context.
         assert_not_impl_any!(BackendContext: Send, Sync);
