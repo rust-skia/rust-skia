@@ -942,6 +942,9 @@ pub(crate) mod definitions {
         if features.ganesh() {
             files.push("obj/gpu.ninja".into());
         }
+        if features.graphite() {
+            files.push("obj/graphite.ninja".into());
+        }
         if features[feature::TEXTLAYOUT] {
             files.extend(vec![
                 "obj/modules/skshaper/skshaper.ninja".into(),
