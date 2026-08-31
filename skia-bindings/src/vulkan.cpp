@@ -85,7 +85,7 @@ extern "C" void *C_VulkanBackendContext_new(
     void *device,
     void *queue,
     uint32_t graphicsQueueIndex,
-    GrProtected protectedContext,
+    skgpu::Protected protectedContext,
     uint32_t maxAPIVersion,
 
     /* PFN_vkVoidFunction makes us trouble on the Rust side */
@@ -124,7 +124,7 @@ extern "C" void C_VulkanBackendContext_delete(void* vkBackendContext) {
     delete bc;
 }
 
-extern "C" void C_VulkanBackendContext_setProtectedContext(skgpu::VulkanBackendContext *self, GrProtected protectedContext) {
+extern "C" void C_VulkanBackendContext_setProtectedContext(skgpu::VulkanBackendContext *self, skgpu::Protected protectedContext) {
     self->fProtectedContext = protectedContext;
 }
 
