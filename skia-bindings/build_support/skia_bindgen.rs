@@ -146,10 +146,21 @@ pub fn generate_bindings(
         .blocklist_type("SkVerticesPriv")
         .blocklist_function("SkVertices_priv.*")
         .blocklist_function("std::bitset_flip.*")
-        // Vulkan reexports that got swallowed by making them opaque.
-        // (these can not be allowlisted by a extern "C" function)
+        // Vulkan reexports that cannot be reached from an extern "C" function.
+        .allowlist_type("VkCommandBuffer")
+        .allowlist_type("VkExtent2D")
+        .allowlist_type("VkImage")
+        .allowlist_type("VkImageTiling")
+        .allowlist_type("VkImageUsageFlags")
+        .allowlist_type("VkOffset2D")
+        .allowlist_type("VkPhysicalDevice")
         .allowlist_type("VkPhysicalDeviceFeatures")
-        .allowlist_type("VkPhysicalDeviceFeatures2").
+        .allowlist_type("VkPhysicalDeviceFeatures2")
+        .allowlist_type("VkQueue")
+        .allowlist_type("VkRect2D")
+        .allowlist_type("VkRenderPass")
+        .allowlist_type("VkSemaphore")
+        .allowlist_type("VkSharingMode").
         // m91: These functions are not actually implemented.
         blocklist_function("SkCustomTypefaceBuilder_setGlyph[123].*")
         // m113: `SkUnicode` pulls in an impl block that forwards static functions that may not be
