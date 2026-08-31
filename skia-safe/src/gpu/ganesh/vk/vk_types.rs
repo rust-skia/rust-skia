@@ -1,4 +1,4 @@
-use std::{ffi::CStr, os::raw, ptr};
+use std::ptr;
 
 use skia_bindings::{GrVkDrawableInfo, GrVkImageInfo, GrVkSurfaceInfo};
 
@@ -6,6 +6,8 @@ use crate::gpu::{
     self, Protected,
     vk::{self, Alloc, YcbcrConversionInfo},
 };
+
+pub use crate::gpu::vk::{GetProc, GetProcOf, GetProcResult};
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
@@ -147,33 +149,6 @@ impl ImageInfo {
         self.alloc = alloc;
     }
 }
-
-// TODO: Tried to use CStr here, but &CStr needs a lifetime parameter
-//       which would make the whole GetProc trait generic.
-#[derive(Copy, Clone, Debug)]
-pub enum GetProcOf {
-    Instance(vk::Instance, *const raw::c_char),
-    Device(vk::Device, *const raw::c_char),
-}
-
-impl GetProcOf {
-    /// # Safety
-    /// The referred raw `name` strings must outlive the returned CStr reference.
-    pub unsafe fn name(&self) -> &CStr {
-        match *self {
-            GetProcOf::Instance(_, name) => unsafe { CStr::from_ptr(name) },
-            GetProcOf::Device(_, name) => unsafe { CStr::from_ptr(name) },
-        }
-    }
-}
-
-// TODO: Really would like to see a fn() signature here, but I'm always running
-//       into a conflict between extern "C" and extern "system".
-pub type GetProcResult = *const raw::c_void;
-
-// GetProc is a trait alias for Fn...
-pub trait GetProc: Fn(GetProcOf) -> GetProcResult {}
-impl<T> GetProc for T where T: Fn(GetProcOf) -> GetProcResult {}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
