@@ -42,8 +42,8 @@ release-verify version previous commit remote="upstream":
 
 # Download matching QA artifacts and compare all generated images across every
 # platform that produces QA artifacts.
-release-verify-images previous commit report="/tmp/rust-skia-release-images" platforms="" website_fallback="false":
-    bash .github/skills/rust-skia-release-verification/scripts/compare-images.sh "{{ previous }}" "{{ commit }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}" "{{ website_fallback }}"
+release-verify-images previous commit report="/tmp/rust-skia-release-images" platforms="":
+    bash .github/skills/rust-skia-release-verification/scripts/compare-images.sh "{{ previous }}" "{{ commit }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}"
 
 # Advisory comparison of the SVG and PDF outputs between two commits, across
 # every platform that produces QA artifacts.

@@ -14,15 +14,10 @@ report="${3:-/tmp/rust-skia-release-images}"
 # Space-separated list of "workflow:artifact" pairs, one per platform that
 # generates QA artifacts. Override to check a subset.
 platforms="${4:-linux-qa.yaml:skia-org-images-x86_64-unknown-linux-gnu macos-qa.yaml:skia-org-images-aarch64-apple-darwin windows-qa.yaml:skia-org-images-x86_64-pc-windows-msvc windows-arm-qa.yaml:skia-org-images-aarch64-pc-windows-msvc}"
-website_fallback="${5:-false}"
 repo="rust-skia/rust-skia"
 
 command -v magick >/dev/null || { echo "ImageMagick is required" >&2; exit 2; }
 command -v gh >/dev/null || { echo "GitHub CLI is required" >&2; exit 2; }
-if [[ "$website_fallback" != true && "$website_fallback" != false ]]; then
-    echo "website_fallback must be true or false" >&2
-    exit 2
-fi
 [[ ! -e "$report" || -z "$(find "$report" -mindepth 1 -print -quit)" ]] || {
     echo "Report directory must be new or empty: $report" >&2
     exit 2
@@ -46,11 +41,6 @@ prepare_image() {
 compare_platform() {
     local tag="$1"
     local bdir="$report/$tag/baseline/cpu" cdir="$report/$tag/candidate/cpu"
-    if [[ "$website_fallback" == true ]]; then
-        echo "Using the published website CPU images as a visual-only baseline"
-        git clone --depth 1 https://github.com/rust-skia/rust-skia.github.io "$report/site"
-        bdir="$report/site/skia-org/cpu"
-    fi
 
     if [[ -d "$bdir" && -d "$cdir" ]]; then
         compared_any=1

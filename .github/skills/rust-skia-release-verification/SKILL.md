@@ -45,10 +45,6 @@ same release.
   `just release-verify-vector <previous> <commit> svg` (or `pdf`).
 - To check a subset of platforms, pass a space-separated list of
   `workflow:artifact` pairs as the `platforms` argument to either recipe.
-- If the previous QA artifact has expired, opt into the published website CPU
-  images as a visual-only baseline:
-  `just release-verify-images <previous> <commit> <report> <platforms> true`.
-  Do not treat that cross-version website snapshot as an exact pixel oracle.
 
 ## Failure prevention
 
