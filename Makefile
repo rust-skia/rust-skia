@@ -24,20 +24,27 @@ crate-tests: crate-bindings-binaries crate-bindings-build
 .PHONY: crate-bindings-binaries
 crate-bindings-binaries: export FORCE_SKIA_BINARIES_DOWNLOAD=1
 crate-bindings-binaries:
-	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout,binary-cache"
+	cd skia-bindings && cargo publish -vv --dry-run --features "ganesh,gl,vulkan,textlayout,binary-cache"
 	cd skia-bindings && cargo publish -vv --dry-run 
 
 .PHONY: crate-bindings-build
 crate-bindings-build: export FORCE_SKIA_BUILD=1
 crate-bindings-build: 
-	cd skia-bindings && cargo publish -vv --dry-run --features "gl,vulkan,textlayout"
-	cd skia-bindings && cargo publish -vv --dry-run 
+	rm -rf target/package/skia-bindings-*
+	cd skia-bindings && cargo package -vv --no-verify
+	cd target/package && tar xzf skia-bindings-*.crate
+	cargo build -vv --manifest-path target/package/skia-bindings-*/Cargo.toml --features "ganesh,gl,vulkan,textlayout"
+	rm -rf target/package/skia-bindings-*
+	cd skia-bindings && cargo package -vv --no-verify
+	cd target/package && tar xzf skia-bindings-*.crate
+	cargo build -vv --manifest-path target/package/skia-bindings-*/Cargo.toml
 
 .PHONY: crate-post-release-test
 crate-post-release-test:
+	test -n "${RELEASE_VERSION}"
 	rm -rf /tmp/skia-test
 	cd /tmp && cargo new skia-test
-	cd /tmp/skia-test && cargo add skia-safe
+	cd /tmp/skia-test && cargo add "skia-safe@=${RELEASE_VERSION}"
 	cd /tmp/skia-test && cargo run
 	# https://github.com/rust-skia/rust-skia/issues/1310
 	cd /tmp/skia-test && cargo build --target wasm32-unknown-emscripten
@@ -66,6 +73,7 @@ publish-bindings:
 publish-bindings-docs: bindings-docs
 	cd skia-bindings && cp /tmp/bindings.rs bindings_docs.rs
 	cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
+	rm skia-bindings/bindings_docs.rs
 
 # SVG Macros are most likely changed rarely. So this is separate.
 

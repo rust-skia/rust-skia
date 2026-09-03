@@ -33,3 +33,18 @@ check-skia-submodule-tag:
 
     echo "OK: skia submodule tag matches metadata tag ($expected_tag)"
 
+# Verify the release commit, workflows/assets, binary downloads, and source builds.
+release-verify version previous commit remote="upstream":
+    bash .github/scripts/release.sh verify "{{ version }}" "{{ previous }}" "{{ commit }}" "{{ remote }}"
+
+# Download matching QA artifacts and compare all generated images.
+release-verify-images previous commit report="/tmp/rust-skia-release-images" workflow="linux-qa.yaml" artifact="skia-org-images-x86_64-unknown-linux-gnu" website_fallback="false":
+    bash .github/skills/rust-skia-release-verification/scripts/compare-images.sh "{{ previous }}" "{{ commit }}" "{{ report }}" "{{ workflow }}" "{{ artifact }}" "{{ website_fallback }}"
+
+# Publish required crates in dependency order, verify them, and run smoke tests.
+release-publish-crates version previous:
+    bash .github/scripts/release.sh publish-crates "{{ version }}" "{{ previous }}"
+
+# Create or resume the GitHub release and verify its tag.
+release-publish-github version commit notes prerelease="false" remote="upstream":
+    bash .github/scripts/release.sh publish-github "{{ version }}" "{{ commit }}" "{{ notes }}" "{{ prerelease }}" "{{ remote }}"
