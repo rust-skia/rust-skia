@@ -15,12 +15,16 @@ Set `<version>`, `<previous>`, `<commit>`, and `<notes>` to concrete values.
 - [ ] Run `just release-verify-images <previous> <commit>`, then inspect
       `/tmp/rust-skia-release-images/comparison/summary.tsv` and every image in
       its `review` directory.
+- [ ] Run `just release-verify-vector <previous> <commit>`, then inspect
+      `/tmp/rust-skia-release-vector/comparison/summary.tsv` and its `review`
+      directory (advisory SVG/PDF check).
 - [ ] Review `<notes>` against the
       [release notes guidelines](release-notes-guidelines.md).
 
 Image comparison exits 0 for an exact match, 1 when differences need human
 review, and 2 when the check could not run. Stop for a failed workflow, missing
-artifact, source-build fallback, or unexplained image change.
+artifact, source-build fallback, or unexplained image change. The vector gate
+is advisory: treat its differences as a signal to review, not a hard block.
 
 ## Publish
 

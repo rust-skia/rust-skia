@@ -21,8 +21,10 @@ same release.
    crate changed.
 2. Run `just release-verify-images <previous-version> <commit>` and inspect every
    reported difference.
-3. Validate the release notes against the repository rules.
-4. Report the verified version, previous version, exact commit, notes file,
+3. Run `just release-verify-vector <previous-version> <commit>` and inspect the
+   reported SVG/PDF differences (advisory).
+4. Validate the release notes against the repository rules.
+5. Report the verified version, previous version, exact commit, notes file,
    canonical remote, and image-review result.
 
 ## Failure prevention
