@@ -111,6 +111,17 @@ the fork tag.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's patch component.
+- **Build organization diff:** review whether the build organization changed
+  significantly by diffing the build files between the old and new tags. Cover
+  `BUILD.gn`, `gn/*` (recursively), and the `BUILD.gn`/`*.gni` pairs under
+  `modules/skshaper`, `modules/paragraph`, `modules/skottie`, and `modules/svg`.
+  Record each as `no change` or `updated build glue` in the accounting. Most
+  source-list changes flow through existing Skia targets and need no rust-skia
+  build glue change. However, any diff in the `gn`/`gni` files that looks
+  relevant — one that may need special consideration or may indirectly affect
+  the bindings or any build process — must be reviewed by the user. Do not
+  silently decide on such a diff; surface it and get explicit confirmation
+  before proceeding.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff OLD_TAG..NEW_TAG -- ...`
   commands. Do not use `make diff-skia` for include/API diffs; that target only
   compares rust-skia-specific commits in the Skia submodule against master (it is the
@@ -151,6 +162,13 @@ the fork tag.
      matching `*.cpp` and `skia-safe/src/...` files together. Re-run
      `cargo check -p skia-bindings` (touching `bindings.cpp` first to force bindgen
      regeneration) and `cargo check -p skia-safe` after each batch.
+
+  Cover every wrapper area systematically, mirroring the `skia-safe/src` layout:
+  `codec/`, `core/`, `docs/`, `effects/`, `encode/`, `gpu/` (with `ganesh/`,
+  `graphite/`, `mtl/`, `vk/`), `pathops/`, `svg/`, `utils/`, and `modules/` (with
+  `paragraph/`, `shaper/`, `skottie/`, `skresources/`, `svg/`). For each area,
+  cross-reference the changed headers against the corresponding `skia-bindings/src/*.cpp`
+  and `skia-safe/src/...` wrapper module, and record the outcome in the accounting.
 - **Wrapper updates:** preserve method/debug-field ordering aligned with the upstream
   C++ header. Add `todo!()` for anything that cannot be updated right now. Stay
   compatible with previous versions of skia-safe without trying too hard before 1.0;
