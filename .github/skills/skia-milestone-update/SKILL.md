@@ -14,12 +14,21 @@ wiki page and extends it with project-specific coverage such as Graphite. The
 
 ## Inputs
 
-- `OLD_TAG`: the current Skia submodule tag (e.g. `m152-0.152.1`)
-- `NEW_TAG`: the target Skia submodule tag (e.g. `m153-0.153.0`)
+- `OLD_TAG`: the current Skia submodule tag (e.g. `m153-0.101.1`)
+- `NEW_TAG`: the target Skia submodule tag and branch name (e.g. `m154-0.153.2`)
 - `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `150` / `151`)
+- `PREVIOUS_BINDINGS_VERSION`: the `skia-bindings` package version before the
+  milestone bump (for example, `0.153.2` when starting the m154 update)
 
 Determine these from `skia-bindings/Cargo.toml` (`[package.metadata] skia = "..."`)
 and `git -C skia-bindings/skia describe --tags` / `git -C skia-bindings/skia tag --list 'm1*'`.
+For a new milestone, set `NEW_TAG` and name the temporary submodule branch
+`mNEW_MILESTONE-PREVIOUS_BINDINGS_VERSION`. For example, when updating from
+`skia-bindings` 0.153.2 to milestone 154, both the tag and branch are
+`m154-0.153.2`, and `[package.metadata].skia` must use that same value. Read the
+previous version from `skia-bindings/Cargo.toml` before editing it. Do not derive
+this suffix from an older Skia fork tag, and do not use the target crate version
+(such as `0.154.0`) for the tag, branch, or Skia metadata.
 
 ## Refresh the current milestone from upstream
 
@@ -45,7 +54,7 @@ the fork tag.
 
    ```sh
    git -C skia-bindings/skia merge-base OLD_TAG upstream/chrome/mXX
-   git -C skia-bindings/skia switch -c codex/NEW_TAG OLD_TAG
+   git -C skia-bindings/skia switch -c mNEW_MILESTONE-PREVIOUS_BINDINGS_VERSION OLD_TAG
    git -C skia-bindings/skia rebase --onto upstream/chrome/mXX OLD_BASE
    ```
 
@@ -91,12 +100,13 @@ the fork tag.
 ## Notes that go beyond the wiki checklist
 
 - **Versioning:** synchronize the Rust crate minor version with the numeric Skia
-  milestone: milestone `mXX` uses version `0.XX.0` (for example, `m153` uses
-  `0.153.0`). Update all of these together:
+  milestone: milestone `mXX` uses crate version `0.XX.0`. Separately, name the
+  Skia fork tag and branch from the target milestone plus the previous
+  `skia-bindings` version as described above. Update all of these together:
   - `skia-bindings/Cargo.toml` package version;
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
-  - `skia-bindings/Cargo.toml` `[package.metadata].skia` tag
-    (for example, `m153-0.153.0`);
+  - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
+    and the submodule branch exactly;
   - both package entries in `Cargo.lock`.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate

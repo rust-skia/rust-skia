@@ -67,4 +67,27 @@ mod tests {
     fn test_skunicode_parameterized_shaper() {
         shapers::hb::shape_dont_wrap_or_reorder(None).expect("Shaper");
     }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_shape_with_options() {
+        let shaper = Shaper::new(None);
+        let text = "Hello";
+        let mut font_run_iterator =
+            Shaper::new_trivial_font_run_iterator(&Font::default(), text.len());
+        let mut bidi_run_iterator = shapers::primitive::trivial_bidi_run_iterator(0, text.len());
+        let mut script_run_iterator = shapers::primitive::trivial_script_run_iterator(0, text.len());
+        let mut language_run_iterator = Shaper::new_trivial_language_run_iterator("en", text.len());
+        shaper.shape_with_iterators_and_features_and_options(
+            text,
+            &mut font_run_iterator,
+            &mut bidi_run_iterator,
+            &mut script_run_iterator,
+            &mut language_run_iterator,
+            &[],
+            10000.0,
+            0.0,
+            &mut DebugRunHandler::default(),
+        );
+    }
 }
