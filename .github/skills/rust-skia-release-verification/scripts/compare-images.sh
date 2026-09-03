@@ -26,7 +26,7 @@ release_sha="$(git rev-parse "$commit^{commit}")"
 find_run() {
     local sha="$1"
     gh run list --repo "$repo" --workflow "$workflow" --commit "$sha" \
-        --status success --limit 100 --json databaseId --jq '.[0].databaseId'
+        --status success --limit 100 --json databaseId --jq '.[0].databaseId // empty'
 }
 
 download_images() {
