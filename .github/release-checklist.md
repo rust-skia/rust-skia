@@ -14,7 +14,8 @@ Set `<version>`, `<previous>`, `<commit>`, and `<notes>` to concrete values.
       package dry run.
 - [ ] Run `just release-verify-images <previous> <commit>`, then inspect
       `/tmp/rust-skia-release-images/comparison/summary.tsv` and every image in
-      its `review` directory.
+      its `review` directory. This covers every platform that produces QA
+      artifacts (linux, macos, windows, windows-arm).
 - [ ] Run `just release-verify-vector <previous> <commit>`, then inspect
       `/tmp/rust-skia-release-vector/comparison/summary.tsv` and its `review`
       directory (advisory SVG/PDF check).
