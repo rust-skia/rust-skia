@@ -18,10 +18,23 @@ find_run() {
         --status success --limit 100 --json databaseId --jq '.[0].databaseId // empty'
 }
 
+# Resolve the run to use for a workflow: an explicit override from `runs`
+# (space-separated "workflow:run" pairs) if present, otherwise the most recent
+# successful run at the commit.
+resolve_run() {
+    local workflow="$1" run
+    run="$(awk -v w="$workflow" -F: '$1 == w { print $2; exit }' <<<"$runs")"
+    if [[ -n "$run" ]]; then
+        echo "$run"
+    else
+        find_run "$2" "$workflow"
+    fi
+}
+
 # Download an artifact from a successful run of a workflow at a commit.
 download_images() {
     local sha="$1" output="$2" workflow="$3" artifact="$4" run
-    run="$(find_run "$sha" "$workflow")"
+    run="$(resolve_run "$workflow" "$sha")"
     [[ -n "$run" ]] || {
         echo "No successful $workflow run found for $sha" >&2
         exit 2

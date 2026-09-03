@@ -42,13 +42,13 @@ release-verify version previous commit remote="upstream":
 
 # Download matching QA artifacts and compare all generated images across every
 # platform that produces QA artifacts.
-release-verify-images previous commit report="/tmp/rust-skia-release-images" platforms="":
-    bash .github/skills/rust-skia-release-verification/scripts/compare-images.sh "{{ previous }}" "{{ commit }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}"
+release-verify-images previous commit report="/tmp/rust-skia-release-images" platforms="" runs="":
+    bash .github/skills/rust-skia-release-verification/scripts/compare-images.sh "{{ previous }}" "{{ commit }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}" "{{ runs }}"
 
 # Advisory comparison of the SVG and PDF outputs between two commits, across
 # every platform that produces QA artifacts.
-release-verify-vector previous commit formats="svg pdf" report="/tmp/rust-skia-release-vector" platforms="":
-    bash .github/skills/rust-skia-release-verification/scripts/compare-vector.sh "{{ previous }}" "{{ commit }}" "{{ formats }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}"
+release-verify-vector previous commit formats="svg pdf" report="/tmp/rust-skia-release-vector" platforms="" runs="":
+    bash .github/skills/rust-skia-release-verification/scripts/compare-vector.sh "{{ previous }}" "{{ commit }}" "{{ formats }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}" "{{ runs }}"
 
 # Publish required crates in dependency order, verify them, and run smoke tests.
 release-publish-crates version previous:

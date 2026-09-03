@@ -45,6 +45,10 @@ same release.
   `just release-verify-vector <previous> <commit> svg` (or `pdf`).
 - To check a subset of platforms, pass a space-separated list of
   `workflow:artifact` pairs as the `platforms` argument to either recipe.
+- To pin the run used for a workflow instead of auto-selecting the most recent
+  successful run at each commit, pass a space-separated list of `workflow:run`
+  pairs as the `runs` argument to either recipe. This is useful when a commit
+  has multiple successful runs and you want a specific one.
 
 ## Failure prevention
 

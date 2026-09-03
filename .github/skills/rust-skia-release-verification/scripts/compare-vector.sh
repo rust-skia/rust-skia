@@ -17,6 +17,9 @@ report="${4:-/tmp/rust-skia-release-vector}"
 # Space-separated list of "workflow:artifact" pairs, one per platform that
 # generates QA artifacts. Override to check a subset.
 platforms="${5:-linux-qa.yaml:skia-org-images-x86_64-unknown-linux-gnu macos-qa.yaml:skia-org-images-aarch64-apple-darwin windows-qa.yaml:skia-org-images-x86_64-pc-windows-msvc windows-arm-qa.yaml:skia-org-images-aarch64-pc-windows-msvc}"
+# Space-separated list of "workflow:run" pairs to pin the run used for a
+# workflow. Omit to auto-select the most recent successful run at each commit.
+runs="${6:-}"
 repo="rust-skia/rust-skia"
 
 command -v magick >/dev/null || { echo "ImageMagick is required" >&2; exit 2; }
