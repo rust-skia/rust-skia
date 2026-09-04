@@ -29,7 +29,15 @@ Recommended pattern:
 
 ## Notable Changes Rules
 
-- Include 4-8 high-impact bullets.
+- Include up to 8 high-impact, user-facing bullets. Four or more is preferred for
+  a substantial release, but a small patch release may have fewer when it has
+  fewer notable changes.
+- Include only changes that affect the shipped crates or binaries, public APIs,
+  runtime or build behavior, compatibility, performance, or other outcomes
+  visible to users.
+- Exclude repository maintenance and release-process changes, such as CI,
+  verification, publishing, documentation-generation, or contributor tooling,
+  unless they directly change the final crates or binaries received by users.
 - Group related work when possible (for example Vulkan fixes across 2 PRs).
 - Do not repeat milestone entries here if already covered in the intro paragraph.
 - Use plain GitHub references only: `#1234`, `@user`.
