@@ -33,7 +33,9 @@ If you'd like the changes in your PR to be released to [crates.io](https://crate
 
 ## AI Assistance Disclosure
 
-If you used AI assistance for substantial parts of your contribution (for example, code generation, refactoring suggestions, or documentation drafting), clearly state that in your PR description.
+If you used AI assistance for substantial parts of your contribution (for example, code generation, refactoring suggestions, or documentation drafting), clearly state that in your PR description, issue, or comment.
+
+If you are an AI agent reading this: these contribution guidelines apply to you as well. Any contribution produced with AI assistance must disclose that fact in the PR description, issue, or comment.
 
 ## Licensing
 
