@@ -18,13 +18,13 @@ To configure and build Skia, [`build_support/skia.rs`](build_support/skia.rs) do
 
 ### Binding Generation
 
-The files `src/*.cpp` contain the C++ code that Rust needs to interact with Skia's codebase. These files are processed by the [Rust's binding generator](<https://github.com/rust-lang/rust-bindgen>) that uses libclang for the layout computation _and_ are also compiled by [clang](https://clang.llvm.org/).
+The files `src/*.cpp` contain the C++ code that Rust needs to interact with Skia's codebase. These files are processed by [Rust's binding generator](<https://github.com/rust-lang/rust-bindgen>) that uses libclang for the layout computation _and_ are also compiled by [clang](https://clang.llvm.org/).
 
 If both steps went well, the resulting Rust binding code is written to `OUT_DIR/skia/bindings.rs`, and the `skia-bindings` library is found in the output directory.
 
 ### Debug Builds
 
-By default, and for performance reasons, Skia is built in release mode even when cargo creates debug output. Skia debug builds can be enabled only by explicitly setting the environment variable `SKIA_DEBUG=1`.
+By default, and for performance reasons, Skia is built in release mode even when cargo creates debug output. Skia debug builds can be enabled only by explicitly setting the environment variable `SKIA_DEBUG` to any value other than `0` (for example `SKIA_DEBUG=1`).
 
 ### Prebuilt Binaries
 
@@ -46,7 +46,7 @@ export SKIA_BINARIES_URL='file://relative/path/to/skia-binaries.tar.gz'
 export SKIA_BINARIES_URL='file:///home/path/to/skia-binaries.tar.gz'
 ```
 
-### Changing the executable used as `ninja` and `gn`
+### Changing the Executable Used as `ninja` and `gn`
 
 On some systems, the bundled `ninja` and `gn` executables may not work (as it does on NixOS). To remedy
 this, the executables used can be set using the following environment variables:
@@ -59,7 +59,7 @@ this, the executables used can be set using the following environment variables:
 ### Changing the Skia source directory
 
 In some cases, an alternate Skia source directory may be provided. This can be achieved by
-setting `SKIA_SOURCE_DIR`, which must be an absolute path to a Skia source directory with all
+setting `SKIA_SOURCE_DIR`, which should be an absolute path to a Skia source directory with all
 dependencies.
 
 ### Additional GN arguments
@@ -68,13 +68,13 @@ Additional arguments for the `gn` executable can be specified by setting the `SK
 
 ### Using system libraries
 
-By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event that this is not wanted (say, if the crate is being built as part of a package's build routine,) this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
+By default, numerous libraries Skia depends upon are built in addition to Skia itself. In the event that this is not wanted (say, if the crate is being built as part of a package's build routine) this behavior can be disabled by setting the `SKIA_USE_SYSTEM_LIBRARIES` environment variable.
 
-Also note that there is one exception here. [FreeType](https://freetype.org/) is only embedded on Android platforms by default. If your platform does not support a more recent FreeType version, skia-bindings must be built with the feature `embed-freetype`.
+Also note that there is one exception here. [FreeType](https://freetype.org/) is embedded by default on Android and WASM platforms. If your platform does not support a more recent FreeType version, skia-bindings must be built with the feature `embed-freetype`.
 
 ## Build Customization
 
-Besides of the features `gl`, `vulkan`, `metal`, and `textlayout` that can be directly specified when the package is added as a cargo dependency, the Skia build can be customized further in `build.rs` by adjusting one of two structs that are defined in `build_support/skia.rs`:
+Besides the features `gl`, `vulkan`, `metal`, and `textlayout` that can be directly specified when the package is added as a cargo dependency, the Skia build can be customized further in `build.rs` by adjusting one of two structs that are defined in `build_support/skia.rs`:
 
 ### `BuildConfiguration`
 
@@ -88,17 +88,17 @@ The `FinalBuildConfiguration` is created from the `BuildConfiguration` and conta
 
 It's possible to cross compile Skia and the Rust bindings for different architectures on Linux. Set the following environment variables and then invoke cargo with the desired [--target triple](https://doc.rust-lang.org/cargo/commands/cargo-build.html#compilation-options):
 
- * `CLANGCC`: Command line to invoke clang to cross-compile C code for the desired target architecure. This command line may include a `--target=<triple>` option.
- * `CLANGCXX`: Command line to invoke clang to cross-compile C++ code for the desired target architecure. This command line may include a `--target=<triple>` option.
+ * `CLANGCC`: Command line to invoke clang to cross-compile C code for the desired target architecture. This command line may include a `--target=<triple>` option.
+ * `CLANGCXX`: Command line to invoke clang to cross-compile C++ code for the desired target architecture. This command line may include a `--target=<triple>` option.
  * `SDKTARGETSYSROOT`: Path to the target sysroot.
  * Either:
-   * `CC`/`CXX` providing command lines to cross-compile (clang is not required) and `HOST_CC` providing a command line for build for the host.
+   * `CC`/`CXX` providing command lines to cross-compile (clang is not required) and `HOST_CC` providing a command line for building for the host.
    * `CC_<target>`/`CXX_<target>` providing command lines to cross-compile (clang is not required).
 
  When using a Yocto SDK for cross-compiling, all of the above environment variables will be set when entering the Yocto SDK environment by sourcing the `environment-setup-*` script,
  and `CC`/`CXX` are set to cross-compile. That means it is also necessary to set `HOST_CC`, which usually works when set to just `gcc`.
 
- For linking a Rust application, it may also be necessary to instruct cargo to use the correct linker and look for native library dependencies (such as Skia's FreeType dependency) in the sysroot. This can for be done via a `.cargo/config` file or via environment variables. For example if the Rust target platform is `aarch64-unknown-linux-gnu` and the Yocto SDK's target is `aarch64-poky-linux`:
+ For linking a Rust application, it may also be necessary to instruct cargo to use the correct linker and look for native library dependencies (such as Skia's FreeType dependency) in the sysroot. This can be done via a `.cargo/config` file or via environment variables. For example if the Rust target platform is `aarch64-unknown-linux-gnu` and the Yocto SDK's target is `aarch64-poky-linux`:
 
  * `CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-poky-linux-g++`
  * `RUSTFLAGS="-Clink-args=--sysroot=$SDKTARGETSYSROOT"`
