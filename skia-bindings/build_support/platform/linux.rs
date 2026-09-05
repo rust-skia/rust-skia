@@ -38,7 +38,11 @@ pub fn link_libraries(features: &Features) -> Vec<String> {
     let mut libs = vec!["stdc++".to_string()];
 
     // Use pkg-config for system libraries when available
-    add_pkg_config_libs(&mut libs, "freetype2", &["freetype"]);
+    // When `embed-freetype` is enabled, Skia builds its own FreeType
+    // (`skia_use_system_freetype2 = no()`), so the system library must not be linked.
+    if !features[feature::EMBED_FREETYPE] {
+        add_pkg_config_libs(&mut libs, "freetype2", &["freetype"]);
+    }
     add_pkg_config_libs(&mut libs, "fontconfig", &["fontconfig"]);
 
     if features[feature::GL] {
