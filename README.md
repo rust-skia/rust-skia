@@ -21,21 +21,13 @@ We (slowly) [add more documentation](https://github.com/rust-skia/rust-skia/issu
 
 ### Crate
 
-A prerelease crate is available from [crates.io](https://crates.io/crates/skia-safe) and invoking
+A prerelease crate is available from [crates.io](https://crates.io/crates/skia-safe). To get started, run
 
 ```bash
 cargo add skia-safe
 ```
 
-in your project's folder should get you started. And you might want to take a look at the [gl-window](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/gl-window) example if you plan to render to a window.
-
-**On Linux** you may run into trouble when **OpenSSL libraries** are missing. On **Debian** and **Ubuntu** they can be installed with:
-
-```bash
-sudo apt-get install pkg-config libssl-dev
-```
-
-For other platforms, more information is available at the [OpenSSL crate documentation](https://docs.rs/openssl/0.10.24/openssl/#automatic).
+in your project's folder. And you might want to take a look at the [gl-window](https://github.com/rust-skia/rust-skia/tree/master/skia-safe/examples/gl-window) example if you plan to render to a window.
 
 ### Platform Support, Build Targets, and Prebuilt Binaries
 
@@ -43,11 +35,11 @@ Because building Skia takes a lot of time and needs tools that may be missing, t
 
 | Platform                          | Binaries                                                   |
 | --------------------------------- | ---------------------------------------------------------- |
-| Windows                           | `x86_64-pc-windows-msvc`                                   |
+| Windows                           | `x86_64-pc-windows-msvc`<br/>`aarch64-pc-windows-msvc`     |
 | Linux Ubuntu 16+<br />CentOS 7, 8 | `x86_64-unknown-linux-gnu`<br/>`aarch64-unknown-linux-gnu` |
 | macOS                             | `x86_64-apple-darwin`<br/>`aarch64-apple-darwin`           |
 | Android                           | `aarch64-linux-android`<br/>`x86_64-linux-android`         |
-| iOS                               | `aarch64-apple-ios`<br/>`x86_64-apple-ios`                 |
+| iOS                               | `aarch64-apple-ios`<br/>`aarch64-apple-ios-sim`<br/>`x86_64-apple-ios` |
 | WebAssembly                       | `wasm32-unknown-emscripten`                                |
 
 ### Wrappers & Codecs & Supported Features
@@ -70,7 +62,7 @@ The build script probes for `python --version` and `python3 --version` and uses 
 
 **Ninja**
 
-The build system for Skia. `ninja` is available as a binary package on all major platforms. Install `ninja` or `ninja-build` and make sure it is available `PATH` with `ninja --version`.
+The build system for Skia. `ninja` is available as a binary package on all major platforms. Install `ninja` or `ninja-build` and make sure it is in your `PATH` with `ninja --version`.
 
 ### On macOS
 
@@ -82,7 +74,7 @@ The build system for Skia. `ninja` is available as a binary package on all major
 
   or download and install the [Command Line Tools for Xcode](https://developer.apple.com/download/more/).
 
-- As an alternative to Apple's XCode LLVM, install LLVM via `brew install llvm` or `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` like instructed.
+- As an alternative to Apple's Xcode LLVM, install LLVM via `brew install llvm` and then set `PATH`, `CPPFLAGS`, and `LDFLAGS` as instructed.
 
   If the environment variables are not set, [bindgen](https://github.com/rust-lang/rust-bindgen) will most likely use the wrong `libclang.dylib` and cause confusing compilation errors (see [#228](https://github.com/rust-skia/rust-skia/issues/228)).
 
@@ -122,7 +114,7 @@ The build system for Skia. `ninja` is available as a binary package on all major
 
 Cross compilation to Android is supported for targeting 64 bit ARM and Intel x86 architectures (`aarch64` and `x86_64`) for API Level 26 (Oreo, Android 8):
 
-We recommend to use [cargo apk](https://crates.io/crates/cargo-apk), but if that does not work for you, following are some instructions on how we build Android targets with GitHub Actions:
+We recommend using [cargo apk](https://crates.io/crates/cargo-apk), but if that does not work for you, following are some instructions on how we build Android targets with GitHub Actions:
 
 For example, to compile for `aarch64`:
 
@@ -191,7 +183,7 @@ Compilation to visionOS is supported on macOS targeting visionOS devices (`--tar
 
 ### For WebAssembly
 
-Install `emscripten` version 3.1.57 or superior and make sure that llvm / clang 16+ is installed. In the examples below, we assume
+Install `emscripten` version 3.1.57 or newer and make sure that llvm / clang 16+ is installed. In the examples below, we assume
 `emsdk` version `3.1.57` was installed with [asdf](http://asdf-vm.com/).
 
 Build with the `wasm32-unknown-emscripten` target (`wasm32-unknown-unknown` is
@@ -219,13 +211,13 @@ export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
 cargo build --target wasm32-unknown-emscripten --features gl
 ```
 
-On MacOS there is a problem with the OS version of `ar` so you will have to install the GNU version from homebrew:
+On macOS there is a problem with the OS version of `ar` so you will have to install the GNU version from homebrew:
 
 ```bash
 brew install binutils
 ```
 
-Then prepend `binutils` path for the build. The path depends on your CPU
+Then prepend the `binutils` path to `PATH`. The path depends on your CPU
 architecture, and can be retrieved with `brew info binutils`. Here is an
 example for Apple silicon:
 
@@ -239,9 +231,9 @@ cargo build --target wasm32-unknown-emscripten
 
 ### Skia
 
-For situations in which Skia does not build or needs to be configured differently, we support some customization support in `skia-bindings/build.rs`. For more details take a look at the [README of the skia-bindings package](skia-bindings/README.md).
+`cargo build` is sufficient to build the bindings _including_ Skia. For situations in which Skia does not build or needs to be configured differently, some customization is supported in `skia-bindings/build.rs`. For more details take a look at the [README of the skia-bindings package](skia-bindings/README.md).
 
-Please share your build experience so that we can try to automate the build and get to the point where `cargo build` _is_ sufficient to build the bindings _including_ Skia, and if that is not possible, clearly prompts to what's missing.
+Please share your build experience so that we can try to automate the build further.
 
 ## Example Applications
 
@@ -330,7 +322,7 @@ For more, you may take a look at the [rust-skia.github.io](https://github.com/ru
 
 ## This project needs contributions!
 
-If you'd like to help with the bindings, take a look at the [Wiki](https://github.com/rust-skia/rust-skia/wiki) to get started and create an issue to prevent duplicate work. For smaller tasks, grep for "TODO"s in the source code. And for heroic work, check out the label [help wanted](https://github.com/rust-skia/rust-skia/labels/help%20wanted). And if you like to help making the Rust API nicer to use, look out for open issues with the label [api ergonomics](https://github.com/rust-skia/rust-skia/issues?q=is%3Aissue+is%3Aopen+label%3A%22api+ergonomics%22).
+If you'd like to help with the bindings, take a look at the [Wiki](https://github.com/rust-skia/rust-skia/wiki) to get started and create an issue to prevent duplicate work. For smaller tasks, grep for "TODO"s in the source code. And for heroic work, check out the label [help wanted](https://github.com/rust-skia/rust-skia/labels/help%20wanted). And if you'd like to help make the Rust API nicer to use, look out for open issues with the label [api ergonomics](https://github.com/rust-skia/rust-skia/issues?q=is%3Aissue+is%3Aopen+label%3A%22api+ergonomics%22).
 
 More details can be found at [CONTRIBUTING.md](https://github.com/rust-skia/rust-skia/tree/master/CONTRIBUTING.md).
 
