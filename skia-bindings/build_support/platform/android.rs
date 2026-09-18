@@ -25,6 +25,8 @@ impl PlatformDetails for Android {
             .arg("target_cpu", quote(clang::target_arch(arch)))
             .arg("skia_enable_fontmgr_android", yes());
 
+        builder.target(clang_target(&config.target));
+
         let major = ndk_major_version(Path::new(&ndk));
         let mut extra_skia_cflags = extra_skia_cflags();
 
@@ -43,6 +45,8 @@ impl PlatformDetails for Android {
             &target.to_string(),
             &target.architecture,
         ));
+        // Must be an override: `skia_bindgen` appends the plain target after the platform args.
+        builder.override_target(&clang_target(target));
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
@@ -62,6 +66,20 @@ impl PlatformDetails for Android {
         }
 
         features
+    }
+}
+
+/// `target` with the API level appended, unless it already ends in one (a `--target=` from `CC`).
+///
+/// Our `--target` overrides the one set by the NDK's versioned clang wrapper. Without a level,
+/// clang leaves `__ANDROID_MIN_SDK_VERSION__` undefined, and newer NDK headers then hide every
+/// API above level 0 (e.g. `posix_madvise`).
+fn clang_target(target: &Target) -> String {
+    let target = target.to_string();
+    if target.ends_with(|c: char| c.is_ascii_digit()) {
+        target
+    } else {
+        format!("{target}{API_LEVEL}")
     }
 }
 
