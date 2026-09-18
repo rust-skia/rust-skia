@@ -31,12 +31,13 @@ pub fn download_cache_path(url: impl AsRef<str>) -> Option<PathBuf> {
 pub fn download(url: impl AsRef<str>, resume_and_cache: bool) -> io::Result<Vec<u8>> {
     let url = url.as_ref();
 
-    // `file` URL, empty hostname, absolute path
+    // `file://` URLs: strip the prefix and read the remainder as a path, which may be
+    // relative to the current working directory or absolute.
     if let Some(file_path) = url.strip_prefix("file://") {
         return fs::read(Path::new(file_path));
     }
 
-    // `file` URLs with non-empty hostname or relative paths are unsupported.
+    // Any other `file:` form (for example `file:/path`) is unsupported.
     if url.starts_with("file:") {
         eprintln!("Unsupported file: URL {url}");
         return Err(ErrorKind::Unsupported.into());
