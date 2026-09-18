@@ -103,9 +103,8 @@ the fork tag.
   - `skia-bindings/Cargo.toml` `[package.metadata].skia` tag
     (for example, `m153-0.101.2`);
   - both package entries in `Cargo.lock`.
-  The version component of the Skia fork tag is independent of the crate version and
-  does not track the milestone for tags up to `m152` (for example `m152-0.100.0`);
-  continue its own patch sequence instead of deriving it from the crate version.
+  The Skia fork tag's version component is independent of the crate version — see
+  the note under Inputs for its scheme.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.<patch>"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's patch component.
