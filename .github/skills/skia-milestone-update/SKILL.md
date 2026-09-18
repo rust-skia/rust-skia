@@ -16,7 +16,7 @@ wiki page and extends it with project-specific coverage such as Graphite. The
 
 - `OLD_TAG`: the current Skia submodule tag (e.g. `m154.5`)
 - `NEW_TAG`: the target Skia submodule tag (e.g. `m154.6` or `m155.0`)
-- `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `150` / `151`)
+- `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `154` / `155`)
 
 A Skia fork tag is `m<milestone>.<ordinal>`, where the ordinal is the tag's position
 within the milestone: `m155.0` is the first tag ever cut for milestone 155, `m155.1`
@@ -52,6 +52,10 @@ tag. With both refs present Git warns that the refname is ambiguous, and
 decorations the tag is prefixed with `tag:` and the branch is not, which is easy to
 misread as two tags on the same commit. For the same reason, always spell out
 `refs/tags/…` or `refs/heads/…` in the commands below instead of bare ref names.
+
+Note that the version component of a Skia fork tag does not track the milestone for
+tags up to `m152` (for example `m152-0.100.0`), and only aligns with it from `m153`
+on. Take both tags from the repository instead of deriving one from the other.
 
 ## Refresh the current milestone from upstream
 
