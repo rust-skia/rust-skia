@@ -167,9 +167,9 @@ the fork tag.
 ## Notes that go beyond the wiki checklist
 
 - **Versioning:** synchronize the Rust crate minor version with the numeric Skia
-  milestone: milestone `mXX` uses crate version `0.XX.0`. The Skia fork tag carries
-  the milestone plus the ordinal described above and is otherwise unrelated to the
-  crate version. Update all of these together:
+  milestone: milestone `mXX` uses crate version `0.XX.0`. The Skia fork tag is
+  unrelated to the crate version — see the note under Inputs for its scheme.
+  Update all of these together:
   - `skia-bindings/Cargo.toml` package version;
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
