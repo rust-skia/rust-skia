@@ -10,6 +10,8 @@ use super::{
 };
 use crate::build_support::features::feature;
 
+use std::collections::HashMap;
+
 pub mod alpine;
 pub mod android;
 mod apple;
@@ -45,7 +47,29 @@ pub fn uses_freetype(target: &Target) -> bool {
 
 pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(String, String)> {
     details(&config.target).gn_args(config, &mut builder);
-    builder.into_gn_args()
+    let gn_args = builder.into_gn_args();
+    dedup_by_name_drop_all_but_last(gn_args)
+}
+
+/// Drops all but the last occurrence of a name, preserving the order of the
+/// remaining entries.
+///
+/// Later platform arguments override earlier ones, for example when an
+/// emscripten platform sets `cc`/`cxx`/`ar` after the default configuration
+/// has written them. GN reports duplicate arguments as an error, so duplicates
+/// must not survive.
+fn dedup_by_name_drop_all_but_last(gn_args: Vec<(String, String)>) -> Vec<(String, String)> {
+    let mut last_index: HashMap<String, usize> = HashMap::new();
+    for (index, (name, _)) in gn_args.iter().enumerate() {
+        last_index.insert(name.clone(), index);
+    }
+    let mut deduped = Vec::with_capacity(gn_args.len());
+    for (index, (name, value)) in gn_args.into_iter().enumerate() {
+        if last_index.get(&name) == Some(&index) {
+            deduped.push((name, value));
+        }
+    }
+    deduped
 }
 
 #[derive(Clone, Debug)]
