@@ -1,10 +1,5 @@
 #![allow(dead_code)]
 
-// cargo 1.45.1 / rustfmt 1.4.17-stable fails to process the relative path on Windows.
-#[rustfmt::skip]
-#[path = "../icon/renderer.rs"]
-mod renderer;
-
 #[cfg(target_os = "android")]
 fn main() {
     println!(
@@ -43,11 +38,7 @@ fn main() {
     feature = "gl"
 ))]
 fn main() {
-    use std::{
-        ffi::CString,
-        num::NonZeroU32,
-        time::{Duration, Instant},
-    };
+    use std::{ffi::CString, num::NonZeroU32};
 
     use gl::types::*;
     use gl_rs as gl;
@@ -56,7 +47,9 @@ fn main() {
         context::{ContextApi, ContextAttributesBuilder, PossiblyCurrentContext},
         display::{GetGlDisplay, GlDisplay},
         prelude::{GlSurface, NotCurrentGlContext},
-        surface::{Surface as GlutinSurface, SurfaceAttributesBuilder, WindowSurface},
+        surface::{
+            Surface as GlutinSurface, SurfaceAttributesBuilder, SwapInterval, WindowSurface,
+        },
     };
     use glutin_winit::DisplayBuilder;
     use raw_window_handle::HasWindowHandle;
@@ -64,7 +57,7 @@ fn main() {
         application::ApplicationHandler,
         dpi::LogicalSize,
         event::{KeyEvent, Modifiers, WindowEvent},
-        event_loop::{ControlFlow, EventLoop},
+        event_loop::EventLoop,
         window::{Window, WindowAttributes},
     };
 
@@ -72,6 +65,8 @@ fn main() {
         Color, ColorType, Surface,
         gpu::{self, SurfaceOrigin, backend_render_targets, gl::FramebufferInfo},
     };
+
+    use skia_icon as renderer;
 
     let el = EventLoop::new().expect("Failed to create event loop");
 
@@ -233,6 +228,12 @@ fn main() {
         }
     }
 
+    // Synchronize buffer swaps with the display's video frames (vsync) to get
+    // a tearing-free, full refresh-rate animation.
+    gl_surface
+        .set_swap_interval(&gl_context, SwapInterval::Wait(NonZeroU32::new(1).unwrap()))
+        .expect("Could not set swap interval");
+
     let env = Env {
         surface,
         gl_surface,
@@ -248,7 +249,9 @@ fn main() {
         stencil_size: usize,
         modifiers: Modifiers,
         frame: usize,
-        previous_frame_start: Instant,
+        // Whether the window content is currently not presented (minimized
+        // or fully occluded), as reported by winit's `Occluded` event.
+        occluded: bool,
     }
 
     let mut application = Application {
@@ -258,20 +261,36 @@ fn main() {
         stencil_size,
         modifiers: Modifiers::default(),
         frame: 0,
-        previous_frame_start: Instant::now(),
+        occluded: false,
     };
 
     impl ApplicationHandler for Application {
-        fn resumed(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {}
+        fn resumed(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
+            // Kick off the VBlank loop: request → draw → swap (blocks on
+            // vblank) → request → …
+            self.env.window.request_redraw();
+        }
 
         fn new_events(
             &mut self,
             _event_loop: &winit::event_loop::ActiveEventLoop,
-            cause: winit::event::StartCause,
+            _cause: winit::event::StartCause,
         ) {
-            if let winit::event::StartCause::ResumeTimeReached { .. } = cause {
-                self.env.window.request_redraw()
+            // Intentionally does not request redraws: the chain is sustained
+            // from `RedrawRequested` (see below).
+        }
+
+        fn about_to_wait(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
+            // While the window is minimized, break the redraw chain: winit's
+            // Windows backend never delivers `Occluded` events (macOS/iOS/Web
+            // only), so winit's own `is_minimized` query is the portable
+            // presentability check there. No re-request => the loop sleeps.
+            if self.env.window.is_minimized().unwrap_or(false) {
+                event_loop.set_control_flow(winit::event_loop::ControlFlow::Wait);
+                return;
             }
+            // Sustain the VBlank loop while the window is presentable.
+            self.env.window.request_redraw()
         }
 
         fn window_event(
@@ -280,13 +299,20 @@ fn main() {
             _window_id: winit::window::WindowId,
             event: WindowEvent,
         ) {
-            let mut draw_frame = false;
-            let frame_start = Instant::now();
-
             match event {
                 WindowEvent::CloseRequested => {
                     event_loop.exit();
                     return;
+                }
+                WindowEvent::Occluded(occluded) => {
+                    // macOS/iOS/Web signal presentability through occlusion
+                    // (AppKit delivers this on minimize via
+                    // windowDidChangeOcclusionState). Re-arming on the clear
+                    // edge sustains the loop after occlusion ends.
+                    self.occluded = occluded;
+                    if !occluded {
+                        self.env.window.request_redraw()
+                    }
                 }
                 WindowEvent::Resized(physical_size) => {
                     self.env.surface = create_surface(
@@ -317,33 +343,35 @@ fn main() {
                     self.env.window.request_redraw();
                 }
                 WindowEvent::RedrawRequested => {
-                    // draw_frame = true;
+                    // The VBlank loop: `swap_buffers` blocks until the next
+                    // video frame (vblank), which paces this loop at the
+                    // display refresh rate; each completed swap re-requests
+                    // the next redraw.
+                    //
+                    // When the window cannot be presented (minimized/occluded)
+                    // the swap no longer blocks — so the loop is broken off
+                    // instead: no draw, no swap, no re-request. It is re-armed
+                    // by Occluded(false), or by `about_to_wait` once
+                    // `is_minimized` reports false again.
+                    if self.occluded {
+                        return;
+                    }
+                    self.frame += 1;
+                    let canvas = self.env.surface.canvas();
+                    canvas.clear(Color::WHITE);
+                    // At fps=180/bpm=60 a full revolution takes
+                    // 360 / (12 · 60/60/180) = 5400 frames; wrapping there is
+                    // seamless, so the gear simply keeps rotating.
+                    renderer::render_frame(self.frame % 5400, 180, 60, canvas);
+                    self.env.gr_context.flush_and_submit();
+                    self.env
+                        .gl_surface
+                        .swap_buffers(&self.env.gl_context)
+                        .unwrap();
+                    self.env.window.request_redraw();
                 }
                 _ => (),
             }
-
-            let expected_frame_length_seconds = 1.0 / 20.0;
-            let frame_duration = Duration::from_secs_f32(expected_frame_length_seconds);
-
-            if frame_start - self.previous_frame_start > frame_duration {
-                draw_frame = true;
-                self.previous_frame_start = frame_start;
-            }
-            if draw_frame {
-                self.frame += 1;
-                let canvas = self.env.surface.canvas();
-                canvas.clear(Color::WHITE);
-                renderer::render_frame(self.frame % 360, 12, 60, canvas);
-                self.env.gr_context.flush_and_submit();
-                self.env
-                    .gl_surface
-                    .swap_buffers(&self.env.gl_context)
-                    .unwrap();
-            }
-
-            event_loop.set_control_flow(ControlFlow::WaitUntil(
-                self.previous_frame_start + frame_duration,
-            ));
         }
     }
 
