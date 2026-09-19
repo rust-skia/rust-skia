@@ -483,6 +483,13 @@ const OPAQUE_TYPES: &[&str] = &[
     // LLVM21
     "std::basic_string.*",
     "std::__tree.*",
+    // clang 21 / libc++ with __rebind_alloc in __hash_table
+    // <https://github.com/rust-skia/rust-skia/issues/1331>
+    // With bindgen >= 0.73.2 the `__rebind_alloc` alias template is rendered
+    // as a valid generic alias (`pub type std___rebind_alloc<_Traits> = _Traits;`)
+    // and no blocklist entry is needed for it — verify before removing these.
+    "std::__rebind_alloc.*",
+    "std::__hash_table.*",
     // libstdc++ 10 on Linux (since m143, c++20)
     "std::strong_ordering",
     // skottie internal types with layout issues
