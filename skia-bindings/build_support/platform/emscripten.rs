@@ -26,21 +26,19 @@ impl PlatformDetails for Emscripten {
             .arg("skia_use_webgl", yes_if(features.ganesh()))
             .arg("target_cpu", quote("wasm"));
 
-        // The emscripten compilers are passed below. Host `CC`/`CXX` are
-        // deliberately disregarded: the host compiler tools cannot build for
-        // the emscripten target. The `cc`/`cxx`/`ar` arguments written here
-        // are the ones Skia's wasm toolchain uses to link against the emsdk
-        // sysroot.
-
-        // The sysroot is normally derived by Skia's `config("wasm")` from
-        // `skia_emsdk_dir`; since that argument is not set, supply it
-        // explicitly.
+        // `skia_emsdk_dir` is deliberately not set. Skia's wasm toolchain and
+        // `config("wasm")` derive the compiler and sysroot paths from it as
+        // `<dir>/upstream/emscripten/...` (see `gn/toolchain/BUILD.gn` and
+        // `gn/skia/BUILD.gn`), a layout that flat emsdk releases do not have.
+        // Setting it would therefore point Skia at paths that do not exist.
+        // With it unset, the toolchain falls back to the top-level
+        // `ar`/`cc`/`cxx` arguments supplied below, and the sysroot, which
+        // Skia otherwise only adds alongside `skia_emsdk_dir`, is passed
+        // explicitly. Host `CC`/`CXX` are disregarded here (see
+        // `PlatformDetails::provides_tools`).
         let cc = format!("{emcc_dir}/emcc");
         let cxx = format!("{emcc_dir}/em++");
         let ar = format!("{emcc_dir}/emar");
-        // The sysroot is normally derived by Skia's `config("wasm")` from
-        // `skia_emsdk_dir`; since that argument is not set, supply it
-        // explicitly.
         let sysroot = format!("{emcc_dir}/cache/sysroot");
         builder
             .arg("ar", quote(&ar))

@@ -153,9 +153,11 @@ impl FinalBuildConfiguration {
                 );
 
             if platform::provides_tools(&build.target) {
-                // The platform supplies its own compiler tools (for example
-                // the emcc wrappers of the emsdk); host compiler tools cannot
-                // build for the target, so no defaults are written.
+                // The platform writes its own compiler tools through
+                // `gn_args` (for example the emcc wrappers of the emsdk).
+                // Defaults derived from the host would duplicate those and
+                // cannot build for the target anyway; GN rejects duplicate
+                // arguments, so exactly one source must supply them.
             } else {
                 builder
                     .arg("cc", quote(&build.cc))
