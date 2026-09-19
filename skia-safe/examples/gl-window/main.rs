@@ -300,9 +300,7 @@ fn main() {
             event: WindowEvent,
         ) {
             match event {
-                WindowEvent::CloseRequested => {
-                    event_loop.exit()
-                }
+                WindowEvent::CloseRequested => event_loop.exit(),
                 WindowEvent::Occluded(occluded) => {
                     // macOS/iOS/Web signal presentability through occlusion
                     // (AppKit delivers this on minimize via
