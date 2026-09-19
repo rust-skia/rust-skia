@@ -26,16 +26,13 @@ impl PlatformDetails for Emscripten {
             .arg("skia_use_webgl", yes_if(features.ganesh()))
             .arg("target_cpu", quote("wasm"));
 
-        // `skia_emsdk_dir` is deliberately not set. Skia's wasm toolchain and
-        // `config("wasm")` derive the compiler and sysroot paths from it as
-        // `<dir>/upstream/emscripten/...` (see `gn/toolchain/BUILD.gn` and
-        // `gn/skia/BUILD.gn`), a layout that flat emsdk releases do not have.
-        // Setting it would therefore point Skia at paths that do not exist.
-        // With it unset, the toolchain falls back to the top-level
-        // `ar`/`cc`/`cxx` arguments supplied below, and the sysroot, which
-        // Skia otherwise only adds alongside `skia_emsdk_dir`, is passed
-        // explicitly. Host `CC`/`CXX` are disregarded here (see
-        // `PlatformDetails::provides_tools`).
+        // `skia_emsdk_dir` is deliberately not set. Skia's wasm toolchain and `config("wasm")`
+        // derive the compiler and sysroot paths from it as `<dir>/upstream/emscripten/...` (see
+        // `gn/toolchain/BUILD.gn` and `gn/skia/BUILD.gn`), a layout that flat emsdk releases do not
+        // have. Setting it would therefore point Skia at paths that do not exist. With it unset,
+        // the toolchain falls back to the top-level `ar`/`cc`/`cxx` arguments supplied below, and
+        // the sysroot, which Skia otherwise only adds alongside `skia_emsdk_dir`, is passed
+        // explicitly. Host `CC`/`CXX` are disregarded here (see `PlatformDetails::provides_tools`).
         let cc = format!("{emcc_dir}/emcc");
         let cxx = format!("{emcc_dir}/em++");
         let ar = format!("{emcc_dir}/emar");
@@ -47,10 +44,9 @@ impl PlatformDetails for Emscripten {
         builder.cflags(vec![format!("--sysroot={sysroot}")]);
         builder.arg("extra_ldflags", format!("[\"--sysroot={sysroot}\"]"));
 
-        // The custom embedded font manager is enabled by default on WASM, but depends
-        // on the undefined symbol `SK_EMBEDDED_FONTS`. Enable the custom empty font
-        // manager instead so typeface creation still works.
-        // See https://github.com/rust-skia/rust-skia/issues/648
+        // The custom embedded font manager is enabled by default on WASM, but depends on the
+        // undefined symbol `SK_EMBEDDED_FONTS`. Enable the custom empty font manager instead so
+        // typeface creation still works. See <https://github.com/rust-skia/rust-skia/issues/648>
         builder
             .arg("skia_enable_fontmgr_custom_embedded", no())
             .arg("skia_enable_fontmgr_custom_empty", yes());
@@ -112,12 +108,11 @@ impl PlatformDetails for Emscripten {
 
 /// Resolved Emscripten SDK layout.
 ///
-/// Classic emsdk installations (up to and including 5.x installed with the
-/// `emsdk` tool) place the toolchain below `upstream/emscripten`; bare
-/// emscripten release archives (newer emsdk versions) unpack the compiler
-/// directly below their own root. Nothing needs to point into the SDK with a
-/// symlink: the layout is detected from the filesystem, and the compiler
-/// tools are passed to Skia's GN explicitly for all layouts.
+/// Classic emsdk installations (up to and including 5.x installed with the `emsdk` tool) place the
+/// toolchain below `upstream/emscripten`; bare emscripten release archives (newer emsdk versions)
+/// unpack the compiler directly below their own root. Nothing needs to point into the SDK with a
+/// symlink: the layout is detected from the filesystem, and the compiler tools are passed to Skia's
+/// GN explicitly for all layouts.
 fn emscripten_dir() -> String {
     let base_dir = emsdk_base_dir();
 
@@ -156,17 +151,15 @@ fn emsdk_base_dir() -> String {
     }
 }
 
-/// Warns if the libclang used by bindgen is older than the clang that
-/// is bundled with the emsdk.
+/// Warns if the libclang used by bindgen is older than the clang that is bundled with the emsdk.
 ///
-/// The emsdk does not ship a libclang library, bindgen uses the host's
-/// installation. An older host libclang may parse the emscripten headers
-/// differently than the compiler that will process them later.
+/// The emsdk does not ship a libclang library, bindgen uses the host's installation. An older host
+/// libclang may parse the emscripten headers differently than the compiler that will process them
+/// later.
 ///
-/// The expected clang version is read from emscripten's own
-/// `tools/shared.py` (`EXPECTED_LLVM_VERSION`), the same constant
-/// emscripten uses to validate its compiler, so no command output
-/// has to be parsed.
+/// The expected clang version is read from emscripten's own `tools/shared.py`
+/// (`EXPECTED_LLVM_VERSION`), the same constant emscripten uses to validate its compiler, so no
+/// command output has to be parsed.
 fn check_bindgen_clang_version(emcc_dir: &str) {
     let expected_llvm_version = fs::read_to_string(format!("{emcc_dir}/tools/shared.py"))
         .ok()

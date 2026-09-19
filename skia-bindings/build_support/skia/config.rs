@@ -153,11 +153,10 @@ impl FinalBuildConfiguration {
                 );
 
             if platform::provides_tools(&build.target) {
-                // The platform writes its own compiler tools through
-                // `gn_args` (for example the emcc wrappers of the emsdk).
-                // Defaults derived from the host would duplicate those and
-                // cannot build for the target anyway; GN rejects duplicate
-                // arguments, so exactly one source must supply them.
+                // The platform writes its own compiler tools through `gn_args` (for example the
+                // emcc wrappers of the emsdk). Defaults derived from the host would duplicate those
+                // and cannot build for the target anyway; GN rejects duplicate arguments, so
+                // exactly one source must supply them.
             } else {
                 builder
                     .arg("cc", quote(&build.cc))
@@ -195,9 +194,9 @@ impl FinalBuildConfiguration {
                     .arg("skia_pdf_subset_harfbuzz", yes())
                     .arg("skia_use_system_harfbuzz", yes_if(use_system_libraries))
                     .arg("skia_enable_skparagraph", yes());
-                // note: currently, tests need to be enabled, because modules/skparagraph
-                // is not included in the default dependency configuration.
-                // ("paragraph_tests_enabled", no()),
+                // note: currently, tests need to be enabled, because modules/skparagraph is not
+                // included in the default dependency configuration. ("paragraph_tests_enabled",
+                // no()),
             } else {
                 builder
                     .arg("skia_use_icu", no())
