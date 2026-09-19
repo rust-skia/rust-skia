@@ -181,20 +181,31 @@ Compilation to visionOS is supported on macOS targeting visionOS devices (`--tar
 
 ### For WebAssembly
 
-Install `emscripten` version 3.1.57 or newer and make sure that llvm / clang 16+ is installed. In the examples below, we assume
-`emsdk` version `3.1.57` was installed with [asdf](http://asdf-vm.com/).
+Install `emscripten` version 5.0 or newer — the emsdk ships its own clang 23 (5.x) / clang 24 (6.x) to compile the wasm code. It does **not** ship a `libclang` library, which the binding generator additionally needs on the host (see [Building — On macOS] and [Building — On Linux]). (emsdk 4.x is not supported: its [WebGL sync function signatures](https://github.com/emscripten-core/emscripten/pull/25933) changed during the 4.x series, while Skia's version gate still assumes the 5.x layout.) The recommended way to install Emscripten is the [emsdk](https://emscripten.org/docs/getting_started/downloads.html) tool:
+
+```bash
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+./emsdk install latest-stable
+./emsdk activate latest-stable
+source ./emsdk_env.sh
+```
 
 Build with the `wasm32-unknown-emscripten` target (`wasm32-unknown-unknown` is
 unsupported because it is [fundamentally incompatible with linking C code](https://github.com/rustwasm/team/issues/291#issuecomment-645482430):
 
 ```bash
-export EMSDK=~/.asdf/installs/emsdk/3.1.57
+export EMSDK=<path-to-emsdk>
 export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"
 
 cargo build --target wasm32-unknown-emscripten
 ```
 
-The `EMSDK` environment variable must be set to the root of your `emscripten` SDK.
+The `EMSDK` environment variable must be set to the root of your `emscripten` SDK. It can point to
+the emsdk install root (its `upstream/emscripten` directory is detected), directly to an activated
+`emscripten` installation, or to the unpacked toolchain of a bare
+[emscripten release archive](https://storage.googleapis.com/webassembly/emscripten-releases-builds/).
+The build script detects the layout automatically.
 
 In `EMCC_CFLAGS`, `-s ERROR_ON_UNDEFINED_SYMBOLS` is a
 [workaround](https://github.com/rust-lang/rust/issues/85821#issuecomment-969369677) to build with
@@ -203,7 +214,7 @@ In `EMCC_CFLAGS`, `-s ERROR_ON_UNDEFINED_SYMBOLS` is a
 If you want to enable WebGL, you will also have to set `MAX_WEBGL_VERSION=2`:
 
 ```bash
-export EMSDK=~/.asdf/installs/emsdk/3.1.57
+export EMSDK=<path-to-emsdk>
 export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
 
 cargo build --target wasm32-unknown-emscripten --features gl
@@ -220,7 +231,7 @@ architecture, and can be retrieved with `brew info binutils`. Here is an
 example for Apple silicon:
 
 ```bash
-export EMSDK=~/.asdf/installs/emsdk/3.1.57
+export EMSDK=<path-to-emsdk>
 export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"
 export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
 
