@@ -21,7 +21,10 @@ createRustSkiaModule().then((RustSkia) => {
     antialias: true,
     depth: true,
     stencil: true,
+    // The Skia surface is cleared to transparent each frame so the page
+    // background shows through.
     alpha: true,
+    premultipliedAlpha: true,
   });
 
   // Register the context with emscripten
@@ -34,20 +37,22 @@ createRustSkiaModule().then((RustSkia) => {
   // Initialize Skia
   const state = RustSkia._init(canvas.width, canvas.height);
 
-  // Draw a circle that follows the mouse pointer
+  // Draw the animated logo at the last mouse position (default: center).
+  let mouseX = (canvas.width / 2) | 0;
+  let mouseY = (canvas.height / 2) | 0;
   window.addEventListener("mousemove", (event) => {
     const canvasPos = canvas.getBoundingClientRect();
-    RustSkia._draw_circle(
-      state,
-      event.clientX - canvasPos.x,
-      event.clientY - canvasPos.y
-    );
+    mouseX = event.clientX - canvasPos.x;
+    mouseY = event.clientY - canvasPos.y;
   });
 
-  // Make canvas size stick to the window size
-  window.addEventListener("resize", () => {
-    if (resizeCanvasToDisplaySize(canvas)) {
+  // Animation loop: the requestAnimationFrame timestamp drives the animation
+  // phase, the cursor drives the position.
+  function drawFrame(timestampMs) {
+    resizeCanvasToDisplaySize(canvas) &&
       RustSkia._resize_surface(state, canvas.width, canvas.height);
-    }
-  });
+    RustSkia._draw_logo(state, mouseX, mouseY, timestampMs);
+    requestAnimationFrame(drawFrame);
+  }
+  requestAnimationFrame(drawFrame);
 });

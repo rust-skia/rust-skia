@@ -2,8 +2,10 @@ use std::boxed::Box;
 
 use skia_safe::{
     gpu::{self, gl::FramebufferInfo, DirectContext},
-    Color, Paint, PaintStyle, Surface,
+    Color, Surface,
 };
+
+use skia_icon::render_frame;
 
 unsafe extern "C" {
     pub fn emscripten_GetProcAddress(
@@ -86,12 +88,20 @@ fn create_surface(gpu_state: &mut GpuState, width: i32, height: i32) -> Surface 
     .unwrap()
 }
 
-fn render_circle(surface: &mut Surface, x: f32, y: f32, radius: f32) {
-    let mut paint = Paint::default();
-    paint.set_style(PaintStyle::Fill);
-    paint.set_color(Color::BLACK);
-    paint.set_anti_alias(true);
-    surface.canvas().draw_circle((x, y), radius, &paint);
+/// Draw the animated logo centered at the given point at half size.
+fn render_logo_at(surface: &mut Surface, frame: usize, x: f32, y: f32) {
+    let dims = surface.image_info().dimensions();
+    let (center_x, center_y) = (dims.width as f32 / 2.0, dims.height as f32 / 2.0);
+    let canvas = surface.canvas();
+    // Position and scale the logo at the cursor: translate so that scaling the
+    // canvas around the origin afterwards pivots at the cursor point
+    // (translate = cursor - scale * render_frame's draw center). Applied
+    // relative to a save/restore pair so nothing leaks between frames.
+    canvas.save();
+    canvas.translate((x - center_x / 2.0, y - center_y / 2.0));
+    canvas.scale((0.5, 0.5));
+    render_frame(frame, 60, 60, canvas);
+    canvas.restore();
 }
 
 /// Initialize the renderer.
@@ -116,13 +126,21 @@ pub unsafe extern "C" fn resize_surface(state: *mut State, width: i32, height: i
     state.set_surface(surface);
 }
 
-/// Draw a black circle at the specified coordinates.
+/// Draw the animated rust-skia logo centered at the given (mouse) coordinates.
+///
+/// `timestamp_ms` is the `requestAnimationFrame` timestamp in milliseconds; it
+/// drives the animation phase.
 /// # Safety
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn draw_circle(state: *mut State, x: i32, y: i32) {
+pub unsafe extern "C" fn draw_logo(state: *mut State, x: i32, y: i32, timestamp_ms: f64) {
     let state = unsafe { state.as_mut() }.expect("got an invalid state pointer");
-    //state.surface.canvas().clear(Color::WHITE);
-    render_circle(&mut state.surface, x as f32, y as f32, 50.);
+    // The renderer runs at 60 frames/s (60 fps, 60 bpm); derive the frame
+    // number from the browser clock so the animation keeps its speed when the
+    // tab is throttled.
+    let frame = (timestamp_ms * 60.0 / 1000.0) as usize;
+
+    state.surface.canvas().clear(Color::TRANSPARENT);
+    render_logo_at(&mut state.surface, frame, x as f32, y as f32);
     state
         .gpu_state
         .context
