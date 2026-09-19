@@ -301,8 +301,7 @@ fn main() {
         ) {
             match event {
                 WindowEvent::CloseRequested => {
-                    event_loop.exit();
-                    return;
+                    event_loop.exit()
                 }
                 WindowEvent::Occluded(occluded) => {
                     // macOS/iOS/Web signal presentability through occlusion
