@@ -10,8 +10,6 @@ use super::{
 };
 use crate::build_support::features::feature;
 
-use std::collections::HashMap;
-
 pub mod alpine;
 pub mod android;
 mod apple;
@@ -47,29 +45,7 @@ pub fn uses_freetype(target: &Target) -> bool {
 
 pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(String, String)> {
     details(&config.target).gn_args(config, &mut builder);
-    let gn_args = builder.into_gn_args();
-    dedup_by_name_drop_all_but_last(gn_args)
-}
-
-/// Drops all but the last occurrence of a name, preserving the order of the
-/// remaining entries.
-///
-/// Later platform arguments override earlier ones, for example when an
-/// emscripten platform sets `cc`/`cxx`/`ar` after the default configuration
-/// has written them. GN reports duplicate arguments as an error, so duplicates
-/// must not survive.
-fn dedup_by_name_drop_all_but_last(gn_args: Vec<(String, String)>) -> Vec<(String, String)> {
-    let mut last_index: HashMap<String, usize> = HashMap::new();
-    for (index, (name, _)) in gn_args.iter().enumerate() {
-        last_index.insert(name.clone(), index);
-    }
-    let mut deduped = Vec::with_capacity(gn_args.len());
-    for (index, (name, value)) in gn_args.into_iter().enumerate() {
-        if last_index.get(&name) == Some(&index) {
-            deduped.push((name, value));
-        }
-    }
-    deduped
+    builder.into_gn_args()
 }
 
 #[derive(Clone, Debug)]
@@ -100,6 +76,15 @@ pub fn filter_features(
 pub trait PlatformDetails {
     /// We need this information relatively early on to help parameterizing GN.
     fn uses_freetype(&self) -> bool;
+
+    /// Whether the platform supplies its own compiler tools (`cc`/`cxx`/`ar`)
+    /// through `gn_args`. When `true`, the default compiler tools derived from
+    /// the host environment (`CC`/`CXX`) must not be written, as they would
+    /// conflict and cannot build for the target anyway.
+    fn provides_tools(&self) -> bool {
+        false
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder);
     fn bindgen_args(&self, _target: &Target, _builder: &mut BindgenArgsBuilder) {}
     fn link_libraries(&self, features: &Features) -> Vec<String>;
@@ -110,6 +95,10 @@ pub trait PlatformDetails {
     ) -> Features {
         features
     }
+}
+
+pub fn provides_tools(target: &Target) -> bool {
+    details(target).provides_tools()
 }
 
 fn details(target: &Target) -> &dyn PlatformDetails {

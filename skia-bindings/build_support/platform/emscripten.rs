@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::Path;
 
 use super::generic;
@@ -10,6 +11,12 @@ impl PlatformDetails for Emscripten {
         true
     }
 
+    fn provides_tools(&self) -> bool {
+        // The emsdk compilers (`emcc`/`em++`/`emar`) must be used, host
+        // compiler tools cannot build for the emscripten target.
+        true
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         let features = &config.features;
         let emcc_dir = emscripten_dir();
@@ -19,12 +26,15 @@ impl PlatformDetails for Emscripten {
             .arg("skia_use_webgl", yes_if(features.ganesh()))
             .arg("target_cpu", quote("wasm"));
 
-        // `skia_emsdk_dir` is never set: Skia's wasm toolchain would derive
-        // `ar`/`cc`/`cxx` from it in the classic layout and ignore the tools
-        // provided here. `cc`/`cxx`/`ar` are also set from CC/CXX by
-        // `FinalBuildConfiguration::from_build_configuration`, the arguments
-        // written here win because they come later and duplicates are dropped
-        // by `platform::gn_args`.
+        // The emscripten compilers are passed below. Host `CC`/`CXX` are
+        // deliberately disregarded: the host compiler tools cannot build for
+        // the emscripten target. The `cc`/`cxx`/`ar` arguments written here
+        // are the ones Skia's wasm toolchain uses to link against the emsdk
+        // sysroot.
+
+        // The sysroot is normally derived by Skia's `config("wasm")` from
+        // `skia_emsdk_dir`; since that argument is not set, supply it
+        // explicitly.
         let cc = format!("{emcc_dir}/emcc");
         let cxx = format!("{emcc_dir}/em++");
         let ar = format!("{emcc_dir}/emar");
@@ -138,9 +148,11 @@ fn emscripten_dir() -> String {
 }
 
 fn emsdk_base_dir() -> String {
-    match std::env::var("EMSDK") {
-        Ok(val) => val,
-        Err(_e) => panic!(
+    // `cargo::env_var` also notifies cargo to re-run the build script when
+    // the environment variable changes.
+    match cargo::env_var("EMSDK") {
+        Some(val) => val,
+        None => panic!(
             "please set the EMSDK environment variable to the root of your Emscripten installation"
         ),
     }
@@ -158,7 +170,7 @@ fn emsdk_base_dir() -> String {
 /// emscripten uses to validate its compiler, so no command output
 /// has to be parsed.
 fn check_bindgen_clang_version(emcc_dir: &str) {
-    let expected_llvm_version = std::fs::read_to_string(format!("{emcc_dir}/tools/shared.py"))
+    let expected_llvm_version = fs::read_to_string(format!("{emcc_dir}/tools/shared.py"))
         .ok()
         .and_then(|shared_py| {
             shared_py

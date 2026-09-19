@@ -150,9 +150,17 @@ impl FinalBuildConfiguration {
                 .arg(
                     "skia_use_libjpeg_turbo_encode",
                     yes_if(features[feature::JPEG_ENCODE]),
-                )
-                .arg("cc", quote(&build.cc))
-                .arg("cxx", quote(&build.cxx));
+                );
+
+            if platform::provides_tools(&build.target) {
+                // The platform supplies its own compiler tools (for example
+                // the emcc wrappers of the emsdk); host compiler tools cannot
+                // build for the target, so no defaults are written.
+            } else {
+                builder
+                    .arg("cc", quote(&build.cc))
+                    .arg("cxx", quote(&build.cxx));
+            }
             if features[feature::VULKAN] {
                 builder
                     .arg("skia_use_vulkan", yes())
