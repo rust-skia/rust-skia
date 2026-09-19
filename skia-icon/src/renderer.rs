@@ -28,12 +28,12 @@ pub fn render_frame(
     let step = 12.0 * bpm as f32 / 60.0 / fps as f32;
     let frame_count = (360.0 / step) as usize;
 
-    let size = {
-        let dim = canvas.image_info().dimensions();
-        min(dim.width, dim.height)
-    };
-
-    let center = (size / 2, size / 2);
+    let dims = canvas.image_info().dimensions();
+    // Scale by the smaller dimension, but center the logo in the canvas so it
+    // stays centered on non-square output (browser windows, GL windows).
+    let (width, height) = (dims.width, dims.height);
+    let size = min(width, height);
+    let center = (width / 2, height / 2);
     let chain_ring_radius = size / 2 * 100 / 100;
     let triangle_radius = size / 2 * 53 / 100;
 
