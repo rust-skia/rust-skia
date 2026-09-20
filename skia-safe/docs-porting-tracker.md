@@ -2,7 +2,7 @@
 
 Persistent tracker of documentation ported from Skia C++ headers into `skia-safe` Rust rustdoc and **verified for completeness** against the C++ header (rule: C++ doc ported COMPLETELY, no shortening; only allowed drops = fiddle example links, out-param/nullptr→Option, ownership sentences, name translation + intra-doc links).
 
-**Milestone:** m153 (skia-bindings `skia = "m153-0.101.2"`; Skia submodule tag `m153-0.101.2`). All ports below are against the m153 headers.
+**Milestone:** m154 (skia-bindings `skia = "m154-0.153.3"`; Skia submodule tag `m154-0.153.3`; crates `0.154.0`). The current state is described in the `# m154 update (2026-09-20)` section below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
 
 ## Verification method
 - Independent subagent audit comparing EVERY public item doc in each Rust file vs its C++ header.
@@ -126,7 +126,65 @@ Do NOT add rustdoc for items that have no C++ doc comment. Only port docs that e
 
 ---
 
+# m154 update (2026-09-20)
+
+Milestone m154: crates `0.154.0`, skia-bindings metadata `skia = "m154-0.153.3"`, Skia submodule tag `m154-0.153.3`, `core/milestone.rs` `MILESTONE = 154`.
+
+Branch `m154` commits (vs `master`): `52e5110a` Update Skia to milestone 154 · `2c950404` + `fff83457` milestone-update skill / PR template · `a6d1b9fa` Port FlushResult API (refresh from `chrome/m154`) · `cf9c3b2b` skill branch naming · `2017e567` assert Send + Sync for `gpu::FlushResult` · `c619dcad` re-insert the missing `is_clang.py` compiler-command patch (unpushed at the time of writing).
+
+## Header accounting (m153-0.101.2 → m154-0.153.3)
+
+Method: `git -C skia-bindings/skia diff m153-0.101.2 m154-0.153.3` — 115 changed `.h` files in total. Only the 13 listed below live under `include/` or `modules/` (11 Skia headers, 2 third-party skcms internals). The remaining 102 are `src/`, `bench/`, `tests/` and `tools/` internals (Skia rewrote `SkPicture`'s internals — `SkBigPicture` deleted, `SkCachedData`, `SkPicturePriv` —, reworked `GrRenderTask`/`GrResourceAllocator` in Ganesh and the graphite `DrawList*`/`Renderer`/`Geometry` code, and added `sparse_strips/` and `src/gpu/graphite/geom/`). None of those are reachable through `skia-bindings`/`skia-safe`, so the m153 doc corpus stays valid for every header that did not change.
+
+| Changed header | Rust counterpart | Doc status |
+|---|---|---|
+| `include/core/SkMilestone.h` (`153`→`154`) | `core/milestone.rs` | ✅ `MILESTONE = 154` (no prose) |
+| `include/core/SkPicture.h` | `core/picture.rs` | ⭐ **GAP — 1 doc sentence** (see below) |
+| `include/gpu/ganesh/GrDirectContext.h` | `gpu/ganesh/direct_context.rs`, `gpu/ganesh/types.rs` | ✅ prose ported; ⭐ thin docs on 2 helper fns |
+| `include/gpu/graphite/ContextOptions.h` | `gpu/graphite/context_options.rs` | ⭐ **GAP — 1 field doc** |
+| `modules/skshaper/include/SkShaper.h` | `modules/shaper.rs` | ✅ Rust wrapper documented (new `Options` API) |
+| `include/gpu/ganesh/SkSurfaceGanesh.h` | `gpu/ganesh/surface_ganesh.rs` | Flush/FlushAndSubmit not wrapped (pre-existing) |
+| `include/gpu/graphite/GraphiteTypes.h` | — | not wrapped (`DrawTypeFlags`, `Precompile`) |
+| `include/private/chromium/GrVkSecondaryCBDrawContext.h` | — | not wrapped (private/chromium) |
+| `include/core/SkSerialProcs.h` | — | not wrapped (TODO in `picture.rs`, `flattenable.rs`) |
+| `modules/skottie/include/SkottieProperty.h`, `TextShaper.h` | — | not wrapped (`TextPropertyValue`, `ShapingProps`) |
+| `modules/skcms/src/*.h` | — | third-party internals; upstream added `modules/skcms/LICENSE` |
+
+Upstream added **no** public header and removed none (the only `--diff-filter=ADR` hit under `include/`+`modules/` is the skcms `LICENSE`).
+
+## Gaps / follow-ups found in the m154 update
+
+Documentation regressions (C++ doc exists, Rust doc missing/now incomplete — same rule as the m153 corpus: port the existing C++ text, never invent):
+1. ⭐ `core/picture.rs` — `SkPicture.h::approximateOpCount()` gained a sentence: *"If 0 is returned, we say the SkPicture is "empty" meaning its cullRect is the result of an SkRect::MakeEmpty()."* Neither `approximate_op_count()` nor `approximate_op_count_nested()` has it.
+2. ⭐ `gpu/graphite/context_options.rs` — `ContextOptions.h::fUseDrawListLayer` is new and documented: *"Enabling switches Graphite from the existing sort-based draw ordering to the new layer-based system."* `use_draw_list_layer()` / `set_use_draw_list_layer()` have no docs (the file is otherwise documented).
+
+API follow-ups from the m154 `FlushResult` migration (not doc-specific, recorded here because they came out of the same header accounting):
+- `GrDirectContext::flushAndSubmit(GrSyncCpu)` and `flushAndSubmit(SkSurface*, GrSyncCpu)` now return `FlushResult`, but `C_GrDirectContext_flushAndSubmit` still calls `self->flushAndSubmit()` and discards the result, so `DirectContext::flush_and_submit()` keeps returning `&mut Self` and the new return value is unreachable through the Rust API. (`DirectContext::flush_submit_and_sync_cpu()` predates m154 — introduced in `13f13c14` m130 — and is semantically equivalent to the upstream `flushAndSubmit(sync)`, so it needs no change; only its thin doc is worth completing.)
+- The `GrDirectContext.h` prose for `flushAndSubmit(SkSurface*, GrSyncCpu)` — *"Call to ensure all reads/writes of the surface have been issued to the underlying 3D API. Skia will correctly order its own draws and pixel operations. This must be used to ensure correct ordering when the surface backing store is accessed outside Skia (e.g. direct use of the 3D API or a windowing system). This is equivalent to calling ::flush with a default GrFlushInfo followed by ::submit(syncCpu). Has no effect on a CPU-backed surface."* — is not ported to `flush_and_submit_surface()` (which carries only a shorter paraphrase).
+- `SkSurfaces::Flush` / `SkSurfaces::FlushAndSubmit` (`gpu/ganesh/SkSurfaceGanesh.h`, now returning `GrDirectContext::FlushResult`) have no C wrapper and no Rust API at all; their C++ prose (*"Clients should strive to call GrDirectContext::flush directly. However, there exist some places where the GrDirectContext is hard to find, these helpers allow for the flushing of the provided surface. This is a no-op if the surface is nullptr or not GPU backed."*) has no Rust counterpart.
+- `GrDirectContext::flush(SkSurface*)` (default-info overload, documented *"Flushes the given surface with the default GrFlushInfo. Has no effect on a CPU-backed surface."*) is not wrapped; Rust exposes only `flush_surface()` via `flushSurfaceWithAccess(NoAccess, default)`.
+- Doc-convention note: upstream folded the *"If the return is GrSemaphoresSubmitted::kYes …"* blocks into *"If FlushResult.fSubmitted is …"*. The Rust `flush()` doc in `gpu/ganesh/direct_context.rs` was updated to match verbatim, but it is line-wrapped irregularly (e.g. "call (it is / possible Skia failed to create a subset of the semaphores)"). Cosmetic, not a correctness gap — worth normalizing if the file is touched again.
+
+## m154 header docs already correctly ported (verified against the m154 headers)
+
+- `gpu/ganesh/types.rs`: `FlushResult` struct overview *"Result of a Ganesh flush call. A flush can be successful with or without any semaphores being flushed. In some circumstances an unsuccessful flush can still have flushed the semaphores, but the rendering results should be discarded."* ✅ plus both field docs (`success`, `submitted`) ✅. `From<FlushResult> for SemaphoresSubmitted` carries a deliberate divergence comment: it keys on `success` only, as upstream's implicit `operator GrSemaphoresSubmitted()` does, rather than on `submitted`; and it is kept because the Rust helper path (`flush_image`, `flush_and_submit_surface`) would otherwise lose the `kNo` result upstream reports (`RustSkiaContexts::flush` returns `fSubmitted`). No TODO in the code marks that reason — the tracker records it here.
+- `gpu/graphite/context_options.rs`: contributor docs plus the new `use_draw_list_layer` accessor pair ported in `a6d1b9fa` (only the field prose is missing, see gap 2).
+- `modules/shaper.rs`: new `SkShaper::Options` (upstream comment: width = *"Width available for horizontal layout, before wrapping kicks in."*; tracking = *"Extra advance added after each glyph, expressed as a fraction of the font size (i.e. em units, thus it scales with the text). It applies on top of font kerning and participates in line breaking."*) is covered by `shape_with_iterators_and_features_and_options(…, width, tracking, …)`; the doc explains tracking as "glyph tracking (letter spacing) in addition to the width available for horizontal layout" without quoting the em-unit comment. The underlying `SkShaper_Options` struct is bindgen-generated but never re-exported: the wrapper passes `width`/`tracking` as separate scalars, so there are no Rust fields to document.
+- `core/picture.rs`: unchanged m153 docs are still correct against m154 for `playback`, `cull_rect`, `from_data`/`from_bytes`, `serialize`, `new_placeholder`, `approximate_bytes_used`, `to_shader` (upstream only reflowed parameters, made `playback`/`cullRect`/`approximateOpCount`/`approximateBytesUsed` non-virtual, and replaced the `SkBigPicture` subclass hooks with an `SkRecord`-based private constructor — none of that changes the documented prose).
+
+## m154: nothing to port (verified)
+
+- `SkPicture` class overview (`\class SkPicture …`) and `SkPicture::AbortCallback` have no Rust counterpart at all (the AbortCallback API is a standing TODO in `picture.rs`), so their C++ prose remains unported by design, not by omission.
+- `SkSerialProcs.h` / `SkDeserialProcs`: still unwrapped (`MakeFromData`/`serialize` take no procs); the m154 change only dropped the `SK_LEGACY_DESERIAL_IMAGE_PROC` guard and added a `std::optional<SkAlphaType>` parameter. Nothing to port until the procs API is wrapped.
+- `GraphiteTypes.h`: `DrawTypeFlags` is not wrapped (`Precompile` has no binding either), so `kDrawMesh`'s new pipeline-label comments and the `Tris*`→`Pos*` `VerticesRenderStep` renames are out of scope.
+- `GrVkSecondaryCBDrawContext.h`: private/chromium, not wrapped — its `flush()` → `GrDirectContext::FlushResult` change needs no Rust work.
+- `SkottieProperty::TextPropertyValue::fTextTracking` and `TextShaper::ShapingProps::fTextTracking`: none of `TextPropertyValue`/`ShapingProps`/`SkottieProperty` is wrapped by `skia-safe`, so the new field comments have no Rust surface.
+
+---
+
 # MISSING / UNCHECKED YET (survey 2026-09-08, milestone m153)
+
+> **Stale relative to m154:** the surveys and tables in this section were taken against the **m153** headers and were not re-verified for m154. Re-verification found no *new* gaps in these areas (the m154 header diff touched none of them), but the per-file counts below are the m153 numbers with the m153 commit history.
 
 File-by-file audit of the remaining `skia-safe` crate. "Rust doc" = doc-comment coverage (none/partial/mostly/complete). "C++ richness" = whether the matching C++ header carries substantive doc comments (rich/sparse/no docs). Items where C++ has NO docs are LOW porting value and are candidates to leave undocumented per the established rule. This section is the unchecked backlog, NOT yet verified against headers.
 
