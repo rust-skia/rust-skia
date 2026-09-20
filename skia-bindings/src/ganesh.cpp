@@ -172,7 +172,7 @@ extern "C" void C_GrYUVABackendTextureInfo_CopyConstruct(GrYUVABackendTextureInf
     new(uninitialized) GrYUVABackendTextureInfo(*src);
 }
 
-extern "C" bool C_GrYUVABackendTextureInfo_equals(const GrYUVABackendTextureInfo* a, const GrYUVABackendTextureInfo* b) {
+extern "C" bool C_GrYUVABackendTextureInfo_Equals(const GrYUVABackendTextureInfo* a, const GrYUVABackendTextureInfo* b) {
     return *a == *b;
 }
 

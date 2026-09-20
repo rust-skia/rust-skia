@@ -21,7 +21,7 @@ impl NativeClone for GrYUVABackendTextureInfo {
 
 impl NativePartialEq for GrYUVABackendTextureInfo {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { sb::C_GrYUVABackendTextureInfo_equals(self, rhs) }
+        unsafe { sb::C_GrYUVABackendTextureInfo_Equals(self, rhs) }
     }
 }
 

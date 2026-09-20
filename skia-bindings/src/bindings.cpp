@@ -951,7 +951,7 @@ extern "C" void C_SkPathBuilder_delete(SkPathBuilder* self) {
     delete self;
 }
 
-extern "C" bool C_SkPathBuilder_equals(const SkPathBuilder* self, const SkPathBuilder* other) {
+extern "C" bool C_SkPathBuilder_Equals(const SkPathBuilder* self, const SkPathBuilder* other) {
     return *self == *other;
 }
 
@@ -1352,7 +1352,7 @@ extern "C" uint64_t C_SkColorSpace_hash(const SkColorSpace* self) {
 
 extern "C" void C_SkM44_Types(SkV2 *) {};
 
-extern "C" bool C_SkM44_equals(const SkM44 *self, const SkM44 *other) {
+extern "C" bool C_SkM44_Equals(const SkM44 *self, const SkM44 *other) {
     return *self == *other;
 }
 
@@ -2972,7 +2972,7 @@ extern "C" int C_SkYUVAInfo_NumChannelsInPlane(SkYUVAInfo::PlaneConfig planarCon
     return SkYUVAInfo::NumChannelsInPlane(planarConfig, i);
 }
 
-extern "C" bool C_SkYUVAInfo_equals(const SkYUVAInfo* a, const SkYUVAInfo* b) {
+extern "C" bool C_SkYUVAInfo_Equals(const SkYUVAInfo* a, const SkYUVAInfo* b) {
     return *a == *b;
 }
 
@@ -2996,7 +2996,7 @@ extern "C" void C_SkYUVAPixmapInfo_destruct(SkYUVAPixmapInfo* self) {
     self->~SkYUVAPixmapInfo();
 }
 
-extern "C" bool C_SkYUVAPixmapInfo_equals(const SkYUVAPixmapInfo* a, const SkYUVAPixmapInfo* b) {
+extern "C" bool C_SkYUVAPixmapInfo_Equals(const SkYUVAPixmapInfo* a, const SkYUVAPixmapInfo* b) {
     return *a == *b;
 }
 
