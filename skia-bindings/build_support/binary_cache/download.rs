@@ -1,11 +1,9 @@
-use std::{
-    ffi::OsStr,
-    fs,
-    io::{self, Cursor},
-    path::{Component, Path, PathBuf},
-    process::{Command, Stdio},
-    str,
-};
+use std::ffi::OsStr;
+use std::fs;
+use std::io::{self, Cursor};
+use std::path::{Component, Path, PathBuf};
+use std::process::{Command, Stdio};
+use std::str;
 
 use flate2::read::GzDecoder;
 
