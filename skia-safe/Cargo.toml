@@ -89,6 +89,9 @@ serial_test = "4.0"
 static_assertions = "1.1"
 winit = "0.30.2"
 
+# icon & gl-window examples
+skia-icon = { path = "../skia-icon" }
+
 # gl-window & vulkan-window
 [target.'cfg(all(not(target_os = "android"), not(target_os = "emscripten"), not(target_os = "ios")))'.dev-dependencies]
 glutin = "0.32.0"

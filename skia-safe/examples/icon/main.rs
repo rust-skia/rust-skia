@@ -11,9 +11,7 @@ use std::{fs::File, io::Write};
 
 use skia_safe::{Color, EncodedImageFormat, surfaces};
 
-mod renderer;
-
-use renderer::render_frame;
+use skia_icon::render_frame;
 
 const USAGE: &str = r#"icon [size]
 With <size> parameter, produce a single PNG image.

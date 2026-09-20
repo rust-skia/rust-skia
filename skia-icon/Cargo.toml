@@ -1,0 +1,10 @@
+[package]
+name = "skia-icon"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[dependencies]
+# Draws via skia-safe, but only needs the default (CPU) features:
+skia-safe = { path = "../skia-safe" }
