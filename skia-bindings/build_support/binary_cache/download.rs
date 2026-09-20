@@ -4,6 +4,7 @@ use std::{
     io::{self, Cursor},
     path::{Component, Path, PathBuf},
     process::{Command, Stdio},
+    str,
 };
 
 use flate2::read::GzDecoder;
@@ -11,7 +12,10 @@ use flate2::read::GzDecoder;
 use super::{binaries, env, git, utils};
 use crate::build_support::{binaries_config, cargo};
 
-/// Resolve the `skia/` subdirectory contents, either by checking out the submodules, or when
+/// The path of the Skia submodule, relative to this package.
+const SKIA_SUBMODULE: &str = "skia";
+
+/// Resolve the `skia/` subdirectory contents, either by checking out the submodule, or when
 /// `build.rs` was invoked outside of the git repository by downloading and unpacking them from
 /// GitHub.
 pub fn resolve_dependencies() {
@@ -21,22 +25,73 @@ pub fn resolve_dependencies() {
         return;
     }
 
-    // Not in a crate, assuming a git repo. Update all submodules.
-    let submodules_updated = Command::new("git")
-        .args(["submodule", "update", "--init", "--depth", "1"])
+    // Not in a crate, assuming a git repo.
+    //
+    // A checkout that exists is never moved: `git submodule update` would reset it to the revision
+    // recorded in the repository and discard a checkout that was moved on purpose, for example to
+    // the rebased tip while updating Skia to a new milestone
+    // (`docs/adr/0001-a-source-build-never-moves-the-skia-submodule-checkout.md`).
+    match submodule_status() {
+        // Initialize a missing checkout. `--depth 1` avoids fetching Skia's entire history.
+        Some('-') => {
+            if !update_submodule() {
+                println!("`git submodule update` failed. Falling back to HTTP download");
+                download_dependencies();
+            }
+        }
+        Some('+') => cargo::warning(format!(
+            "The `{SKIA_SUBMODULE}` submodule is checked out at a revision other than the one \
+             recorded in the repository, building that revision. Run `git submodule update -- \
+             skia-bindings/{SKIA_SUBMODULE}` to check out the recorded revision."
+        )),
+        // Up to date, or a state that this build must not resolve, like merge conflicts.
+        Some(_) => {}
+        // Git is not installed or this is not a git repository. This can happen if the repo is
+        // downloaded as a ZIP archive.
+        None => {
+            println!("`git submodule status` failed. Falling back to HTTP download");
+            download_dependencies();
+        }
+    }
+}
+
+/// Returns the status character of the `skia/` submodule as reported by `git submodule status`,
+/// or `None` if git could not be run or this is not a git repository. `-` means that the submodule
+/// is not checked out, a space that it matches the revision recorded in the repository, and `+`
+/// that it does not.
+fn submodule_status() -> Option<char> {
+    let output = Command::new("git")
+        .args(["submodule", "status", "--", SKIA_SUBMODULE])
+        .stderr(Stdio::null())
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    str::from_utf8(&output.stdout)
+        .ok()?
+        .lines()
+        .next()?
+        .chars()
+        .next()
+}
+
+/// Initializes the `skia/` submodule.
+fn update_submodule() -> bool {
+    Command::new("git")
+        .args([
+            "submodule",
+            "update",
+            "--init",
+            "--depth",
+            "1",
+            "--",
+            SKIA_SUBMODULE,
+        ])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status()
-        .unwrap()
-        .success();
-
-    // If `git submodule update` failed, either git is not installed,
-    // or we're not building from a git repo.
-    // This can happen if the repo is downloaded as a ZIP archive.
-    if !submodules_updated {
-        println!("`git submodule update` failed. Falling back to HTTP download");
-        download_dependencies();
-    }
+        .is_ok_and(|status| status.success())
 }
 
 /// Downloads the `skia` from its repository.

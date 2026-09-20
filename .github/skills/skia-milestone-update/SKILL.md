@@ -101,12 +101,12 @@ the fork tag.
    git add README.md skia-bindings/Cargo.toml skia-bindings/skia
    ```
 
-   This ordering is required because the build script may run `git submodule update`.
-   An unstaged gitlink still points at the old commit and can reset the submodule
-   checkout. If that happens, switch back to the temporary branch with
-   `git -C skia-bindings/skia switch refs/heads/mNEW_MILESTONE-refresh`, verify its tip,
-   repair only a local unpushed tag if needed, and stage the gitlink before retrying.
-   Never rewrite a tag that is already published.
+   The gitlink must name the rebased tip before any build that starts without a `skia/`
+   checkout, because the build script initializes a missing submodule from it: that is
+   what CI and fresh clones do, and `just check-skia-submodule-tag` compares the gitlink
+   with the tag in `[package.metadata].skia`. The build never moves an initialized
+   checkout, so it cannot reset the rebased tip in this working tree
+   (`docs/adr/0001`). Never rewrite a tag that is already published.
 
    Confirm that these files differ from `master` by the milestone deltas **only**:
 
