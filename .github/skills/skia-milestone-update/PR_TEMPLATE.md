@@ -22,3 +22,11 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 - [ ] Review API changes: `make diff-api`.
 - [ ] Do one final review of all the changes.
 - [ ] Run `make doc` and fix all warnings.
+
+---
+
+## AI disclosure
+
+Parts of this PR were prepared with AI assistance: submodule
+rebase/retag bookkeeping, header accounting, and wrapper updates. All changes
+were reviewed and verified by the listed authors before being committed.
