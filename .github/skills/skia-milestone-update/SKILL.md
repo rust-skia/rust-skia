@@ -104,6 +104,22 @@ the fork tag.
    repair only a local unpushed tag if needed, and stage the gitlink before retrying.
    Never rewrite a tag that is already published.
 
+   Confirm that these files differ from `master` by the milestone deltas **only**:
+
+   ```sh
+   git diff master -- README.md skia-bindings/Cargo.toml skia-safe/Cargo.toml
+   ```
+
+   When the milestone commit was created before `master` gained changes to those files,
+   a conflict resolution that keeps the milestone side (`--ours`/`--theirs`, "take mine")
+   silently reverts `master`'s changes to them. This is not hypothetical: it discarded
+   `master`'s README content and its `bindgen` upgrade during the m154 update. No build
+   or test fails, because a stale README is just text and the older `bindgen` still
+   builds, so `git diff` is the only reliable detector. Every removed line that `master`
+   added is a regression, even though `git log mNEW_MILESTONE..master` is empty (the
+   history is still an ancestor relationship; only the tree was damaged). Re-apply the
+   milestone deltas on top of `master`'s content and re-verify before proceeding.
+
 7. Run `make diff-skia`, `cargo check -p skia-bindings`,
    `cargo check -p skia-safe`, and the platform tests appropriate to the change.
    Reconfirm after the builds, with explicit refs, that the checkout, the new tag, and
@@ -134,8 +150,11 @@ the fork tag.
   - `skia-bindings/Cargo.toml` package version;
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
-    exactly;
-  - both package entries in `Cargo.lock`.
+    exactly.
+  `Cargo.lock` is gitignored and untracked, so it is not part of the commit; let
+  Cargo re-resolve it. A stale local lock can fail the build spuriously even when
+  the tree is correct, so delete it and re-resolve before investigating a
+  dependency build error.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's patch component.
