@@ -106,6 +106,44 @@ impl FlushInfo {
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
 variant_name!(SemaphoresSubmitted::Yes);
 
+/// Result of a Ganesh flush call. A flush can be successful with or without
+/// any semaphores being flushed. In some circumstances an unsuccessful flush
+/// can still have flushed the semaphores, but the rendering results should be
+/// discarded.
+#[repr(C)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct FlushResult {
+    /// Did the flush succeed.
+    pub success: bool,
+    /// Whether any semaphores were submitted during the flush process.
+    /// Will be [`SemaphoresSubmitted::No`] if no semaphores were specified.
+    pub submitted: SemaphoresSubmitted,
+}
+
+native_transmutable!(sb::GrDirectContext_FlushResult, FlushResult);
+
+impl Default for FlushResult {
+    fn default() -> Self {
+        Self {
+            success: false,
+            submitted: SemaphoresSubmitted::No,
+        }
+    }
+}
+
+// Temporary compatibility with the pre-m154 flush return type, mirroring the
+// implicit conversion operator on GrDirectContext::FlushResult that upstream
+// added while transitioning clients to the new return value.
+impl From<FlushResult> for SemaphoresSubmitted {
+    fn from(result: FlushResult) -> Self {
+        if result.success {
+            SemaphoresSubmitted::Yes
+        } else {
+            SemaphoresSubmitted::No
+        }
+    }
+}
+
 pub use sb::GrPurgeResourceOptions as PurgeResourceOptions;
 variant_name!(PurgeResourceOptions::AllResources);
 

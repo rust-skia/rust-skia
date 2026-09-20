@@ -76,7 +76,8 @@ mod tests {
         let mut font_run_iterator =
             Shaper::new_trivial_font_run_iterator(&Font::default(), text.len());
         let mut bidi_run_iterator = shapers::primitive::trivial_bidi_run_iterator(0, text.len());
-        let mut script_run_iterator = shapers::primitive::trivial_script_run_iterator(0, text.len());
+        let mut script_run_iterator =
+            shapers::primitive::trivial_script_run_iterator(0, text.len());
         let mut language_run_iterator = Shaper::new_trivial_language_run_iterator("en", text.len());
         shaper.shape_with_iterators_and_features_and_options(
             text,

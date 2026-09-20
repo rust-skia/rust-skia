@@ -128,16 +128,20 @@ extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self) {
     self->flushAndSubmit();
 }
 
-extern "C" GrSemaphoresSubmitted C_GrDirectContext_flushImageWithInfo(GrDirectContext* self, SkImage* image, const GrFlushInfo* info) {
-    return self->flush(sp(image), *info);
+extern "C" void C_GrDirectContext_flush(GrDirectContext* self, const GrFlushInfo* info, GrDirectContext::FlushResult* result) {
+    *result = self->flush(*info);
 }
 
-extern "C" void C_GrDirectContext_flushImage(GrDirectContext* self, SkImage* image) {
-    self->flush(sp(image));
+extern "C" void C_GrDirectContext_flushImageWithInfo(GrDirectContext* self, SkImage* image, const GrFlushInfo* info, GrDirectContext::FlushResult* result) {
+    *result = self->flush(sp(image), *info);
 }
 
-extern "C" void C_GrDirectContext_flushAndSubmitImage(GrDirectContext* self, SkImage* image) {
-    self->flushAndSubmit(sp(image));
+extern "C" void C_GrDirectContext_flushSurfaceWithAccess(GrDirectContext* self, SkSurface* surface, SkSurfaces::BackendSurfaceAccess access, const GrFlushInfo* info, GrDirectContext::FlushResult* result) {
+    *result = self->flush(surface, access, *info);
+}
+
+extern "C" void C_GrDirectContext_flushSurfaceWithTextureState(GrDirectContext* self, SkSurface* surface, const GrFlushInfo* info, const skgpu::MutableTextureState* newState, GrDirectContext::FlushResult* result) {
+    *result = self->flush(surface, *info, newState);
 }
 
 extern "C" void C_GrDirectContext_compressedBackendFormat(const GrDirectContext* self, SkTextureCompressionType compression, GrBackendFormat* result) {

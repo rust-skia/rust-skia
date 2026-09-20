@@ -8,9 +8,8 @@ use std::{
 use crate::{
     Data, Image, Surface, TextureCompressionType,
     gpu::{
-        BackendFormat, BackendRenderTarget, BackendTexture, FlushInfo, GpuStatsFlags,
-        MutableTextureState, PurgeResourceOptions, RecordingContext, SemaphoresSubmitted,
-        SubmitInfo, SyncCpu,
+        BackendFormat, BackendRenderTarget, BackendTexture, FlushInfo, FlushResult, GpuStatsFlags,
+        MutableTextureState, PurgeResourceOptions, RecordingContext, SubmitInfo, SyncCpu,
     },
     prelude::*,
     surfaces,
@@ -311,30 +310,35 @@ impl DirectContext {
     /// buffer or encoder objects. However, these objects are not sent to the gpu until a
     /// submission occurs.
     ///
-    /// If the return is [`SemaphoresSubmitted::Yes`], only initialized
+    /// If [`FlushResult::submitted`] is [`crate::gpu::SemaphoresSubmitted::Yes`], only initialized
     /// [`crate::gpu::BackendSemaphore`]s will be submitted to the gpu during the next submit
     /// call (it is
     /// possible Skia failed to create a subset of the semaphores). The client should not wait
     /// on these semaphores until after submit has been called, and must keep them alive until
-    /// then. If this call returns [`SemaphoresSubmitted::No`], the GPU backend will not submit
-    /// any semaphores to be signaled on the GPU. Thus the client should not have the GPU wait
-    /// on any of the semaphores passed in with the [`FlushInfo`]. Regardless of whether
+    /// then. If [`FlushResult::submitted`] is [`crate::gpu::SemaphoresSubmitted::No`], the GPU backend will
+    /// not submit any semaphores to be signaled on the GPU. Thus the client should not have the
+    /// GPU wait on any of the semaphores passed in with the [`FlushInfo`]. Regardless of whether
     /// semaphores were submitted to the GPU or not, the client is still responsible for
     /// deleting any initialized semaphores.
     /// Regardless of semaphore submission the context will still be flushed. It should be
-    /// emphasized that a return value of [`SemaphoresSubmitted::No`] does not mean the flush
-    /// did not happen. It simply means there were no semaphores submitted to the GPU. A caller
-    /// should only take this as a failure if they passed in semaphores to be submitted.
+    /// emphasized that a [`FlushResult::submitted`] value of [`crate::gpu::SemaphoresSubmitted::No`] does not
+    /// mean the flush did not happen. It simply means there were no semaphores submitted to the
+    /// GPU. A caller should only take this as a failure if they passed in semaphores to be
+    /// submitted.
     ///
     /// - `info` flush options, or `None` for default flush options
-    pub fn flush<'a>(&mut self, info: impl Into<Option<&'a FlushInfo>>) -> SemaphoresSubmitted {
-        let n = self.native_mut();
-        if let Some(info) = info.into() {
-            unsafe { n.flush(info.native()) }
-        } else {
-            let info = FlushInfo::default();
-            unsafe { n.flush(info.native()) }
-        }
+    pub fn flush<'a>(&mut self, info: impl Into<Option<&'a FlushInfo>>) -> FlushResult {
+        let default_info;
+        let info: *const sb::GrFlushInfo = match info.into() {
+            Some(info) => info.native(),
+            None => {
+                default_info = FlushInfo::default();
+                default_info.native()
+            }
+        };
+        FlushResult::construct(|result| unsafe {
+            sb::C_GrDirectContext_flush(self.native_mut(), info, result)
+        })
     }
 
     /// Flushes any pending uses of texture-backed images in the GPU backend. If the image is
@@ -346,31 +350,31 @@ impl DirectContext {
     ///
     /// - `image` the image to flush
     /// - `info` flush options
-    pub fn flush_image_with_info(
-        &mut self,
-        image: &Image,
-        info: &FlushInfo,
-    ) -> SemaphoresSubmitted {
-        unsafe {
+    pub fn flush_image_with_info(&mut self, image: &Image, info: &FlushInfo) -> FlushResult {
+        FlushResult::construct(|result| unsafe {
             sb::C_GrDirectContext_flushImageWithInfo(
                 self.native_mut(),
                 image.clone().into_ptr(),
                 info.native(),
+                result,
             )
-        }
+        })
     }
 
     /// Version of [`DirectContext::flush_image_with_info()`] that uses a default
     /// [`FlushInfo`].
-    pub fn flush_image(&mut self, image: &Image) {
-        unsafe { sb::C_GrDirectContext_flushImage(self.native_mut(), image.clone().into_ptr()) }
+    pub fn flush_image(&mut self, image: &Image) -> FlushResult {
+        self.flush_image_with_info(image, &FlushInfo::default())
     }
 
     /// Version of [`DirectContext::flush()`] that uses a default [`FlushInfo`]. Also submits
     /// the flushed image work to the GPU.
-    pub fn flush_and_submit_image(&mut self, image: &Image) {
-        unsafe {
-            sb::C_GrDirectContext_flushAndSubmitImage(self.native_mut(), image.clone().into_ptr())
+    pub fn flush_and_submit_image(&mut self, image: &Image) -> FlushResult {
+        let result = self.flush_image_with_info(image, &FlushInfo::default());
+        let submitted = self.submit(SubmitInfo::default());
+        FlushResult {
+            success: result.success && submitted,
+            ..result
         }
     }
 
@@ -402,21 +406,22 @@ impl DirectContext {
     /// The [`FlushInfo`] describes additional options to flush. Please see documentation at
     /// [`FlushInfo`] for more info.
     ///
-    /// If the return is [`SemaphoresSubmitted::Yes`], only initialized
+    /// If [`FlushResult::submitted`] is [`crate::gpu::SemaphoresSubmitted::Yes`], only initialized
     /// [`crate::gpu::BackendSemaphore`]s
     /// will be submitted to the gpu during the next submit call (it is possible Skia failed to
     /// create a subset of the semaphores). The client should not wait on these semaphores until
     /// after submit has been called, but must keep them alive until then. If a submit flag was
     /// passed in with the flush these valid semaphores can be waited on immediately. If this
-    /// call returns [`SemaphoresSubmitted::No`], the GPU backend will not submit any
-    /// semaphores to be signaled on the GPU. Thus the client should not have the GPU wait on
-    /// any of the semaphores passed in with the [`FlushInfo`]. Regardless of whether
+    /// [`FlushResult::submitted`] is [`crate::gpu::SemaphoresSubmitted::No`], the GPU backend will not
+    /// submit any semaphores to be signaled on the GPU. Thus the client should not have the GPU
+    /// wait on any of the semaphores passed in with the [`FlushInfo`]. Regardless of whether
     /// semaphores were submitted to the GPU or not, the client is still responsible for
     /// deleting any initialized semaphores.
     /// Regardless of semaphore submission the context will still be flushed. It should be
-    /// emphasized that a return value of [`SemaphoresSubmitted::No`] does not mean the flush
-    /// did not happen. It simply means there were no semaphores submitted to the GPU. A caller
-    /// should only take this as a failure if they passed in semaphores to be submitted.
+    /// emphasized that a [`FlushResult::submitted`] value of [`crate::gpu::SemaphoresSubmitted::No`] does not
+    /// mean the flush did not happen. It simply means there were no semaphores submitted to the
+    /// GPU. A caller should only take this as a failure if they passed in semaphores to be
+    /// submitted.
     ///
     /// Pending surface commands are flushed regardless of the return result.
     ///
@@ -428,11 +433,16 @@ impl DirectContext {
         surface: &mut Surface,
         access: surfaces::BackendSurfaceAccess,
         info: &FlushInfo,
-    ) -> SemaphoresSubmitted {
-        unsafe {
-            self.native_mut()
-                .flush3(surface.native_mut(), access, info.native())
-        }
+    ) -> FlushResult {
+        FlushResult::construct(|result| unsafe {
+            sb::C_GrDirectContext_flushSurfaceWithAccess(
+                self.native_mut(),
+                surface.native_mut(),
+                access,
+                info.native(),
+                result,
+            )
+        })
     }
 
     /// Same as [`DirectContext::flush_surface_with_access()`] except:
@@ -457,14 +467,16 @@ impl DirectContext {
         surface: &mut Surface,
         info: &FlushInfo,
         new_state: Option<&MutableTextureState>,
-    ) -> SemaphoresSubmitted {
-        unsafe {
-            self.native_mut().flush4(
+    ) -> FlushResult {
+        FlushResult::construct(|result| unsafe {
+            sb::C_GrDirectContext_flushSurfaceWithTextureState(
+                self.native_mut(),
                 surface.native_mut(),
                 info.native(),
                 new_state.native_ptr_or_null(),
+                result,
             )
-        }
+        })
     }
 
     /// Call to ensure all reads/writes of the surface have been issued to the underlying 3D
@@ -482,18 +494,28 @@ impl DirectContext {
         &mut self,
         surface: &mut Surface,
         sync_cpu: impl Into<Option<SyncCpu>>,
-    ) {
-        unsafe {
-            self.native_mut()
-                .flushAndSubmit1(surface.native_mut(), sync_cpu.into().unwrap_or(SyncCpu::No))
+    ) -> FlushResult {
+        let result = self.flush_surface_with_access(
+            surface,
+            surfaces::BackendSurfaceAccess::NoAccess,
+            &FlushInfo::default(),
+        );
+        let submitted = self.submit(sync_cpu.into().unwrap_or(SyncCpu::No));
+        FlushResult {
+            success: result.success && submitted,
+            ..result
         }
     }
 
     /// Flushes the given surface with the default [`FlushInfo`].
     ///
     /// Has no effect on a CPU-backed surface.
-    pub fn flush_surface(&mut self, surface: &mut Surface) {
-        unsafe { self.native_mut().flush5(surface.native_mut()) }
+    pub fn flush_surface(&mut self, surface: &mut Surface) -> FlushResult {
+        self.flush_surface_with_access(
+            surface,
+            surfaces::BackendSurfaceAccess::NoAccess,
+            &FlushInfo::default(),
+        )
     }
 
     /// Submit outstanding work to the gpu from all previously un-submitted flushes. The return

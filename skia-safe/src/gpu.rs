@@ -21,9 +21,9 @@ pub mod vk;
 #[cfg(feature = "ganesh")]
 pub use ganesh::{
     BackendAPI, BackendFormat, BackendRenderTarget, BackendSemaphore, BackendTexture,
-    DirectContext, DirectContextId, DriverBugWorkarounds, FlushInfo, PurgeResourceOptions,
-    RecordingContext, SemaphoresSubmitted, SubmitInfo, SurfaceOrigin, SyncCpu,
-    YUVABackendTextureInfo, YUVABackendTextures, context_options::ContextOptions, images,
+    DirectContext, DirectContextId, DriverBugWorkarounds, FlushInfo, FlushResult,
+    PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SubmitInfo, SurfaceOrigin,
+    SyncCpu, YUVABackendTextureInfo, YUVABackendTextures, context_options::ContextOptions, images,
 };
 
 #[cfg(any(feature = "ganesh", feature = "graphite"))]
