@@ -7,6 +7,17 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 
 - [x] Update `README.md` ([rendered](https://github.com/pragmatrix/rust-skia/blob/mXX/README.md))  
   > Most important here is to change the Skia branch name and the current Skia submodule tag at the top of the `README.md` file.
+- [ ] Diff the following files to see if the build organization has changed significantly:
+  - [ ] `/BUILD.gn`
+  - [ ] `/gn/*` (recursively)
+  - [ ] `/modules/skshaper/BUILD.gn`
+  - [ ] `/modules/skshaper/skshaper.gni`
+  - [ ] `/modules/paragraph/BUILD.gn`
+  - [ ] `/modules/paragraph/skparagraph.gni`
+  - [ ] `/modules/skottie/BUILD.gn`
+  - [ ] `/modules/skottie/skottie.gni`
+  - [ ] `/modules/svg/BUILD.gn`
+  - [ ] `/modules/svg/svg.gni`
 - [ ] Skia builds ([release notes](https://github.com/google/skia/blob/chrome/mXX/RELEASE_NOTES.md)).
 - [ ] `/skia-bindings` builds.
 - [ ] `/skia-safe`: Update & add new wrappers by diffing include files.  
@@ -22,6 +33,21 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 - [ ] Review API changes: `make diff-api`.
 - [ ] Do one final review of all the changes.
 - [ ] Run `make doc` and fix all warnings.
+
+## Wrapper updates
+
+> Summarize the public API changes and how they were wrapped: new types and their
+> wrapper kind (`native_transmutable!`, `Send`/`Sync`, `Debug`), changed method
+> signatures including any temporary conversion that keeps existing call sites
+> compiling, new `deprecated` attributes with their `since` version, and which of
+> the changed public headers needed a wrapper change at all.
+
+## Build organization
+
+> List the build organization files that changed and record each as `no change` or
+> `updated build glue`. Most source-list changes flow through the existing Skia
+> targets; call out `declare_args()` changes in `gn/skia.gni` explicitly, because
+> rust-skia pins several of those flags.
 
 ---
 
