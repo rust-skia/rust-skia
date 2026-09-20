@@ -29,6 +29,10 @@ previous version from `skia-bindings/Cargo.toml` before editing it. Do not deriv
 this suffix from an older Skia fork tag, and do not use the target crate version
 (such as `0.154.0`) for the tag or the Skia metadata.
 
+Choose `OLD_TAG` as the newest previous-milestone tag: patches can land on it after
+an earlier tag was cut, and a milestone based on the stale one drops them. The
+`make diff-skia` checklist item below is what catches this.
+
 Name the temporary local working branch distinctly from every tag, for example
 `mNEW_MILESTONE-refresh` (`m154-refresh`). Never give a branch the same name as a
 tag. With both refs present Git warns that the refname is ambiguous, and
