@@ -15,20 +15,27 @@ wiki page and extends it with project-specific coverage such as Graphite. The
 ## Inputs
 
 - `OLD_TAG`: the current Skia submodule tag (e.g. `m153-0.101.1`)
-- `NEW_TAG`: the target Skia submodule tag and branch name (e.g. `m154-0.153.2`)
+- `NEW_TAG`: the target Skia submodule tag (e.g. `m154-0.153.2`)
 - `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `150` / `151`)
 - `PREVIOUS_BINDINGS_VERSION`: the `skia-bindings` package version before the
   milestone bump (for example, `0.153.2` when starting the m154 update)
 
 Determine these from `skia-bindings/Cargo.toml` (`[package.metadata] skia = "..."`)
 and `git -C skia-bindings/skia describe --tags` / `git -C skia-bindings/skia tag --list 'm1*'`.
-For a new milestone, set `NEW_TAG` and name the temporary submodule branch
-`mNEW_MILESTONE-PREVIOUS_BINDINGS_VERSION`. For example, when updating from
-`skia-bindings` 0.153.2 to milestone 154, both the tag and branch are
+For a new milestone, set `NEW_TAG` to `mNEW_MILESTONE-PREVIOUS_BINDINGS_VERSION`.
+For example, when updating from `skia-bindings` 0.153.2 to milestone 154, the tag is
 `m154-0.153.2`, and `[package.metadata].skia` must use that same value. Read the
 previous version from `skia-bindings/Cargo.toml` before editing it. Do not derive
 this suffix from an older Skia fork tag, and do not use the target crate version
-(such as `0.154.0`) for the tag, branch, or Skia metadata.
+(such as `0.154.0`) for the tag or the Skia metadata.
+
+Name the temporary local working branch distinctly from every tag, for example
+`mNEW_MILESTONE-refresh` (`m154-refresh`). Never give a branch the same name as a
+tag. With both refs present Git warns that the refname is ambiguous, and
+`git rev-parse <name>` resolves the tag rather than the branch. In `git log`
+decorations the tag is prefixed with `tag:` and the branch is not, which is easy to
+misread as two tags on the same commit. For the same reason, always spell out
+`refs/tags/…` or `refs/heads/…` in the commands below instead of bare ref names.
 
 ## Refresh the current milestone from upstream
 
@@ -41,39 +48,46 @@ the fork tag.
    ```sh
    git fetch --all --prune
    git -C skia-bindings/skia fetch --all --prune
-   git -C skia-bindings/skia rev-list --left-right --count OLD_TAG...upstream/chrome/mXX
-   git -C skia-bindings/skia log --oneline OLD_TAG..upstream/chrome/mXX
+   git -C skia-bindings/skia rev-list --left-right --count refs/tags/OLD_TAG...upstream/chrome/mXX
+   git -C skia-bindings/skia log --oneline refs/tags/OLD_TAG..upstream/chrome/mXX
    ```
 
 2. Review the upstream diff. If it changes public headers, complete the full header
    accounting below before updating wrappers. Record internal-only changes as requiring
    no binding update.
 
-3. Find the old upstream base, create a temporary branch at `OLD_TAG`, and rebase the
+3. Find the old upstream base, create the temporary branch at `OLD_TAG`, and rebase the
    complete rust-skia patch stack onto the refreshed branch:
 
    ```sh
-   git -C skia-bindings/skia merge-base OLD_TAG upstream/chrome/mXX
-   git -C skia-bindings/skia switch -c mNEW_MILESTONE-PREVIOUS_BINDINGS_VERSION OLD_TAG
+   git -C skia-bindings/skia merge-base refs/tags/OLD_TAG upstream/chrome/mXX
+   git -C skia-bindings/skia switch -c mNEW_MILESTONE-refresh refs/tags/OLD_TAG
    git -C skia-bindings/skia rebase --onto upstream/chrome/mXX OLD_BASE
    ```
 
-   If the temporary branch already exists, switch to it instead of recreating it.
+   If the temporary branch already exists, switch to it instead of recreating it:
+   `git -C skia-bindings/skia switch refs/heads/mNEW_MILESTONE-refresh`.
 
 4. Verify that every downstream patch is unchanged and that the result is based on the
    refreshed upstream tip:
 
    ```sh
-   git -C skia-bindings/skia range-diff OLD_BASE..OLD_TAG upstream/chrome/mXX..HEAD
+   git -C skia-bindings/skia range-diff OLD_BASE..refs/tags/OLD_TAG upstream/chrome/mXX..HEAD
    git -C skia-bindings/skia rev-list --left-right --count upstream/chrome/mXX...HEAD
    ```
 
    Require every `range-diff` entry to be `=` and the second command to report `0 N`,
    where `N` is the number of rust-skia patches.
 
-5. Increment the patch component of the Skia fork tag (for example,
-  `m153-0.153.0` -> `m153-0.153.1`) and tag the rebased tip. Do not bump the Rust crate
-   versions for a same-milestone upstream refresh.
+5. Increment the `skia-bindings` version component of the Skia fork tag and tag the
+  rebased tip with an explicit ref. Keep `NEW_TAG` in `[package.metadata].skia` in
+  sync when you do. For example, when the tag is `m154-0.153.2`:
+
+  ```sh
+  git -C skia-bindings/skia tag m154-0.153.3 refs/heads/m154-refresh
+  ```
+
+  Do not bump the Rust crate versions for a same-milestone upstream refresh.
 
 6. Update `[package.metadata].skia`, the README comparison links, and the parent
    repository's submodule gitlink. Stage all three before running Cargo or another
@@ -85,28 +99,42 @@ the fork tag.
 
    This ordering is required because the build script may run `git submodule update`.
    An unstaged gitlink still points at the old commit and can reset the submodule
-   checkout. If that happens, switch back to the temporary branch, verify its tip,
+   checkout. If that happens, switch back to the temporary branch with
+   `git -C skia-bindings/skia switch refs/heads/mNEW_MILESTONE-refresh`, verify its tip,
    repair only a local unpushed tag if needed, and stage the gitlink before retrying.
    Never rewrite a tag that is already published.
 
 7. Run `make diff-skia`, `cargo check -p skia-bindings`,
    `cargo check -p skia-safe`, and the platform tests appropriate to the change.
-   Reconfirm after the builds that the checkout, tag, and staged gitlink all point at
-   the rebased tip.
+   Reconfirm after the builds, with explicit refs, that the checkout, the new tag, and
+   the staged gitlink all point at the rebased tip:
+
+   ```sh
+   git -C skia-bindings/skia rev-parse HEAD
+   git -C skia-bindings/skia rev-parse refs/tags/NEW_TAG^{commit}
+   git ls-files -s skia-bindings/skia
+   ```
 
 8. Push the new Skia tag only with explicit user authorization, then verify the remote
-   tag points at the expected commit. Pushing the temporary branch is not required.
+   tag points at the expected commit:
+
+   ```sh
+   git -C skia-bindings/skia push origin refs/tags/NEW_TAG
+   git -C skia-bindings/skia ls-remote --tags origin refs/tags/NEW_TAG
+   ```
+
+   Pushing the temporary branch is not required.
 
 ## Notes that go beyond the wiki checklist
 
 - **Versioning:** synchronize the Rust crate minor version with the numeric Skia
   milestone: milestone `mXX` uses crate version `0.XX.0`. Separately, name the
-  Skia fork tag and branch from the target milestone plus the previous
+  Skia fork tag from the target milestone plus the previous
   `skia-bindings` version as described above. Update all of these together:
   - `skia-bindings/Cargo.toml` package version;
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
-    and the submodule branch exactly;
+    exactly;
   - both package entries in `Cargo.lock`.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
@@ -122,13 +150,14 @@ the fork tag.
   the bindings or any build process — must be reviewed by the user. Do not
   silently decide on such a diff; surface it and get explicit confirmation
   before proceeding.
-- **Include diffs:** use direct `git -C skia-bindings/skia diff OLD_TAG..NEW_TAG -- ...`
+- **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. Do not use `make diff-skia` for include/API diffs; that target only
   compares rust-skia-specific commits in the Skia submodule against master (it is the
   "Do the `rust-skia:` commits ... match with `master`" checklist item).
 - **Account for every changed public header** before editing wrappers. Start from the
   full list of changed public headers (`git -C skia-bindings/skia diff --name-only
-  OLD_TAG..NEW_TAG -- 'include/**/*.h' 'modules/*/include/**/*.h'`) and the complete
+  refs/tags/OLD_TAG..refs/tags/NEW_TAG -- 'include/**/*.h' 'modules/*/include/**/*.h'`)
+  and the complete
   diff of all of them, then walk through every file before making any edits. Review
   inline function and method implementations as carefully as declarations: they are
   compiled into consumers and can change behavior without changing the API signature.
