@@ -33,11 +33,11 @@ impl ContextOptions {
     }
 
     pub fn use_draw_list_layer(&self) -> bool {
-        unsafe { sb::C_ContextOptions_useDrawListLayer(self.native()) }
+        self.native().fUseDrawListLayer
     }
 
     pub fn set_use_draw_list_layer(&mut self, use_draw_list_layer: bool) -> &mut Self {
-        unsafe { sb::C_ContextOptions_setUseDrawListLayer(self.native_mut(), use_draw_list_layer) }
+        self.native_mut().fUseDrawListLayer = use_draw_list_layer;
         self
     }
 }

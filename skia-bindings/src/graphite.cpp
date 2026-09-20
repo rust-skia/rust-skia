@@ -231,17 +231,6 @@ extern "C" void C_ContextOptions_Construct(skgpu::graphite::ContextOptions* unin
     new(uninitialized) skgpu::graphite::ContextOptions();
 }
 
-extern "C" bool C_ContextOptions_useDrawListLayer(
-        const skgpu::graphite::ContextOptions* self) {
-    return self->fUseDrawListLayer;
-}
-
-extern "C" void C_ContextOptions_setUseDrawListLayer(
-        skgpu::graphite::ContextOptions* self,
-        bool useDrawListLayer) {
-    self->fUseDrawListLayer = useDrawListLayer;
-}
-
 extern "C" void C_ContextOptions_destruct(skgpu::graphite::ContextOptions* self) {
     self->~ContextOptions();
 }
