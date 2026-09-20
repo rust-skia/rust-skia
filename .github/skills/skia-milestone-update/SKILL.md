@@ -221,11 +221,14 @@ the fork tag.
   `paragraph/`, `shaper/`, `skottie/`, `skresources/`, `svg/`). For each area,
   cross-reference the changed headers against the corresponding `skia-bindings/src/*.cpp`
   and `skia-safe/src/...` wrapper module, and record the outcome in the accounting.
-- **Wrapper updates:** preserve method/debug-field ordering aligned with the upstream
-  C++ header. Add `todo!()` for anything that cannot be updated right now. Stay
-  compatible with previous versions of skia-safe without trying too hard before 1.0;
-  use `#[deprecated]` if needed. Look for `todo!()` macros that can now be resolved.
-  Review `Send` & `Sync` and `Debug` implementations for new wrappers.
+- **Wrapper updates:** follow the `rust-skia-bindings` skill for how to add or change
+  a C shim and its Rust wrapper. In short: preserve method/debug-field ordering aligned
+  with the upstream C++ header, prefer direct field access over getter/setter shims for
+  bindgen-generated data members of C-compatible types, add `todo!()` for anything that
+  cannot be updated right now, stay compatible with previous versions of skia-safe
+  without trying too hard before 1.0, use `#[deprecated]` if needed, look for `todo!()`
+  macros that can now be resolved, and review `Send` & `Sync` and `Debug`
+  implementations for new wrappers.
 
 ## Release notes
 
@@ -236,13 +239,16 @@ milestone update unless explicitly asked.
 
 ## Style & conventions
 
-See `AGENTS.md` and `.github/copilot-instructions.md` for the full set. Highlights:
+See the `rust-skia-bindings` skill for binding and wrapper mechanics, and `AGENTS.md`
+and `.github/copilot-instructions.md` for the full set. Highlights:
 - Keep Rust method and debug-field ordering aligned with the upstream C++ header order.
 - Keep top-level type declarations in the same sequence as the upstream C++ header.
 - For nested C++ types, keep the parent Rust type first and define nested Rust types
   directly below the parent.
 - Derive `Debug` for all public types unless there's a specific reason not to; place
   `Debug` first in the derive list.
+- Access bindgen-generated fields of C-compatible types directly; do not wrap public
+  data members in C getter/setter functions.
 - Do not pass C++ class types by value across `extern "C"`; use pointers and/or
   out-parameters. Use placement new for non-trivial out-parameters.
 - Match the surrounding code style; keep functions small and deterministic.
