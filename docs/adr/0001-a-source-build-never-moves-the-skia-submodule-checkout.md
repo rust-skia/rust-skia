@@ -5,8 +5,10 @@ the checkout on purpose: a milestone refresh builds the rebased and tagged tip b
 staged, a bisect moves it backwards, and testing a wrapper against a newer Skia needs it ahead of the
 recorded revision. Since `git submodule update` resets the submodule to the recorded revision, the
 build initializes a missing submodule but never moves an existing one, and reports a checkout that
-differs from the recorded revision with a warning instead. `just check-skia-submodule-tag` stays the
-check that the recorded tag and the gitlink agree.
+differs from the recorded revision with a warning instead. `just check-skia-submodule-tag` compares
+the tag in `[package.metadata].skia` with the tags at the submodule *checkout* HEAD, not with the
+gitlink, so it fails while a refresh has the checkout at the new tag but has not staged the gitlink
+yet; the milestone procedure verifies the staged gitlink separately.
 
 ## Considered Options
 
