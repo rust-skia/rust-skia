@@ -14,20 +14,32 @@ wiki page and extends it with project-specific coverage such as Graphite. The
 
 ## Inputs
 
-- `OLD_TAG`: the current Skia submodule tag (e.g. `m153-0.101.1`)
-- `NEW_TAG`: the target Skia submodule tag (e.g. `m154-0.153.2`)
+- `OLD_TAG`: the current Skia submodule tag (e.g. `m154.5`)
+- `NEW_TAG`: the target Skia submodule tag (e.g. `m154.6` or `m155.0`)
 - `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `150` / `151`)
-- `PREVIOUS_BINDINGS_VERSION`: the `skia-bindings` package version before the
-  milestone bump (for example, `0.153.2` when starting the m154 update)
 
-Determine these from `skia-bindings/Cargo.toml` (`[package.metadata] skia = "..."`)
-and `git -C skia-bindings/skia describe --tags` / `git -C skia-bindings/skia tag --list 'm1*'`.
-For a new milestone, set `NEW_TAG` to `mNEW_MILESTONE-PREVIOUS_BINDINGS_VERSION`.
-For example, when updating from `skia-bindings` 0.153.2 to milestone 154, the tag is
-`m154-0.153.2`, and `[package.metadata].skia` must use that same value. Read the
-previous version from `skia-bindings/Cargo.toml` before editing it. Do not derive
-this suffix from an older Skia fork tag, and do not use the target crate version
-(such as `0.154.0`) for the tag or the Skia metadata.
+A Skia fork tag is `m<milestone>.<ordinal>`, where the ordinal is the tag's position
+within the milestone: `m155.0` is the first tag ever cut for milestone 155, `m155.1`
+the second. The ordinal is independent of the crate version and carries no other
+meaning; see `docs/adr/0002-skia-fork-tags-are-milestone-plus-ordinal.md`.
+
+Determine `OLD_TAG` from `git -C skia-bindings/skia describe --tags`, and
+`NEW_TAG` from `git -C skia-bindings/skia tag --list 'm<MILESTONE>*'`. For a new
+milestone it is `mNEW_MILESTONE.0`. For a refresh of the current milestone, add one to
+the largest ordinal already used by any tag for that milestone. Under the previous tag
+scheme that number is the trailing component of the tag, so `m154-0.153.4` counts as
+ordinal 4:
+
+```sh
+git -C skia-bindings/skia tag --list 'm154*' | grep -oE '[0-9]+$' | sort -n | tail -1
+```
+
+Read the tag list by eye as well: a tag with a non-numeric suffix such as
+`m153-0.101.0-x` is skipped by that command and can hide a larger ordinal.
+
+A published tag is immutable: never rewrite or delete one. An unpushed tag that was cut
+too early is re-cut under the same ordinal, while a repair of a published tag takes the
+next ordinal.
 
 Choose `OLD_TAG` as the newest previous-milestone tag: patches can land on it after
 an earlier tag was cut, and a milestone based on the stale one drops them. The
@@ -83,22 +95,23 @@ the fork tag.
    Require every `range-diff` entry to be `=` and the second command to report `0 N`,
    where `N` is the number of rust-skia patches.
 
-5. Increment the `skia-bindings` version component of the Skia fork tag and tag the
-  rebased tip with an explicit ref. Keep `NEW_TAG` in `[package.metadata].skia` in
-  sync when you do. For example, when the tag is `m154-0.153.2`:
+5. Tag the rebased tip with the next ordinal, using an explicit ref. Keep `NEW_TAG` in
+  `[package.metadata].skia` in sync when you do. For example, when the newest m154 tag
+  is `m154.5`:
 
   ```sh
-  git -C skia-bindings/skia tag m154-0.153.3 refs/heads/m154-refresh
+  git -C skia-bindings/skia tag m154.6 refs/heads/m154-refresh
   ```
 
   Do not bump the Rust crate versions for a same-milestone upstream refresh.
 
-6. Update `[package.metadata].skia`, the README comparison links, and the parent
-   repository's submodule gitlink. Stage all three before running Cargo or another
+6. Update `[package.metadata].skia`, the README comparison links, the milestone line of
+   `skia-safe/docs-porting-tracker.md` (it names the current tag), and the parent
+   repository's submodule gitlink. Stage all of them before running Cargo or another
    build job:
 
    ```sh
-   git add README.md skia-bindings/Cargo.toml skia-bindings/skia
+   git add README.md skia-bindings/Cargo.toml skia-safe/docs-porting-tracker.md skia-bindings/skia
    ```
 
    The gitlink must name the rebased tip before any build that starts without a `skia/`
@@ -148,9 +161,9 @@ the fork tag.
 ## Notes that go beyond the wiki checklist
 
 - **Versioning:** synchronize the Rust crate minor version with the numeric Skia
-  milestone: milestone `mXX` uses crate version `0.XX.0`. Separately, name the
-  Skia fork tag from the target milestone plus the previous
-  `skia-bindings` version as described above. Update all of these together:
+  milestone: milestone `mXX` uses crate version `0.XX.0`. The Skia fork tag carries
+  the milestone plus the ordinal described above and is otherwise unrelated to the
+  crate version. Update all of these together:
   - `skia-bindings/Cargo.toml` package version;
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
@@ -161,7 +174,7 @@ the fork tag.
   dependency build error.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
-  versions unchanged and increment only the Skia fork tag's patch component.
+  versions unchanged and increment only the Skia fork tag's ordinal.
 - **Build organization diff:** review whether the build organization changed
   significantly by diffing the build files between the old and new tags. Cover
   `BUILD.gn`, `gn/*` (recursively), and the `BUILD.gn`/`*.gni` pairs under

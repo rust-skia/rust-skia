@@ -29,7 +29,9 @@ include = [
 doctest = false
 
 # Metadata used from inside the packaged crate that defines where to download the Skia archive from.
-# Note: use short hashes here because of filesystem path size restrictions.
+# Note: this is the Skia fork tag. It is appended to the codeload URL as the git ref, and
+# prefixed with "skia-" it names the unpacked root directory, so keep it short because
+# filesystem path sizes are restricted.
 [package.metadata]
 skia = "m154-0.153.4"
 

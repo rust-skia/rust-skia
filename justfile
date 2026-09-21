@@ -23,14 +23,10 @@ check-skia-submodule-tag:
         exit 1
     fi
 
-    actual_tag="$(git -C skia-bindings/skia tag --points-at HEAD | grep -E '^m[0-9]+-' | head -n1 || true)"
-    if [[ -z "$actual_tag" ]]; then
-        echo "No milestone tag found at skia-bindings/skia HEAD ($(git -C skia-bindings/skia rev-parse --short HEAD))" >&2
-        exit 1
-    fi
-
-    if [[ "$actual_tag" != "$expected_tag" ]]; then
-        echo "Mismatch: skia-bindings/Cargo.toml expects '$expected_tag' but skia submodule is at '$actual_tag'" >&2
+    # The recorded tag must be among the tags at the submodule HEAD. Both the current
+    # and the previous tag scheme are accepted, so older commits still pass.
+    if ! git -C skia-bindings/skia tag --points-at HEAD | grep -Fqx "$expected_tag"; then
+        echo "Mismatch: skia-bindings/Cargo.toml expects '$expected_tag' but skia submodule HEAD ($(git -C skia-bindings/skia rev-parse --short HEAD)) is not tagged with it" >&2
         exit 1
     fi
 
