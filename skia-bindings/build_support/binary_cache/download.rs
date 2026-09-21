@@ -87,8 +87,10 @@ fn submodule_revisions(status: &str) -> (&str, &str) {
         .get(1..)
         .and_then(|rest| rest.split_whitespace().next())
         .unwrap_or("?");
+    // The describe is everything between the first `(` and the trailing `)`; it can itself
+    // contain parentheses, so it must not be split at the last one.
     let checked_out = status
-        .rsplit_once('(')
+        .split_once('(')
         .and_then(|(_, describe)| describe.strip_suffix(')'))
         .unwrap_or("?");
     (recorded, checked_out)
@@ -291,4 +293,27 @@ fn download_and_unpack(url: &str, output_directory: &Path) -> io::Result<()> {
     // TODO: verify key
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::submodule_revisions;
+
+    #[test]
+    fn submodule_revisions_are_extracted() {
+        assert_eq!(
+            submodule_revisions("+e106ccb3fd7db69a717b44e17b32e62609f0014c skia (canvaskit/0.41.0-1949-ge106ccb3fd)"),
+            ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "canvaskit/0.41.0-1949-ge106ccb3fd")
+        );
+        // `git submodule status` prints no describe in parentheses when the checkout is not a
+        // repository, and a describe can itself contain parentheses.
+        assert_eq!(
+            submodule_revisions("+e106ccb3fd7db69a717b44e17b32e62609f0014c skia"),
+            ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "?")
+        );
+        assert_eq!(
+            submodule_revisions("+e106ccb3fd7db69a717b44e17b32e62609f0014c skia (m154.5 (1))"),
+            ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "m154.5 (1)")
+        );
+    }
 }
