@@ -94,7 +94,7 @@ fn main() {
 
                         window::draw(surface.canvas());
 
-                        context.skia.flush_and_submit();
+                        let _ = context.skia.flush_and_submit();
                         drop(surface);
 
                         let command_buffer = context

@@ -286,17 +286,18 @@ impl DirectContext {
     /// Call to ensure all drawing to the context has been flushed and submitted to the
     /// underlying 3D API. This is equivalent to calling [`DirectContext::flush()`] with a
     /// default [`FlushInfo`] followed by [`DirectContext::submit()`].
-    pub fn flush_and_submit(&mut self) -> &mut Self {
-        unsafe { sb::C_GrDirectContext_flushAndSubmit(self.native_mut()) }
-        self
+    pub fn flush_and_submit(&mut self) -> FlushResult {
+        FlushResult::construct(|result| unsafe {
+            sb::C_GrDirectContext_flushAndSubmit(self.native_mut(), SyncCpu::No, result)
+        })
     }
 
-    /// Version of [`DirectContext::flush()`] that uses a default [`FlushInfo`]. Also submits
-    /// the flushed work to the GPU.
-    pub fn flush_submit_and_sync_cpu(&mut self) -> &mut Self {
-        self.flush(&FlushInfo::default());
-        self.submit(SyncCpu::Yes);
-        self
+    /// Version of [`DirectContext::flush()`] that uses a default [`FlushInfo`] and submits with
+    /// [`SyncCpu::Yes`], so it returns once the gpu has finished with all submitted work.
+    pub fn flush_submit_and_sync_cpu(&mut self) -> FlushResult {
+        FlushResult::construct(|result| unsafe {
+            sb::C_GrDirectContext_flushAndSubmit(self.native_mut(), SyncCpu::Yes, result)
+        })
     }
 
     /// Call to ensure all drawing to the context has been flushed to underlying 3D API
@@ -328,14 +329,8 @@ impl DirectContext {
     ///
     /// - `info` flush options, or `None` for default flush options
     pub fn flush<'a>(&mut self, info: impl Into<Option<&'a FlushInfo>>) -> FlushResult {
-        let default_info;
-        let info: *const sb::GrFlushInfo = match info.into() {
-            Some(info) => info.native(),
-            None => {
-                default_info = FlushInfo::default();
-                default_info.native()
-            }
-        };
+        let default_info = FlushInfo::default();
+        let info = info.into().unwrap_or(&default_info).native();
         FlushResult::construct(|result| unsafe {
             sb::C_GrDirectContext_flush(self.native_mut(), info, result)
         })

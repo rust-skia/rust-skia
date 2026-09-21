@@ -360,7 +360,7 @@ fn main() {
                     // 360 / (12 · 60/60/180) = 5400 frames; wrapping there is
                     // seamless, so the gear simply keeps rotating.
                     renderer::render_frame(self.frame % 5400, 180, 60, canvas);
-                    self.env.gr_context.flush_and_submit();
+                    let _ = self.env.gr_context.flush_and_submit();
                     self.env
                         .gl_surface
                         .swap_buffers(&self.env.gl_context)

@@ -124,8 +124,8 @@ extern "C" skcpu::Recorder* C_GrRecordingContext_makeCPURecorder(GrRecordingCont
     return self->makeCPURecorder().release();
 }
 
-extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self) {
-    self->flushAndSubmit();
+extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self, GrSyncCpu sync, GrDirectContext::FlushResult* result) {
+    *result = self->flushAndSubmit(sync);
 }
 
 extern "C" void C_GrDirectContext_flush(GrDirectContext* self, const GrFlushInfo* info, GrDirectContext::FlushResult* result) {

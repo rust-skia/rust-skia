@@ -321,7 +321,7 @@ impl VulkanRenderer {
                 vk::ImageLayout::PRESENT_SRC_KHR,
                 self.queue.queue_family_index(),
             );
-            self.skia_ctx.flush_surface_with_texture_state(
+            let _ = self.skia_ctx.flush_surface_with_texture_state(
                 &mut surface,
                 &flush_info,
                 Some(&present_state),

@@ -141,7 +141,7 @@ pub unsafe extern "C" fn draw_logo(state: *mut State, x: i32, y: i32, timestamp_
 
     state.surface.canvas().clear(Color::TRANSPARENT);
     render_logo_at(&mut state.surface, frame, x as f32, y as f32);
-    state
+    let _ = state
         .gpu_state
         .context
         .flush_and_submit_surface(&mut state.surface, None);

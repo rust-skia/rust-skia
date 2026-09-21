@@ -256,7 +256,7 @@ mod window {
                 &paint,
             );
 
-            self.direct_context.flush_and_submit_surface(surface, None);
+            let _ = self.direct_context.flush_and_submit_surface(surface, None);
 
             unsafe { self.swap_chain.Present(1, DXGI_PRESENT::default()) }.unwrap();
 
