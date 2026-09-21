@@ -100,13 +100,19 @@ impl Picture {
     /// or less than the number of [`crate::Canvas`] calls recorded: some calls may be recorded as
     /// more than one operation, other calls may be optimized away.
     ///
-    /// Returns: approximate operation count
+    /// Returns: approximate operation count. If 0 is returned, we say the [`Picture`] is "empty"
+    /// meaning its [`Picture::cull_rect()`] is the result of an [`crate::Rect::new_empty()`].
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Picture_approximateOpCount>
     pub fn approximate_op_count(&self) -> usize {
         self.approximate_op_count_nested(false)
     }
 
+    /// Version of [`Picture::approximate_op_count()`] that includes the op-counts of nested
+    /// pictures.
+    ///
+    /// - `nested` if true, include the op-counts of nested pictures as well, else just return count
+    ///   the ops in the top-level picture.
     pub fn approximate_op_count_nested(&self, nested: impl Into<Option<bool>>) -> usize {
         let nested = nested.into().unwrap_or(false);
         unsafe {

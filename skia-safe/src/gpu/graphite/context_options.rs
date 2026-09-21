@@ -32,10 +32,14 @@ impl ContextOptions {
         Self::construct(|options| unsafe { sb::C_ContextOptions_Construct(options) })
     }
 
+    /// Enabling switches Graphite from the existing sort-based draw ordering to the new
+    /// layer-based system.
     pub fn use_draw_list_layer(&self) -> bool {
         self.native().fUseDrawListLayer
     }
 
+    /// Enabling switches Graphite from the existing sort-based draw ordering to the new
+    /// layer-based system.
     pub fn set_use_draw_list_layer(&mut self, use_draw_list_layer: bool) -> &mut Self {
         self.native_mut().fUseDrawListLayer = use_draw_list_layer;
         self
