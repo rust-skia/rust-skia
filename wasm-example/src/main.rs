@@ -1,8 +1,8 @@
 use std::boxed::Box;
 
 use skia_safe::{
-    gpu::{self, gl::FramebufferInfo, DirectContext},
     Color, Surface,
+    gpu::{self, DirectContext, gl::FramebufferInfo},
 };
 
 use skia_icon::render_frame;
@@ -141,10 +141,17 @@ pub unsafe extern "C" fn draw_logo(state: *mut State, x: i32, y: i32, timestamp_
 
     state.surface.canvas().clear(Color::TRANSPARENT);
     render_logo_at(&mut state.surface, frame, x as f32, y as f32);
-    let _ = state
+    // A failed flush means the rendering results are undefined and must be discarded. The surface
+    // wraps the default framebuffer, which the browser composites itself, so unlike the native
+    // window examples there is no present step to skip here: report the failure instead of
+    // dropping it silently, and let the next frame redraw the logo from scratch.
+    if let Err(err) = state
         .gpu_state
         .context
-        .flush_and_submit_surface(&mut state.surface, None);
+        .flush_and_submit_surface(&mut state.surface, None)
+    {
+        eprintln!("flush_and_submit_surface failed, the frame is undefined: {err}");
+    }
 }
 
 /// The main function is called by emscripten when the WASM object is created.
