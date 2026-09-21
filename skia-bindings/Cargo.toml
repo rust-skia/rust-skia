@@ -33,7 +33,7 @@ doctest = false
 # prefixed with "skia-" it names the unpacked root directory, so keep it short because
 # filesystem path sizes are restricted.
 [package.metadata]
-skia = "m154-0.153.4"
+skia = "m154.5"
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf"]

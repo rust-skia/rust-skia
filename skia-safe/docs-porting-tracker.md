@@ -2,7 +2,7 @@
 
 Persistent tracker of documentation ported from Skia C++ headers into `skia-safe` Rust rustdoc and **verified for completeness** against the C++ header (rule: C++ doc ported COMPLETELY, no shortening; only allowed drops = fiddle example links, out-param/nullptr→Option, ownership sentences, name translation + intra-doc links).
 
-**Milestone:** m154 (skia-bindings `skia = "m154-0.153.3"`; Skia submodule tag `m154-0.153.3`; crates `0.154.0`). The current state is described in the `# m154 update (2026-09-20)` section below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
+**Milestone:** m154 (skia-bindings `skia = "m154.5"`; Skia submodule tag `m154.5`; crates `0.154.0`). The current state is described in the `# m154 update (2026-09-20)` section below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
 
 ## Verification method
 - Independent subagent audit comparing EVERY public item doc in each Rust file vs its C++ header.
@@ -128,7 +128,7 @@ Do NOT add rustdoc for items that have no C++ doc comment. Only port docs that e
 
 # m154 update (2026-09-20)
 
-Milestone m154: crates `0.154.0`, skia-bindings metadata `skia = "m154-0.153.3"`, Skia submodule tag `m154-0.153.3`, `core/milestone.rs` `MILESTONE = 154`.
+Milestone m154: crates `0.154.0`, skia-bindings metadata `skia = "m154.5"`, Skia submodule tag `m154.5`, `core/milestone.rs` `MILESTONE = 154`.
 
 Branch `m154` commits (vs `master`): `52e5110a` Update Skia to milestone 154 · `2c950404` + `fff83457` milestone-update skill / PR template · `a6d1b9fa` Port FlushResult API (refresh from `chrome/m154`) · `cf9c3b2b` skill branch naming · `2017e567` assert Send + Sync for `gpu::FlushResult` · `c619dcad` re-insert the missing `is_clang.py` compiler-command patch (unpushed at the time of writing).
 
