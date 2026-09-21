@@ -128,20 +128,18 @@ Do NOT add rustdoc for items that have no C++ doc comment. Only port docs that e
 
 # m154 update (2026-09-20)
 
-Milestone m154: crates `0.154.0`, skia-bindings metadata `skia = "m154.5"`, Skia submodule tag `m154.5`, `core/milestone.rs` `MILESTONE = 154`.
+Milestone m154: crates `0.154.0`, skia-bindings metadata `skia = "m154.5"`, Skia submodule tag `m154.5`, `core/milestone.rs` `MILESTONE = 154`. Work in progress on branch `m154` (PR rust-skia/rust-skia#1338); individual commits are not listed here because the branch is amended and rebased while the PR is open.
 
-Branch `m154` commits (vs `master`): `52e5110a` Update Skia to milestone 154 · `2c950404` + `fff83457` milestone-update skill / PR template · `a6d1b9fa` Port FlushResult API (refresh from `chrome/m154`) · `cf9c3b2b` skill branch naming · `2017e567` assert Send + Sync for `gpu::FlushResult` · `c619dcad` re-insert the missing `is_clang.py` compiler-command patch (unpushed at the time of writing).
+## Header accounting (m153-0.101.2 → m154.5)
 
-## Header accounting (m153-0.101.2 → m154-0.153.3)
-
-Method: `git -C skia-bindings/skia diff m153-0.101.2 m154-0.153.3` — 115 changed `.h` files in total. Only the 13 listed below live under `include/` or `modules/` (11 Skia headers, 2 third-party skcms internals). The remaining 102 are `src/`, `bench/`, `tests/` and `tools/` internals (Skia rewrote `SkPicture`'s internals — `SkBigPicture` deleted, `SkCachedData`, `SkPicturePriv` —, reworked `GrRenderTask`/`GrResourceAllocator` in Ganesh and the graphite `DrawList*`/`Renderer`/`Geometry` code, and added `sparse_strips/` and `src/gpu/graphite/geom/`). None of those are reachable through `skia-bindings`/`skia-safe`, so the m153 doc corpus stays valid for every header that did not change.
+Method: `git -C skia-bindings/skia diff m153-0.101.2 m154.5` — 115 changed `.h` files in total. Only the 13 listed below live under `include/` or `modules/` (11 Skia headers, 2 third-party skcms internals). The remaining 102 are `src/`, `bench/`, `tests/` and `tools/` internals (Skia rewrote `SkPicture`'s internals — `SkBigPicture` deleted, `SkCachedData`, `SkPicturePriv` —, reworked `GrRenderTask`/`GrResourceAllocator` in Ganesh and the graphite `DrawList*`/`Renderer`/`Geometry` code, and added `sparse_strips/` and `src/gpu/graphite/geom/`). None of those are reachable through `skia-bindings`/`skia-safe`, so the m153 doc corpus stays valid for every header that did not change.
 
 | Changed header | Rust counterpart | Doc status |
 |---|---|---|
 | `include/core/SkMilestone.h` (`153`→`154`) | `core/milestone.rs` | ✅ `MILESTONE = 154` (no prose) |
-| `include/core/SkPicture.h` | `core/picture.rs` | ⭐ **GAP — 1 doc sentence** (see below) |
-| `include/gpu/ganesh/GrDirectContext.h` | `gpu/ganesh/direct_context.rs`, `gpu/ganesh/types.rs` | ✅ prose ported; ⭐ thin docs on 2 helper fns |
-| `include/gpu/graphite/ContextOptions.h` | `gpu/graphite/context_options.rs` | ⭐ **GAP — 1 field doc** |
+| `include/core/SkPicture.h` | `core/picture.rs` | ✅ empty-picture note and `nested` parameter doc ported |
+| `include/gpu/ganesh/GrDirectContext.h` | `gpu/ganesh/direct_context.rs`, `gpu/ganesh/types.rs` | ✅ prose ported; `flush_and_submit*` return `FlushResult` |
+| `include/gpu/graphite/ContextOptions.h` | `gpu/graphite/context_options.rs` | ✅ field prose ported |
 | `modules/skshaper/include/SkShaper.h` | `modules/shaper.rs` | ✅ Rust wrapper documented (new `Options` API) |
 | `include/gpu/ganesh/SkSurfaceGanesh.h` | `gpu/ganesh/surface_ganesh.rs` | Flush/FlushAndSubmit not wrapped (pre-existing) |
 | `include/gpu/graphite/GraphiteTypes.h` | — | not wrapped (`DrawTypeFlags`, `Precompile`) |
@@ -152,14 +150,15 @@ Method: `git -C skia-bindings/skia diff m153-0.101.2 m154-0.153.3` — 115 chang
 
 Upstream added **no** public header and removed none (the only `--diff-filter=ADR` hit under `include/`+`modules/` is the skcms `LICENSE`).
 
-## Gaps / follow-ups found in the m154 update
+## Resolved in the m154 update
 
-Documentation regressions (C++ doc exists, Rust doc missing/now incomplete — same rule as the m153 corpus: port the existing C++ text, never invent):
-1. ⭐ `core/picture.rs` — `SkPicture.h::approximateOpCount()` gained a sentence: *"If 0 is returned, we say the SkPicture is "empty" meaning its cullRect is the result of an SkRect::MakeEmpty()."* Neither `approximate_op_count()` nor `approximate_op_count_nested()` has it.
-2. ⭐ `gpu/graphite/context_options.rs` — `ContextOptions.h::fUseDrawListLayer` is new and documented: *"Enabling switches Graphite from the existing sort-based draw ordering to the new layer-based system."* `use_draw_list_layer()` / `set_use_draw_list_layer()` have no docs (the file is otherwise documented).
+- `core/picture.rs`: `approximateOpCount()`'s *"If 0 is returned, we say the SkPicture is "empty" meaning its cullRect is the result of an SkRect::MakeEmpty()."* is ported to `approximate_op_count()`, and `approximate_op_count_nested()` now carries the `nested` parameter doc it was missing entirely.
+- `gpu/graphite/context_options.rs`: the `fUseDrawListLayer` prose is ported to both accessors.
+- `gpu/ganesh`: `flush_and_submit()` and `flush_submit_and_sync_cpu()` return `FlushResult` through one `C_GrDirectContext_flushAndSubmit` shim that takes a `GrSyncCpu`, matching upstream's `flushAndSubmit(sync)`; `FlushResult` is `#[must_use]`.
+- The temporary `From<FlushResult> for SemaphoresSubmitted` conversion and `Default for FlushResult` were dropped before the m154 release: nothing in the tree used them, and the conversion silently dropped `submitted`.
 
-API follow-ups from the m154 `FlushResult` migration (not doc-specific, recorded here because they came out of the same header accounting):
-- `GrDirectContext::flushAndSubmit(GrSyncCpu)` and `flushAndSubmit(SkSurface*, GrSyncCpu)` now return `FlushResult`, but `C_GrDirectContext_flushAndSubmit` still calls `self->flushAndSubmit()` and discards the result, so `DirectContext::flush_and_submit()` keeps returning `&mut Self` and the new return value is unreachable through the Rust API. (`DirectContext::flush_submit_and_sync_cpu()` predates m154 — introduced in `13f13c14` m130 — and is semantically equivalent to the upstream `flushAndSubmit(sync)`, so it needs no change; only its thin doc is worth completing.)
+## Open follow-ups
+
 - The `GrDirectContext.h` prose for `flushAndSubmit(SkSurface*, GrSyncCpu)` — *"Call to ensure all reads/writes of the surface have been issued to the underlying 3D API. Skia will correctly order its own draws and pixel operations. This must be used to ensure correct ordering when the surface backing store is accessed outside Skia (e.g. direct use of the 3D API or a windowing system). This is equivalent to calling ::flush with a default GrFlushInfo followed by ::submit(syncCpu). Has no effect on a CPU-backed surface."* — is not ported to `flush_and_submit_surface()` (which carries only a shorter paraphrase).
 - `SkSurfaces::Flush` / `SkSurfaces::FlushAndSubmit` (`gpu/ganesh/SkSurfaceGanesh.h`, now returning `GrDirectContext::FlushResult`) have no C wrapper and no Rust API at all; their C++ prose (*"Clients should strive to call GrDirectContext::flush directly. However, there exist some places where the GrDirectContext is hard to find, these helpers allow for the flushing of the provided surface. This is a no-op if the surface is nullptr or not GPU backed."*) has no Rust counterpart.
 - `GrDirectContext::flush(SkSurface*)` (default-info overload, documented *"Flushes the given surface with the default GrFlushInfo. Has no effect on a CPU-backed surface."*) is not wrapped; Rust exposes only `flush_surface()` via `flushSurfaceWithAccess(NoAccess, default)`.
@@ -167,8 +166,8 @@ API follow-ups from the m154 `FlushResult` migration (not doc-specific, recorded
 
 ## m154 header docs already correctly ported (verified against the m154 headers)
 
-- `gpu/ganesh/types.rs`: `FlushResult` struct overview *"Result of a Ganesh flush call. A flush can be successful with or without any semaphores being flushed. In some circumstances an unsuccessful flush can still have flushed the semaphores, but the rendering results should be discarded."* ✅ plus both field docs (`success`, `submitted`) ✅. `From<FlushResult> for SemaphoresSubmitted` carries a deliberate divergence comment: it keys on `success` only, as upstream's implicit `operator GrSemaphoresSubmitted()` does, rather than on `submitted`; and it is kept because the Rust helper path (`flush_image`, `flush_and_submit_surface`) would otherwise lose the `kNo` result upstream reports (`RustSkiaContexts::flush` returns `fSubmitted`). No TODO in the code marks that reason — the tracker records it here.
-- `gpu/graphite/context_options.rs`: contributor docs plus the new `use_draw_list_layer` accessor pair ported in `a6d1b9fa` (only the field prose is missing, see gap 2).
+- `gpu/ganesh/types.rs`: `FlushResult` struct overview *"Result of a Ganesh flush call. A flush can be successful with or without any semaphores being flushed. In some circumstances an unsuccessful flush can still have flushed the semaphores, but the rendering results should be discarded."* ✅ plus both field docs (`success`, `submitted`) ✅. The type is `#[must_use]`, because upstream returns it by value to stop clients from discarding a failed flush, and the crate has no error type to map it onto: `Result<SemaphoresSubmitted, ()>` would drop `submitted` in exactly the case where the rendering results must be discarded, and it does not pass `clippy::result_unit_err` under CI's `-D warnings`.
+- `gpu/graphite/context_options.rs`: contributor docs plus the new `use_draw_list_layer` accessor pair; the `fUseDrawListLayer` field prose is ported to both accessors.
 - `modules/shaper.rs`: new `SkShaper::Options` (upstream comment: width = *"Width available for horizontal layout, before wrapping kicks in."*; tracking = *"Extra advance added after each glyph, expressed as a fraction of the font size (i.e. em units, thus it scales with the text). It applies on top of font kerning and participates in line breaking."*) is covered by `shape_with_iterators_and_features_and_options(…, width, tracking, …)`; the doc explains tracking as "glyph tracking (letter spacing) in addition to the width available for horizontal layout" without quoting the em-unit comment. The underlying `SkShaper_Options` struct is bindgen-generated but never re-exported: the wrapper passes `width`/`tracking` as separate scalars, so there are no Rust fields to document.
 - `core/picture.rs`: unchanged m153 docs are still correct against m154 for `playback`, `cull_rect`, `from_data`/`from_bytes`, `serialize`, `new_placeholder`, `approximate_bytes_used`, `to_shader` (upstream only reflowed parameters, made `playback`/`cullRect`/`approximateOpCount`/`approximateBytesUsed` non-virtual, and replaced the `SkBigPicture` subclass hooks with an `SkRecord`-based private constructor — none of that changes the documented prose).
 
