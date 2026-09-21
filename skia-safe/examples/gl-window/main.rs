@@ -360,11 +360,17 @@ fn main() {
                     // 360 / (12 · 60/60/180) = 5400 frames; wrapping there is
                     // seamless, so the gear simply keeps rotating.
                     renderer::render_frame(self.frame % 5400, 180, 60, canvas);
-                    let _ = self.env.gr_context.flush_and_submit();
-                    self.env
-                        .gl_surface
-                        .swap_buffers(&self.env.gl_context)
-                        .unwrap();
+                    // A failed flush means the rendering results are undefined, so the frame is
+                    // dropped instead of being swapped in.
+                    match self.env.gr_context.flush_and_submit() {
+                        Ok(_) => {
+                            self.env
+                                .gl_surface
+                                .swap_buffers(&self.env.gl_context)
+                                .unwrap();
+                        }
+                        Err(err) => eprintln!("flush_and_submit failed, skipping frame: {err}"),
+                    }
                     self.env.window.request_redraw();
                 }
                 _ => (),

@@ -321,11 +321,17 @@ impl VulkanRenderer {
                 vk::ImageLayout::PRESENT_SRC_KHR,
                 self.queue.queue_family_index(),
             );
-            let _ = self.skia_ctx.flush_surface_with_texture_state(
+            // A failed flush means the rendering results are undefined, so the image must not be
+            // presented. The acquire is still chained so that the frame submission stays valid.
+            if let Err(err) = self.skia_ctx.flush_surface_with_texture_state(
                 &mut surface,
                 &flush_info,
                 Some(&present_state),
-            );
+            ) {
+                eprintln!("flush_surface_with_texture_state failed, skipping frame: {err}");
+                self.chain_acquire_without_present(acquire_future);
+                return;
+            }
             // Keep this synchronized so the transition is complete before vkQueuePresentKHR.
             self.skia_ctx.submit(gpu::SubmitInfo {
                 sync: gpu::SyncCpu::Yes,
