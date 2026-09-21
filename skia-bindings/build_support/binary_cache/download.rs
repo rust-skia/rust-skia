@@ -29,7 +29,15 @@ pub fn resolve_dependencies() {
     // recorded in the repository and discard a checkout that was moved on purpose, for example to
     // the rebased tip while updating Skia to a new milestone
     // (`docs/adr/0001-a-source-build-never-moves-the-skia-submodule-checkout.md`).
-    match submodule_status() {
+    let Some(status) = submodule_status() else {
+        // Git is not installed or this is not a git repository. This can happen if the repo is
+        // downloaded as a ZIP archive.
+        println!("`git submodule status` failed. Falling back to HTTP download");
+        download_dependencies();
+        return;
+    };
+
+    match status.chars().next() {
         // Initialize a missing checkout. `--depth 1` avoids fetching Skia's entire history.
         Some('-') => {
             if !update_submodule() {
@@ -37,27 +45,30 @@ pub fn resolve_dependencies() {
                 download_dependencies();
             }
         }
-        Some('+') => cargo::warning(format!(
-            "The `{SKIA_SUBMODULE}` submodule is checked out at a revision other than the one \
-             recorded in the repository, building that revision. Run `git submodule update -- \
-             skia-bindings/{SKIA_SUBMODULE}` to check out the recorded revision."
-        )),
-        // Up to date, or a state that this build must not resolve, like merge conflicts.
-        Some(_) => {}
-        // Git is not installed or this is not a git repository. This can happen if the repo is
-        // downloaded as a ZIP archive.
-        None => {
-            println!("`git submodule status` failed. Falling back to HTTP download");
-            download_dependencies();
+        Some('+') => {
+            let (recorded, checked_out) = submodule_revisions(&status);
+            cargo::warning(format!(
+                "The `{SKIA_SUBMODULE}` submodule is checked out at {checked_out}, but the \
+                 repository records {recorded}. Building the checkout. Run `git submodule update \
+                 -- skia-bindings/{SKIA_SUBMODULE}` to check out the recorded revision."
+            ));
         }
+        // Up to date.
+        Some(' ') => {}
+        // A state that this build must not resolve, like `U` for a merge conflict.
+        Some(state) => cargo::warning(format!(
+            "The `{SKIA_SUBMODULE}` submodule is in the unexpected state `{state}`. Run `git \
+             submodule status -- skia-bindings/{SKIA_SUBMODULE}` for details."
+        )),
+        None => {}
     }
 }
 
-/// Returns the status character of the `skia/` submodule as reported by `git submodule status`,
-/// or `None` if git could not be run or this is not a git repository. `-` means that the submodule
-/// is not checked out, a space that it matches the revision recorded in the repository, and `+`
-/// that it does not.
-fn submodule_status() -> Option<char> {
+/// Returns the first line of `git submodule status -- skia`, or `None` if git could not be run or
+/// this is not a git repository. The line starts with a status character: `-` means that the
+/// submodule is not checked out, a space that it matches the revision recorded in the repository,
+/// and `+` that it does not.
+fn submodule_status() -> Option<String> {
     let output = Command::new("git")
         .args(["submodule", "status", "--", SKIA_SUBMODULE])
         .stderr(Stdio::null())
@@ -66,12 +77,21 @@ fn submodule_status() -> Option<char> {
     if !output.status.success() {
         return None;
     }
-    str::from_utf8(&output.stdout)
-        .ok()?
-        .lines()
-        .next()?
-        .chars()
-        .next()
+    Some(str::from_utf8(&output.stdout).ok()?.lines().next()?.to_owned())
+}
+
+/// Returns the revision recorded in the repository and the revision the checkout is at, taken from
+/// a `git submodule status` line like `+<recorded> skia (<checked out>)`.
+fn submodule_revisions(status: &str) -> (&str, &str) {
+    let recorded = status
+        .get(1..)
+        .and_then(|rest| rest.split_whitespace().next())
+        .unwrap_or("?");
+    let checked_out = status
+        .rsplit_once('(')
+        .and_then(|(_, describe)| describe.strip_suffix(')'))
+        .unwrap_or("?");
+    (recorded, checked_out)
 }
 
 /// Initializes the `skia/` submodule.
