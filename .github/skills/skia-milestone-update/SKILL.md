@@ -14,12 +14,16 @@ wiki page and extends it with project-specific coverage such as Graphite. The
 
 ## Inputs
 
-- `OLD_TAG`: the current Skia submodule tag (e.g. `m152-0.152.1`)
-- `NEW_TAG`: the target Skia submodule tag (e.g. `m153-0.153.0`)
-- `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `150` / `151`)
+- `OLD_TAG`: the current Skia submodule tag (e.g. `m153-0.101.2`)
+- `NEW_TAG`: the target Skia submodule tag (e.g. `m154-0.153.2`)
+- `OLD_MILESTONE` / `NEW_MILESTONE`: the numeric milestones (e.g. `153` / `154`)
 
 Determine these from `skia-bindings/Cargo.toml` (`[package.metadata] skia = "..."`)
 and `git -C skia-bindings/skia describe --tags` / `git -C skia-bindings/skia tag --list 'm1*'`.
+
+Note that the version component of a Skia fork tag does not track the milestone for
+tags up to `m152` (for example `m152-0.100.0`), and only aligns with it from `m153`
+on. Take both tags from the repository instead of deriving one from the other.
 
 ## Refresh the current milestone from upstream
 
@@ -63,7 +67,7 @@ the fork tag.
    where `N` is the number of rust-skia patches.
 
 5. Increment the patch component of the Skia fork tag (for example,
-  `m153-0.153.0` -> `m153-0.153.1`) and tag the rebased tip. Do not bump the Rust crate
+   `m153-0.101.1` -> `m153-0.101.2`) and tag the rebased tip. Do not bump the Rust crate
    versions for a same-milestone upstream refresh.
 
 6. Update `[package.metadata].skia`, the README comparison links, and the parent
@@ -91,15 +95,18 @@ the fork tag.
 ## Notes that go beyond the wiki checklist
 
 - **Versioning:** synchronize the Rust crate minor version with the numeric Skia
-  milestone: milestone `mXX` uses version `0.XX.0` (for example, `m153` uses
-  `0.153.0`). Update all of these together:
+  milestone: milestone `mXX` uses version `0.XX.<patch>` (for example, `m153` uses
+  `0.153.0` and subsequent patch releases continue with `0.153.1`, `0.153.2`, ...).
+  Update all of these together:
   - `skia-bindings/Cargo.toml` package version;
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia` tag
-    (for example, `m153-0.153.0`);
+    (for example, `m153-0.101.2`);
   - both package entries in `Cargo.lock`.
+  The Skia fork tag's version component is independent of the crate version — see
+  the note under Inputs for its scheme.
   Add the synchronized crate version to any new `deprecated` attributes
-  (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
+  (`since = "0.XX.<patch>"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's patch component.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff OLD_TAG..NEW_TAG -- ...`
   commands. Do not use `make diff-skia` for include/API diffs; that target only

@@ -17,7 +17,7 @@
             "compilerPath": "/usr/bin/clang++",
             "intelliSenseMode": "macos-clang-arm64",
             "macFrameworkPath": [],
-            "cppStandard": "c++17"
+            "cppStandard": "c++20"
         }
     ],
     "version": 4
