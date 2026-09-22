@@ -584,6 +584,43 @@ impl Shaper {
             )
         }
     }
+
+    /// Shapes text using the new `SkShaper::Options`-based API, which supports
+    /// glyph tracking (letter spacing) in addition to the width available for
+    /// horizontal layout.
+    #[allow(clippy::too_many_arguments)]
+    pub fn shape_with_iterators_and_features_and_options<'a, 'b: 'a>(
+        &self,
+        utf8: &str,
+        font_run_iterator: &mut FontRunIterator,
+        bidi_run_iterator: &mut BiDiRunIterator,
+        script_run_iterator: &mut ScriptRunIterator,
+        language_run_iterator: &mut LanguageRunIterator,
+        features: &[Feature],
+        width: scalar,
+        tracking: scalar,
+        run_handler: &'b mut impl AsRunHandler<'a>,
+    ) {
+        let mut run_handler = run_handler.as_run_handler();
+
+        let bytes = utf8.as_bytes();
+        unsafe {
+            sb::C_SkShaper_shape4(
+                self.native(),
+                bytes.as_ptr() as _,
+                bytes.len(),
+                font_run_iterator.native_mut(),
+                bidi_run_iterator.native_mut(),
+                script_run_iterator.native_mut(),
+                language_run_iterator.native_mut(),
+                features.as_ptr(),
+                features.len(),
+                width,
+                tracking,
+                run_handler.as_native_run_handler(),
+            )
+        }
+    }
 }
 
 mod rust_run_handler {

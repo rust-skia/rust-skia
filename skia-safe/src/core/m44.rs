@@ -428,7 +428,7 @@ impl Default for M44 {
 
 impl PartialEq for M44 {
     fn eq(&self, other: &Self) -> bool {
-        unsafe { sb::C_SkM44_equals(self.native(), other.native()) }
+        unsafe { sb::C_SkM44_Equals(self.native(), other.native()) }
     }
 }
 

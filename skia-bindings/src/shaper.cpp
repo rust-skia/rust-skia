@@ -184,6 +184,21 @@ C_SkShaper_shape3(const SkShaper *self, const char *utf8, size_t utf8Bytes, SkSh
                 runHandler);
 }
 
+extern "C" void
+C_SkShaper_shape4(const SkShaper *self, const char *utf8, size_t utf8Bytes, SkShaper::FontRunIterator *fontRunIterator,
+                  SkShaper::BiDiRunIterator *bidiRunIterator,
+                  SkShaper::ScriptRunIterator *scriptRunIterator,
+                  SkShaper::LanguageRunIterator *languageRunIterator,
+                  const SkShaper::Feature *features, size_t featuresSize,
+                  float width, float tracking,
+                  SkShaper::RunHandler *runHandler) {
+    SkShaper::Options options;
+    options.width = width;
+    options.tracking = tracking;
+    self->shape(SkSpan<const char>(utf8, utf8Bytes), *fontRunIterator, *bidiRunIterator, *scriptRunIterator,
+                *languageRunIterator, SkSpan<const SkShaper::Feature>(features, featuresSize), options, runHandler);
+}
+
 extern "C" void C_SkTextBlobBuilderRunHandler_construct(SkTextBlobBuilderRunHandler* uninitialized, const char* utf8Text, const SkPoint* offset) {
     new(uninitialized)SkTextBlobBuilderRunHandler(utf8Text, *offset);
 }

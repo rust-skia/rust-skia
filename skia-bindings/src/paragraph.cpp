@@ -168,7 +168,7 @@ extern "C" {
         self->setFontFamilies(std::vector<SkString>(data, data + count));
     }
 
-    bool C_StrutStyle_equals(const StrutStyle* self, const StrutStyle* rhs) {
+    bool C_StrutStyle_Equals(const StrutStyle* self, const StrutStyle* rhs) {
         return *self == *rhs;
     }
 }

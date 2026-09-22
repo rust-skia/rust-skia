@@ -28,7 +28,7 @@ impl NativeClone for sb::skia_textlayout_StrutStyle {
 
 impl NativePartialEq for sb::skia_textlayout_StrutStyle {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { sb::C_StrutStyle_equals(self, rhs) }
+        unsafe { sb::C_StrutStyle_Equals(self, rhs) }
     }
 }
 

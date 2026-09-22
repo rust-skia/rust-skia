@@ -256,7 +256,12 @@ mod window {
                 &paint,
             );
 
-            self.direct_context.flush_and_submit_surface(surface, None);
+            // A failed flush means the rendering results are undefined, so the frame is dropped
+            // instead of being presented.
+            if let Err(err) = self.direct_context.flush_and_submit_surface(surface, None) {
+                eprintln!("flush_and_submit_surface failed, skipping frame: {err}");
+                return;
+            }
 
             unsafe { self.swap_chain.Present(1, DXGI_PRESENT::default()) }.unwrap();
 

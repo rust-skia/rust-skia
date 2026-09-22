@@ -1,3 +1,5 @@
+use std::error::Error;
+use std::fmt;
 use std::ptr;
 
 use crate::gpu;
@@ -105,6 +107,84 @@ impl FlushInfo {
 /// call.
 pub use sb::GrSemaphoresSubmitted as SemaphoresSubmitted;
 variant_name!(SemaphoresSubmitted::Yes);
+
+/// Result of a Ganesh flush call. A flush can be successful with or without
+/// any semaphores being flushed. In some circumstances an unsuccessful flush
+/// can still have flushed the semaphores, but the rendering results should be
+/// discarded.
+#[repr(C)]
+#[must_use]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) struct FlushResult {
+    /// Did the flush succeed.
+    pub success: bool,
+    /// Whether any semaphores were submitted during the flush process.
+    /// Will be [`SemaphoresSubmitted::No`] if no semaphores were specified.
+    pub submitted: SemaphoresSubmitted,
+}
+
+native_transmutable!(sb::GrDirectContext_FlushResult, FlushResult);
+
+/// A Ganesh flush failed.
+///
+/// This type is not part of Skia's C++ API. The native `GrDirectContext::FlushResult` reports
+/// whether the flush succeeded and whether semaphores were submitted as two independent fields,
+/// which makes a failure easy to overlook: inspecting it reads like an ordinary status check, and
+/// nothing draws attention to the flush having failed. The Rust flush methods therefore map a
+/// failed flush to [`Err`] so that the failure has to be handled explicitly, and this type carries
+/// the one piece of information that still has to be acted on.
+///
+/// A flush fails in the following situations:
+///
+/// - The context was abandoned, for example after a device loss or a call to
+///   [`crate::gpu::DirectContext::abandon()`].
+/// - The flush is reentrant: it was issued from an on-flush callback or a finished proc while
+///   another flush was still in progress.
+/// - The flushed [`crate::Image`] or [`crate::Surface`] is not backed by this context, is not
+///   GPU-backed (a CPU-backed surface has no effect), or is null.
+/// - An on-flush callback's `preFlush` failed, in which case the render tasks were never executed.
+/// - Uploading pending data to the GPU failed, for example because a vertex, index or draw-indirect
+///   buffer could not be unmapped.
+/// - A GPU resource could not be allocated or instantiated, for example when the device ran out of
+///   memory.
+/// - A render task failed, for example because a stencil buffer could not be attached, a render
+///   pass could not be created, or a pixel transfer failed.
+/// - An intermediate submit issued while flushing failed.
+/// - For the `flush_and_submit*` methods, the submit that follows the flush failed.
+///
+/// Handling a failure is not optional:
+///
+/// - The rendering results of a failed flush are undefined and must be discarded. Presenting them
+///   or reading them back yields undefined output.
+/// - The semaphores reported by [`Self::submitted`] may still have been submitted to the GPU, so
+///   the client must still keep them alive and wait on them (or perform an equivalent global
+///   synchronization) before deleting them. Ignoring them leads to a use-after-free or a hang.
+#[non_exhaustive]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct FlushError {
+    /// Whether any semaphores were submitted during the flush process.
+    ///
+    /// Will be [`SemaphoresSubmitted::No`] if no semaphores were specified. If it is
+    /// [`SemaphoresSubmitted::Yes`], the semaphores were submitted even though the flush failed,
+    /// so they must be waited on before they are deleted.
+    pub submitted: SemaphoresSubmitted,
+}
+
+impl fmt::Display for FlushError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.submitted {
+            SemaphoresSubmitted::Yes => f.write_str(
+                "flush failed; the rendering results must be discarded, but the semaphores were \
+                 submitted and must be waited on before deletion",
+            ),
+            SemaphoresSubmitted::No => {
+                f.write_str("flush failed; the rendering results must be discarded")
+            }
+        }
+    }
+}
+
+impl Error for FlushError {}
 
 pub use sb::GrPurgeResourceOptions as PurgeResourceOptions;
 variant_name!(PurgeResourceOptions::AllResources);

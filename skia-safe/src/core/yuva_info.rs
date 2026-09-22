@@ -140,7 +140,7 @@ impl Default for YUVAInfo {
 
 impl NativePartialEq for YUVAInfo {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { sb::C_SkYUVAInfo_equals(self.native(), rhs.native()) }
+        unsafe { sb::C_SkYUVAInfo_Equals(self.native(), rhs.native()) }
     }
 }
 
