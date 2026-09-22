@@ -77,7 +77,13 @@ fn submodule_status() -> Option<String> {
     if !output.status.success() {
         return None;
     }
-    Some(str::from_utf8(&output.stdout).ok()?.lines().next()?.to_owned())
+    Some(
+        str::from_utf8(&output.stdout)
+            .ok()?
+            .lines()
+            .next()?
+            .to_owned(),
+    )
 }
 
 /// Returns the revision recorded in the repository and the revision the checkout is at, taken from
@@ -302,8 +308,13 @@ mod tests {
     #[test]
     fn submodule_revisions_are_extracted() {
         assert_eq!(
-            submodule_revisions("+e106ccb3fd7db69a717b44e17b32e62609f0014c skia (canvaskit/0.41.0-1949-ge106ccb3fd)"),
-            ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "canvaskit/0.41.0-1949-ge106ccb3fd")
+            submodule_revisions(
+                "+e106ccb3fd7db69a717b44e17b32e62609f0014c skia (canvaskit/0.41.0-1949-ge106ccb3fd)"
+            ),
+            (
+                "e106ccb3fd7db69a717b44e17b32e62609f0014c",
+                "canvaskit/0.41.0-1949-ge106ccb3fd"
+            )
         );
         // `git submodule status` prints no describe in parentheses when the checkout is not a
         // repository, and a describe can itself contain parentheses.
