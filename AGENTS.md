@@ -3,10 +3,11 @@
 ## Repository structure
 
 - `skia-bindings/` - Low-level C++ bindings. Contains:
-  - `skia/` - Git submodule pointing to `rust-skia/skia` fork (tagged e.g. `m148-0.95.1`)
+  - `skia/` - Git submodule pointing to `rust-skia/skia` fork (tagged `m<milestone>.<ordinal>`,
+    currently `m154.5`; see `docs/adr/0002-skia-fork-tags-are-milestone-plus-ordinal.md`)
   - `src/bindings.cpp` - C wrapper functions for Skia C++ APIs (parsed by bindgen)
   - `src/shaper.cpp` - C wrappers for SkShaper / modules
-  - `Cargo.toml` - `[package.metadata] skia = "m148-X.Y.Z"` must match submodule tag
+  - `Cargo.toml` - `[package.metadata] skia = "m<MILESTONE>.<ORDINAL>"` must match submodule tag
   - `build_support/` - Build configuration (e.g. `binaries_config.rs` for platform-specific logic)
 - `skia-safe/` - Safe Rust wrappers over `skia-bindings`. Mirrors Skia's include structure:
   - `src/core/` -> `include/core/`

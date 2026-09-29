@@ -16,6 +16,10 @@ Building Skia is quite exceptional, a number of prerequisites need to be availab
 
 To configure and build Skia, [`build_support/skia.rs`](build_support/skia.rs) does all the hard work: it synchronizes Skia's additional dependencies by executing `skia/tools/git-sync-deps` with Python. After that, it configures Skia with Google's [GN](https://gn.googlesource.com/gn/+/refs/heads/master/README.md) tool, and finally builds it with the configured `ninja` executable.
 
+### The Skia Submodule
+
+A build from source initializes the `skia/` submodule when it is missing, but never moves an existing checkout: one that differs from the revision recorded in the repository is built as it is, and a warning reports both revisions. Run `git submodule update -- skia-bindings/skia` in the repository root to check out the recorded revision.
+
 ### Binding Generation
 
 The files `src/*.cpp` contain the C++ code that Rust needs to interact with Skia's codebase. These files are processed by [Rust's binding generator](<https://github.com/rust-lang/rust-bindgen>) that uses libclang for the layout computation _and_ are also compiled by [clang](https://clang.llvm.org/).

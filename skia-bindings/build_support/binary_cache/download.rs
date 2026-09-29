@@ -1,17 +1,19 @@
-use std::{
-    ffi::OsStr,
-    fs,
-    io::{self, Cursor},
-    path::{Component, Path, PathBuf},
-    process::{Command, Stdio},
-};
+use std::ffi::OsStr;
+use std::fs;
+use std::io::{self, Cursor};
+use std::path::{Component, Path, PathBuf};
+use std::process::{Command, Stdio};
+use std::str;
 
 use flate2::read::GzDecoder;
 
 use super::{binaries, env, git, utils};
 use crate::build_support::{binaries_config, cargo};
 
-/// Resolve the `skia/` subdirectory contents, either by checking out the submodules, or when
+/// The path of the Skia submodule, relative to this package.
+const SKIA_SUBMODULE: &str = "skia";
+
+/// Resolve the `skia/` subdirectory contents, either by checking out the submodule, or when
 /// `build.rs` was invoked outside of the git repository by downloading and unpacking them from
 /// GitHub.
 pub fn resolve_dependencies() {
@@ -21,22 +23,101 @@ pub fn resolve_dependencies() {
         return;
     }
 
-    // Not in a crate, assuming a git repo. Update all submodules.
-    let submodules_updated = Command::new("git")
-        .args(["submodule", "update", "--init", "--depth", "1"])
+    // Not in a crate, assuming a git repo.
+    //
+    // A checkout that exists is never moved: `git submodule update` would reset it to the revision
+    // recorded in the repository and discard a checkout that was moved on purpose, for example to
+    // the rebased tip while updating Skia to a new milestone
+    // (`docs/adr/0001-a-source-build-never-moves-the-skia-submodule-checkout.md`).
+    let Some(status) = submodule_status() else {
+        // Git is not installed or this is not a git repository. This can happen if the repo is
+        // downloaded as a ZIP archive.
+        println!("`git submodule status` failed. Falling back to HTTP download");
+        download_dependencies();
+        return;
+    };
+
+    match status.chars().next() {
+        // Initialize a missing checkout. `--depth 1` avoids fetching Skia's entire history.
+        Some('-') => {
+            if !update_submodule() {
+                println!("`git submodule update` failed. Falling back to HTTP download");
+                download_dependencies();
+            }
+        }
+        Some('+') => {
+            let (recorded, checked_out) = submodule_revisions(&status);
+            cargo::warning(format!(
+                "The `{SKIA_SUBMODULE}` submodule is checked out at {checked_out}, but the \
+                 repository records {recorded}. Building the checkout. Run `git submodule update \
+                 -- skia-bindings/{SKIA_SUBMODULE}` to check out the recorded revision."
+            ));
+        }
+        // Up to date.
+        Some(' ') => {}
+        // A state that this build must not resolve, like `U` for a merge conflict.
+        Some(state) => cargo::warning(format!(
+            "The `{SKIA_SUBMODULE}` submodule is in the unexpected state `{state}`. Run `git \
+             submodule status -- skia-bindings/{SKIA_SUBMODULE}` for details."
+        )),
+        None => {}
+    }
+}
+
+/// Returns the first line of `git submodule status -- skia`, or `None` if git could not be run or
+/// this is not a git repository. The line starts with a status character: `-` means that the
+/// submodule is not checked out, a space that it matches the revision recorded in the repository,
+/// and `+` that it does not.
+fn submodule_status() -> Option<String> {
+    let output = Command::new("git")
+        .args(["submodule", "status", "--", SKIA_SUBMODULE])
+        .stderr(Stdio::null())
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    Some(
+        str::from_utf8(&output.stdout)
+            .ok()?
+            .lines()
+            .next()?
+            .to_owned(),
+    )
+}
+
+/// Returns the revision recorded in the repository and the revision the checkout is at, taken from
+/// a `git submodule status` line like `+<recorded> skia (<checked out>)`.
+fn submodule_revisions(status: &str) -> (&str, &str) {
+    let recorded = status
+        .get(1..)
+        .and_then(|rest| rest.split_whitespace().next())
+        .unwrap_or("?");
+    // The describe is everything between the first `(` and the trailing `)`; it can itself
+    // contain parentheses, so it must not be split at the last one.
+    let checked_out = status
+        .split_once('(')
+        .and_then(|(_, describe)| describe.strip_suffix(')'))
+        .unwrap_or("?");
+    (recorded, checked_out)
+}
+
+/// Initializes the `skia/` submodule.
+fn update_submodule() -> bool {
+    Command::new("git")
+        .args([
+            "submodule",
+            "update",
+            "--init",
+            "--depth",
+            "1",
+            "--",
+            SKIA_SUBMODULE,
+        ])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status()
-        .unwrap()
-        .success();
-
-    // If `git submodule update` failed, either git is not installed,
-    // or we're not building from a git repo.
-    // This can happen if the repo is downloaded as a ZIP archive.
-    if !submodules_updated {
-        println!("`git submodule update` failed. Falling back to HTTP download");
-        download_dependencies();
-    }
+        .is_ok_and(|status| status.success())
 }
 
 /// Downloads the `skia` from its repository.
@@ -218,4 +299,32 @@ fn download_and_unpack(url: &str, output_directory: &Path) -> io::Result<()> {
     // TODO: verify key
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::submodule_revisions;
+
+    #[test]
+    fn submodule_revisions_are_extracted() {
+        assert_eq!(
+            submodule_revisions(
+                "+e106ccb3fd7db69a717b44e17b32e62609f0014c skia (canvaskit/0.41.0-1949-ge106ccb3fd)"
+            ),
+            (
+                "e106ccb3fd7db69a717b44e17b32e62609f0014c",
+                "canvaskit/0.41.0-1949-ge106ccb3fd"
+            )
+        );
+        // `git submodule status` prints no describe in parentheses when the checkout is not a
+        // repository, and a describe can itself contain parentheses.
+        assert_eq!(
+            submodule_revisions("+e106ccb3fd7db69a717b44e17b32e62609f0014c skia"),
+            ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "?")
+        );
+        assert_eq!(
+            submodule_revisions("+e106ccb3fd7db69a717b44e17b32e62609f0014c skia (m154.5 (1))"),
+            ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "m154.5 (1)")
+        );
+    }
 }

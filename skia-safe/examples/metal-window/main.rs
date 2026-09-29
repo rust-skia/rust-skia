@@ -94,7 +94,12 @@ fn main() {
 
                         window::draw(surface.canvas());
 
-                        context.skia.flush_and_submit();
+                        // A failed flush means the rendering results are undefined, so the frame
+                        // is dropped instead of being presented.
+                        if let Err(err) = context.skia.flush_and_submit() {
+                            eprintln!("flush_and_submit failed, skipping frame: {err}");
+                            return;
+                        }
                         drop(surface);
 
                         let command_buffer = context

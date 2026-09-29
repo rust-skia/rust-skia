@@ -21,10 +21,15 @@ pub mod vk;
 #[cfg(feature = "ganesh")]
 pub use ganesh::{
     BackendAPI, BackendFormat, BackendRenderTarget, BackendSemaphore, BackendTexture,
-    DirectContext, DirectContextId, DriverBugWorkarounds, FlushInfo, PurgeResourceOptions,
-    RecordingContext, SemaphoresSubmitted, SubmitInfo, SurfaceOrigin, SyncCpu,
-    YUVABackendTextureInfo, YUVABackendTextures, context_options::ContextOptions, images,
+    DirectContext, DirectContextId, DriverBugWorkarounds, FlushError, FlushInfo,
+    PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SubmitInfo, SurfaceOrigin,
+    SyncCpu, YUVABackendTextureInfo, YUVABackendTextures, context_options::ContextOptions, images,
 };
+
+// Not part of the public API: the flush methods report a failure as a `FlushError` instead, so
+// the native result stays an implementation detail of those methods.
+#[cfg(feature = "ganesh")]
+pub(crate) use ganesh::FlushResult;
 
 #[cfg(any(feature = "ganesh", feature = "graphite"))]
 pub use mutable_texture_state::*;

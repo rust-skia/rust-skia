@@ -240,6 +240,7 @@ mod gpu {
         assert_impl_all!(gpu::Renderable: Send, Sync);
         assert_impl_all!(gpu::SurfaceOrigin: Send, Sync);
         assert_not_impl_any!(gpu::FlushInfo: Send, Sync);
+        assert_impl_all!(gpu::FlushError: Send, Sync);
         assert_impl_all!(gpu::SemaphoresSubmitted: Send, Sync);
         assert_impl_all!(gpu::PurgeResourceOptions: Send, Sync);
         assert_impl_all!(gpu::SyncCpu: Send, Sync);

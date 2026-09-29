@@ -27,7 +27,7 @@ impl NativeDrop for SkPathBuilder {
 
 impl NativePartialEq for SkPathBuilder {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { sb::C_SkPathBuilder_equals(self, rhs) }
+        unsafe { sb::C_SkPathBuilder_Equals(self, rhs) }
     }
 }
 

@@ -123,8 +123,7 @@ extern "C" bool C_Context_isDeviceLost(const skgpu::graphite::Context* self) {
 }
 
 // skgpu::graphite::Context is owned via std::unique_ptr (Context::MakeMetal etc.
-// return unique_ptr and the shim releases it). It is NOT ref-counted, so the
-// Rust wrapper must `delete` it rather than unref a (non-existent) SkRefCntBase.
+// return unique_ptr and the shim releases it).
 extern "C" void C_Context_delete(skgpu::graphite::Context* self) {
     delete self;
 }

@@ -68,13 +68,6 @@ pub fn wrap_backend_texture(
     color_space: impl Into<Option<ColorSpace>>,
     surface_props: Option<&SurfaceProps>,
 ) -> Option<Surface> {
-    // `C_SkSurfaces_WrapBackendTextureGraphite` adopts the color space (the shim
-    // wraps the raw pointer in an `sk_sp` *without* adding a ref), so an owned
-    // reference must be transferred via `into_ptr_or_null`. Passing a borrowed
-    // pointer would let Skia release a ref it never retained — a refcount
-    // underflow / use-after-free of the color space.
-    let color_space_ptr = color_space.into().into_ptr_or_null();
-
     let surface_props_ptr = surface_props
         .map(|props| props.native() as *const _)
         .unwrap_or(std::ptr::null());
@@ -84,7 +77,7 @@ pub fn wrap_backend_texture(
             recorder.native_mut(),
             backend_texture.native(),
             color_type.into_native(),
-            color_space_ptr,
+            color_space.into().into_ptr_or_null(),
             surface_props_ptr,
         )
     };
@@ -103,13 +96,7 @@ pub fn wrap_backend_texture(
 /// # Returns
 /// An `Image` representing the surface contents, or `None` if conversion failed
 pub fn as_image(surface: &Surface) -> Option<crate::Image> {
-    // `SkSurfaces::AsImage` takes an owning `sk_sp<const SkSurface>` (the shim
-    // adopts the pointer) while the caller keeps using `surface`, so transfer a
-    // *fresh* reference: `clone` bumps the refcount and `into_ptr` hands that ref
-    // over. Passing the borrowed `native_mut()` pointer would make Skia release
-    // the caller's ref.
-    let surface_ptr = surface.clone().into_ptr();
-    let image_ptr = unsafe { sb::C_SkSurfaces_AsImageGraphite(surface_ptr) };
+    let image_ptr = unsafe { sb::C_SkSurfaces_AsImageGraphite(surface.clone().into_ptr()) };
     crate::Image::from_ptr(image_ptr)
 }
 
@@ -133,11 +120,8 @@ pub fn as_image_copy(
         .map(|rect| rect.native() as *const _)
         .unwrap_or(std::ptr::null());
 
-    // Transfer a fresh surface reference (clone bumps, `into_ptr` hands it over):
-    // the shim adopts an owning `sk_sp<const SkSurface>` and the caller keeps
-    // `surface`. See `as_image` for the full rationale.
-    let surface_ptr = surface.clone().into_ptr();
-    let image_ptr =
-        unsafe { sb::C_SkSurfaces_AsImageCopyGraphite(surface_ptr, subset_ptr, mipmapped) };
+    let image_ptr = unsafe {
+        sb::C_SkSurfaces_AsImageCopyGraphite(surface.clone().into_ptr(), subset_ptr, mipmapped)
+    };
     crate::Image::from_ptr(image_ptr)
 }

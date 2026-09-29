@@ -23,7 +23,7 @@ impl NativeDrop for SkYUVAPixmapInfo {
 
 impl NativePartialEq for SkYUVAPixmapInfo {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { sb::C_SkYUVAPixmapInfo_equals(self, rhs) }
+        unsafe { sb::C_SkYUVAPixmapInfo_Equals(self, rhs) }
     }
 }
 
