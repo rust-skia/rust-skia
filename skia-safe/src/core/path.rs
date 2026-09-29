@@ -1327,7 +1327,7 @@ impl Path {
     /// Returns: non-zero, globally unique value
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Path_getGenerationID>
-    pub fn generation_id(&self) -> u32 {
+    pub fn generation_id(&self) -> u64 {
         unsafe { self.native().getGenerationID() }
     }
 
