@@ -589,6 +589,10 @@ extern "C" SkData* C_SkData_MakeWithoutCopy(const void* data, size_t length) {
     return SkData::MakeWithoutCopy(data, length).release();
 }
 
+extern "C" SkData* C_SkData_MakeWithProc(const void* ptr, size_t length, SkData::ReleaseProc proc, void* ctx) {
+    return SkData::MakeWithProc(ptr, length, proc, ctx).release();
+}
+
 extern "C" SkData* C_SkData_MakeFromFileName(const char cstr[]) {
     return SkData::MakeFromFileName(cstr).release();
 }

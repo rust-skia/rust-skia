@@ -1,5 +1,5 @@
 use std::{
-    ffi::{CStr, CString},
+    ffi::{CStr, CString, c_void},
     fmt, io,
     ops::Deref,
     path::Path,
@@ -97,6 +97,29 @@ impl Data {
         }
     }
 
+    /// Constructs Data that references the bytes of `owner` without copying them.
+    ///
+    /// `owner` is moved to the heap and kept alive until the last reference to the returned
+    /// Data (including references held internally by Skia) is released. It is then dropped,
+    /// possibly on a different thread.
+    pub fn new_with_owner<T: AsRef<[u8]> + Send + 'static>(owner: T) -> Self {
+        unsafe extern "C" fn release<T>(_ptr: *const c_void, context: *mut c_void) {
+            drop(unsafe { Box::from_raw(context as *mut T) });
+        }
+
+        let owner = Box::into_raw(Box::new(owner));
+        let bytes = unsafe { (*owner).as_ref() };
+        Data::from_ptr(unsafe {
+            sb::C_SkData_MakeWithProc(
+                bytes.as_ptr() as _,
+                bytes.len(),
+                Some(release::<T>),
+                owner as _,
+            )
+        })
+        .unwrap()
+    }
+
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new_uninitialized(length: usize) -> Data {
         unsafe { Data::from_ptr(sb::C_SkData_MakeUninitialized(length)).unwrap() }
@@ -189,6 +212,31 @@ mod tests {
         let data = Data::from_stream(cursor, 1).unwrap();
         assert_eq!(data.len(), 1);
         assert_eq!(data[0], 1u8);
+    }
+
+    #[test]
+    fn new_with_owner_shares_bytes_and_drops_owner() {
+        use std::sync::Arc;
+
+        let bytes: Arc<[u8]> = Arc::from(&[1u8, 2, 3][..]);
+        let data = Data::new_with_owner(bytes.clone());
+        assert_eq!(data.as_bytes(), &[1, 2, 3]);
+        assert_eq!(data.as_bytes().as_ptr(), bytes.as_ptr());
+        assert_eq!(Arc::strong_count(&bytes), 2);
+
+        let data2 = data.clone();
+        drop(data);
+        assert_eq!(Arc::strong_count(&bytes), 2);
+        assert_eq!(data2.as_bytes(), &[1, 2, 3]);
+
+        drop(data2);
+        assert_eq!(Arc::strong_count(&bytes), 1);
+    }
+
+    #[test]
+    fn new_with_owner_empty() {
+        let data = Data::new_with_owner(Vec::<u8>::new());
+        assert!(data.is_empty());
     }
 
     #[test]
