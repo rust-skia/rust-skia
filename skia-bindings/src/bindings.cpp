@@ -36,7 +36,7 @@
 #include "include/core/SkColorTable.h"
 #include "include/core/SkContext.h"
 #include "include/core/SkContextOptions.h"
-#include "include/core/SkCPURecorder.h"
+#include "include/cpu/Recorder.h"
 #include "include/core/SkContourMeasure.h"
 #include "include/core/SkCoverageMode.h"
 #include "include/core/SkCubicMap.h"
