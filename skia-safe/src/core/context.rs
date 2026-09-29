@@ -23,8 +23,14 @@ impl Default for ContextOptions {
 impl fmt::Debug for ContextOptions {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("ContextOptions")
-            .field("typeface_cache_count_limit", &self.typeface_cache_count_limit())
-            .field("resource_cache_total_byte_limit", &self.resource_cache_total_byte_limit())
+            .field(
+                "typeface_cache_count_limit",
+                &self.typeface_cache_count_limit(),
+            )
+            .field(
+                "resource_cache_total_byte_limit",
+                &self.resource_cache_total_byte_limit(),
+            )
             .field(
                 "resource_cache_single_allocation_byte_limit",
                 &self.resource_cache_single_allocation_byte_limit(),
