@@ -96,9 +96,11 @@ affected feature enabled. Do not add a second, hand-maintained name mapping in
 ### `native_transmutable!` — bit-for-bit compatible value types
 
 Use when Rust can own exactly the same bytes as the C++ type. The macro implements
-`NativeTransmutable` and asserts size **and** alignment compatibility at compile time,
-so a wrong `#[repr]` or a field that does not exist in the C++ type fails the build
-rather than producing a silently misaligned wrapper:
+`NativeTransmutable` and asserts size **and** alignment compatibility at compile time.
+Note that the assert does not verify field order or correspondence: two types with
+matching size and alignment but differently ordered fields pass it. Mirroring the C++
+members exactly (same order, same types) is a manual obligation, and a wrong `#[repr]`
+or a missing field only fails the build when it changes size or alignment:
 
 ```rust
 macro_rules! native_transmutable {
@@ -111,9 +113,18 @@ macro_rules! native_transmutable {
 }
 ```
 
-The wrapper gets `native()` / `native_mut()` / `from_native_c()` / `into_native()`
-without copying, and slices transmute through `NativeTransmutableSliceAccess`, which is
-what makes `&[Point]` usable as `&[SkPoint]` in FFI calls.
+`native()` / `native_mut()` and slice access reinterpret references in place, without
+copying. The owned `from_native_c()` / `into_native()` conversions use
+`transmute_copy` and forget the source value. Slices transmute through
+`NativeTransmutableSliceAccess`, which is what makes `&[Point]` usable as `&[SkPoint]`
+in FFI calls.
+
+Every transmutable type carries an explicit `repr` — the layout assert does not
+enforce it, so this is a review obligation. Which one depends on the type shape:
+`#[repr(C)]` for a multi-field struct (Rust's default repr may reorder fields),
+`#[repr(transparent)]` for a newtype over a single field, and `#[repr(i32)]`/`#[repr(u8)]`
+matching the C++ underlying type for a mirrored enum. A `bitflags!` block needs none;
+bitflags 2.x generates `#[repr(transparent)]` itself.
 
 #### Newtype over a scalar or an existing bindgen type
 
@@ -162,11 +173,10 @@ pub struct IRect {
 native_transmutable!(SkIRect, IRect);
 ```
 
-`Point`/`IPoint`, `Point3`, `Rect`, `V4` follow the same shape. `Matrix` and `V2`/`V3`
-show two variations: `Matrix` mirrors a nested array (`mat: [scalar; 9]`) plus a
-private `type_mask`, and both omit `#[repr(C)]` — the layout assert is what guarantees
-correctness, `#[repr(C)]` only makes the field order explicit. Prefer `#[repr(C)]` for
-a new type; it documents the intent and removes reliance on Rust's default layout.
+`Point`/`IPoint`, `Point3`, `Rect`, `V4` follow the same shape. `Matrix` shows a
+variation: it mirrors a nested array (`mat: [scalar; 9]`) plus a private `type_mask`,
+and like `V2`/`V3` it carries `#[repr(C)]`. Prefer `#[repr(C)]` for a new type; it
+documents the intent and removes reliance on Rust's default layout.
 
 #### Transmutable iterator or handle with a lifetime
 
@@ -230,8 +240,8 @@ pub fn new() -> Self {
 }
 ```
 
-`Handle`'s `PhantomData<*const ()>` deliberately makes it `!Send`/`!Sync`, so
-thread-safety is always an explicit decision.
+`Handle`'s `PhantomData<*const ()>` deliberately makes it `!Send` (its `UnsafeCell`
+already makes it `!Sync`), so thread-safety is always an explicit decision.
 
 ### `RCHandle<T>` — reference counted
 
@@ -251,8 +261,10 @@ assumption with `require_base_type!`, and `require_type_equality!` when a
 `*_INHERITED` alias must name the expected base.
 
 `clone()` copies the pointer and increases the count; `drop()` decreases it. To move
-a refcounted value across threads safely, use `Sendable`/`ConditionallySend`, which
-checks that the count is 1.
+an `RCHandle` value across threads safely, use `Sendable`/`ConditionallySend`, which
+checks that the count is 1. This applies to types implementing `NativeRefCountedBase`;
+types with a custom counter (like `Data`) are marked `Send`/`Sync` directly with
+`unsafe_send_sync!` instead.
 
 ### `RefHandle<T>` — heap object
 

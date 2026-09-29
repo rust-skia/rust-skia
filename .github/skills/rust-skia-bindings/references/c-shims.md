@@ -112,15 +112,7 @@ extern "C" void C_SkPaint_setShader(SkPaint* self, SkShader* shader) {
 unsafe { sb::C_SkPaint_setShader(self.native_mut(), shader.into().into_ptr_or_null()) }
 ```
 
-Getting this wrong is a refcount underflow and a use-after-free, so the call site
-carries a comment when the shim adopts:
-
-```rust
-// `C_SkImages_WrapTextureGraphite` adopts the color space (the shim wraps the
-// raw pointer in an `sk_sp` *without* adding a ref), so transfer an owned
-// reference via `into_ptr_or_null`. A borrowed pointer would let Skia release
-// a ref it never retained — a refcount underflow / use-after-free.
-```
+Getting this wrong is a refcount underflow and a use-after-free.
 
 When the caller keeps using the object, hand over a *fresh* reference instead:
 `surface.clone().into_ptr()`.
@@ -131,13 +123,22 @@ Use `spFromConst` when the C++ API takes a `const T*` and stores it in an `sk_sp
 
 ### Reading an `sk_sp` member
 
-Expose the raw `fPtr` and let Rust decide:
+Expose the raw `fPtr`; the Rust accessor decides which ownership kind to build from
+it. The reference belongs to the member, so share it with `from_unshared_ptr`, which
+increases the refcount and maps `null` to `None`:
 
 ```rust
 pub fn shader(&self) -> Option<Shader> {
     Shader::from_unshared_ptr(self.native().fShader.fPtr)
 }
 ```
+
+`from_ptr` would adopt that reference instead, so the member would keep pointing at
+an object whose count the returned handle consumes on drop; use it only for an
+`sk_sp` the C++ side has given up. When the accessor should borrow rather than own —
+the `sk_sp` is written once and lives as long as the member — transmute the `fPtr`
+in place with `from_unshared_ptr_ref`, which returns `&Option<Self>` and leaves the
+count alone.
 
 ### `std::unique_ptr<T>`
 
@@ -147,9 +148,7 @@ opaque to bindgen, so Rust never models it. A `unique_ptr`-owned result must be
 `delete`d on the Rust side, not unref'd:
 
 ```cpp
-// skgpu::graphite::Context is owned via std::unique_ptr ... It is NOT
-// ref-counted, so the Rust wrapper must `delete` it rather than unref a
-// (non-existent) SkRefCntBase.
+// skgpu::graphite::Context is owned via std::unique_ptr.
 extern "C" void C_Context_delete(skgpu::graphite::Context* self) { delete self; }
 ```
 
@@ -161,13 +160,13 @@ Rust transmutes into `&[RCHandle<T>]` with `from_non_null_sp_slice`; the shim ex
 
 ## `std::optional<T>`
 
-Three surrogates, in order of preference:
+Two surrogates, in order of preference:
 
 1. `opt(pt)` from `bindings.h` for a nullable input pointer:
-   `opt(alphaType)`.
-2. A ternary for an inline value:
-   `arguments ? std::optional(*arguments) : std::nullopt`.
-3. An `int` sentinel when there is no other channel — `-1` means `nullopt`, `0`/`1`
+   `opt(alphaType)`. It expands to `pt ? std::optional(*pt) : std::nullopt`, so the
+   only reason to write a ternary by hand is a condition that is not a pointer
+   dereference.
+2. An `int` sentinel when there is no other channel — `-1` means `nullopt`, `0`/`1`
    mean `false`/`true`:
 
 ```cpp
