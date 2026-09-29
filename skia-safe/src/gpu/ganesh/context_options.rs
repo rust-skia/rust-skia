@@ -177,6 +177,11 @@ pub struct ContextOptions {
     /// If `true`, then allow to enable MSAA on new Intel GPUs.
     pub allow_msaa_on_new_intel: bool,
 
+    /// Historically MSAA was disabled outright for Imagination (2017, Nexus Player).
+    ///
+    /// If `true`, then allow to enable MSAA on Imagination GPUs.
+    pub allow_msaa_on_imagination: bool,
+
     /// Currently on ARM Android we disable the use of GL TexStorage because of memory regressions.
     /// However, some clients may still want to use TexStorage. For example, TexStorage support is
     /// required for creating protected textures.
