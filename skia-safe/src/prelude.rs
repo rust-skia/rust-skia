@@ -200,8 +200,7 @@ pub struct Handle<N: NativeDrop>(
     // UnsafeCell is used for disabling niche optimization, because we don't care about the proper
     // representations of bindgen types as long the size and alignment matches.
     UnsafeCell<N>,
-    // `*const` is needed to prevent automatic Send implementation, which happens when the
-    // native type is Send.
+    // Keeps Handle !Send even when N: Send. UnsafeCell already makes it !Sync.
     PhantomData<*const ()>,
 );
 
