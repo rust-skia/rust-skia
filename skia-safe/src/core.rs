@@ -21,7 +21,6 @@ mod color_type;
 mod context;
 pub mod contour_measure;
 mod coverage_mode;
-mod cpu_recorder;
 mod cubic_map;
 mod data;
 mod data_table;
@@ -131,7 +130,6 @@ pub use paint::Paint;
 pub use tile_mode::*;
 // We keep these around for the time being.
 pub use arc::Arc;
-pub use cpu_recorder::cpu;
 pub use paint::Cap as PaintCap;
 pub use paint::Join as PaintJoin;
 pub use paint::Style as PaintStyle;
