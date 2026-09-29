@@ -5,9 +5,8 @@
 - `skia-bindings/` - Low-level C++ bindings. Contains:
   - `skia/` - Git submodule pointing to `rust-skia/skia` fork (tagged `m<milestone>.<ordinal>`,
     currently `m154.5`; see `docs/adr/0002-skia-fork-tags-are-milestone-plus-ordinal.md`)
-  - `src/bindings.cpp` - C wrapper functions for Skia C++ APIs (parsed by bindgen)
-  - `src/shaper.cpp` - C wrappers for SkShaper / modules
-  - `Cargo.toml` - `[package.metadata] skia = "m<MILESTONE>.<ORDINAL>"` must match submodule tag
+  - `src/*.cpp` - C wrapper functions for Skia C++ APIs (parsed by bindgen). One file per area, for example `bindings.cpp` (core), `ganesh.cpp`, `graphite.cpp`, `shaper.cpp`, `skottie.cpp`, `svg.cpp`, `vulkan.cpp`.
+  - `Cargo.toml` - `[package.metadata] skia = "m<milestone>.<ordinal>"` must match submodule tag
   - `build_support/` - Build configuration (e.g. `binaries_config.rs` for platform-specific logic)
 - `skia-safe/` - Safe Rust wrappers over `skia-bindings`. Mirrors Skia's include structure:
   - `src/core/` -> `include/core/`
@@ -38,7 +37,7 @@
 
 See the [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR) wiki page.
 
-Version numbering: Each milestone bump increments the minor version (e.g. 0.95.0 -> 0.96.0).
+Version numbering: Each milestone bump increments the minor version (e.g. 0.152.0 -> 0.153.0).
 
 For Skia submodule milestone include/API diffs, use direct
 `git -C skia-bindings/skia diff OLD_TAG..NEW_TAG -- ...` commands. Do not use

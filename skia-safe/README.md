@@ -6,7 +6,7 @@ For information about the supported build targets and how to run the examples, p
 
 ## Documentation
 
-Function level documentation is [not yet](https://github.com/rust-skia/rust-skia/issues/23) available. To get started, take a look at the [Rust examples](https://github.com/rust-skia/rust-skia/tree/master/skia-org/src/) or the [Skia documentation](https://skia.org). 
+Function level documentation, ported from the Skia C++ headers, is available for a large part of the API. To get started, take a look at the [Rust examples](https://github.com/rust-skia/rust-skia/tree/master/skia-org/src/) or the [Skia documentation](https://skia.org). 
 
 ## Bindings & Wrappers
 
@@ -17,7 +17,7 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
 - [x] Effects and Shaders
 - [x] Utility classes we think are useful
 - [x] PDF & SVG rendering
-- [ ] Skia Modules
+- [x] Skia Modules
   - [x] Text shaping with [Harfbuzz](https://www.freedesktop.org/wiki/Software/HarfBuzz/) and [ICU](http://site.icu-project.org/home).
   - [x] Text layout (skparagraph)
   - [x] Animation via [Skottie](https://skia.org/docs/user/modules/skottie/)
@@ -28,9 +28,11 @@ Skia-safe wraps most parts of the public Skia C++ APIs:
     - [x] Metal
     - [x] Direct3D
     - [ ] WebGPU [Dawn](https://dawn.googlesource.com/dawn/)
-  - [ ] Graphite
+  - [x] Graphite
+    - [x] Context creation (Metal, Vulkan)
+    - [ ] Backend type wrappers (Metal and Vulkan `TextureInfo`, precompile, `ImageProvider`)
 
-Wrappers for functions that take callbacks and virtual classes are not supported right now. While we think they should be wrapped, the use cases related seem to be rather special, so we postponed that for now.
+Most wrappers don't require callbacks: Skia objects are created and manipulated directly. Where Skia needs to call back into Rust, skia-safe provides Rust traits and closures that Skia invokes through generated trampolines — for example the `RunHandler` trait for shaping, `ResourceProvider` for Skottie resources, `RustStream` for Rust I/O streams, and the Vulkan `GetProc` resolver. Classes that would require subclassing in C++ (such as `Drawable` and `RuntimeEffect`) are exposed as handles without a Rust subclassing interface yet; the cases where that matters are rather special, so we postponed them for now.
 
 ## Codecs
 
@@ -55,7 +57,7 @@ Skia provides the `ganesh` and `graphite` GPU rendering engines. Vulkan and Meta
 Platform support for OpenGL or OpenGL ES can be enabled by adding the feature `gl`. Since version `0.25.0`, rust-skia is configured by default to enable CPU rendering only. Before that, OpenGL support was included in every feature configuration. To render the examples with OpenGL, use
 
 ```bash
-(cd skia-org && cargo run --features gl [OUTPUT_DIR] --driver opengl)
+(cd skia-org && cargo run --features gl -- [OUTPUT_DIR] --driver gl)
 ```
 
 #### `egl`, `x11`, `wayland`
@@ -73,7 +75,7 @@ These features are configure the Window manager integration. They are supported 
 Vulkan support can be enabled by adding `vulkan` and either `ganesh` or `graphite`. To render the Ganesh examples with Vulkan, use
 
 ```bash
-(cd skia-org && cargo run --features ganesh,vulkan [OUTPUT_DIR] --driver vulkan)
+(cd skia-org && cargo run --features vulkan -- [OUTPUT_DIR] --driver vulkan)
 ```
 
 Note that Vulkan drivers need to be available. On Windows, they are most likely available already, on Linux [this article on linuxconfig.org](<https://linuxconfig.org/install-and-test-vulkan-on-linux>) might get you started, and on macOS with Metal support, [install the Vulkan SDK](<https://vulkan.lunarg.com/sdk/home>) for Mac and configure MoltenVK by setting the `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and `VK_ICD_FILENAMES` environment variables as described in `Documentation/getting_started_macos.html`.

@@ -3,11 +3,8 @@ skia-short-hash:
 	cd skia && git rev-parse --short HEAD
 
 unused_dirs=\
-	animations\
 	bench\
-	build\
 	dm\
-	docker\
 	docs\
 	example\
 	experimental\
@@ -16,7 +13,6 @@ unused_dirs=\
 	infra\
 	platform_tools\
 	resources\
-	samplecode\
 	site\
 	specs\
 	tests
