@@ -96,13 +96,13 @@ extern "C" {
         const FontArguments* fontArguments,
         VecSink<sk_sp<SkTypeface>>* typefaces) {
         // TODO: Don't create a copy of `fontArguments`.
-        auto fa = fontArguments ? std::optional(*fontArguments) : std::nullopt;
+        auto fa = opt(fontArguments);
         auto tfs = self->findTypefaces(familyNames->strings, fontStyle, fa);
         typefaces->set(tfs);
     }
 
     SkTypeface* C_FontCollection_defaultFallback(FontCollection* self, SkUnichar unicode, const SkStrings* familyNames, SkFontStyle fontStyle, const SkString* locale, const FontArguments* arguments) {
-        return self->defaultFallback(unicode, familyNames->strings, fontStyle, *locale, arguments ? std::make_optional(*arguments) : std::nullopt).release();
+        return self->defaultFallback(unicode, familyNames->strings, fontStyle, *locale, opt(arguments)).release();
     }
 
 
@@ -531,7 +531,7 @@ extern "C" {
     }
 
     void C_TextStyle_setFontArguments(TextStyle* self, const SkFontArguments* arguments) {
-        self->setFontArguments(arguments ? std::optional(*arguments) : std::nullopt);
+        self->setFontArguments(opt(arguments));
     }
 
     const SkString* C_TextStyle_getFontFamilies(const TextStyle* self, size_t* count) {
