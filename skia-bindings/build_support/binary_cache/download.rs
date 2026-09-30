@@ -323,8 +323,13 @@ mod tests {
             ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "?")
         );
         assert_eq!(
-            submodule_revisions("+e106ccb3fd7db69a717b44e17b32e62609f0014c skia (m154.5 (1))"),
-            ("e106ccb3fd7db69a717b44e17b32e62609f0014c", "m154.5 (1)")
+            submodule_revisions(
+                "+94d221e7ab0ed48ca01f19e9eac3a09669710f20 skia (canvaskit/0.41.0-1949-ge106ccb3fd-9-g3d0a8b7c2 (dist))"
+            ),
+            (
+                "94d221e7ab0ed48ca01f19e9eac3a09669710f20",
+                "canvaskit/0.41.0-1949-ge106ccb3fd-9-g3d0a8b7c2 (dist)"
+            )
         );
     }
 }

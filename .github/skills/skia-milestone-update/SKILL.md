@@ -181,6 +181,10 @@ the fork tag.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's ordinal.
+- **PR title:** the milestone PR is titled `Milestone XX` (milestone number
+  only, no `m` and no tag ordinal — e.g. `Milestone 155`), matching the
+  previous milestone PRs. Update the title of an already opened PR if the
+  milestone changes direction, but never during a same-milestone refresh.
 - **Build organization diff:** review whether the build organization changed
   significantly by diffing the build files between the old and new tags. Cover
   `BUILD.gn`, `gn/*` (recursively), and the `BUILD.gn`/`*.gni` pairs under

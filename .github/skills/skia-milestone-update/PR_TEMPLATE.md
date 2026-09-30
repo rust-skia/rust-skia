@@ -1,6 +1,8 @@
 This template should be used for new Skia Milestone update PRs, which can be added
 as soon new `chrome/m**` branches appear in https://github.com/google/skia.
 
+Title: `Milestone XX` (e.g. `Milestone 155`).
+
 ---
 
 This PR aligns rust-skia with Skia's `chrome/mXX` branch.

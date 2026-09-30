@@ -2,7 +2,7 @@
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
-#include "include/core/SkCPURecorder.h"
+#include "include/cpu/Recorder.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkSurface.h"
