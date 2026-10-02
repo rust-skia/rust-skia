@@ -433,6 +433,34 @@ extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
     return &self->props();
 }
 
+extern "C" void C_SkSurface_asyncRescaleAndReadPixelsYUV420(
+        SkSurface* self,
+        SkYUVColorSpace yuvColorSpace,
+        SkColorSpace* dstColorSpace,
+        const SkIRect* srcRect,
+        const SkISize* dstSize,
+        SkSurface::RescaleGamma rescaleGamma,
+        SkSurface::RescaleMode rescaleMode,
+        void (*callback)(void* context, const SkSurface::AsyncReadResult* result),
+        void* context) {
+    struct Closure {
+        void (*fCallback)(void*, const SkSurface::AsyncReadResult*);
+        void* fContext;
+    };
+    self->asyncRescaleAndReadPixelsYUV420(
+        yuvColorSpace,
+        sp(dstColorSpace),
+        *srcRect,
+        *dstSize,
+        rescaleGamma,
+        rescaleMode,
+        [](SkSurface::ReadPixelsContext context, std::unique_ptr<const SkSurface::AsyncReadResult> result) {
+            std::unique_ptr<Closure> closure(static_cast<Closure*>(context));
+            closure->fCallback(closure->fContext, result.release());
+        },
+        new Closure{callback, context});
+}
+
 //
 // core/SkImage.h
 //
@@ -542,6 +570,22 @@ extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkRecorder* re
 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
     return self->reinterpretColorSpace(sp(newColorSpace)).release();
+}
+
+extern "C" void C_SkImage_AsyncReadResult_delete(const SkImage::AsyncReadResult* self) {
+    delete self;
+}
+
+extern "C" int C_SkImage_AsyncReadResult_count(const SkImage::AsyncReadResult* self) {
+    return self->count();
+}
+
+extern "C" const void* C_SkImage_AsyncReadResult_data(const SkImage::AsyncReadResult* self, int i) {
+    return self->data(i);
+}
+
+extern "C" size_t C_SkImage_AsyncReadResult_rowBytes(const SkImage::AsyncReadResult* self, int i) {
+    return self->rowBytes(i);
 }
 
 //

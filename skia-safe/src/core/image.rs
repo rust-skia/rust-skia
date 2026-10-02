@@ -6,8 +6,8 @@ use crate::{
     ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, Recorder,
     SamplingOptions, Shader, SurfaceProps, TextureCompressionType, TileMode, gpu, prelude::*,
 };
-use skia_bindings::{self as sb, SkImage, SkRefCntBase};
-use std::{fmt, ptr};
+use skia_bindings::{self as sb, SkImage, SkImage_AsyncReadResult, SkRefCntBase};
+use std::{ffi::c_void, fmt, ptr};
 
 pub use super::CubicResampler;
 
@@ -263,6 +263,46 @@ pub struct RequiredProperties {
 }
 
 native_transmutable!(sb::SkImage_RequiredProperties, RequiredProperties);
+
+pub use skia_bindings::SkImage_RescaleGamma as RescaleGamma;
+variant_name!(RescaleGamma::Linear);
+
+pub use skia_bindings::SkImage_RescaleMode as RescaleMode;
+variant_name!(RescaleMode::RepeatedCubic);
+
+pub type AsyncReadResult = RefHandle<SkImage_AsyncReadResult>;
+
+impl NativeDrop for SkImage_AsyncReadResult {
+    fn drop(&mut self) {
+        unsafe { sb::C_SkImage_AsyncReadResult_delete(self) }
+    }
+}
+
+impl fmt::Debug for AsyncReadResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AsyncReadResult")
+            .field("count", &self.count())
+            .finish()
+    }
+}
+
+impl AsyncReadResult {
+    pub fn count(&self) -> usize {
+        unsafe { sb::C_SkImage_AsyncReadResult_count(self.native()) }
+            .try_into()
+            .unwrap()
+    }
+
+    pub fn data(&self, i: usize) -> *const c_void {
+        assert!(i < self.count());
+        unsafe { sb::C_SkImage_AsyncReadResult_data(self.native(), i.try_into().unwrap()) }
+    }
+
+    pub fn row_bytes(&self, i: usize) -> usize {
+        assert!(i < self.count());
+        unsafe { sb::C_SkImage_AsyncReadResult_rowBytes(self.native(), i.try_into().unwrap()) }
+    }
+}
 
 /// [`Image`] describes a two dimensional array of pixels to draw. The pixels may be
 /// decoded in a raster bitmap, encoded in a [`Picture`] or compressed data stream,
@@ -922,11 +962,8 @@ impl Image {
     }
 
     // TODO:
-    // AsyncReadResult,
     // ReadPixelsContext,
     // ReadPixelsCallback,
-    // RescaleGamma,
-    // RescaleMode,
     // asyncRescaleAndReadPixels,
     // asyncRescaleAndReadPixelsYUV420,
     // asyncRescaleAndReadPixelsYUVA420

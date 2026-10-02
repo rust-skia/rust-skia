@@ -647,6 +647,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     // SkImage_*
     ("BitDepth", rewrite::k_xxx),
     ("CachingHint", rewrite::k_xxx_name),
+    ("RescaleGamma", rewrite::k_xxx),
+    ("RescaleMode", rewrite::k_xxx),
     ("SkTextureCompressionType", rewrite::k_xxx),
     // SkImageFilter_MapDirection
     ("MapDirection", rewrite::k_xxx_name),

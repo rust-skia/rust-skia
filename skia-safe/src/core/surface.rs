@@ -1,13 +1,14 @@
 //! Describes a drawing destination: a [`Surface`] manages the pixels or GPU resources that a
 //! [`crate::Canvas`] draws into.
 
-use std::{fmt, ptr};
+use std::{ffi::c_void, fmt, ptr};
 
-use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
+use skia_bindings::{self as sb, SkImage_AsyncReadResult, SkRefCntBase, SkSurface};
 
+pub use crate::image::{AsyncReadResult, RescaleGamma, RescaleMode};
 use crate::{
-    Bitmap, Canvas, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point, SamplingOptions,
-    SurfaceProps, gpu, prelude::*,
+    Bitmap, Canvas, ColorSpace, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point,
+    SamplingOptions, SurfaceProps, YUVColorSpace, gpu, prelude::*,
 };
 
 pub mod surfaces {
@@ -652,9 +653,47 @@ impl Surface {
         unsafe { self.native_mut().readPixels2(bitmap.native(), src.x, src.y) }
     }
 
-    // TODO: AsyncReadResult, RescaleGamma (m79, m86)
     // TODO: wrap asyncRescaleAndReadPixels (m76, m79, m89)
-    // TODO: wrap asyncRescaleAndReadPixelsYUV420 (m77, m79, m89)
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn async_rescale_and_read_pixels_yuv420<F>(
+        &mut self,
+        yuv_color_space: YUVColorSpace,
+        dst_color_space: impl Into<Option<ColorSpace>>,
+        src_rect: impl AsRef<IRect>,
+        dst_size: impl Into<ISize>,
+        rescale_gamma: RescaleGamma,
+        rescale_mode: RescaleMode,
+        callback: F,
+    ) where
+        F: FnOnce(Option<AsyncReadResult>) + 'static,
+    {
+        unsafe extern "C" fn trampoline<F>(
+            context: *mut c_void,
+            result: *const SkImage_AsyncReadResult,
+        ) where
+            F: FnOnce(Option<AsyncReadResult>),
+        {
+            let callback = unsafe { Box::from_raw(context as *mut F) };
+            callback(AsyncReadResult::from_ptr(result as *mut _));
+        }
+
+        let callback = Box::into_raw(Box::new(callback));
+        unsafe {
+            sb::C_SkSurface_asyncRescaleAndReadPixelsYUV420(
+                self.native_mut(),
+                yuv_color_space,
+                dst_color_space.into().into_ptr_or_null(),
+                src_rect.as_ref().native(),
+                dst_size.into().native(),
+                rescale_gamma,
+                rescale_mode,
+                Some(trampoline::<F>),
+                callback as _,
+            )
+        }
+    }
+
     // TODO: wrap asyncRescaleAndReadPixelsYUVA420 (m117)
 
     /// Copies [`crate::Rect`] of pixels from the src [`Pixmap`] to the [`Surface`].
@@ -772,6 +811,30 @@ mod tests {
         .unwrap();
         let paint = Paint::default();
         surface.canvas().draw_circle((10, 10), 10.0, &paint);
+    }
+
+    #[test]
+    fn async_rescale_and_read_pixels_yuv420_fails_on_raster_surface() {
+        use std::{cell::RefCell, rc::Rc};
+
+        let mut surface = surfaces::raster_n32_premul((16, 16)).unwrap();
+        let results = Rc::new(RefCell::new(Vec::new()));
+
+        for dst_size in [(16, 16), (8, 8), (15, 16), (0, 0)] {
+            let results = results.clone();
+            surface.async_rescale_and_read_pixels_yuv420(
+                YUVColorSpace::Rec709_Limited,
+                ColorSpace::new_srgb(),
+                IRect::from_wh(16, 16),
+                dst_size,
+                RescaleGamma::Src,
+                RescaleMode::RepeatedCubic,
+                move |result| results.borrow_mut().push(result.is_some()),
+            );
+        }
+
+        assert_eq!(*results.borrow(), [false; 4]);
+        assert_eq!(Rc::strong_count(&results), 1);
     }
 
     #[test]
