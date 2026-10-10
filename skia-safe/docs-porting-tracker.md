@@ -182,6 +182,28 @@ Upstream added **no** public header and removed none (the only `--diff-filter=AD
 
 ---
 
+# Async read pixels (PR rust-skia/rust-skia#1346, follow-up to #1343, 2026-10-10, milestone m155)
+
+Wrappers added together with their docs; the PR is open and its branch may still be rebased, so commits are not listed yet.
+
+| C++ header | Rust counterpart | Doc status |
+|---|---|---|
+| `include/core/SkImage.h` `AsyncReadResult` | `core/image.rs` `AsyncReadResult` | ✅ class doc + `count`/`data`/`rowBytes` ported; class doc names the `Image` methods (the `Surface` ones mirror them) |
+| `include/core/SkImage.h` `asyncRescaleAndReadPixels`, `…YUV420`, `…YUVA420` | `core/image.rs` `Image::async_rescale_and_read_pixels*` | ✅ ported in full; `ReadPixelsCallback` + `ReadPixelsContext` collapse into the Rust `callback` parameter, so the `context` parameter doc is dropped |
+| `include/core/SkSurface.h` `asyncRescaleAndReadPixels`, `…YUV420`, `…YUVA420` | `core/surface.rs` `Surface::async_rescale_and_read_pixels*` | ✅ ported in full, same adaptation |
+| `include/core/SkImage.h` `RescaleGamma`, `RescaleMode` | `core/image.rs` re-exports | C++ has no docs → left undocumented |
+
+Rust-specific additions (no C++ counterpart; they document the wrapper's contract):
+- every method: *"`callback` is called exactly once: before this function returns, from `DirectContext::check_async_work_completion()`, or when the context is dropped. A panic in `callback` aborts the process."* (exactly-once verified against Skia's `SkSurface.cpp`/`SkImage.cpp` early returns, Ganesh `SurfaceContext::AsyncReadPixelContext`, `GrGpu::~GrGpu` and `AutoCallback`).
+- `Image::async_rescale_and_read_pixels()` and `…_yuv420()`: *"`callback` must be [`Send`] because a GPU-backed [`Image`] calls back on the thread of its context."* (`Image` is `Send + Sync`, `Surface` is not, so only the `Image` methods carry the bound).
+- `Image::async_rescale_and_read_pixels_yuv420()`: *"Raster and Graphite images do not support this read and call back with `None`."* (`SkImage_Raster` and Graphite `Image_Base` fall back to a `nullptr` callback).
+- `Surface::async_rescale_and_read_pixels_yuv420()`: *"Raster and Graphite surfaces do not support this read and call back with `None`."* (`SkSurface_Base` and `Surface_Graphite` call back with `nullptr`).
+- `AsyncReadResult` and `AsyncReadResult::data()`: the data/pointer is invalidated when the GPU context is abandoned or dropped (from the method docs in `SkSurface.h`/`SkImage.h`).
+
+Open: `skgpu::graphite::Context` stays plain text, as in the neighbouring `read_pixels` docs, because the CI doc feature set does not enable `graphite` and a link would not resolve.
+
+---
+
 # MISSING / UNCHECKED YET (survey 2026-09-08, milestone m153)
 
 > **Stale relative to m154:** the surveys and tables in this section were taken against the **m153** headers and were not re-verified for m154. Re-verification found no *new* gaps in these areas (the m154 header diff touched none of them), but the per-file counts below are the m153 numbers with the m153 commit history.

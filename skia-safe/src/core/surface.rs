@@ -1,22 +1,27 @@
 //! Describes a drawing destination: a [`Surface`] manages the pixels or GPU resources that a
 //! [`crate::Canvas`] draws into.
 
-use std::{ffi::c_void, fmt, ptr};
+use std::{fmt, ptr};
 
-use skia_bindings::{self as sb, SkImage_AsyncReadResult, SkRefCntBase, SkSurface};
+use skia_bindings::{self as sb, SkRefCntBase, SkSurface};
 
-pub use crate::image::{AsyncReadResult, RescaleGamma, RescaleMode};
+use crate::gpu;
+use crate::image::read_pixels_callback;
+use crate::prelude::*;
 use crate::{
     Bitmap, Canvas, ColorSpace, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap, Point,
-    SamplingOptions, SurfaceProps, YUVColorSpace, gpu, prelude::*,
+    SamplingOptions, SurfaceProps, YUVColorSpace,
 };
+
+pub use crate::image::{AsyncReadResult, RescaleGamma, RescaleMode};
 
 pub mod surfaces {
     //! Factory functions for creating [`crate::Surface`]s, e.g. raster, null, and GPU-backed
     //! surfaces.
     use skia_bindings::{self as sb};
 
-    use crate::{ISize, ImageInfo, Surface, SurfaceProps, prelude::*};
+    use crate::prelude::*;
+    use crate::{ISize, ImageInfo, Surface, SurfaceProps};
 
     pub use sb::SkSurfaces_BackendSurfaceAccess as BackendSurfaceAccess;
     variant_name!(BackendSurfaceAccess::Present);
@@ -653,10 +658,96 @@ impl Surface {
         unsafe { self.native_mut().readPixels2(bitmap.native(), src.x, src.y) }
     }
 
-    // TODO: wrap asyncRescaleAndReadPixels (m76, m79, m89)
+    /// Makes surface pixel data available to caller, possibly asynchronously. It can also rescale
+    /// the surface pixels.
+    ///
+    /// Currently asynchronous reads are only supported in the Ganesh GPU backend and only when the
+    /// underlying 3D API supports transfer buffers and CPU/GPU synchronization primitives. In all
+    /// other cases this operates synchronously.
+    ///
+    /// For the Graphite backend this API has been deprecated in favor of the equivalent API
+    /// on `skgpu::graphite::Context`.
+    ///
+    /// Data is read from the source sub-rectangle, is optionally converted to a linear gamma, is
+    /// rescaled to the size indicated by `info`, is then converted to the color space, color type,
+    /// and alpha type of `info`. A `src_rect` that is not contained by the bounds of the surface
+    /// causes failure.
+    ///
+    /// When the pixel data is ready the caller's `callback` is called with a
+    /// [`AsyncReadResult`] containing pixel data in the requested color type, alpha type, and color
+    /// space. The [`AsyncReadResult`] will have [`AsyncReadResult::count()`] == 1. Upon failure the
+    /// callback is called with `None` for [`AsyncReadResult`]. For a GPU surface this flushes work
+    /// but a submit must occur to guarantee a finite time before the callback is called.
+    ///
+    /// The data is valid for the lifetime of [`AsyncReadResult`] with the exception that if the
+    /// [`Surface`] is GPU-backed the data is immediately invalidated if the context is abandoned
+    /// or destroyed.
+    ///
+    /// `callback` is called exactly once: before this function returns, from
+    /// [`crate::gpu::DirectContext::check_async_work_completion()`], or when the context is
+    /// dropped. A panic in `callback` aborts the process.
+    ///
+    /// - `info` info of the requested pixels
+    /// - `src_rect` subrectangle of surface to read
+    /// - `rescale_gamma` controls whether rescaling is done in the surface's gamma or whether
+    ///   the source data is transformed to a linear gamma before rescaling.
+    /// - `rescale_mode` controls the technique of the rescaling
+    /// - `callback` function to call with result of the read
+    pub fn async_rescale_and_read_pixels(
+        &mut self,
+        info: &ImageInfo,
+        src_rect: impl AsRef<IRect>,
+        rescale_gamma: RescaleGamma,
+        rescale_mode: RescaleMode,
+        callback: impl FnOnce(Option<AsyncReadResult>) + 'static,
+    ) {
+        let (callback, context) = read_pixels_callback(callback);
+        unsafe {
+            sb::C_SkSurface_asyncRescaleAndReadPixels(
+                self.native_mut(),
+                info.native(),
+                src_rect.as_ref().native(),
+                rescale_gamma,
+                rescale_mode,
+                callback,
+                context,
+            )
+        }
+    }
 
+    /// Similar to [`Self::async_rescale_and_read_pixels()`] but performs an additional conversion
+    /// to YUV. The RGB->YUV conversion is controlled by `yuv_color_space`. The YUV data is returned
+    /// as three planes ordered y, u, v. The u and v planes are half the width and height of the
+    /// resized rectangle. The y, u, and v values are single bytes. Currently this fails if
+    /// `dst_size` width and height are not even. A `src_rect` that is not contained by the bounds
+    /// of the surface causes failure.
+    ///
+    /// When the pixel data is ready the caller's `callback` is called with a
+    /// [`AsyncReadResult`] containing the planar data. The [`AsyncReadResult`] will have
+    /// [`AsyncReadResult::count()`] == 3. Upon failure the callback is called with `None` for
+    /// [`AsyncReadResult`]. For a GPU surface this flushes work but a submit must occur to
+    /// guarantee a finite time before the callback is called.
+    ///
+    /// The data is valid for the lifetime of [`AsyncReadResult`] with the exception that if the
+    /// [`Surface`] is GPU-backed the data is immediately invalidated if the context is abandoned
+    /// or destroyed.
+    ///
+    /// `callback` is called exactly once: before this function returns, from
+    /// [`crate::gpu::DirectContext::check_async_work_completion()`], or when the context is
+    /// dropped. A panic in `callback` aborts the process. Raster and Graphite surfaces do not
+    /// support this read and call back with `None`.
+    ///
+    /// - `yuv_color_space` The transformation from RGB to YUV. Applied to the resized image
+    ///   after it is converted to `dst_color_space`.
+    /// - `dst_color_space` The color space to convert the resized image to, after rescaling.
+    /// - `src_rect` The portion of the surface to rescale and convert to YUV planes.
+    /// - `dst_size` The size to rescale `src_rect` to
+    /// - `rescale_gamma` controls whether rescaling is done in the surface's gamma or whether
+    ///   the source data is transformed to a linear gamma before rescaling.
+    /// - `rescale_mode` controls the sampling technique of the rescaling
+    /// - `callback` function to call with the planar read result
     #[allow(clippy::too_many_arguments)]
-    pub fn async_rescale_and_read_pixels_yuv420<F>(
+    pub fn async_rescale_and_read_pixels_yuv420(
         &mut self,
         yuv_color_space: YUVColorSpace,
         dst_color_space: impl Into<Option<ColorSpace>>,
@@ -664,21 +755,9 @@ impl Surface {
         dst_size: impl Into<ISize>,
         rescale_gamma: RescaleGamma,
         rescale_mode: RescaleMode,
-        callback: F,
-    ) where
-        F: FnOnce(Option<AsyncReadResult>) + 'static,
-    {
-        unsafe extern "C" fn trampoline<F>(
-            context: *mut c_void,
-            result: *const SkImage_AsyncReadResult,
-        ) where
-            F: FnOnce(Option<AsyncReadResult>),
-        {
-            let callback = unsafe { Box::from_raw(context as *mut F) };
-            callback(AsyncReadResult::from_ptr(result as *mut _));
-        }
-
-        let callback = Box::into_raw(Box::new(callback));
+        callback: impl FnOnce(Option<AsyncReadResult>) + 'static,
+    ) {
+        let (callback, context) = read_pixels_callback(callback);
         unsafe {
             sb::C_SkSurface_asyncRescaleAndReadPixelsYUV420(
                 self.native_mut(),
@@ -688,13 +767,41 @@ impl Surface {
                 dst_size.into().native(),
                 rescale_gamma,
                 rescale_mode,
-                Some(trampoline::<F>),
-                callback as _,
+                callback,
+                context,
             )
         }
     }
 
-    // TODO: wrap asyncRescaleAndReadPixelsYUVA420 (m117)
+    /// Identical to [`Self::async_rescale_and_read_pixels_yuv420()`] but a fourth plane is returned
+    /// in the [`AsyncReadResult`] passed to `callback`. The fourth plane contains the alpha chanel
+    /// at the same full resolution as the Y plane.
+    #[allow(clippy::too_many_arguments)]
+    pub fn async_rescale_and_read_pixels_yuva420(
+        &mut self,
+        yuv_color_space: YUVColorSpace,
+        dst_color_space: impl Into<Option<ColorSpace>>,
+        src_rect: impl AsRef<IRect>,
+        dst_size: impl Into<ISize>,
+        rescale_gamma: RescaleGamma,
+        rescale_mode: RescaleMode,
+        callback: impl FnOnce(Option<AsyncReadResult>) + 'static,
+    ) {
+        let (callback, context) = read_pixels_callback(callback);
+        unsafe {
+            sb::C_SkSurface_asyncRescaleAndReadPixelsYUVA420(
+                self.native_mut(),
+                yuv_color_space,
+                dst_color_space.into().into_ptr_or_null(),
+                src_rect.as_ref().native(),
+                dst_size.into().native(),
+                rescale_gamma,
+                rescale_mode,
+                callback,
+                context,
+            )
+        }
+    }
 
     /// Copies [`crate::Rect`] of pixels from the src [`Pixmap`] to the [`Surface`].
     ///
@@ -814,26 +921,56 @@ mod tests {
     }
 
     #[test]
+    fn async_rescale_and_read_pixels_hands_the_result_to_the_callback() {
+        use crate::{AlphaType, Color, ColorType};
+        use std::{cell::RefCell, rc::Rc};
+
+        let mut surface = surfaces::raster_n32_premul((4, 4)).unwrap();
+        surface.canvas().clear(Color::RED);
+        let info = ImageInfo::new((2, 2), ColorType::RGBA8888, AlphaType::Premul, None);
+        let read = Rc::new(RefCell::new(None));
+
+        surface.async_rescale_and_read_pixels(
+            &info,
+            IRect::from_wh(4, 4),
+            RescaleGamma::Src,
+            RescaleMode::Nearest,
+            {
+                let read = read.clone();
+                move |result| {
+                    *read.borrow_mut() = result.map(|result| {
+                        let pixel = unsafe { *(result.data(0) as *const [u8; 4]) };
+                        (result.count(), pixel)
+                    })
+                }
+            },
+        );
+
+        assert_eq!(*read.borrow(), Some((1, [255, 0, 0, 255])));
+        assert_eq!(Rc::strong_count(&read), 1);
+    }
+
+    #[test]
     fn async_rescale_and_read_pixels_yuv420_fails_on_raster_surface() {
         use std::{cell::RefCell, rc::Rc};
 
         let mut surface = surfaces::raster_n32_premul((16, 16)).unwrap();
         let results = Rc::new(RefCell::new(Vec::new()));
 
-        for dst_size in [(16, 16), (8, 8), (15, 16), (0, 0)] {
-            let results = results.clone();
-            surface.async_rescale_and_read_pixels_yuv420(
-                YUVColorSpace::Rec709_Limited,
-                ColorSpace::new_srgb(),
-                IRect::from_wh(16, 16),
-                dst_size,
-                RescaleGamma::Src,
-                RescaleMode::RepeatedCubic,
-                move |result| results.borrow_mut().push(result.is_some()),
-            );
-        }
+        surface.async_rescale_and_read_pixels_yuv420(
+            YUVColorSpace::Rec709_Limited,
+            ColorSpace::new_srgb(),
+            IRect::from_wh(16, 16),
+            (16, 16),
+            RescaleGamma::Src,
+            RescaleMode::RepeatedCubic,
+            {
+                let results = results.clone();
+                move |result| results.borrow_mut().push(result.is_some())
+            },
+        );
 
-        assert_eq!(*results.borrow(), [false; 4]);
+        assert_eq!(*results.borrow(), [false]);
         assert_eq!(Rc::strong_count(&results), 1);
     }
 

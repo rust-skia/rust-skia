@@ -81,6 +81,7 @@ mod core {
     assert_impl_all!(Image: Send, Sync);
     assert_impl_all!(image::CubicResampler: Send, Sync);
     assert_impl_all!(image::BitDepth: Send, Sync);
+    assert_impl_all!(image::AsyncReadResult: Send, Sync);
     assert_impl_all!(image::RequiredProperties: Send, Sync);
 
     assert_impl_all!(ImageFilter: Send, Sync);

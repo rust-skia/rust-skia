@@ -1,13 +1,18 @@
 //! Describes a two dimensional array of pixels to draw. An [`Image`] is an immutable, thread-safe
 //! container for pixel data.
 
+use std::ffi::c_void;
+use std::{fmt, panic, process, ptr};
+
+use skia_bindings::{self as sb, SkImage, SkImage_AsyncReadResult, SkRefCntBase};
+
+use crate::gpu;
+use crate::prelude::*;
 use crate::{
     AlphaType, Bitmap, ColorSpace, ColorType, Data, EncodedImageFormat, IPoint, IRect, ISize,
     ImageFilter, ImageGenerator, ImageInfo, Matrix, Paint, Picture, Pixmap, Recorder,
-    SamplingOptions, Shader, SurfaceProps, TextureCompressionType, TileMode, gpu, prelude::*,
+    SamplingOptions, Shader, SurfaceProps, TextureCompressionType, TileMode, YUVColorSpace,
 };
-use skia_bindings::{self as sb, SkImage, SkImage_AsyncReadResult, SkRefCntBase};
-use std::{ffi::c_void, fmt, ptr};
 
 pub use super::CubicResampler;
 
@@ -256,21 +261,17 @@ pub mod images {
 pub use skia_bindings::SkImage_CachingHint as CachingHint;
 variant_name!(CachingHint::Allow);
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[repr(C)]
-pub struct RequiredProperties {
-    pub mipmapped: bool,
-}
-
-native_transmutable!(sb::SkImage_RequiredProperties, RequiredProperties);
-
-pub use skia_bindings::SkImage_RescaleGamma as RescaleGamma;
-variant_name!(RescaleGamma::Linear);
-
-pub use skia_bindings::SkImage_RescaleMode as RescaleMode;
-variant_name!(RescaleMode::RepeatedCubic);
-
+/// The result from [`Image::async_rescale_and_read_pixels()`] or
+/// [`Image::async_rescale_and_read_pixels_yuv420()`].
+///
+/// The data is valid for the lifetime of [`AsyncReadResult`], with the exception that if the
+/// source is GPU-backed, the data is immediately invalidated when the context is abandoned or
+/// dropped.
 pub type AsyncReadResult = RefHandle<SkImage_AsyncReadResult>;
+// Skia hands the result to clients that consume it on another thread: dropping it posts the
+// mapped GPU buffers to the owning context through a thread-safe message bus, and all accessors
+// are const. The data itself still dies with the GPU context (see `data()`).
+unsafe_send_sync!(AsyncReadResult);
 
 impl NativeDrop for SkImage_AsyncReadResult {
     fn drop(&mut self) {
@@ -287,22 +288,67 @@ impl fmt::Debug for AsyncReadResult {
 }
 
 impl AsyncReadResult {
+    /// Returns how many planes of data are in the result. e.g. 3 for YUV data.
     pub fn count(&self) -> usize {
         unsafe { sb::C_SkImage_AsyncReadResult_count(self.native()) }
             .try_into()
             .unwrap()
     }
 
+    /// Returns the raw pixel data for a given plane.
+    ///
+    /// It will be organized as per the dst [`ImageInfo`] passed in to the async read call.
+    ///
+    /// Clients may wish to create a [`Pixmap`] with this data using the dst [`ImageInfo`] and
+    /// [`Self::row_bytes()`].
+    ///
+    /// The pointer dangles once the GPU context that produced the result is abandoned or dropped.
     pub fn data(&self, i: usize) -> *const c_void {
         assert!(i < self.count());
         unsafe { sb::C_SkImage_AsyncReadResult_data(self.native(), i.try_into().unwrap()) }
     }
 
+    /// Returns how many bytes correspond to a single row of image data
     pub fn row_bytes(&self, i: usize) -> usize {
         assert!(i < self.count());
         unsafe { sb::C_SkImage_AsyncReadResult_rowBytes(self.native(), i.try_into().unwrap()) }
     }
 }
+
+/// Moves `callback` to the heap and returns the C callback and context that Skia's
+/// `ReadPixelsCallback` adapter invokes it with.
+pub(crate) fn read_pixels_callback<F: FnOnce(Option<AsyncReadResult>) + 'static>(
+    callback: F,
+) -> (sb::C_ReadPixelsCallback, *mut c_void) {
+    unsafe extern "C" fn call<F: FnOnce(Option<AsyncReadResult>)>(
+        context: *mut c_void,
+        result: *const SkImage_AsyncReadResult,
+    ) {
+        // Skia calls back exactly once, so the closure is reclaimed here.
+        let callback = unsafe { Box::from_raw(context as *mut F) };
+        let result = AsyncReadResult::from_ptr(result as *mut _);
+        if panic::catch_unwind(panic::AssertUnwindSafe(|| callback(result))).is_err() {
+            println!("Panic in FFI callback for `SkImage::ReadPixelsCallback`");
+            process::abort();
+        }
+    }
+
+    (Some(call::<F>), Box::into_raw(Box::new(callback)) as _)
+}
+
+pub use skia_bindings::SkImage_RescaleGamma as RescaleGamma;
+variant_name!(RescaleGamma::Linear);
+
+pub use skia_bindings::SkImage_RescaleMode as RescaleMode;
+variant_name!(RescaleMode::RepeatedCubic);
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[repr(C)]
+pub struct RequiredProperties {
+    pub mipmapped: bool,
+}
+
+native_transmutable!(sb::SkImage_RequiredProperties, RequiredProperties);
 
 /// [`Image`] describes a two dimensional array of pixels to draw. The pixels may be
 /// decoded in a raster bitmap, encoded in a [`Picture`] or compressed data stream,
@@ -961,12 +1007,152 @@ impl Image {
         }
     }
 
-    // TODO:
-    // ReadPixelsContext,
-    // ReadPixelsCallback,
-    // asyncRescaleAndReadPixels,
-    // asyncRescaleAndReadPixelsYUV420,
-    // asyncRescaleAndReadPixelsYUVA420
+    /// Makes image pixel data available to caller, possibly asynchronously. It can also rescale
+    /// the image pixels.
+    ///
+    /// Currently asynchronous reads are only supported in the Ganesh GPU backend and only when the
+    /// underlying 3D API supports transfer buffers and CPU/GPU synchronization primitives. In all
+    /// other cases this operates synchronously.
+    ///
+    /// For the Graphite backend this API has been deprecated in favor of the equivalent API
+    /// on `skgpu::graphite::Context`.
+    ///
+    /// Data is read from the source sub-rectangle, is optionally converted to a linear gamma, is
+    /// rescaled to the size indicated by `info`, is then converted to the color space, color type,
+    /// and alpha type of `info`. A `src_rect` that is not contained by the bounds of the image
+    /// causes failure.
+    ///
+    /// When the pixel data is ready the caller's `callback` is called with a
+    /// [`AsyncReadResult`] containing pixel data in the requested color type, alpha type, and color
+    /// space. The [`AsyncReadResult`] will have [`AsyncReadResult::count()`] == 1. Upon failure the
+    /// callback is called with `None` for [`AsyncReadResult`]. For a GPU image this flushes work but
+    /// a submit must occur to guarantee a finite time before the callback is called.
+    ///
+    /// The data is valid for the lifetime of [`AsyncReadResult`] with the exception that if the
+    /// [`Image`] is GPU-backed the data is immediately invalidated if the context is abandoned or
+    /// destroyed.
+    ///
+    /// `callback` is called exactly once: before this function returns, from
+    /// [`crate::gpu::DirectContext::check_async_work_completion()`], or when the context is
+    /// dropped. A panic in `callback` aborts the process. `callback` must be [`Send`] because a
+    /// GPU-backed [`Image`] calls back on the thread of its context.
+    ///
+    /// - `info` info of the requested pixels
+    /// - `src_rect` subrectangle of image to read
+    /// - `rescale_gamma` controls whether rescaling is done in the image's gamma or whether
+    ///   the source data is transformed to a linear gamma before rescaling.
+    /// - `rescale_mode` controls the technique (and cost) of the rescaling
+    /// - `callback` function to call with result of the read
+    pub fn async_rescale_and_read_pixels(
+        &self,
+        info: &ImageInfo,
+        src_rect: impl AsRef<IRect>,
+        rescale_gamma: RescaleGamma,
+        rescale_mode: RescaleMode,
+        callback: impl FnOnce(Option<AsyncReadResult>) + Send + 'static,
+    ) {
+        let (callback, context) = read_pixels_callback(callback);
+        unsafe {
+            sb::C_SkImage_asyncRescaleAndReadPixels(
+                self.native(),
+                info.native(),
+                src_rect.as_ref().native(),
+                rescale_gamma,
+                rescale_mode,
+                callback,
+                context,
+            )
+        }
+    }
+
+    /// Similar to [`Self::async_rescale_and_read_pixels()`] but performs an additional conversion
+    /// to YUV. The RGB->YUV conversion is controlled by `yuv_color_space`. The YUV data is returned
+    /// as three planes ordered y, u, v. The u and v planes are half the width and height of the
+    /// resized rectangle. The y, u, and v values are single bytes. Currently this fails if
+    /// `dst_size` width and height are not even. A `src_rect` that is not contained by the bounds
+    /// of the image causes failure.
+    ///
+    /// When the pixel data is ready the caller's `callback` is called with a
+    /// [`AsyncReadResult`] containing the planar data. The [`AsyncReadResult`] will have
+    /// [`AsyncReadResult::count()`] == 3. Upon failure the callback is called with `None` for
+    /// [`AsyncReadResult`]. For a GPU image this flushes work but a submit must occur to guarantee
+    /// a finite time before the callback is called.
+    ///
+    /// The data is valid for the lifetime of [`AsyncReadResult`] with the exception that if the
+    /// [`Image`] is GPU-backed the data is immediately invalidated if the context is abandoned or
+    /// destroyed.
+    ///
+    /// `callback` is called exactly once: before this function returns, from
+    /// [`crate::gpu::DirectContext::check_async_work_completion()`], or when the context is
+    /// dropped. A panic in `callback` aborts the process. `callback` must be [`Send`] because a
+    /// GPU-backed [`Image`] calls back on the thread of its context. Raster and Graphite images do
+    /// not support this read and call back with `None`.
+    ///
+    /// - `yuv_color_space` The transformation from RGB to YUV. Applied to the resized image
+    ///   after it is converted to `dst_color_space`.
+    /// - `dst_color_space` The color space to convert the resized image to, after rescaling.
+    /// - `src_rect` The portion of the image to rescale and convert to YUV planes.
+    /// - `dst_size` The size to rescale `src_rect` to
+    /// - `rescale_gamma` controls whether rescaling is done in the image's gamma or whether
+    ///   the source data is transformed to a linear gamma before rescaling.
+    /// - `rescale_mode` controls the technique (and cost) of the rescaling
+    /// - `callback` function to call with the planar read result
+    #[allow(clippy::too_many_arguments)]
+    pub fn async_rescale_and_read_pixels_yuv420(
+        &self,
+        yuv_color_space: YUVColorSpace,
+        dst_color_space: impl Into<Option<ColorSpace>>,
+        src_rect: impl AsRef<IRect>,
+        dst_size: impl Into<ISize>,
+        rescale_gamma: RescaleGamma,
+        rescale_mode: RescaleMode,
+        callback: impl FnOnce(Option<AsyncReadResult>) + Send + 'static,
+    ) {
+        let (callback, context) = read_pixels_callback(callback);
+        unsafe {
+            sb::C_SkImage_asyncRescaleAndReadPixelsYUV420(
+                self.native(),
+                yuv_color_space,
+                dst_color_space.into().into_ptr_or_null(),
+                src_rect.as_ref().native(),
+                dst_size.into().native(),
+                rescale_gamma,
+                rescale_mode,
+                callback,
+                context,
+            )
+        }
+    }
+
+    /// Identical to [`Self::async_rescale_and_read_pixels_yuv420()`] but a fourth plane is returned
+    /// in the [`AsyncReadResult`] passed to `callback`. The fourth plane contains the alpha chanel
+    /// at the same full resolution as the Y plane.
+    #[allow(clippy::too_many_arguments)]
+    pub fn async_rescale_and_read_pixels_yuva420(
+        &self,
+        yuv_color_space: YUVColorSpace,
+        dst_color_space: impl Into<Option<ColorSpace>>,
+        src_rect: impl AsRef<IRect>,
+        dst_size: impl Into<ISize>,
+        rescale_gamma: RescaleGamma,
+        rescale_mode: RescaleMode,
+        callback: impl FnOnce(Option<AsyncReadResult>) + Send + 'static,
+    ) {
+        let (callback, context) = read_pixels_callback(callback);
+        unsafe {
+            sb::C_SkImage_asyncRescaleAndReadPixelsYUVA420(
+                self.native(),
+                yuv_color_space,
+                dst_color_space.into().into_ptr_or_null(),
+                src_rect.as_ref().native(),
+                dst_size.into().native(),
+                rescale_gamma,
+                rescale_mode,
+                callback,
+                context,
+            )
+        }
+    }
 
     /// Copies [`Image`] to dst, scaling pixels to fit `dst.width()` and `dst.height()`, and
     /// converting pixels to match `dst.color_type()` and `dst.alpha_type()`. Returns `true` if

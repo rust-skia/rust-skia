@@ -433,6 +433,35 @@ extern "C" const SkSurfaceProps* C_SkSurface_props(const SkSurface* self) {
     return &self->props();
 }
 
+typedef void (*C_ReadPixelsCallback)(void* context, const SkImage::AsyncReadResult* result);
+
+// Skia's ReadPixelsCallback receives the result as a std::unique_ptr, which Rust can't take, so
+// the Rust callback and its context travel in ReadPixelsContext. Skia calls back exactly once,
+// which frees the closure.
+struct ReadPixelsClosure {
+    C_ReadPixelsCallback fCallback;
+    void* fContext;
+
+    static void Call(SkImage::ReadPixelsContext context,
+                     std::unique_ptr<const SkImage::AsyncReadResult> result) {
+        std::unique_ptr<ReadPixelsClosure> closure(static_cast<ReadPixelsClosure*>(context));
+        closure->fCallback(closure->fContext, result.release());
+    }
+};
+
+extern "C" void C_SkSurface_asyncRescaleAndReadPixels(
+        SkSurface* self,
+        const SkImageInfo* info,
+        const SkIRect* srcRect,
+        SkSurface::RescaleGamma rescaleGamma,
+        SkSurface::RescaleMode rescaleMode,
+        C_ReadPixelsCallback callback,
+        void* context) {
+    self->asyncRescaleAndReadPixels(
+        *info, *srcRect, rescaleGamma, rescaleMode,
+        ReadPixelsClosure::Call, new ReadPixelsClosure{callback, context});
+}
+
 extern "C" void C_SkSurface_asyncRescaleAndReadPixelsYUV420(
         SkSurface* self,
         SkYUVColorSpace yuvColorSpace,
@@ -441,24 +470,26 @@ extern "C" void C_SkSurface_asyncRescaleAndReadPixelsYUV420(
         const SkISize* dstSize,
         SkSurface::RescaleGamma rescaleGamma,
         SkSurface::RescaleMode rescaleMode,
-        void (*callback)(void* context, const SkSurface::AsyncReadResult* result),
+        C_ReadPixelsCallback callback,
         void* context) {
-    struct Closure {
-        void (*fCallback)(void*, const SkSurface::AsyncReadResult*);
-        void* fContext;
-    };
     self->asyncRescaleAndReadPixelsYUV420(
-        yuvColorSpace,
-        sp(dstColorSpace),
-        *srcRect,
-        *dstSize,
-        rescaleGamma,
-        rescaleMode,
-        [](SkSurface::ReadPixelsContext context, std::unique_ptr<const SkSurface::AsyncReadResult> result) {
-            std::unique_ptr<Closure> closure(static_cast<Closure*>(context));
-            closure->fCallback(closure->fContext, result.release());
-        },
-        new Closure{callback, context});
+        yuvColorSpace, sp(dstColorSpace), *srcRect, *dstSize, rescaleGamma, rescaleMode,
+        ReadPixelsClosure::Call, new ReadPixelsClosure{callback, context});
+}
+
+extern "C" void C_SkSurface_asyncRescaleAndReadPixelsYUVA420(
+        SkSurface* self,
+        SkYUVColorSpace yuvColorSpace,
+        SkColorSpace* dstColorSpace,
+        const SkIRect* srcRect,
+        const SkISize* dstSize,
+        SkSurface::RescaleGamma rescaleGamma,
+        SkSurface::RescaleMode rescaleMode,
+        C_ReadPixelsCallback callback,
+        void* context) {
+    self->asyncRescaleAndReadPixelsYUVA420(
+        yuvColorSpace, sp(dstColorSpace), *srcRect, *dstSize, rescaleGamma, rescaleMode,
+        ReadPixelsClosure::Call, new ReadPixelsClosure{callback, context});
 }
 
 //
@@ -570,6 +601,49 @@ extern "C" SkImage* C_SkImage_makeColorSpace(const SkImage* self, SkRecorder* re
 
 extern "C" SkImage* C_SkImage_reinterpretColorSpace(const SkImage* self, SkColorSpace* newColorSpace) {
     return self->reinterpretColorSpace(sp(newColorSpace)).release();
+}
+
+extern "C" void C_SkImage_asyncRescaleAndReadPixels(
+        const SkImage* self,
+        const SkImageInfo* info,
+        const SkIRect* srcRect,
+        SkImage::RescaleGamma rescaleGamma,
+        SkImage::RescaleMode rescaleMode,
+        C_ReadPixelsCallback callback,
+        void* context) {
+    self->asyncRescaleAndReadPixels(
+        *info, *srcRect, rescaleGamma, rescaleMode,
+        ReadPixelsClosure::Call, new ReadPixelsClosure{callback, context});
+}
+
+extern "C" void C_SkImage_asyncRescaleAndReadPixelsYUV420(
+        const SkImage* self,
+        SkYUVColorSpace yuvColorSpace,
+        SkColorSpace* dstColorSpace,
+        const SkIRect* srcRect,
+        const SkISize* dstSize,
+        SkImage::RescaleGamma rescaleGamma,
+        SkImage::RescaleMode rescaleMode,
+        C_ReadPixelsCallback callback,
+        void* context) {
+    self->asyncRescaleAndReadPixelsYUV420(
+        yuvColorSpace, sp(dstColorSpace), *srcRect, *dstSize, rescaleGamma, rescaleMode,
+        ReadPixelsClosure::Call, new ReadPixelsClosure{callback, context});
+}
+
+extern "C" void C_SkImage_asyncRescaleAndReadPixelsYUVA420(
+        const SkImage* self,
+        SkYUVColorSpace yuvColorSpace,
+        SkColorSpace* dstColorSpace,
+        const SkIRect* srcRect,
+        const SkISize* dstSize,
+        SkImage::RescaleGamma rescaleGamma,
+        SkImage::RescaleMode rescaleMode,
+        C_ReadPixelsCallback callback,
+        void* context) {
+    self->asyncRescaleAndReadPixelsYUVA420(
+        yuvColorSpace, sp(dstColorSpace), *srcRect, *dstSize, rescaleGamma, rescaleMode,
+        ReadPixelsClosure::Call, new ReadPixelsClosure{callback, context});
 }
 
 extern "C" void C_SkImage_AsyncReadResult_delete(const SkImage::AsyncReadResult* self) {
