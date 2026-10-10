@@ -394,15 +394,17 @@ impl IndexBuffer {
     /// and thus the context must be valid for the current thread.
     ///
     /// A CPU-backed buffer is updated with `None` and fails if a context is passed.
+    ///
+    /// The buffer is shared: every [`Mesh`] and clone that holds it sees the update.
     pub fn update<'a>(
-        &mut self,
+        &self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
         data: &[u8],
         offset: usize,
     ) -> bool {
         unsafe {
             sb::C_SkMesh_IndexBuffer_update(
-                self.native_mut(),
+                self.native_mut_force(),
                 context.into().native_ptr_or_null_mut(),
                 data.as_ptr() as _,
                 offset,
@@ -442,15 +444,17 @@ impl VertexBuffer {
     /// and thus the context must be valid for the current thread.
     ///
     /// A CPU-backed buffer is updated with `None` and fails if a context is passed.
+    ///
+    /// The buffer is shared: every [`Mesh`] and clone that holds it sees the update.
     pub fn update<'a>(
-        &mut self,
+        &self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
         data: &[u8],
         offset: usize,
     ) -> bool {
         unsafe {
             sb::C_SkMesh_VertexBuffer_update(
-                self.native_mut(),
+                self.native_mut_force(),
                 context.into().native_ptr_or_null_mut(),
                 data.as_ptr() as _,
                 offset,

@@ -355,7 +355,7 @@ fn main() {
     let left_quad = Rect::from_xywh(40.0, panel(3).top + 20.0, 140.0, 160.0);
     let right_quad = left_quad.with_offset((200.0, 0.0));
     {
-        let mut vertex_buffer =
+        let vertex_buffer =
             gpu::meshes::make_vertex_buffer(&mut gr_context, &color_quad_vertices(left_quad))
                 .expect("GPU vertex buffer");
         assert_eq!(vertex_buffer.size(), 48);
