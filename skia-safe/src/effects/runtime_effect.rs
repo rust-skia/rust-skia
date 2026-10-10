@@ -480,6 +480,22 @@ impl ChildPtr {
     //
     // Skia will copy the pointers and increase the reference counters if it uses the actual
     // objects.
+    /// `None` if `native` holds no child.
+    pub(crate) fn from_native_ref(native: &sb::SkRuntimeEffect_ChildPtr) -> Option<Self> {
+        unsafe {
+            Shader::from_unshared_ptr(sb::SkRuntimeEffect_ChildPtr_shader(native))
+                .map(Self::Shader)
+                .or_else(|| {
+                    ColorFilter::from_unshared_ptr(sb::SkRuntimeEffect_ChildPtr_colorFilter(native))
+                        .map(Self::ColorFilter)
+                })
+                .or_else(|| {
+                    Blender::from_unshared_ptr(sb::SkRuntimeEffect_ChildPtr_blender(native))
+                        .map(Self::Blender)
+                })
+        }
+    }
+
     pub(crate) fn native(&self) -> Borrows<sb::SkRuntimeEffect_ChildPtr> {
         let flattenable: *mut SkFlattenable = match self {
             // casting to &T &mut T is UB, so we don't use the base() indirection and directly cast

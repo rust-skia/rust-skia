@@ -1713,12 +1713,32 @@ extern "C" SkMeshSpecification* C_SkMeshSpecification_Make(
     size_t vertexStride,
     const SkMeshSpecification::Varying* varyings, size_t varyingCount,
     const SkString* vs, const SkString* fs,
-    SkColorSpace* cs, SkAlphaType at,
     SkString* error) {
     auto r = SkMeshSpecification::Make(
         SkSpan(attributes, attributeCount), vertexStride,
         SkSpan(varyings, varyingCount),
-        *vs, *fs, sp(cs), at);
+        *vs, *fs);
+    *error = r.error;
+    return r.specification.release();
+}
+
+// `at` is optional so that Skia's own default alpha type applies when it is not given.
+extern "C" SkMeshSpecification* C_SkMeshSpecification_MakeWithColorSpace(
+    const SkMeshSpecification::Attribute* attributes, size_t attributeCount,
+    size_t vertexStride,
+    const SkMeshSpecification::Varying* varyings, size_t varyingCount,
+    const SkString* vs, const SkString* fs,
+    SkColorSpace* cs, const SkAlphaType* at,
+    SkString* error) {
+    auto r = at
+        ? SkMeshSpecification::Make(
+            SkSpan(attributes, attributeCount), vertexStride,
+            SkSpan(varyings, varyingCount),
+            *vs, *fs, sp(cs), *at)
+        : SkMeshSpecification::Make(
+            SkSpan(attributes, attributeCount), vertexStride,
+            SkSpan(varyings, varyingCount),
+            *vs, *fs, sp(cs));
     *error = r.error;
     return r.specification.release();
 }
@@ -1799,7 +1819,7 @@ extern "C" SkMesh* C_SkMesh_Make(
     auto childSpan = SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount);
     sk_sp<const SkData> uniformData = sp(uniforms);
     // SkMesh::validate() dereferences null uniforms while it formats the "uniform data is too
-    // small" error (m153), so pass empty uniforms in this case.
+    // small" error (m153-m155), so pass empty uniforms in this case.
     if (!uniformData && spec->uniformSize() > 0) {
         uniformData = SkData::MakeEmpty();
     }
@@ -1857,6 +1877,12 @@ extern "C" size_t C_SkMesh_indexCount(const SkMesh* self) {
 
 extern "C" const SkData* C_SkMesh_refUniforms(const SkMesh* self) {
     return self->refUniforms().release();
+}
+
+extern "C" const SkRuntimeEffect::ChildPtr* C_SkMesh_children(const SkMesh* self, size_t* count) {
+    auto children = self->children();
+    *count = children.size();
+    return children.data();
 }
 
 extern "C" void C_SkMesh_bounds(const SkMesh* self, SkRect* bounds) {
