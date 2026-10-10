@@ -63,7 +63,6 @@ impl Vulkan {
     }
 
     #[cfg(feature = "ganesh")]
-    #[allow(dead_code)]
     pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.with_backend_context(|backend_context| {
             gpu::direct_contexts::make_vulkan(backend_context, None)
@@ -71,6 +70,7 @@ impl Vulkan {
     }
 
     #[cfg(feature = "graphite")]
+    // Each test target compiles its own copy of this module, and not every one uses Graphite.
     #[allow(dead_code)]
     pub fn graphite_context(&self) -> Option<gpu::graphite::Context> {
         self.with_backend_context(|backend_context| {
