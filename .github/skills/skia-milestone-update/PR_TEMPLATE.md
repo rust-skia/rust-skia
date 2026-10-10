@@ -33,7 +33,7 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
     > date is in less than 7 days, check this box (release the crates with the PR's merge).
 - [ ] Any pending changes in the Skia `chrome/mXX` branch that aren't synchronized yet?
 - [ ] Rebase on or merge with master.
-- [ ] Do the `rust-skia:` commits in the `skia-bindings/skia` subdirectory match with `master` (`make diff-skia`).
+- [ ] Do the fork patches in the `skia-bindings/skia` subdirectory match with `master` (`make diff-skia`).
 - [ ] Update versions of `skia-bindings/Cargo.toml` and `skia-safe/Cargo.toml` and also add the version to the new `deprecated` attributes.
 - [ ] Review API changes: `make diff-api`.
 - [ ] Do one final review of all the changes.

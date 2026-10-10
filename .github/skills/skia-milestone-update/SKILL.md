@@ -197,9 +197,8 @@ the fork tag.
   silently decide on such a diff; surface it and get explicit confirmation
   before proceeding.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
-  commands. Do not use `make diff-skia` for include/API diffs; that target only
-  compares rust-skia-specific commits in the Skia submodule against master (it is the
-  "Do the `rust-skia:` commits ... match with `master`" checklist item).
+  commands. `make diff-skia` only compares the fork patch stack against master (it is
+  the "Do the fork patches ... match with `master`" checklist item).
 - **Account for every changed public header** before editing wrappers. Start from the
   full list of changed public headers (`git -C skia-bindings/skia diff --name-only
   refs/tags/OLD_TAG..refs/tags/NEW_TAG -- 'include/**/*.h' 'modules/*/include/**/*.h'`)
