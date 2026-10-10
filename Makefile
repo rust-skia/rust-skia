@@ -180,16 +180,17 @@ build-local-build:
 	cargo clean
 	SKIA_SOURCE_DIR=$(shell pwd)/skia-bindings/skia SKIA_BUILD_DEFINES=`cat tmp/skia-defines.txt` SKIA_LIBRARY_SEARCH_PATH=$(shell pwd)/tmp cargo build --release --no-default-features -vv --features ${local-build-features}
 
-# Diffs the rust skia commits of the current branch with what is committed to the master branch.
-rust-skia-logs = git log --oneline | head -n 1000 | grep rust-skia | cut -d' ' -f2-
+# Diffs the Skia fork patch stack of the submodule checkout with the one master records. A stack is
+# every commit on top of the upstream chrome/mXX branch named by `[package.metadata].skia`, so
+# edited, added, and dropped patches show up regardless of their subject.
+skia-milestone = sed -nE 's/^skia = "m([0-9]+)[.-].*/\1/p'
 .PHONY: diff-skia
 diff-skia:
-	rm -rf /tmp/rust-skia-cmp
-	git clone . /tmp/rust-skia-cmp
-	cd /tmp/rust-skia-cmp && git checkout master && git submodule update --init
-	cd /tmp/rust-skia-cmp/skia-bindings/skia && ${rust-skia-logs} >/tmp/rust-skia-cmp-master.txt
-	cd skia-bindings/skia && ${rust-skia-logs} >/tmp/rust-skia-cmp-current.txt
-	diff /tmp/rust-skia-cmp-master.txt /tmp/rust-skia-cmp-current.txt
+	cd skia-bindings/skia && \
+	master_tip=$$(git -C ../.. rev-parse master:skia-bindings/skia) && \
+	master_base=$$(git merge-base $$master_tip upstream/chrome/m$$(git -C ../.. show master:skia-bindings/Cargo.toml | ${skia-milestone})) && \
+	base=$$(git merge-base HEAD upstream/chrome/m$$(${skia-milestone} ../Cargo.toml)) && \
+	git range-diff $$master_base..$$master_tip $$base..HEAD
 
 # Diffs the public skia-safe API with the latest on crates.io using cargo public-api
 .PHONY: diff-api
