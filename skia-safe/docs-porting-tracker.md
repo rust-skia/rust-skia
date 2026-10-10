@@ -182,9 +182,9 @@ Upstream added **no** public header and removed none (the only `--diff-filter=AD
 
 ---
 
-# Async read pixels (PR rust-skia/rust-skia#1343, 2026-10-10, milestone m155)
+# Async read pixels (PR rust-skia/rust-skia#1346, follow-up to #1343, 2026-10-10, milestone m155)
 
-Wrappers added together with their docs; work in progress on branch `feat/async-rescale-and-read-pixels-yuv420-review`, so commits are not listed yet.
+Wrappers added together with their docs; the PR is open and its branch may still be rebased, so commits are not listed yet.
 
 | C++ header | Rust counterpart | Doc status |
 |---|---|---|
