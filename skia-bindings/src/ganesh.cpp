@@ -11,6 +11,7 @@
 #include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/GrYUVABackendTextures.h"
 #include "include/gpu/ganesh/SkImageGanesh.h"
+#include "include/gpu/ganesh/SkMeshGanesh.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 
 // Size / Alignment proxy for GrContextOptions
@@ -374,4 +375,24 @@ extern "C" void C_SkSurfaces_GetBackendRenderTarget(
 extern "C" void C_SkSurfaces_ResolveMSAA(SkSurface* surface)
 {
     SkSurfaces::ResolveMSAA(surface);
+}
+
+//
+// gpu/ganesh/SkMeshGanesh.h
+//
+
+extern "C" SkMesh::IndexBuffer* C_SkMeshes_MakeIndexBufferGanesh(GrDirectContext* context, const void* data, size_t size) {
+    return SkMeshes::MakeIndexBuffer(context, data, size).release();
+}
+
+extern "C" SkMesh::IndexBuffer* C_SkMeshes_CopyIndexBufferGanesh(GrDirectContext* context, const SkMesh::IndexBuffer* src) {
+    return SkMeshes::CopyIndexBuffer(context, sk_ref_sp(const_cast<SkMesh::IndexBuffer*>(src))).release();
+}
+
+extern "C" SkMesh::VertexBuffer* C_SkMeshes_MakeVertexBufferGanesh(GrDirectContext* context, const void* data, size_t size) {
+    return SkMeshes::MakeVertexBuffer(context, data, size).release();
+}
+
+extern "C" SkMesh::VertexBuffer* C_SkMeshes_CopyVertexBufferGanesh(GrDirectContext* context, const SkMesh::VertexBuffer* src) {
+    return SkMeshes::CopyVertexBuffer(context, sk_ref_sp(const_cast<SkMesh::VertexBuffer*>(src))).release();
 }

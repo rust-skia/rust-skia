@@ -24,6 +24,7 @@ pub use ganesh::{
     DirectContext, DirectContextId, DriverBugWorkarounds, FlushError, FlushInfo,
     PurgeResourceOptions, RecordingContext, SemaphoresSubmitted, SubmitInfo, SurfaceOrigin,
     SyncCpu, YUVABackendTextureInfo, YUVABackendTextures, context_options::ContextOptions, images,
+    meshes,
 };
 
 // Not part of the public API: the flush methods report a failure as a `FlushError` instead, so

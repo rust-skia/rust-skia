@@ -15,10 +15,10 @@ use crate::gpu::graphite;
 use crate::gpu::{DirectContext, RecordingContext};
 use crate::{Arc, ColorSpace};
 use crate::{
-    Bitmap, BlendMode, ClipOp, Color, Color4f, Data, Drawable, FilterMode, Font, GlyphId, IPoint,
-    IRect, ISize, Image, ImageFilter, ImageInfo, M44, Matrix, Paint, Path, Picture, Pixmap, Point,
-    QuickReject, RRect, RSXform, Rect, Region, SamplingOptions, Shader, Surface, SurfaceProps,
-    TextBlob, TextEncoding, TileMode, Vector, Vertices, prelude::*, scalar,
+    Bitmap, BlendMode, Blender, ClipOp, Color, Color4f, Data, Drawable, FilterMode, Font, GlyphId,
+    IPoint, IRect, ISize, Image, ImageFilter, ImageInfo, M44, Matrix, Mesh, Paint, Path, Picture,
+    Pixmap, Point, QuickReject, RRect, RSXform, Rect, Region, SamplingOptions, Shader, Surface,
+    SurfaceProps, TextBlob, TextEncoding, TileMode, Vector, Vertices, prelude::*, scalar,
 };
 
 pub use lattice::Lattice;
@@ -2049,6 +2049,37 @@ impl Canvas {
         unsafe {
             self.native_mut()
                 .drawVertices(vertices.native(), mode, paint.native())
+        }
+        self
+    }
+
+    /// Draws a [`Mesh`] using clip and [`Matrix`].
+    ///
+    /// If the fragment program of the mesh's specification produces a color, `blender` combines
+    /// it (as dst) with the [`Shader`] of `paint`, or the paint color if there is no shader (as
+    /// src). `None` means [`BlendMode::Modulate`].
+    ///
+    /// [`crate::MaskFilter`], [`crate::PathEffect`], and antialiasing on [`Paint`] are ignored.
+    ///
+    /// Note: In this Skia version, meshes are drawn by the Ganesh GPU backend only. The raster,
+    /// PDF and SVG backends ignore this call.
+    ///
+    /// - `mesh` the mesh vertices and compatible specification
+    /// - `blender` combines the mesh's color with the paint's [`Shader`] or color
+    /// - `paint` specifies the [`Shader`], and [`crate::ColorFilter`]
+    pub fn draw_mesh(
+        &self,
+        mesh: &Mesh,
+        blender: impl Into<Option<Blender>>,
+        paint: &Paint,
+    ) -> &Self {
+        unsafe {
+            sb::C_SkCanvas_drawMesh(
+                self.native_mut(),
+                mesh.native(),
+                blender.into().into_ptr_or_null(),
+                paint.native(),
+            )
         }
         self
     }

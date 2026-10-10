@@ -55,6 +55,7 @@
 #include "include/core/SkImageInfo.h"
 #include "include/core/SkM44.h"
 #include "include/core/SkMaskFilter.h"
+#include "include/core/SkMesh.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkPathBuilder.h"
@@ -1247,6 +1248,10 @@ extern "C" void C_SkCanvas_drawPoints(SkCanvas* self, SkCanvas::PointMode mode, 
     self->drawPoints(mode, SkSpan(points, pointCount), *paint);
 }
 
+extern "C" void C_SkCanvas_drawMesh(SkCanvas* self, const SkMesh* mesh, SkBlender* blender, const SkPaint* paint) {
+    self->drawMesh(*mesh, sp(blender), *paint);
+}
+
 extern "C" void C_SkCanvas_drawGlyphs(
     SkCanvas* self, 
     const SkGlyphID* glyphs, size_t glyphCount,
@@ -1653,6 +1658,229 @@ extern "C" SkShader* C_SkBitmap_makeShader(
 
 extern "C" SkImage* C_SkBitmap_asImage(const SkBitmap* self) {
     return self->asImage().release();
+}
+
+//
+// core/SkMesh.h
+//
+
+extern "C" void C_SkMeshSpecification_ref(const SkMeshSpecification* self) {
+    self->ref();
+}
+
+extern "C" void C_SkMeshSpecification_unref(const SkMeshSpecification* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkMeshSpecification_unique(const SkMeshSpecification* self) {
+    return self->unique();
+}
+
+extern "C" void C_SkMeshSpecification_Attribute_Construct(
+    SkMeshSpecification::Attribute* uninitialized,
+    SkMeshSpecification::Attribute::Type type, size_t offset,
+    const char* name, size_t nameLength) {
+    new (uninitialized) SkMeshSpecification::Attribute{type, offset, SkString(name, nameLength)};
+}
+
+extern "C" void C_SkMeshSpecification_Attribute_CopyConstruct(
+    SkMeshSpecification::Attribute* uninitialized, const SkMeshSpecification::Attribute* attribute) {
+    new (uninitialized) SkMeshSpecification::Attribute(*attribute);
+}
+
+extern "C" void C_SkMeshSpecification_Attribute_destruct(SkMeshSpecification::Attribute* self) {
+    self->~Attribute();
+}
+
+extern "C" void C_SkMeshSpecification_Varying_Construct(
+    SkMeshSpecification::Varying* uninitialized,
+    SkMeshSpecification::Varying::Type type,
+    const char* name, size_t nameLength) {
+    new (uninitialized) SkMeshSpecification::Varying{type, SkString(name, nameLength)};
+}
+
+extern "C" void C_SkMeshSpecification_Varying_CopyConstruct(
+    SkMeshSpecification::Varying* uninitialized, const SkMeshSpecification::Varying* varying) {
+    new (uninitialized) SkMeshSpecification::Varying(*varying);
+}
+
+extern "C" void C_SkMeshSpecification_Varying_destruct(SkMeshSpecification::Varying* self) {
+    self->~Varying();
+}
+
+extern "C" SkMeshSpecification* C_SkMeshSpecification_Make(
+    const SkMeshSpecification::Attribute* attributes, size_t attributeCount,
+    size_t vertexStride,
+    const SkMeshSpecification::Varying* varyings, size_t varyingCount,
+    const SkString* vs, const SkString* fs,
+    SkColorSpace* cs, SkAlphaType at,
+    SkString* error) {
+    auto r = SkMeshSpecification::Make(
+        SkSpan(attributes, attributeCount), vertexStride,
+        SkSpan(varyings, varyingCount),
+        *vs, *fs, sp(cs), at);
+    *error = r.error;
+    return r.specification.release();
+}
+
+extern "C" const SkMeshSpecification::Attribute* C_SkMeshSpecification_attributes(const SkMeshSpecification* self, size_t* count) {
+    auto attributes = self->attributes();
+    *count = attributes.size();
+    return attributes.data();
+}
+
+extern "C" size_t C_SkMeshSpecification_uniformSize(const SkMeshSpecification* self) {
+    return self->uniformSize();
+}
+
+extern "C" const SkRuntimeEffect::Uniform* C_SkMeshSpecification_uniforms(const SkMeshSpecification* self, size_t* count) {
+    auto uniforms = self->uniforms();
+    *count = uniforms.size();
+    return uniforms.data();
+}
+
+extern "C" const SkRuntimeEffect::Child* C_SkMeshSpecification_children(const SkMeshSpecification* self, size_t* count) {
+    auto children = self->children();
+    *count = children.size();
+    return children.data();
+}
+
+extern "C" const SkRuntimeEffect::Child* C_SkMeshSpecification_findChild(const SkMeshSpecification* self, const char* name, size_t count) {
+    return self->findChild(std::string_view(name, count));
+}
+
+extern "C" const SkRuntimeEffect::Uniform* C_SkMeshSpecification_findUniform(const SkMeshSpecification* self, const char* name, size_t count) {
+    return self->findUniform(std::string_view(name, count));
+}
+
+extern "C" const SkMeshSpecification::Attribute* C_SkMeshSpecification_findAttribute(const SkMeshSpecification* self, const char* name, size_t count) {
+    return self->findAttribute(std::string_view(name, count));
+}
+
+extern "C" const SkMeshSpecification::Varying* C_SkMeshSpecification_findVarying(const SkMeshSpecification* self, const char* name, size_t count) {
+    return self->findVarying(std::string_view(name, count));
+}
+
+extern "C" size_t C_SkMeshSpecification_stride(const SkMeshSpecification* self) {
+    return self->stride();
+}
+
+extern "C" SkColorSpace* C_SkMeshSpecification_colorSpace(const SkMeshSpecification* self) {
+    return self->colorSpace();
+}
+
+extern "C" size_t C_SkMesh_VertexBuffer_size(const SkMesh::VertexBuffer* self) {
+    return self->size();
+}
+
+extern "C" bool C_SkMesh_VertexBuffer_update(SkMesh::VertexBuffer* self, GrDirectContext* context, const void* data, size_t offset, size_t size) {
+    return self->update(context, data, offset, size);
+}
+
+extern "C" size_t C_SkMesh_IndexBuffer_size(const SkMesh::IndexBuffer* self) {
+    return self->size();
+}
+
+extern "C" bool C_SkMesh_IndexBuffer_update(SkMesh::IndexBuffer* self, GrDirectContext* context, const void* data, size_t offset, size_t size) {
+    return self->update(context, data, offset, size);
+}
+
+// Creates an indexed mesh if `ib` is not null. Returns `nullptr` and sets `error` if the mesh is
+// invalid.
+extern "C" SkMesh* C_SkMesh_Make(
+    SkMeshSpecification* spec,
+    SkMesh::Mode mode,
+    SkMesh::VertexBuffer* vb, size_t vertexCount, size_t vertexOffset,
+    SkMesh::IndexBuffer* ib, size_t indexCount, size_t indexOffset,
+    const SkData* uniforms,
+    SkRuntimeEffect::ChildPtr* children, size_t childCount,
+    const SkRect* bounds,
+    SkString* error) {
+    auto childSpan = SkSpan<SkRuntimeEffect::ChildPtr>(children, childCount);
+    sk_sp<const SkData> uniformData = sp(uniforms);
+    // SkMesh::validate() dereferences null uniforms while it formats the "uniform data is too
+    // small" error (m153), so pass empty uniforms in this case.
+    if (!uniformData && spec->uniformSize() > 0) {
+        uniformData = SkData::MakeEmpty();
+    }
+    auto r = ib
+        ? SkMesh::MakeIndexed(
+            sp(spec), mode, sp(vb), vertexCount, vertexOffset,
+            sp(ib), indexCount, indexOffset,
+            std::move(uniformData), childSpan, *bounds)
+        : SkMesh::Make(
+            sp(spec), mode, sp(vb), vertexCount, vertexOffset,
+            std::move(uniformData), childSpan, *bounds);
+    *error = r.error;
+    return r.mesh.isValid() ? new SkMesh(std::move(r.mesh)) : nullptr;
+}
+
+extern "C" SkMesh* C_SkMesh_clone(const SkMesh* self) {
+    return new SkMesh(*self);
+}
+
+extern "C" void C_SkMesh_delete(SkMesh* self) {
+    delete self;
+}
+
+extern "C" SkMeshSpecification* C_SkMesh_refSpec(const SkMesh* self) {
+    return self->refSpec().release();
+}
+
+extern "C" SkMesh::Mode C_SkMesh_mode(const SkMesh* self) {
+    return self->mode();
+}
+
+extern "C" SkMesh::VertexBuffer* C_SkMesh_refVertexBuffer(const SkMesh* self) {
+    return self->refVertexBuffer().release();
+}
+
+extern "C" size_t C_SkMesh_vertexOffset(const SkMesh* self) {
+    return self->vertexOffset();
+}
+
+extern "C" size_t C_SkMesh_vertexCount(const SkMesh* self) {
+    return self->vertexCount();
+}
+
+extern "C" SkMesh::IndexBuffer* C_SkMesh_refIndexBuffer(const SkMesh* self) {
+    return self->refIndexBuffer().release();
+}
+
+extern "C" size_t C_SkMesh_indexOffset(const SkMesh* self) {
+    return self->indexOffset();
+}
+
+extern "C" size_t C_SkMesh_indexCount(const SkMesh* self) {
+    return self->indexCount();
+}
+
+extern "C" const SkData* C_SkMesh_refUniforms(const SkMesh* self) {
+    return self->refUniforms().release();
+}
+
+extern "C" void C_SkMesh_bounds(const SkMesh* self, SkRect* bounds) {
+    *bounds = self->bounds();
+}
+
+extern "C" bool C_SkMesh_isValid(const SkMesh* self) {
+    return self->isValid();
+}
+
+extern "C" SkMesh::IndexBuffer* C_SkMeshes_MakeIndexBuffer(const void* data, size_t size) {
+    return SkMeshes::MakeIndexBuffer(data, size).release();
+}
+
+extern "C" SkMesh::IndexBuffer* C_SkMeshes_CopyIndexBuffer(const SkMesh::IndexBuffer* src) {
+    return SkMeshes::CopyIndexBuffer(sk_ref_sp(const_cast<SkMesh::IndexBuffer*>(src))).release();
+}
+
+extern "C" SkMesh::VertexBuffer* C_SkMeshes_MakeVertexBuffer(const void* data, size_t size) {
+    return SkMeshes::MakeVertexBuffer(data, size).release();
+}
+
+extern "C" SkMesh::VertexBuffer* C_SkMeshes_CopyVertexBuffer(const SkMesh::VertexBuffer* src) {
+    return SkMeshes::CopyVertexBuffer(sk_ref_sp(const_cast<SkMesh::VertexBuffer*>(src))).release();
 }
 
 //

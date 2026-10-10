@@ -480,7 +480,7 @@ impl ChildPtr {
     //
     // Skia will copy the pointers and increase the reference counters if it uses the actual
     // objects.
-    pub(self) fn native(&self) -> Borrows<sb::SkRuntimeEffect_ChildPtr> {
+    pub(crate) fn native(&self) -> Borrows<sb::SkRuntimeEffect_ChildPtr> {
         let flattenable: *mut SkFlattenable = match self {
             // casting to &T &mut T is UB, so we don't use the base() indirection and directly cast
             // to a pointer.

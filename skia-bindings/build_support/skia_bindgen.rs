@@ -505,6 +505,9 @@ const OPAQUE_TYPES: &[&str] = &[
     "std::unordered_map.*",
     // Graphite types that expose std::unordered_set in public fields
     "skgpu::graphite::Recording",
+    // SkMesh.h: std::vector and STArray fields, only used through pointers.
+    "SkMeshSpecification",
+    "SkMesh",
 ];
 
 const BLOCKLISTED_TYPES: &[&str] = &[
