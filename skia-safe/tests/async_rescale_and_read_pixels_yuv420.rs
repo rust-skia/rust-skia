@@ -106,34 +106,9 @@ impl Vulkan {
         let device = unsafe { instance.enumerate_physical_devices() }
             .ok()
             .and_then(|physical_devices| {
-                physical_devices.into_iter().find_map(|physical_device| {
-                    let queue_family_index = unsafe {
-                        instance.get_physical_device_queue_family_properties(physical_device)
-                    }
-                    .iter()
-                    .position(|family| family.queue_flags.contains(vk::QueueFlags::GRAPHICS))?
-                        as u32;
-                    let queue_infos = [vk::DeviceQueueCreateInfo::default()
-                        .queue_family_index(queue_family_index)
-                        .queue_priorities(&[1.0])];
-                    // The spec requires enabling VK_KHR_portability_subset wherever it is offered.
-                    let device_extensions = if has_extension(
-                        &unsafe { instance.enumerate_device_extension_properties(physical_device) }
-                            .ok()?,
-                        ash::khr::portability_subset::NAME,
-                    ) {
-                        vec![ash::khr::portability_subset::NAME.as_ptr()]
-                    } else {
-                        Vec::new()
-                    };
-                    let device_info = vk::DeviceCreateInfo::default()
-                        .queue_create_infos(&queue_infos)
-                        .enabled_extension_names(&device_extensions);
-                    let device =
-                        unsafe { instance.create_device(physical_device, &device_info, None) }
-                            .ok()?;
-                    Some((physical_device, device, queue_family_index))
-                })
+                physical_devices
+                    .into_iter()
+                    .find_map(|physical_device| create_device(&instance, physical_device))
             });
 
         let Some((physical_device, device, queue_family_index)) = device else {
@@ -189,6 +164,34 @@ impl Drop for Vulkan {
             self.instance.destroy_instance(None);
         }
     }
+}
+
+fn create_device(
+    instance: &ash::Instance,
+    physical_device: vk::PhysicalDevice,
+) -> Option<(vk::PhysicalDevice, ash::Device, u32)> {
+    let queue_family_index =
+        unsafe { instance.get_physical_device_queue_family_properties(physical_device) }
+            .iter()
+            .position(|family| family.queue_flags.contains(vk::QueueFlags::GRAPHICS))?
+            as u32;
+    let queue_infos = [vk::DeviceQueueCreateInfo::default()
+        .queue_family_index(queue_family_index)
+        .queue_priorities(&[1.0])];
+    // The spec requires enabling VK_KHR_portability_subset wherever it is offered.
+    let device_extensions = if has_extension(
+        &unsafe { instance.enumerate_device_extension_properties(physical_device) }.ok()?,
+        ash::khr::portability_subset::NAME,
+    ) {
+        vec![ash::khr::portability_subset::NAME.as_ptr()]
+    } else {
+        Vec::new()
+    };
+    let device_info = vk::DeviceCreateInfo::default()
+        .queue_create_infos(&queue_infos)
+        .enabled_extension_names(&device_extensions);
+    let device = unsafe { instance.create_device(physical_device, &device_info, None) }.ok()?;
+    Some((physical_device, device, queue_family_index))
 }
 
 fn has_extension(extensions: &[vk::ExtensionProperties], name: &CStr) -> bool {
