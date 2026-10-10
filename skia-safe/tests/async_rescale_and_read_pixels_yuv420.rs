@@ -12,7 +12,7 @@ use std::ptr;
 use std::rc::Rc;
 
 use ash::vk::{self, Handle};
-use skia_safe::gpu::{self, DirectContext};
+use skia_safe::gpu::{self, DirectContext, direct_contexts};
 use skia_safe::image::{RescaleGamma, RescaleMode};
 use skia_safe::{AlphaType, ColorType, IRect, ISize, ImageInfo, Surface, YUVColorSpace};
 
@@ -153,7 +153,7 @@ impl Vulkan {
             )
             .build()
         };
-        gpu::direct_contexts::make_vulkan(&backend_context, None)
+        direct_contexts::make_vulkan(&backend_context, None)
     }
 }
 
