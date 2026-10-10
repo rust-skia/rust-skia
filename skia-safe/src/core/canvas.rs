@@ -2053,20 +2053,27 @@ impl Canvas {
         self
     }
 
-    /// Draws a [`Mesh`] using clip and [`Matrix`].
+    /// Experimental, under active development, and subject to change without notice.
     ///
-    /// If the fragment program of the mesh's specification produces a color, `blender` combines
-    /// it (as dst) with the [`Shader`] of `paint`, or the paint color if there is no shader (as
-    /// src). `None` means [`BlendMode::Modulate`].
+    /// Draws a mesh using a user-defined specification (see [`crate::MeshSpecification`]).
+    /// Requires a GPU backend or SkSL to be compiled in.
+    ///
+    /// [`Blender`] is ignored if [`Mesh`]'s specification does not output fragment shader color.
+    /// Otherwise, it combines
+    /// - the [`Shader`] if [`Paint`] contains [`Shader`]
+    /// - or the opaque [`Paint`] color if [`Paint`] does not contain [`Shader`]
+    ///
+    /// as the src of the blend and the mesh's fragment color as the dst.
     ///
     /// [`crate::MaskFilter`], [`crate::PathEffect`], and antialiasing on [`Paint`] are ignored.
     ///
-    /// Note: In this Skia version, meshes are drawn by the Ganesh GPU backend only. The raster,
-    /// PDF and SVG backends ignore this call.
+    /// Note: The raster, PDF, and SVG backends ignore meshes; Ganesh and Graphite draw them.
     ///
-    /// - `mesh` the mesh vertices and compatible specification
-    /// - `blender` combines the mesh's color with the paint's [`Shader`] or color
-    /// - `paint` specifies the [`Shader`], and [`crate::ColorFilter`]
+    /// - `mesh` the mesh vertices and compatible specification.
+    /// - `blender` combines vertices colors with [`Shader`] if present or [`Paint`] opaque color
+    ///   if not. Ignored if the custom mesh does not output color. Defaults to
+    ///   [`BlendMode::Modulate`] if `None`.
+    /// - `paint` specifies the [`Shader`], used as [`Vertices`] texture
     pub fn draw_mesh(
         &self,
         mesh: &Mesh,

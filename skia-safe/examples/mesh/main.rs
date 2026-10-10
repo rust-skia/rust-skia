@@ -1,8 +1,7 @@
 //! Draws custom meshes ([`skia_safe::Mesh`]) into an offscreen GPU surface, reads the pixels
 //! back, asserts them, and saves the result as a PNG.
 //!
-//! Meshes are drawn by the Ganesh GPU backend only, so this example needs a GL context. It
-//! creates one with a hidden window.
+//! Meshes need a GPU backend; this example uses a Ganesh GL context on a hidden window.
 //!
 //! `cargo run --example mesh --features gl [output.png]`
 

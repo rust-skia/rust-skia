@@ -1,3 +1,6 @@
+//! Custom meshes: a [`MeshSpecification`] with SkSL vertex and fragment programs, and [`Mesh`]es
+//! that draw vertex (and index) buffers with it.
+
 use std::{fmt, ops::DerefMut, ptr};
 
 use skia_bindings::{
@@ -12,9 +15,6 @@ use crate::{
 };
 
 pub use crate::runtime_effect::{Child, ChildPtr, Uniform};
-
-pub use sb::SkMesh_Mode as Mode;
-variant_name!(Mode::TriangleStrip);
 
 /// A vertex attribute: its type, its byte offset inside a vertex, and the name of the field in the
 /// SkSL `Attributes` struct.
@@ -71,8 +71,14 @@ impl Attribute {
 }
 
 pub mod attribute {
-    /// CPU representation and shader type of a vertex attribute. `UByte4_unorm` is four bytes on
-    /// the CPU and a `half4` in the shader.
+    /// The CPU representation and the shader type of a vertex attribute.
+    ///
+    /// Variants:
+    /// - [`Type::Float`] CPU representation float, shader type `float`.
+    /// - [`Type::Float2`] CPU representation two floats, shader type `float2`.
+    /// - [`Type::Float3`] CPU representation three floats, shader type `float3`.
+    /// - [`Type::Float4`] CPU representation four floats, shader type `float4`.
+    /// - [`Type::UByte4_unorm`] CPU representation four bytes, shader type `half4`.
     pub use skia_bindings::SkMeshSpecification_Attribute_Type as Type;
     variant_name!(Type::UByte4_unorm);
 }
@@ -120,25 +126,52 @@ impl Varying {
 }
 
 pub mod varying {
+    /// The shader type of a varying.
+    ///
+    /// Variants:
+    /// - [`Type::Float`] `float`
+    /// - [`Type::Float2`] `float2`
+    /// - [`Type::Float3`] `float3`
+    /// - [`Type::Float4`] `float4`
+    /// - [`Type::Half`] `half`
+    /// - [`Type::Half2`] `half2`
+    /// - [`Type::Half3`] `half3`
+    /// - [`Type::Half4`] `half4`
     pub use skia_bindings::SkMeshSpecification_Varying_Type as Type;
     variant_name!(Type::Half4);
 }
 
 /// A specification for custom meshes. Specifies the vertex buffer attributes and stride, the
-/// vertex program that produces a user-defined set of varyings, and a fragment program that
-/// ingests the interpolated varyings and produces local coordinates for shading and optionally a
-/// color.
+/// vertex program that produces a user-defined set of varyings, and a fragment program that ingests
+/// the interpolated varyings and produces local coordinates for shading and optionally a color.
 ///
-/// The varyings must include a `float2` named `position`. If the passed varyings do not contain
-/// such a varying, one is implicitly added.
+/// The varyings must include a `float2` named `position`. If the passed varyings does not
+/// contain such a varying then one is implicitly added to the final specification and the SkSL
+/// `Varyings` struct described below. It is an error to have a varying named `position` that has a
+/// type other than `float2`.
 ///
-/// The signature of the vertex program must be `Varyings main(const Attributes)`.
+/// The provided attributes and varyings are used to create `Attributes` and `Varyings` structs in
+/// SkSL that are used by the shaders. Each attribute from the [`Attribute`] slice becomes a member
+/// of the SkSL `Attributes` struct and likewise for the varyings.
 ///
-/// The signature of the fragment program must be either `float2 main(const Varyings)` or
-/// `float2 main(const Varyings, out (half4|float4) color)`, where the return value is the local
-/// coordinates that will be used to access the [`crate::Shader`] of the [`crate::Paint`]. If the
-/// color variant is used, the returned color is blended with the paint's shader (or the paint
-/// color) using the blender passed to [`crate::Canvas::draw_mesh()`].
+/// The signature of the vertex program must be:
+/// `Varyings main(const Attributes)`.
+///
+/// The signature of the fragment program must be either:
+/// `float2 main(const Varyings)`
+/// or
+/// `float2 main(const Varyings, out (half4|float4) color)`
+///
+/// where the return value is the local coordinates that will be used to access [`crate::Shader`].
+/// If the color variant is used, the returned color will be blended with [`crate::Paint`]'s
+/// [`crate::Shader`] (or [`crate::Paint`] color in absence of a [`crate::Shader`]) using the
+/// [`crate::Blender`] passed to [`crate::Canvas::draw_mesh()`]. To use interpolated local space
+/// positions as the shader coordinates, equivalent to how [`crate::Path`]s are shaded, return the
+/// position field from the `Varying` struct as the coordinates.
+///
+/// The vertex and fragment programs may both contain uniforms. Uniforms with the same name are
+/// assumed to be shared between stages. It is an error to specify uniforms in the vertex and
+/// fragment program with the same name but different types, dimensionality, or layouts.
 pub type MeshSpecification = RCHandle<SkMeshSpecification>;
 
 impl NativeRefCounted for SkMeshSpecification {
@@ -159,25 +192,29 @@ impl fmt::Debug for MeshSpecification {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("MeshSpecification")
             .field("attributes", &self.attributes())
-            .field("stride", &self.stride())
             .field("uniform_size", &self.uniform_size())
             .field("uniforms", &self.uniforms())
             .field("children", &self.children())
+            .field("stride", &self.stride())
             .finish()
     }
 }
 
 impl MeshSpecification {
-    /// Creates a specification whose fragment program color (if any) is sRGB and premultiplied.
+    /// If successful the return is a specification. Otherwise, it is a non-empty error string.
     ///
-    /// Returns the SkSL / validation error text on failure.
+    /// The color produced by `fs` (if any) is sRGB and premultiplied.
     ///
-    /// - `attributes` the vertex attributes consumed by `vs`. At least one is required, offsets
-    ///   must be 4 byte aligned.
-    /// - `vertex_stride` the byte distance between successive vertices, 4 byte aligned.
-    /// - `varyings` the varyings written by `vs` and read by `fs`. May be empty.
-    /// - `vs` the vertex program.
-    /// - `fs` the fragment program.
+    /// - `attributes` The vertex attributes that will be consumed by `vs`. Attributes need not be
+    ///   tightly packed but attribute offsets must be aligned to 4 bytes and offset + size may not
+    ///   be greater than `vertex_stride`. At least one attribute is required.
+    /// - `vertex_stride` The offset between successive attribute values. This must be aligned to 4
+    ///   bytes.
+    /// - `varyings` The varyings that will be written by `vs` and read by `fs`. This may be empty.
+    /// - `vs` The vertex shader code that computes a vertex position and the varyings from the
+    ///   attributes.
+    /// - `fs` The fragment code that computes a local coordinate and optionally a color from the
+    ///   varyings. The local coordinate is used to sample [`crate::Shader`].
     pub fn make(
         attributes: &[Attribute],
         vertex_stride: usize,
@@ -248,12 +285,15 @@ impl MeshSpecification {
         }
     }
 
-    /// Combined size of all uniforms. A [`Mesh`] created with this specification needs a [`Data`]
-    /// of this size. Use [`Self::uniforms()`] to get the offset of each uniform.
+    /// Combined size of all 'uniform' variables. When creating a [`Mesh`] with this specification
+    /// provide a [`Data`] of this size, containing values for all of those variables. Use
+    /// [`Self::uniforms()`] to get the offset of each uniform within the [`Data`].
     pub fn uniform_size(&self) -> usize {
         unsafe { sb::C_SkMeshSpecification_uniformSize(self.native()) }
     }
 
+    /// Provides info about individual uniforms including the offset into a [`Data`] where each
+    /// uniform value should be placed.
     pub fn uniforms(&self) -> &[Uniform] {
         unsafe {
             let mut count = 0;
@@ -262,6 +302,7 @@ impl MeshSpecification {
         }
     }
 
+    /// Provides basic info about individual children: names, indices and runtime effect type.
     pub fn children(&self) -> &[Child] {
         unsafe {
             let mut count = 0;
@@ -270,6 +311,7 @@ impl MeshSpecification {
         }
     }
 
+    /// Returns the named child's description, or `None` if not found.
     pub fn find_child(&self, name: impl AsRef<str>) -> Option<&Child> {
         let name = name.as_ref().as_bytes();
         unsafe {
@@ -279,6 +321,7 @@ impl MeshSpecification {
         .map(|ptr| Child::from_native_ref(unsafe { ptr.as_ref() }))
     }
 
+    /// Returns the named uniform variable's description, or `None` if not found.
     pub fn find_uniform(&self, name: impl AsRef<str>) -> Option<&Uniform> {
         let name = name.as_ref().as_bytes();
         unsafe {
@@ -288,6 +331,7 @@ impl MeshSpecification {
         .map(|ptr| Uniform::from_native_ref(unsafe { ptr.as_ref() }))
     }
 
+    /// Returns the named attribute, or `None` if not found.
     pub fn find_attribute(&self, name: impl AsRef<str>) -> Option<&Attribute> {
         let name = name.as_ref().as_bytes();
         unsafe {
@@ -297,6 +341,7 @@ impl MeshSpecification {
         .map(|ptr| Attribute::from_native_ref(unsafe { ptr.as_ref() }))
     }
 
+    /// Returns the named varying, or `None` if not found.
     pub fn find_varying(&self, name: impl AsRef<str>) -> Option<&Varying> {
         let name = name.as_ref().as_bytes();
         unsafe {
@@ -315,52 +360,6 @@ impl MeshSpecification {
         ColorSpace::from_unshared_ptr(unsafe {
             sb::C_SkMeshSpecification_colorSpace(self.native())
         })
-    }
-}
-
-/// The vertex data of a [`Mesh`]. Create one with [`meshes::make_vertex_buffer()`] (CPU-backed) or
-/// `gpu::meshes::make_vertex_buffer()` (GPU-backed).
-pub type VertexBuffer = RCHandle<SkMesh_VertexBuffer>;
-require_base_type!(SkMesh_VertexBuffer, sb::SkRefCnt);
-
-impl NativeRefCountedBase for SkMesh_VertexBuffer {
-    type Base = SkRefCntBase;
-}
-
-impl fmt::Debug for VertexBuffer {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("VertexBuffer")
-            .field("size", &self.size())
-            .finish()
-    }
-}
-
-impl VertexBuffer {
-    /// The size of the buffer in bytes.
-    pub fn size(&self) -> usize {
-        unsafe { sb::C_SkMesh_VertexBuffer_size(self.native()) }
-    }
-
-    /// Copies `data` into the buffer at the byte `offset`. Fails if `offset + data.len() >
-    /// self.size()` or if either `offset` or `data.len()` is not aligned to 4 bytes.
-    ///
-    /// A GPU-backed buffer needs the `context` it was created with, a CPU-backed buffer ignores
-    /// it.
-    pub fn update<'a>(
-        &mut self,
-        context: impl Into<Option<&'a mut gpu::DirectContext>>,
-        data: &[u8],
-        offset: usize,
-    ) -> bool {
-        unsafe {
-            sb::C_SkMesh_VertexBuffer_update(
-                self.native_mut(),
-                context.into().native_ptr_or_null_mut(),
-                data.as_ptr() as _,
-                offset,
-                data.len(),
-            )
-        }
     }
 }
 
@@ -388,11 +387,13 @@ impl IndexBuffer {
         unsafe { sb::C_SkMesh_IndexBuffer_size(self.native()) }
     }
 
-    /// Copies `data` into the buffer at the byte `offset`. Fails if `offset + data.len() >
-    /// self.size()` or if either `offset` or `data.len()` is not aligned to 4 bytes.
+    /// Modifies the data in the [`IndexBuffer`] by copying `data` into the buffer at `offset`.
+    /// Fails if `offset + data.len() > self.size()` or if either `offset` or `data.len()` is not
+    /// aligned to 4 bytes. The [`gpu::DirectContext`] must match that used to create the buffer.
+    /// We take it as a parameter to emphasize that the context must be used to update the data
+    /// and thus the context must be valid for the current thread.
     ///
-    /// A GPU-backed buffer needs the `context` it was created with, a CPU-backed buffer ignores
-    /// it.
+    /// A CPU-backed buffer is updated with `None` and fails if a context is passed.
     pub fn update<'a>(
         &mut self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
@@ -411,11 +412,77 @@ impl IndexBuffer {
     }
 }
 
+/// The vertex data of a [`Mesh`]. Create one with [`meshes::make_vertex_buffer()`] (CPU-backed) or
+/// `gpu::meshes::make_vertex_buffer()` (GPU-backed).
+pub type VertexBuffer = RCHandle<SkMesh_VertexBuffer>;
+require_base_type!(SkMesh_VertexBuffer, sb::SkRefCnt);
+
+impl NativeRefCountedBase for SkMesh_VertexBuffer {
+    type Base = SkRefCntBase;
+}
+
+impl fmt::Debug for VertexBuffer {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VertexBuffer")
+            .field("size", &self.size())
+            .finish()
+    }
+}
+
+impl VertexBuffer {
+    /// The size of the buffer in bytes.
+    pub fn size(&self) -> usize {
+        unsafe { sb::C_SkMesh_VertexBuffer_size(self.native()) }
+    }
+
+    /// Modifies the data in the [`VertexBuffer`] by copying `data` into the buffer at `offset`.
+    /// Fails if `offset + data.len() > self.size()` or if either `offset` or `data.len()` is not
+    /// aligned to 4 bytes. The [`gpu::DirectContext`] must match that used to create the buffer.
+    /// We take it as a parameter to emphasize that the context must be used to update the data
+    /// and thus the context must be valid for the current thread.
+    ///
+    /// A CPU-backed buffer is updated with `None` and fails if a context is passed.
+    pub fn update<'a>(
+        &mut self,
+        context: impl Into<Option<&'a mut gpu::DirectContext>>,
+        data: &[u8],
+        offset: usize,
+    ) -> bool {
+        unsafe {
+            sb::C_SkMesh_VertexBuffer_update(
+                self.native_mut(),
+                context.into().native_ptr_or_null_mut(),
+                data.as_ptr() as _,
+                offset,
+                data.len(),
+            )
+        }
+    }
+}
+
+pub use sb::SkMesh_Mode as Mode;
+variant_name!(Mode::TriangleStrip);
+
 /// A vertex buffer, a topology, optionally an index buffer, and a compatible
-/// [`MeshSpecification`]. Draw it with [`crate::Canvas::draw_mesh()`].
+/// [`MeshSpecification`].
 ///
-/// Note: In this Skia version, meshes are drawn by the Ganesh GPU backend only. The raster, PDF
-/// and SVG backends ignore them.
+/// The data in the vertex buffer is expected to contain the attributes described by the spec
+/// for `vertex_count` vertices, beginning at `vertex_offset`. `vertex_offset` must be aligned to
+/// the [`MeshSpecification`]'s vertex stride. The size of the buffer must be at least
+/// `vertex_offset + spec.stride() * vertex_count` (even if vertex attributes contains pad at the
+/// end of the stride). If the specified bounds do not contain all the points output by the spec's
+/// vertex program when applied to the vertices in the custom mesh, then the result is undefined.
+///
+/// [`Mesh::make_indexed()`] may be used to create an indexed mesh. `index_count` indices are read
+/// from the index buffer at the specified offset, which must be aligned to 2. The indices are
+/// always unsigned 16-bit integers. The index count must be at least 3.
+///
+/// If [`Mesh::make()`] is used, the implicit index sequence is 0, 1, 2, 3, ... and
+/// `vertex_count` must be at least 3.
+///
+/// Both [`Mesh::make()`] and [`Mesh::make_indexed()`] take a [`Data`] with the uniform values.
+/// See [`MeshSpecification::uniform_size()`] and [`MeshSpecification::uniforms()`] for sizing and
+/// packing uniforms into the [`Data`].
 // Heap allocated: `SkMesh` stores its children in an array with inline storage and can not be
 // moved by Rust.
 pub type Mesh = RefHandle<SkMesh>;
@@ -436,18 +503,18 @@ impl fmt::Debug for Mesh {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Mesh")
             .field("mode", &self.mode())
-            .field("vertex_count", &self.vertex_count())
             .field("vertex_offset", &self.vertex_offset())
-            .field("index_count", &self.index_count())
+            .field("vertex_count", &self.vertex_count())
             .field("index_offset", &self.index_offset())
+            .field("index_count", &self.index_count())
             .field("bounds", &self.bounds())
             .finish()
     }
 }
 
 impl Mesh {
-    /// Creates a non-indexed mesh. Returns the reason if the mesh is invalid (for example, the
-    /// uniform data is too small).
+    /// Creates a non-indexed [`Mesh`]. If the mesh is invalid the returned string give contain
+    /// the reason for the failure (e.g. the vertex buffer was null or uniform data too small).
     ///
     /// - `vertex_count` must be at least 3.
     /// - `vertex_offset` the byte offset of the first vertex in `vertex_buffer`, a multiple of the
@@ -481,10 +548,12 @@ impl Mesh {
         )
     }
 
-    /// Creates an indexed mesh. `index_count` (at least 3) unsigned 16-bit indices are read from
-    /// `index_buffer` at the byte offset `index_offset`, which must be a multiple of 2.
+    /// Creates an indexed [`Mesh`]. If the mesh is invalid the returned string give contain the
+    /// reason for the failure (e.g. the index buffer was null or uniform data too small).
     ///
-    /// See [`Self::make()`] for the other parameters.
+    /// `index_count` (at least 3) unsigned 16-bit indices are read from `index_buffer` at the byte
+    /// offset `index_offset`, which must be a multiple of 2. See [`Self::make()`] for the other
+    /// parameters.
     #[allow(clippy::too_many_arguments)]
     pub fn make_indexed(
         spec: impl Into<MeshSpecification>,
@@ -613,28 +682,36 @@ pub mod meshes {
     use crate::prelude::*;
     use skia_bindings as sb;
 
-    /// Makes a CPU-backed index buffer by copying `data` (native endian unsigned 16-bit indices).
+    /// Makes a CPU-backed index buffer to be used with [`super::Mesh`]es.
+    ///
+    /// - `data` The data used to populate the buffer (native endian unsigned 16-bit indices). Its
+    ///   length is both the size of the data and the size of the resulting buffer, in bytes.
     pub fn make_index_buffer(data: &[u8]) -> Option<IndexBuffer> {
         IndexBuffer::from_ptr(unsafe {
             sb::C_SkMeshes_MakeIndexBuffer(data.as_ptr() as _, data.len())
         })
     }
 
-    /// Makes a CPU-backed copy of an index buffer. Returns `None` if the contents of `src` can
-    /// not be read back (GPU-backed buffers).
+    /// Makes a copy of an index buffer. The copy will be CPU-backed.
+    ///
+    /// Returns `None` if the contents of `src` can not be read back (GPU-backed buffers).
     pub fn copy_index_buffer(src: &IndexBuffer) -> Option<IndexBuffer> {
         IndexBuffer::from_ptr(unsafe { sb::C_SkMeshes_CopyIndexBuffer(src.native()) })
     }
 
-    /// Makes a CPU-backed vertex buffer by copying `data`.
+    /// Makes a CPU-backed vertex buffer to be used with [`super::Mesh`]es.
+    ///
+    /// - `data` The data used to populate the buffer. Its length is both the size of the data and
+    ///   the size of the resulting buffer, in bytes.
     pub fn make_vertex_buffer(data: &[u8]) -> Option<VertexBuffer> {
         VertexBuffer::from_ptr(unsafe {
             sb::C_SkMeshes_MakeVertexBuffer(data.as_ptr() as _, data.len())
         })
     }
 
-    /// Makes a CPU-backed copy of a vertex buffer. Returns `None` if the contents of `src` can
-    /// not be read back (GPU-backed buffers).
+    /// Makes a copy of a vertex buffer. The copy will be CPU-backed.
+    ///
+    /// Returns `None` if the contents of `src` can not be read back (GPU-backed buffers).
     pub fn copy_vertex_buffer(src: &VertexBuffer) -> Option<VertexBuffer> {
         VertexBuffer::from_ptr(unsafe { sb::C_SkMeshes_CopyVertexBuffer(src.native()) })
     }
