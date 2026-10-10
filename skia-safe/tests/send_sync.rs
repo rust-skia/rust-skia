@@ -96,7 +96,7 @@ mod core {
     assert_impl_all!(matrix::TypeMask: Send, Sync);
 
     assert_not_impl_any!(Mesh: Send, Sync);
-    assert_not_impl_any!(MeshSpecification: Send, Sync);
+    assert_impl_all!(MeshSpecification: Send, Sync);
     assert_impl_all!(mesh::Attribute: Send, Sync);
     assert_impl_all!(mesh::attribute::Type: Send, Sync);
     assert_impl_all!(mesh::Varying: Send, Sync);

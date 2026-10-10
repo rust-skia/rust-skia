@@ -173,6 +173,9 @@ pub mod varying {
 /// assumed to be shared between stages. It is an error to specify uniforms in the vertex and
 /// fragment program with the same name but different types, dimensionality, or layouts.
 pub type MeshSpecification = RCHandle<SkMeshSpecification>;
+// Immutable after construction (only `const` fields) with an atomic refcount; Skia's Graphite
+// shares specifications between recorder threads.
+unsafe_send_sync!(MeshSpecification);
 
 impl NativeRefCounted for SkMeshSpecification {
     fn _ref(&self) {
