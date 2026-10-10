@@ -257,7 +257,7 @@ impl MeshSpecification {
     /// Like [`Self::make()`], with the color space and alpha type of the color produced by `fs`.
     ///
     /// - `color_space` The colorspace of the color produced by `fs`. Ignored if `fs`'s main()
-    ///   function does not have a color out param.
+    ///   function does not have a color out param. If it has one, `None` is an error.
     /// - `alpha_type` The alpha type of the color produced by `fs`. Ignored if `fs`'s main()
     ///   function does not have a color out param. Cannot be [`AlphaType::Unknown`]. `None` uses
     ///   [`AlphaType::Premul`].
