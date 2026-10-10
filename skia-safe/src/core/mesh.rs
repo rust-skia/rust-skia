@@ -185,30 +185,6 @@ impl MeshSpecification {
         vs: impl AsRef<str>,
         fs: impl AsRef<str>,
     ) -> Result<Self, String> {
-        Self::make_with_color_space(
-            attributes,
-            vertex_stride,
-            varyings,
-            vs,
-            fs,
-            ColorSpace::new_srgb(),
-            None,
-        )
-    }
-
-    /// Like [`Self::make()`], with the color space and alpha type of the color produced by `fs`.
-    ///
-    /// Both are ignored if `fs` has no color out parameter. If it has one, `color_space` must not
-    /// be `None`. `alpha_type` defaults to [`AlphaType::Premul`].
-    pub fn make_with_color_space(
-        attributes: &[Attribute],
-        vertex_stride: usize,
-        varyings: &[Varying],
-        vs: impl AsRef<str>,
-        fs: impl AsRef<str>,
-        color_space: impl Into<Option<ColorSpace>>,
-        alpha_type: impl Into<Option<AlphaType>>,
-    ) -> Result<Self, String> {
         let vs = interop::String::from_str(vs);
         let fs = interop::String::from_str(fs);
         let mut error = interop::String::default();
@@ -221,8 +197,43 @@ impl MeshSpecification {
                 varyings.len(),
                 vs.native(),
                 fs.native(),
+                error.native_mut(),
+            )
+        })
+        .ok_or_else(|| error.to_string())
+    }
+
+    /// Like [`Self::make()`], with the color space and alpha type of the color produced by `fs`.
+    ///
+    /// - `color_space` The colorspace of the color produced by `fs`. Ignored if `fs`'s main()
+    ///   function does not have a color out param.
+    /// - `alpha_type` The alpha type of the color produced by `fs`. Ignored if `fs`'s main()
+    ///   function does not have a color out param. Cannot be [`AlphaType::Unknown`]. `None` uses
+    ///   [`AlphaType::Premul`].
+    pub fn make_with_color_space(
+        attributes: &[Attribute],
+        vertex_stride: usize,
+        varyings: &[Varying],
+        vs: impl AsRef<str>,
+        fs: impl AsRef<str>,
+        color_space: impl Into<Option<ColorSpace>>,
+        alpha_type: impl Into<Option<AlphaType>>,
+    ) -> Result<Self, String> {
+        let vs = interop::String::from_str(vs);
+        let fs = interop::String::from_str(fs);
+        let alpha_type = alpha_type.into();
+        let mut error = interop::String::default();
+        Self::from_ptr(unsafe {
+            sb::C_SkMeshSpecification_MakeWithColorSpace(
+                attributes.as_ptr() as _,
+                attributes.len(),
+                vertex_stride,
+                varyings.as_ptr() as _,
+                varyings.len(),
+                vs.native(),
+                fs.native(),
                 color_space.into().into_ptr_or_null(),
-                alpha_type.into().unwrap_or(AlphaType::Premul),
+                alpha_type.as_ref().map_or(ptr::null(), |at| at as *const _),
                 error.native_mut(),
             )
         })
