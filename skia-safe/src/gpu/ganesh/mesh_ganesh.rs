@@ -1,3 +1,5 @@
+use std::ptr;
+
 use skia_bindings as sb;
 
 use crate::{
@@ -15,6 +17,20 @@ use crate::{
 pub fn make_index_buffer(context: &mut DirectContext, data: &[u8]) -> Option<IndexBuffer> {
     IndexBuffer::from_ptr(unsafe {
         sb::C_SkMeshes_MakeIndexBufferGanesh(context.native_mut(), data.as_ptr() as _, data.len())
+    })
+}
+
+/// Makes a zero-initialized GPU-backed index buffer to be used with [`crate::Mesh`]es.
+///
+/// - `context` The buffer will be created on the corresponding GPU and will only be compatible with
+///   surfaces using the same context.
+/// - `size` The size of the resulting buffer, in bytes.
+pub fn make_zero_initialized_index_buffer(
+    context: &mut DirectContext,
+    size: usize,
+) -> Option<IndexBuffer> {
+    IndexBuffer::from_ptr(unsafe {
+        sb::C_SkMeshes_MakeIndexBufferGanesh(context.native_mut(), ptr::null(), size)
     })
 }
 
@@ -36,6 +52,20 @@ pub fn copy_index_buffer(context: &mut DirectContext, src: &IndexBuffer) -> Opti
 pub fn make_vertex_buffer(context: &mut DirectContext, data: &[u8]) -> Option<VertexBuffer> {
     VertexBuffer::from_ptr(unsafe {
         sb::C_SkMeshes_MakeVertexBufferGanesh(context.native_mut(), data.as_ptr() as _, data.len())
+    })
+}
+
+/// Makes a zero-initialized GPU-backed vertex buffer to be used with [`crate::Mesh`]es.
+///
+/// - `context` The buffer will be created on the corresponding GPU and will only be compatible with
+///   surfaces using the same context.
+/// - `size` The size of the resulting buffer, in bytes.
+pub fn make_zero_initialized_vertex_buffer(
+    context: &mut DirectContext,
+    size: usize,
+) -> Option<VertexBuffer> {
+    VertexBuffer::from_ptr(unsafe {
+        sb::C_SkMeshes_MakeVertexBufferGanesh(context.native_mut(), ptr::null(), size)
     })
 }
 

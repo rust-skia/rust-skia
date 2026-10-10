@@ -204,15 +204,26 @@ impl fmt::Debug for MeshSpecification {
 }
 
 impl MeshSpecification {
+    /// The maximum vertex stride. Enforced when creating a specification.
+    pub const MAX_STRIDE: usize = sb::SkMeshSpecification_kMaxStride;
+    /// The maximum number of attributes. Enforced when creating a specification.
+    pub const MAX_ATTRIBUTES: usize = sb::SkMeshSpecification_kMaxAttributes;
+    /// The alignment of the vertex stride. Enforced when creating a specification.
+    pub const STRIDE_ALIGNMENT: usize = sb::SkMeshSpecification_kStrideAlignment;
+    /// The alignment of attribute offsets. Enforced when creating a specification.
+    pub const OFFSET_ALIGNMENT: usize = sb::SkMeshSpecification_kOffsetAlignment;
+    /// The maximum number of varyings. Enforced when creating a specification.
+    pub const MAX_VARYINGS: usize = sb::SkMeshSpecification_kMaxVaryings;
+
     /// If successful the return is a specification. Otherwise, it is a non-empty error string.
     ///
     /// The color produced by `fs` (if any) is sRGB and premultiplied.
     ///
     /// - `attributes` The vertex attributes that will be consumed by `vs`. Attributes need not be
-    ///   tightly packed but attribute offsets must be aligned to 4 bytes and offset + size may not
-    ///   be greater than `vertex_stride`. At least one attribute is required.
-    /// - `vertex_stride` The offset between successive attribute values. This must be aligned to 4
-    ///   bytes.
+    ///   tightly packed but attribute offsets must be aligned to [`Self::OFFSET_ALIGNMENT`] and
+    ///   offset + size may not be greater than `vertex_stride`. At least one attribute is required.
+    /// - `vertex_stride` The offset between successive attribute values. This must be aligned to
+    ///   [`Self::STRIDE_ALIGNMENT`].
     /// - `varyings` The varyings that will be written by `vs` and read by `fs`. This may be empty.
     /// - `vs` The vertex shader code that computes a vertex position and the varyings from the
     ///   attributes.
@@ -670,6 +681,18 @@ impl Mesh {
         Data::from_ptr_const(unsafe { sb::C_SkMesh_refUniforms(self.native()) })
     }
 
+    pub fn children(&self) -> impl Iterator<Item = ChildPtr> + use<'_> {
+        let children = unsafe {
+            let mut count = 0;
+            let ptr = sb::C_SkMesh_children(self.native(), &mut count);
+            safer::from_raw_parts(ptr, count)
+        };
+        children.iter().map(|child| {
+            // Meshes are only made from `ChildPtr`s, which always hold a child.
+            ChildPtr::from_native_ref(child).expect("mesh child is null")
+        })
+    }
+
     pub fn bounds(&self) -> Rect {
         let mut bounds = Rect::default();
         unsafe { sb::C_SkMesh_bounds(self.native(), bounds.native_mut()) };
@@ -685,6 +708,8 @@ impl Mesh {
 
 /// CPU-backed mesh buffers.
 pub mod meshes {
+    use std::ptr;
+
     use super::{IndexBuffer, VertexBuffer};
     use crate::prelude::*;
     use skia_bindings as sb;
@@ -697,6 +722,13 @@ pub mod meshes {
         IndexBuffer::from_ptr(unsafe {
             sb::C_SkMeshes_MakeIndexBuffer(data.as_ptr() as _, data.len())
         })
+    }
+
+    /// Makes a zero-initialized CPU-backed index buffer to be used with [`super::Mesh`]es.
+    ///
+    /// - `size` The size of the resulting buffer, in bytes.
+    pub fn make_zero_initialized_index_buffer(size: usize) -> Option<IndexBuffer> {
+        IndexBuffer::from_ptr(unsafe { sb::C_SkMeshes_MakeIndexBuffer(ptr::null(), size) })
     }
 
     /// Makes a copy of an index buffer. The copy will be CPU-backed.
@@ -714,6 +746,13 @@ pub mod meshes {
         VertexBuffer::from_ptr(unsafe {
             sb::C_SkMeshes_MakeVertexBuffer(data.as_ptr() as _, data.len())
         })
+    }
+
+    /// Makes a zero-initialized CPU-backed vertex buffer to be used with [`super::Mesh`]es.
+    ///
+    /// - `size` The size of the resulting buffer, in bytes.
+    pub fn make_zero_initialized_vertex_buffer(size: usize) -> Option<VertexBuffer> {
+        VertexBuffer::from_ptr(unsafe { sb::C_SkMeshes_MakeVertexBuffer(ptr::null(), size) })
     }
 
     /// Makes a copy of a vertex buffer. The copy will be CPU-backed.
@@ -816,6 +855,39 @@ mod tests {
         let clone = indexed.clone();
         drop(indexed);
         assert_eq!(clone.index_buffer().unwrap().size(), 6);
+    }
+
+    #[test]
+    fn children_outlive_their_mesh() {
+        let spec = MeshSpecification::make(
+            &[Attribute::new(attribute::Type::Float2, 0, "pos")],
+            8,
+            &[],
+            VS,
+            "uniform shader child;
+            float2 main(const Varyings v, out half4 color) {
+                color = child.eval(v.position); return v.position; }",
+        )
+        .unwrap();
+        let vb = meshes::make_vertex_buffer(&f32_bytes(&[0.0, 0.0, 10.0, 0.0, 0.0, 10.0])).unwrap();
+        let mesh = Mesh::make(
+            &spec,
+            Mode::Triangles,
+            &vb,
+            3,
+            0,
+            None,
+            &[ChildPtr::from(crate::shaders::color(crate::Color::RED))],
+            Rect::from_wh(10.0, 10.0),
+        )
+        .unwrap();
+
+        let children: Vec<_> = mesh.children().collect();
+        drop(mesh);
+        let [ChildPtr::Shader(shader)] = children.as_slice() else {
+            panic!("expected one shader child, got {children:?}");
+        };
+        assert!(shader.is_opaque());
     }
 
     #[test]

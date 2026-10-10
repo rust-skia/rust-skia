@@ -321,6 +321,6 @@ Note: `SkAndroidCodec.h` (rich) not wrapped at all (TODO in codec.rs).
 | `core/tiled_image_utils.rs` | `SkTiledImageUtils.h` (rich 21) | **GAP — 4 undoc** |
 | `core/recorder.rs` | `SkRecorder.h` (some 7) | **GAP — 4 undoc** |
 | `core/cpu_recorder.rs` | `SkCPURecorder.h` (rich 20) | **GAP — 1 undoc** |
-| `core/mesh.rs`, `gpu/ganesh/mesh_ganesh.rs` | `SkMesh.h` (rich 138), `SkMeshGanesh.h` | **complete** ✅ (`kMax*`/`k*Alignment` constants are not wrapped; their values are named inline) |
+| `core/mesh.rs`, `gpu/ganesh/mesh_ganesh.rs` | `SkMesh.h` (rich 138), `SkMeshGanesh.h` | **complete** ✅ |
 | `core/promise_image_texture.rs` | `GrPromiseImageTexture.h` (private) | **EMPTY file** (nothing to port) |
 | `core/font_scanner.rs` | `SkFontScanner.h` (NO DOCS) | **stub** (nothing to port) |

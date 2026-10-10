@@ -1879,6 +1879,12 @@ extern "C" const SkData* C_SkMesh_refUniforms(const SkMesh* self) {
     return self->refUniforms().release();
 }
 
+extern "C" const SkRuntimeEffect::ChildPtr* C_SkMesh_children(const SkMesh* self, size_t* count) {
+    auto children = self->children();
+    *count = children.size();
+    return children.data();
+}
+
 extern "C" void C_SkMesh_bounds(const SkMesh* self, SkRect* bounds) {
     *bounds = self->bounds();
 }
