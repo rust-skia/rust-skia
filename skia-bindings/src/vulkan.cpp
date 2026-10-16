@@ -132,6 +132,11 @@ extern "C" void C_VulkanBackendContext_setMaxAPIVersion(skgpu::VulkanBackendCont
     self->fMaxAPIVersion = maxAPIVersion;
 }
 
+extern "C" void C_VulkanBackendContext_setDeviceFeatures2(
+    skgpu::VulkanBackendContext *self, const VkPhysicalDeviceFeatures2 *deviceFeatures2) {
+    self->fDeviceFeatures2 = deviceFeatures2;
+}
+
 //
 // VulkanTypes.h
 //
