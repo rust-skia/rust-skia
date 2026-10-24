@@ -14,6 +14,10 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
   `/BUILD.gn`, `/gn/**`, `/modules/*/BUILD.gn`, `/modules/*/*.gni`,
   `/third_party/*/BUILD.gn`, and `/third_party/*/*.gni`. List each changed file under
   "Build organization" below.
+- [ ] Review every third-party pin in `DEPS`. Each is the newer of Chromium's commit for the
+  milestone and Skia's own pin, or a stable release that fixes a known vulnerability in it, and
+  `just audit-skia-deps` passes.
+  List each changed pin under "Third-party dependencies" below.
 - [ ] Skia builds.
 - [ ] `/skia-bindings` builds.
 - [ ] `/skia-safe`: Update & add new wrappers by diffing include files.  
@@ -52,6 +56,13 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 > `updated build glue`. Most source-list changes flow through the existing Skia
 > targets; call out `declare_args()` changes in `gn/skia.gni` explicitly, because
 > rust-skia pins several of those flags.
+
+## Third-party dependencies
+
+> List each changed `DEPS` pin with its old and new version, and whether it is Chromium's
+> commit for the milestone, Skia's newer pin, or a stable release taken for a vulnerability
+> fix. List the entries added to or removed from `.github/scripts/audit-skia-deps.ignore`,
+> and any `third_party/*/BUILD.gn` change the new pins needed.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: skia-milestone-update
-description: Perform a Skia milestone update for rust-skia or refresh the current milestone from its upstream chrome/mXX branch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
+description: Perform a Skia milestone update for rust-skia or refresh the current milestone from its upstream chrome/mXX branch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
 ---
 
 # Skia Milestone Update
@@ -226,6 +226,53 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   the bindings or any build process — must be reviewed by the user. Do not
   silently decide on such a diff; surface it and get explicit confirmation
   before proceeding.
+- **Third-party dependencies (`DEPS`):** review every `deps` entry of the fork's
+  `DEPS` file on every tag cut. Upstream Skia's `DEPS` and `third_party/*/BUILD.gn`
+  serve only Skia's standalone build. Chrome compiles Skia's code against Chromium's own
+  copies of these libraries, so upstream rarely updates them. In m156, libpng, expat,
+  freetype, and harfbuzz were seven months old and brotli four years.
+  - Pin each library to the newer of two commits: the one Chromium uses for the same
+    milestone, and Skia's own pin. One commit is newer when its history contains the
+    other. When neither contains the other, the commit with the higher release version
+    is newer, whatever the commit dates say. In m156, Chromium's VulkanMemoryAllocator
+    sat on an `angle-vma-3.0` maintenance branch, which is older than Skia's v3.3.0
+    line. When Chromium pins no copy of the library, keep Skia's pin. Chromium pins no
+    D3D12MemoryAllocator, because Chrome never builds Skia's Direct3D backend. The
+    milestone's Chromium branch number is `chromium_branch` in
+    `https://chromiumdash.appspot.com/fetch_milestones?mstone=XX`. Chromium's `DEPS` on
+    `refs/branch-heads/<branch>` pins most libraries, some of them through `vars`.
+    libpng, brotli, and zlib are part of Chromium's own tree instead. For libpng and
+    brotli, take the version from `third_party/<lib>/README.chromium` on that branch.
+    For zlib, take the commit of the `chromium/src/third_party/zlib` mirror whose tree
+    equals Chromium's `third_party/zlib` tree on that branch.
+  - The one exception: when Chromium's commit has a known vulnerability that applies to
+    rust-skia and a newer stable release fixes it, pin that release. In m156, Chromium's
+    expat had 22 known vulnerabilities, and expat 2.9.0 had two.
+  - A vulnerability applies when rust-skia compiles the affected code. For example,
+    harfbuzz's WebAssembly shaper is never compiled, because Skia does not define
+    `HAVE_WASM`. Record every accepted vulnerability with its reason in
+    `.github/scripts/audit-skia-deps.ignore`, and remove the entries that no longer
+    match.
+  - When a new pin needs build glue changes in `third_party/<lib>/BUILD.gn`, follow
+    Chromium's `third_party/<lib>/BUILD.gn` on the same branch, and compile the upstream
+    sources it compiles. Skia lists platform integrations and optional back ends under
+    `unused_sources`, where Chromium compiles them and disables them with defines, so
+    keep Skia's split. Surface these gn diffs to the user, as for the build
+    organization diff above.
+  - `just audit-skia-deps` must pass. It checks every pin against OSV.dev and applies
+    the ignore file.
+  - Verify with a source build that compiles every pinned library, run after touching
+    `skia-bindings/build.rs`:
+
+    ```sh
+    touch skia-bindings/build.rs
+    FORCE_SKIA_BUILD=1 cargo test -p skia-safe --features "textlayout,svg,webp,embed-freetype,freetype-woff2,pdf"
+    ```
+
+    The build script does not track `DEPS` or the `third_party` build files. Without
+    the touch, Cargo reuses the previous Skia build and the new pins are never compiled.
+    Only the current platform's branches of each `BUILD.gn` are compiled, so also check
+    that every source path the changed build files list exists in the new checkouts.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `make diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
