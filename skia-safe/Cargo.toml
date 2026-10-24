@@ -134,7 +134,7 @@ windows = { version = "0.62.0", features = [
 
 # dotlottie example
 [dev-dependencies.zip]
-version = "8.1"
+version = "9.0"
 
 [dev-dependencies.serde]
 version = "1.0"
