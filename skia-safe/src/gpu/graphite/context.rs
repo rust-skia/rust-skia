@@ -6,7 +6,7 @@ use super::{
     BackendTexture, InsertRecordingInfo, InsertStatus, Recorder, RecorderOptions, SubmitInfo,
 };
 use crate::prelude::*;
-use crate::{IPoint, ImageInfo, Surface};
+use crate::{IPoint, ImageInfo, Surface, gpu::MutableTextureState};
 
 // `skgpu::graphite::Context` is `final` with no base class and is handed out as
 // `std::unique_ptr<Context>` (Context::MakeMetal etc.). It is NOT ref-counted,
@@ -129,6 +129,18 @@ impl Context {
     /// (e.g. if we've gotten a `VK_ERROR_DEVICE_LOST` in the Vulkan backend).
     pub fn is_device_lost(&self) -> bool {
         unsafe { sb::C_Context_isDeviceLost(self.native()) }
+    }
+
+    /// Updates the backend texture's mutable state (e.g. Vulkan layout and queue family index)
+    /// and records the necessary barriers/transitions on the active command buffer.
+    pub fn set_mutable_state(
+        &mut self,
+        texture: &BackendTexture,
+        state: &MutableTextureState,
+    ) -> bool {
+        unsafe {
+            sb::C_Context_setMutableState(self.native_mut(), texture.native(), state.native())
+        }
     }
 
     /// Synchronously read pixels from a Graphite-backed `surface`.

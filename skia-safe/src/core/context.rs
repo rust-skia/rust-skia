@@ -37,6 +37,10 @@ impl fmt::Debug for ContextOptions {
             )
             .field("font_cache_count_limit", &self.font_cache_count_limit())
             .field("font_cache_limit", &self.font_cache_limit())
+            .field(
+                "thread_safe_shared_resources",
+                &self.thread_safe_shared_resources(),
+            )
             .finish()
     }
 }
@@ -78,6 +82,13 @@ impl ContextOptions {
         self.native().fFontCacheLimit
     }
 
+    /// When `true`, shared caches (such as the strike cache, the resource cache, and the typeface
+    /// cache) are guarded by internal mutexes so they can safely be accessed concurrently across
+    /// threads. (`true` is the default value.)
+    pub fn thread_safe_shared_resources(&self) -> bool {
+        self.native().fThreadSafeSharedResources
+    }
+
     /// Sets the maximum number of entries in the typeface cache.
     pub fn set_typeface_cache_count_limit(&mut self, limit: i32) -> &mut Self {
         self.native_mut().fTypefaceCacheCountLimit = limit;
@@ -106,6 +117,13 @@ impl ContextOptions {
     /// Sets the maximum total memory (in bytes) used by the font/strike cache.
     pub fn set_font_cache_limit(&mut self, limit: usize) -> &mut Self {
         self.native_mut().fFontCacheLimit = limit;
+        self
+    }
+
+    /// Sets whether shared caches are guarded by internal mutexes. Set to `false` in
+    /// single-threaded environments to avoid locking overhead.
+    pub fn set_thread_safe_shared_resources(&mut self, thread_safe: bool) -> &mut Self {
+        self.native_mut().fThreadSafeSharedResources = thread_safe;
         self
     }
 }
