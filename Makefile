@@ -182,20 +182,24 @@ build-local-build:
 
 # Diffs the Skia fork patch stack of the submodule checkout with the one master records. A stack is
 # every commit on top of the upstream chrome/mXX branch named by `[package.metadata].skia`, so
-# edited, added, and dropped patches show up regardless of their subject.
+# edited, added, and dropped patches show up regardless of their subject. By default it prints one
+# line per patch, marked `=` (unchanged), `!` (edited), `<` (dropped), or `>` (added). Run
+# `make diff-skia diff-skia-flags=` to see the patch diffs behind the `!` lines.
 skia-milestone = sed -nE 's/^skia = "m([0-9]+)[.-].*/\1/p'
+diff-skia-flags ?= --no-patch
 .PHONY: diff-skia
 diff-skia:
 	cd skia-bindings/skia && \
 	master_tip=$$(git -C ../.. rev-parse master:skia-bindings/skia) && \
 	master_base=$$(git merge-base $$master_tip upstream/chrome/m$$(git -C ../.. show master:skia-bindings/Cargo.toml | ${skia-milestone})) && \
 	base=$$(git merge-base HEAD upstream/chrome/m$$(${skia-milestone} ../Cargo.toml)) && \
-	git range-diff $$master_base..$$master_tip $$base..HEAD
+	git range-diff ${diff-skia-flags} $$master_base..$$master_tip $$base..HEAD
 
-# Diffs the public skia-safe API with the latest on crates.io using cargo public-api
+# Diffs the public skia-safe API with the latest on crates.io using cargo public-api, and writes the
+# result to target/skia-safe-api.diff. The diff also lists what master changed since that release.
 .PHONY: diff-api
 diff-api:
-	cargo public-api -p skia-safe -s --features=all-macos diff latest -- >skia-safe-api.diff
+	cargo public-api -p skia-safe -s --features=all-macos diff latest -- >target/skia-safe-api.diff
 
 bindings-latest = find target -name "bindings.rs" -exec ls -t {} + | head -n 1
 
