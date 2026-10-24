@@ -116,7 +116,9 @@ fn main() {
                 Err(_) => continue,
             };
 
-            let name = file.name().to_string();
+            let Ok(name) = file.name().map(|name| name.into_owned()) else {
+                continue;
+            };
 
             // Check if this is an image file
             if name.starts_with(&prefix) && !file.is_dir() {
