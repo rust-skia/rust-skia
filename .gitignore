@@ -6,3 +6,4 @@ target/
 /tmp/
 .DS_Store
 
+/skia-safe-api.diff
