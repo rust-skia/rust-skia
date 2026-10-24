@@ -1,8 +1,9 @@
 use super::{
-    Device, GetProc, Instance, PhysicalDevice, Queue, Version,
+    Device, GetProc, Instance, PhysicalDevice, PhysicalDeviceFeatures2, Queue, Version,
     vulkan_backend_context::BackendContext,
 };
 use crate::gpu;
+use skia_bindings as sb;
 
 /// Builds a Vulkan [`BackendContext`] with optional extensions and protected mode.
 pub struct BackendContextBuilder<'a> {
@@ -16,6 +17,7 @@ pub struct BackendContextBuilder<'a> {
     instance_extensions: Vec<String>,
     device_extensions: Vec<String>,
     protected_context: Option<gpu::Protected>,
+    device_features: Option<&'a PhysicalDeviceFeatures2>,
 }
 
 impl std::fmt::Debug for BackendContextBuilder<'_> {
@@ -31,6 +33,7 @@ impl std::fmt::Debug for BackendContextBuilder<'_> {
             .field("instance_extensions", &self.instance_extensions)
             .field("device_extensions", &self.device_extensions)
             .field("protected_context", &self.protected_context)
+            .field("device_features", &self.device_features.is_some())
             .finish()
     }
 }
@@ -67,6 +70,7 @@ impl<'a> BackendContextBuilder<'a> {
             instance_extensions: Vec::new(),
             device_extensions: Vec::new(),
             protected_context: None,
+            device_features: None,
         }
     }
 
@@ -92,13 +96,25 @@ impl<'a> BackendContextBuilder<'a> {
         self
     }
 
+    /// Sets the features enabled on `device`, such as `samplerYcbcrConversion` in the `pNext`
+    /// chain.
+    ///
+    /// Skia enables the optional paths that depend on a device feature only for the features
+    /// passed here, for example sampling textures through a YCbCr conversion.
+    pub fn with_device_features(mut self, device_features: &'a PhysicalDeviceFeatures2) -> Self {
+        self.device_features = Some(device_features);
+        self
+    }
+
     /// Creates the Vulkan [`BackendContext`] from the configured builder state.
     ///
     /// If [`Self::with_protected_context()`] is not called, protected mode defaults to
     /// [`gpu::Protected::No`].
     /// # Safety
     /// `instance`, `physical_device`, `device`, and `queue` must outlive the `BackendContext`
-    /// returned.
+    /// returned. Every structure in the `pNext` chain of the device features must outlive it as
+    /// well. The device features must be the features enabled when `device` was created, because
+    /// Skia uses every feature they list.
     pub unsafe fn build(self) -> BackendContext<'a> {
         let instance_extensions: Vec<&str> = self
             .instance_extensions
@@ -108,7 +124,7 @@ impl<'a> BackendContextBuilder<'a> {
         let device_extensions: Vec<&str> =
             self.device_extensions.iter().map(String::as_str).collect();
 
-        unsafe {
+        let context = unsafe {
             BackendContext::new_internal(
                 self.instance,
                 self.physical_device,
@@ -120,6 +136,15 @@ impl<'a> BackendContextBuilder<'a> {
                 &instance_extensions,
                 &device_extensions,
             )
+        };
+        if let Some(device_features) = self.device_features {
+            unsafe {
+                sb::C_VulkanBackendContext_setDeviceFeatures2(
+                    context.native.as_ptr() as _,
+                    device_features,
+                )
+            }
         }
+        context
     }
 }
