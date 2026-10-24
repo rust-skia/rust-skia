@@ -1,0 +1,9 @@
+# Vulnerabilities that `audit-skia-deps.py` accepts in the commits pinned by Skia's DEPS file.
+#
+# Each line names one OSV ID or alias, followed by the reason it is accepted. Remove a line as
+# soon as the pin no longer needs it. The script reports lines that no longer match anything.
+
+CVE-2026-113351 expat 2.9.0 is the latest release, and the fix exists only on expat's master branch. Take the next expat release.
+CVE-2026-115506 expat 2.9.0 is the latest release, and the fix exists only on expat's master branch. Take the next expat release.
+CVE-2026-113679 harfbuzz's WebAssembly shaper is not compiled, because Skia's build does not define HAVE_WASM.
+CVE-2026-113680 harfbuzz's WebAssembly shaper is not compiled, because Skia's build does not define HAVE_WASM.

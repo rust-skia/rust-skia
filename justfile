@@ -32,6 +32,10 @@ check-skia-submodule-tag:
 
     echo "OK: skia submodule tag matches metadata tag ($expected_tag)"
 
+# Check the third-party commits pinned in Skia's DEPS file against OSV.dev for known vulnerabilities.
+audit-skia-deps:
+    python3 .github/scripts/audit-skia-deps.py
+
 # Verify the release commit, workflows/assets, binary downloads, and source builds.
 release-verify version previous commit remote="upstream":
     bash .github/scripts/release.sh verify "{{ version }}" "{{ previous }}" "{{ commit }}" "{{ remote }}"
