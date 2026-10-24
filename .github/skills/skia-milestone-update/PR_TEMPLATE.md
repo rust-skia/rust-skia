@@ -9,18 +9,12 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 
 - [x] Update `README.md` ([rendered](https://github.com/pragmatrix/rust-skia/blob/mXX/README.md))  
   > Most important here is to change the Skia branch name and the current Skia submodule tag at the top of the `README.md` file.
-- [ ] Diff the following files to see if the build organization has changed significantly:
-  - [ ] `/BUILD.gn`
-  - [ ] `/gn/*` (recursively)
-  - [ ] `/modules/skshaper/BUILD.gn`
-  - [ ] `/modules/skshaper/skshaper.gni`
-  - [ ] `/modules/paragraph/BUILD.gn`
-  - [ ] `/modules/paragraph/skparagraph.gni`
-  - [ ] `/modules/skottie/BUILD.gn`
-  - [ ] `/modules/skottie/skottie.gni`
-  - [ ] `/modules/svg/BUILD.gn`
-  - [ ] `/modules/svg/svg.gni`
-- [ ] Skia builds ([release notes](https://github.com/google/skia/blob/chrome/mXX/RELEASE_NOTES.md)).
+- [ ] Read the Skia [release notes](https://github.com/google/skia/blob/chrome/mXX/RELEASE_NOTES.md) and record a decision for every note.
+- [ ] Diff the build organization files to see if they changed significantly: `/.gn`,
+  `/BUILD.gn`, `/gn/**`, `/modules/*/BUILD.gn`, `/modules/*/*.gni`,
+  `/third_party/*/BUILD.gn`, and `/third_party/*/*.gni`. List each changed file under
+  "Build organization" below.
+- [ ] Skia builds.
 - [ ] `/skia-bindings` builds.
 - [ ] `/skia-safe`: Update & add new wrappers by diffing include files.  
   > Add TODOs for everything that can not be updated right now, and attempt to stay compatible with previous versions of skia-safe without trying too hard before version 1.0. Use `deprecated` attributes if needed.
@@ -29,13 +23,18 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 - [ ] Review `Debug` implementation for new wrapper types and functions.
 - [ ] Release date of the matching Chrome version in less than 7 days?  
     > Look up the release date of the milestone's matching Chrome stable version in
-    > the [Chrome release schedule](https://chromiumdash.appspot.com/schedule). If the
-    > date is in less than 7 days, check this box (release the crates with the PR's merge).
+    > the [Chrome release schedule](https://chromiumdash.appspot.com/schedule). The JSON
+    > endpoint `https://chromiumdash.appspot.com/fetch_milestone_schedule?mstone=XX`
+    > returns it as `stable_date`. If the date is in less than 7 days, check this box
+    > (release the crates with the PR's merge).
 - [ ] Any pending changes in the Skia `chrome/mXX` branch that aren't synchronized yet?
 - [ ] Rebase on or merge with master.
 - [ ] Do the fork patches in the `skia-bindings/skia` subdirectory match with `master` (`make diff-skia`).
 - [ ] Update versions of `skia-bindings/Cargo.toml` and `skia-safe/Cargo.toml` and also add the version to the new `deprecated` attributes.
-- [ ] Review API changes: `make diff-api`.
+- [ ] Review API changes: `make diff-api`.  
+    > The diff compares with the latest crates.io release, so it also lists what master
+    > changed since that release. An item belongs to this PR only if
+    > `git diff master...HEAD -- skia-safe/src` touches it.
 - [ ] Do one final review of all the changes.
 - [ ] Run `make doc` and fix all warnings.
 

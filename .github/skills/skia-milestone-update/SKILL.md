@@ -57,11 +57,17 @@ Note that the version component of a Skia fork tag does not track the milestone 
 tags up to `m152` (for example `m152-0.100.0`), and only aligns with it from `m153`
 on. Take both tags from the repository instead of deriving one from the other.
 
-## Refresh the current milestone from upstream
+## Rebase the fork patch stack
 
 Use this sequence when `upstream/chrome/mXX` advances after the initial milestone
-tag. Preserve the rust-skia patch stack by rebasing it; do not merge upstream into
-the fork tag.
+tag, and for a new milestone. Preserve the rust-skia patch stack by rebasing it; do not
+merge upstream into the fork tag.
+
+For a new milestone, `OLD_BASE` comes from the old milestone's branch:
+`git -C skia-bindings/skia merge-base refs/tags/OLD_TAG upstream/chrome/mOLD_MILESTONE`.
+Every other `upstream/chrome/mXX` below is `upstream/chrome/mNEW_MILESTONE`. A base taken
+from the new branch is the point where the two branches diverged, and the rebase then
+replays the old milestone's upstream-only commits as if they were fork patches.
 
 1. Refresh both repositories and inspect the new upstream commits:
 
@@ -76,8 +82,9 @@ the fork tag.
    accounting below before updating wrappers. Record internal-only changes as requiring
    no binding update.
 
-3. Find the old upstream base, create the temporary branch at `OLD_TAG`, and rebase the
-   complete rust-skia patch stack onto the refreshed branch:
+3. Find the old upstream base (for a new milestone, see above), create the temporary
+   branch at `OLD_TAG`, and rebase the complete rust-skia patch stack onto the refreshed
+   branch:
 
    ```sh
    git -C skia-bindings/skia merge-base refs/tags/OLD_TAG upstream/chrome/mXX
@@ -164,6 +171,10 @@ the fork tag.
 
    Pushing the temporary branch is not required.
 
+   Push the parent branch with `git push --recurse-submodules=no` once the tag is on the
+   remote. The fork publishes its commits only as tags, so Git's submodule push check, which
+   looks for them on remote branches, rejects every push that changes the gitlink.
+
 ## Notes that go beyond the wiki checklist
 
 - **Versioning:** synchronize the Rust crate minor version with the numeric Skia
@@ -173,11 +184,13 @@ the fork tag.
   - `skia-bindings/Cargo.toml` package version;
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
-    exactly.
-  `Cargo.lock` is gitignored and untracked, so it is not part of the commit; let
-  Cargo re-resolve it. A stale local lock can fail the build spuriously even when
-  the tree is correct, so delete it and re-resolve before investigating a
-  dependency build error.
+    exactly;
+  - `skia-safe/src/core/milestone.rs` `MILESTONE` constant, matching `SK_MILESTONE`
+    in `include/core/SkMilestone.h`.
+  `Cargo.lock` is gitignored and untracked, so it is not part of the commit. Delete it
+  when you bump the versions, so that the first build re-resolves it. A stale local lock
+  fails the build even when the tree is correct (m157: bindgen failed to compile against
+  two `syn` versions).
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's ordinal.
@@ -185,11 +198,28 @@ the fork tag.
   only, no `m` and no tag ordinal — e.g. `Milestone 155`), matching the
   previous milestone PRs. Update the title of an already opened PR if the
   milestone changes direction, but never during a same-milestone refresh.
+- **Skia release notes:** read them first, before the build organization diff and the
+  header accounting, and record a decision for every note in the accounting:
+
+  ```sh
+  git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- RELEASE_NOTES.md relnotes/
+  ```
+
+  A note can announce a change that no header or build-file diff shows. In m157, "Graphite
+  now requires >= iOS 14.0" came from a `std::atomic::wait` in a source file, and it
+  required raising `MIN_IOS_VERSION` in `skia-bindings/build_support/platform/ios.rs`.
 - **Build organization diff:** review whether the build organization changed
-  significantly by diffing the build files between the old and new tags. Cover
-  `BUILD.gn`, `gn/*` (recursively), and the `BUILD.gn`/`*.gni` pairs under
-  `modules/skshaper`, `modules/paragraph`, `modules/skottie`, and `modules/svg`.
-  Record each as `no change` or `updated build glue` in the accounting. Most
+  significantly by diffing the build files between the old and new tags:
+
+  ```sh
+  git -C skia-bindings/skia diff --stat refs/tags/OLD_TAG..refs/tags/NEW_TAG -- .gn BUILD.gn 'gn/**' 'modules/*/BUILD.gn' 'modules/*/*.gni' 'third_party/*/BUILD.gn' 'third_party/*/*.gni'
+  ```
+
+  `.gn` belongs in the list because rust-skia builds Skia as the gn root, so the
+  `default_args` in `.gn` apply to our build. A flag that `gn/skia.gni` declares off can
+  therefore be on (m157: `skia_enable_packed_422_yuv`). The defines that bindgen
+  actually sees are in `skia-defines.txt`, next to the generated `bindings.rs`.
+  Record each file as `no change` or `updated build glue` in the accounting. Most
   source-list changes flow through existing Skia targets and need no rust-skia
   build glue change. However, any diff in the `gn`/`gni` files that looks
   relevant — one that may need special consideration or may indirectly affect
@@ -200,10 +230,16 @@ the fork tag.
   commands. `make diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
 - **Account for every changed public header** before editing wrappers. Start from the
-  full list of changed public headers (`git -C skia-bindings/skia diff --name-only
-  refs/tags/OLD_TAG..refs/tags/NEW_TAG -- 'include/**/*.h' 'modules/*/include/**/*.h'`)
-  and the complete
-  diff of all of them, then walk through every file before making any edits. Review
+  full list of changed public headers and the complete diff of all of them, then walk
+  through every file before making any edits:
+
+  ```sh
+  git -C skia-bindings/skia diff --name-only refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ':(glob)include/**/*.h' ':(glob)modules/*/include/**/*.h'
+  ```
+
+  The `:(glob)` prefix makes `**/` match zero directories as well, so the list includes
+  headers that sit directly in a module's `include/` (m157: `Paragraph.h` and
+  `SkUnicode_apple.h`). Without it, `**/` requires at least one subdirectory. Review
   inline function and method implementations as carefully as declarations: they are
   compiled into consumers and can change behavior without changing the API signature.
   Include changes that look trivial (include moves, comments, friend declarations,
