@@ -87,8 +87,7 @@ impl Vulkan {
     #[cfg(feature = "ganesh")]
     #[allow(dead_code)]
     pub fn direct_context_with_device_features(&self) -> Option<gpu::DirectContext> {
-        let mut ycbcr_features = vk::PhysicalDeviceSamplerYcbcrConversionFeatures::default()
-            .sampler_ycbcr_conversion(self.sampler_ycbcr_conversion);
+        let mut ycbcr_features = ycbcr_features(self.sampler_ycbcr_conversion);
         let features = vk::PhysicalDeviceFeatures2::default().push_next(&mut ycbcr_features);
         // ash and the bindings both declare VkPhysicalDeviceFeatures2 with the C layout.
         let features = unsafe { &*ptr::from_ref(&features).cast() };
@@ -179,13 +178,21 @@ fn create_device(
     let mut device_info = vk::DeviceCreateInfo::default()
         .queue_create_infos(&queue_infos)
         .enabled_extension_names(&device_extensions);
-    let mut ycbcr_features =
-        vk::PhysicalDeviceSamplerYcbcrConversionFeatures::default().sampler_ycbcr_conversion(true);
+    let mut ycbcr_features = ycbcr_features(sampler_ycbcr_conversion);
     if sampler_ycbcr_conversion {
         device_info = device_info.push_next(&mut ycbcr_features);
     }
     let device = unsafe { instance.create_device(physical_device, &device_info, None) }.ok()?;
     Some((physical_device, device, queue_family_index))
+}
+
+/// Describes the YCbCr conversion feature for both the device creation and the Skia context, so
+/// the features Skia receives always match the features enabled on the device.
+fn ycbcr_features(
+    sampler_ycbcr_conversion: bool,
+) -> vk::PhysicalDeviceSamplerYcbcrConversionFeatures<'static> {
+    vk::PhysicalDeviceSamplerYcbcrConversionFeatures::default()
+        .sampler_ycbcr_conversion(sampler_ycbcr_conversion)
 }
 
 fn supports_sampler_ycbcr_conversion(

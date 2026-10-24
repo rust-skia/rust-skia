@@ -113,7 +113,8 @@ impl<'a> BackendContextBuilder<'a> {
     /// # Safety
     /// `instance`, `physical_device`, `device`, and `queue` must outlive the `BackendContext`
     /// returned. Every structure in the `pNext` chain of the device features must outlive it as
-    /// well.
+    /// well. The device features must be the features enabled when `device` was created, because
+    /// Skia uses every feature they list.
     pub unsafe fn build(self) -> BackendContext<'a> {
         let instance_extensions: Vec<&str> = self
             .instance_extensions
