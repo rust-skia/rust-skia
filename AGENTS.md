@@ -35,8 +35,8 @@
 
 ## Skia milestone update checklist
 
-Task skills live in `.github/skills/` and are not loaded automatically; read the matching
-`SKILL.md` before a bindings change, a milestone update, or a release.
+Task skills live in `.github/skills/`, and `.claude/skills/` links to them for Claude Code. Read
+the matching `SKILL.md` before a bindings change, a milestone update, or a release.
 
 Every Skia fork tag cut — a new milestone, a refresh from upstream, or a new fork patch — follows
 `.github/skills/skia-milestone-update/SKILL.md`. Versioning in short: crates are `0.XX.0` for
