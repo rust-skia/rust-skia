@@ -14,6 +14,11 @@
   - `src/modules/shaper/` -> `modules/skshaper/include/`
   - `src/modules/paragraph/` -> `modules/skparagraph/include/`
   - etc.
+- `mk-workflows/` - Generator for the platform CI workflows in `.github/workflows/`; edit it, then
+  run `just workflows`. The macOS deployment target lives here.
+- CI Linux toolchain: `ghcr.io/pragmatrix/rust-skia-linux` is built from
+  `pragmatrix/rust-skia-images` (`linux/Dockerfile`, checked out at `../rust-skia-images`) and
+  published by that repo's manual Docker Image CI workflow. `docker/` here is unofficial.
 
 ## Binding generation
 
