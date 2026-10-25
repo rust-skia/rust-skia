@@ -273,6 +273,23 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     the touch, Cargo reuses the previous Skia build and the new pins are never compiled.
     Only the current platform's branches of each `BUILD.gn` are compiled, so also check
     that every source path the changed build files list exists in the new checkouts.
+- **Toolchain requirements:** list the upstream commits that may raise a compiler,
+  C++ library, or OS minimum, and read each commit message:
+
+  ```sh
+  git -C skia-bindings/skia log --oneline -i -E \
+    --grep='C\+\+2[0-9]|compiler|toolchain|deployment target|minimum (os|version|sdk)|libc\+\+|libstdc\+\+' \
+    refs/tags/OLD_TAG..refs/tags/NEW_TAG
+  ```
+
+  The release notes miss some of these requirements. In m157 they announced iOS 14 for
+  Graphite's `std::atomic` wait, but not that the same wait needs macOS 11 and gcc 11's
+  libstdc++. Local builds do not reproduce CI's minimums, because CI pins
+  `MACOSX_DEPLOYMENT_TARGET` in `mk-workflows` and cross-compiles Linux aarch64 against
+  the libstdc++ in the CI image (see `AGENTS.md`). Surface each requirement to the user as
+  a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
+  whether a `rust-skia:` fork patch existed only to support the old one. m157.1 dropped
+  three `@available` workarounds that way.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
