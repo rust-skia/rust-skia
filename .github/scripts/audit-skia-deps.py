@@ -10,6 +10,11 @@ vulnerabilities that affect them. This script sends every pinned commit to OSV.d
 known vulnerability, and exits with status 1 if any were found that the ignore file does not
 list.
 
+OSV.dev finds a vulnerability by commit only when its record lists the affected git commits or
+ranges. A record that names only release versions matches no commit, so the script cannot see
+it. A pin without results is therefore free of the vulnerabilities that OSV.dev maps to commits,
+not of all known ones.
+
 The ignore file holds one vulnerability per line: its OSV ID or one of its aliases (such as a
 CVE ID), followed by the reason it is accepted. Lines starting with `#` are comments. The
 script reports ignore entries that no longer match any vulnerability, so they can be removed.
