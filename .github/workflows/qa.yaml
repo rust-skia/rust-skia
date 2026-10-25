@@ -1,5 +1,10 @@
 name: 'qa'
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  # The nightly run catches vulnerabilities that are published after a change was merged.
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   qa:
@@ -20,5 +25,21 @@ jobs:
         rustup update stable
         rustup default stable 
         rustup component add rustfmt
-    - run: | 
+    - run: |
         cargo fmt -- --check
+
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Install just
+      uses: extractions/setup-just@v2
+    - name: Check the Skia DEPS pins for known vulnerabilities
+      run: |
+        just audit-skia-deps
+    - name: Check the Cargo dependencies for security advisories
+      uses: EmbarkStudios/cargo-deny-action@v2
+      with:
+        command: check advisories
