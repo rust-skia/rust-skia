@@ -199,6 +199,7 @@ diff-skia:
 # result to target/skia-safe-api.diff. The diff also lists what master changed since that release.
 .PHONY: diff-api
 diff-api:
+	mkdir -p target && \
 	cargo public-api -p skia-safe -s --features=all-macos diff latest -- >target/skia-safe-api.diff
 
 bindings-latest = find target -name "bindings.rs" -exec ls -t {} + | head -n 1
