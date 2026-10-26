@@ -302,7 +302,9 @@ mod tests {
     fn image_provider_is_dropped_with_the_options() {
         use std::rc::Rc;
 
-        struct Provider(Rc<()>);
+        struct Provider {
+            _alive: Rc<()>,
+        }
         impl ImageProvider for Provider {
             fn find_or_create(
                 &mut self,
@@ -316,9 +318,13 @@ mod tests {
 
         let alive = Rc::new(());
         let mut options = RecorderOptions::new();
-        options.set_image_provider(Provider(alive.clone()));
+        options.set_image_provider(Provider {
+            _alive: alive.clone(),
+        });
         assert_eq!(Rc::strong_count(&alive), 2);
-        options.set_image_provider(Provider(alive.clone()));
+        options.set_image_provider(Provider {
+            _alive: alive.clone(),
+        });
         assert_eq!(
             Rc::strong_count(&alive),
             2,
