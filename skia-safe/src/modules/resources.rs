@@ -1,10 +1,15 @@
 //! Resource provider interfaces for loading images, fonts, and other assets used by animation and vector modules (Skia's `skresources` module).
-use std::{borrow::Cow, ffi::CStr, mem, os::raw, ptr};
+use std::borrow::Cow;
+use std::ffi::{CStr, c_void};
+use std::fmt;
+use std::mem;
+use std::os::raw;
+use std::ptr;
 
 use helpers::ResourceKind;
 use skia_bindings::{
     self as sb, RustResourceProvider, RustResourceProvider_Param, SkData, SkFontMgr, SkRefCnt,
-    SkRefCntBase, SkTypeface, TraitObject, skresources_ImageAsset,
+    SkRefCntBase, SkTypeface, skresources_ImageAsset,
 };
 
 use crate::{Data, FontMgr, Typeface, prelude::*};
@@ -89,23 +94,14 @@ impl NativeRefCountedBase for RustResourceProvider {
 }
 
 impl<T: ResourceProvider + 'static> From<T> for NativeResourceProvider {
-    fn from(value: T) -> Self {
-        let b: Box<dyn ResourceProvider> = Box::new(value);
-        Self::from(b)
-    }
-}
-
-impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
-    fn from(resource_provider: Box<dyn ResourceProvider>) -> Self {
+    fn from(resource_provider: T) -> Self {
         let param = RustResourceProvider_Param {
-            trait_: unsafe {
-                mem::transmute::<Box<dyn ResourceProvider>, TraitObject>(resource_provider)
-            },
-            drop: Some(drop),
-            load: Some(load),
-            loadImageAsset: Some(load_image_asset),
-            loadTypeface: Some(load_typeface),
-            fontMgr: Some(font_mgr),
+            data: Box::into_raw(Box::new(resource_provider)).cast(),
+            drop: Some(drop::<T>),
+            load: Some(load::<T>),
+            loadImageAsset: Some(load_image_asset::<T>),
+            loadTypeface: Some(load_typeface::<T>),
+            fontMgr: Some(font_mgr::<T>),
         };
 
         let skia_resource_provider =
@@ -114,33 +110,31 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
 
         return skia_resource_provider;
 
-        extern "C" fn drop(provider: TraitObject) {
-            mem::drop(unsafe {
-                mem::transmute::<TraitObject, Box<dyn ResourceProvider>>(provider)
-            });
+        unsafe extern "C" fn drop<T>(provider: *mut c_void) {
+            mem::drop(unsafe { Box::from_raw(provider.cast::<T>()) });
         }
 
-        extern "C" fn load(
-            provider: TraitObject,
+        unsafe extern "C" fn load<T: ResourceProvider>(
+            provider: *mut c_void,
             resource_path: *const raw::c_char,
             resource_name: *const raw::c_char,
         ) -> *mut SkData {
             unsafe {
-                provider_ref(&provider)
+                provider_ref::<T>(provider)
                     .load(&uncstr(resource_path), &uncstr(resource_name))
                     .map(|data| data.into_ptr())
                     .unwrap_or(ptr::null_mut())
             }
         }
 
-        extern "C" fn load_image_asset(
-            provider: TraitObject,
+        unsafe extern "C" fn load_image_asset<T: ResourceProvider>(
+            provider: *mut c_void,
             resource_path: *const raw::c_char,
             resource_name: *const raw::c_char,
             resource_id: *const raw::c_char,
         ) -> *mut skresources_ImageAsset {
             unsafe {
-                provider_ref(&provider)
+                provider_ref::<T>(provider)
                     .load_image_asset(
                         &uncstr(resource_path),
                         &uncstr(resource_name),
@@ -151,25 +145,29 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
             }
         }
 
-        extern "C" fn load_typeface(
-            provider: TraitObject,
+        unsafe extern "C" fn load_typeface<T: ResourceProvider>(
+            provider: *mut c_void,
             name: *const raw::c_char,
             url: *const raw::c_char,
         ) -> *mut SkTypeface {
             unsafe {
-                provider_ref(&provider)
+                provider_ref::<T>(provider)
                     .load_typeface(&uncstr(name), &uncstr(url))
                     .map(|typeface| typeface.into_ptr())
                     .unwrap_or(ptr::null_mut())
             }
         }
 
-        extern "C" fn font_mgr(provider: TraitObject) -> *mut SkFontMgr {
-            unsafe { provider_ref(&provider).font_mgr().into_ptr() }
+        unsafe extern "C" fn font_mgr<T: ResourceProvider>(
+            provider: *mut c_void,
+        ) -> *mut SkFontMgr {
+            unsafe { provider_ref::<T>(provider).font_mgr().into_ptr() }
         }
 
-        unsafe fn provider_ref(provider: &TraitObject) -> &dyn ResourceProvider {
-            unsafe { mem::transmute(*provider) }
+        /// `provider` is the `Box<T>` leaked in `from`, the only place that pairs it with the
+        /// callbacks above. It stays valid until `drop` reclaims it.
+        unsafe fn provider_ref<'a, T>(provider: *mut c_void) -> &'a T {
+            unsafe { &*provider.cast::<T>() }
         }
 
         unsafe fn uncstr(ptr: *const raw::c_char) -> Cow<'static, str> {
@@ -178,6 +176,48 @@ impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
             }
             "".into()
         }
+    }
+}
+
+impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
+    fn from(resource_provider: Box<dyn ResourceProvider>) -> Self {
+        DynResourceProvider(resource_provider).into()
+    }
+}
+
+/// Wraps a boxed resource provider, so that it can take the same conversion path as a concrete
+/// one. It must forward every method, because a method it does not forward would fall back to the
+/// trait's default and silently bypass an override of the boxed provider.
+struct DynResourceProvider(Box<dyn ResourceProvider>);
+
+impl fmt::Debug for DynResourceProvider {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DynResourceProvider")
+            .finish_non_exhaustive()
+    }
+}
+
+impl ResourceProvider for DynResourceProvider {
+    fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data> {
+        self.0.load(resource_path, resource_name)
+    }
+
+    fn load_image_asset(
+        &self,
+        resource_path: &str,
+        resource_name: &str,
+        resource_id: &str,
+    ) -> Option<ImageAsset> {
+        self.0
+            .load_image_asset(resource_path, resource_name, resource_id)
+    }
+
+    fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
+        self.0.load_typeface(name, url)
+    }
+
+    fn font_mgr(&self) -> FontMgr {
+        self.0.font_mgr()
     }
 }
 
