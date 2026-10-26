@@ -624,12 +624,12 @@ impl Shaper {
 }
 
 mod rust_run_handler {
-    use std::mem;
+    use std::ffi::c_void;
 
     use skia_bindings as sb;
     use skia_bindings::{
         RustRunHandler, RustRunHandler_Param, SkShaper_RunHandler, SkShaper_RunHandler_Buffer,
-        SkShaper_RunHandler_RunInfo, TraitObject,
+        SkShaper_RunHandler_RunInfo,
     };
 
     use crate::{
@@ -645,15 +645,15 @@ mod rust_run_handler {
         }
     }
 
-    pub unsafe fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
+    pub unsafe fn new_param<T: RunHandler>(run_handler: &mut T) -> RustRunHandler_Param {
         RustRunHandler_Param {
-            trait_: unsafe { mem::transmute::<&mut dyn RunHandler, TraitObject>(run_handler) },
-            beginLine: Some(begin_line),
-            runInfo: Some(run_info),
-            commitRunInfo: Some(commit_run_info),
-            runBuffer: Some(run_buffer),
-            commitRunBuffer: Some(commit_run_buffer),
-            commitLine: Some(commit_line),
+            data: (run_handler as *mut T).cast(),
+            beginLine: Some(begin_line::<T>),
+            runInfo: Some(run_info::<T>),
+            commitRunInfo: Some(commit_run_info::<T>),
+            runBuffer: Some(run_buffer::<T>),
+            commitRunBuffer: Some(commit_run_buffer::<T>),
+            commitLine: Some(commit_line::<T>),
         }
     }
 
@@ -661,38 +661,46 @@ mod rust_run_handler {
         construct(|rh| unsafe { sb::C_RustRunHandler_construct(rh, param) })
     }
 
-    extern "C" fn begin_line(to: TraitObject) {
-        to_run_handler(to).begin_line()
+    unsafe extern "C" fn begin_line<T: RunHandler>(data: *mut c_void) {
+        unsafe { to_run_handler::<T>(data) }.begin_line()
     }
 
-    extern "C" fn run_info(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
-        to_run_handler(to).run_info(&RunInfo::from_native(unsafe { &*ri }));
+    unsafe extern "C" fn run_info<T: RunHandler>(
+        data: *mut c_void,
+        ri: *const SkShaper_RunHandler_RunInfo,
+    ) {
+        unsafe { to_run_handler::<T>(data).run_info(&RunInfo::from_native(&*ri)) }
     }
 
-    extern "C" fn commit_run_info(to: TraitObject) {
-        to_run_handler(to).commit_run_info()
+    unsafe extern "C" fn commit_run_info<T: RunHandler>(data: *mut c_void) {
+        unsafe { to_run_handler::<T>(data) }.commit_run_info()
     }
 
-    extern "C" fn run_buffer(
-        to: TraitObject,
+    unsafe extern "C" fn run_buffer<T: RunHandler>(
+        data: *mut c_void,
         ri: *const SkShaper_RunHandler_RunInfo,
     ) -> SkShaper_RunHandler_Buffer {
         let ri = unsafe { &*ri };
-        to_run_handler(to)
+        unsafe { to_run_handler::<T>(data) }
             .run_buffer(&RunInfo::from_native(ri))
             .native_buffer_mut(ri.glyphCount)
     }
 
-    extern "C" fn commit_run_buffer(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
-        to_run_handler(to).commit_run_buffer(&RunInfo::from_native(unsafe { &*ri }))
+    unsafe extern "C" fn commit_run_buffer<T: RunHandler>(
+        data: *mut c_void,
+        ri: *const SkShaper_RunHandler_RunInfo,
+    ) {
+        unsafe { to_run_handler::<T>(data).commit_run_buffer(&RunInfo::from_native(&*ri)) }
     }
 
-    extern "C" fn commit_line(to: TraitObject) {
-        to_run_handler(to).commit_line()
+    unsafe extern "C" fn commit_line<T: RunHandler>(data: *mut c_void) {
+        unsafe { to_run_handler::<T>(data) }.commit_line()
     }
 
-    fn to_run_handler<'a>(to: TraitObject) -> &'a mut dyn RunHandler {
-        unsafe { mem::transmute(to) }
+    /// `data` is the `&mut T` erased in `new_param`, the only place that pairs it with the
+    /// callbacks above.
+    unsafe fn to_run_handler<'a, T>(data: *mut c_void) -> &'a mut T {
+        unsafe { &mut *data.cast::<T>() }
     }
 }
 
