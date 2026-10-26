@@ -14,10 +14,12 @@ file, and canonical remote. Never proceed across a mismatch: remote `master`
 and `release`, binary artifacts, and the candidate commit must identify the
 same release.
 
-1. Run `just release-verify <version> <previous-version> <commit>`. It verifies
-   the branches and binary workflows/assets, verifies binary-download and
-   source-build packaging, and dry-runs `skia-svg-macros` packaging when that
-   crate changed.
+1. Run `just release-verify <version> <previous-version> <commit>`. It requires
+   a clean working tree with the Skia submodule at its recorded tag, and `emcc`
+   for the post-release smoke test. It verifies the branches and binary
+   workflows/assets, verifies binary-download and source-build packaging, and
+   dry-runs `skia-svg-macros` packaging when that crate changed. Its output ends
+   with a `Summary:` block that lists every check that passed.
 2. Run `just release-verify-images <previous-version> <commit>` and inspect every
    reported difference. This compares the CPU-rendered PNGs across every
    platform that produces QA artifacts (linux, macos, windows, windows-arm).

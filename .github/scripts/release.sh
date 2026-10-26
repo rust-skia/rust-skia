@@ -23,6 +23,30 @@ summary() {
     printf 'OK: %s\n' "${passed[@]}"
 }
 
+# The packaged skia-bindings crate contains the Skia sources of the submodule checkout, so a
+# modified tree or a checkout at a commit other than the one recorded would be published.
+checkout_check() {
+    [[ -z "$(git status --porcelain)" ]] ||
+        die "the working tree has changes or the Skia submodule is not at the recorded commit"
+    just check-skia-submodule-tag
+    ok "clean working tree with the Skia submodule at the recorded tag"
+}
+
+# The post-release smoke test builds for Emscripten and needs `emcc`. A non-interactive shell
+# often lacks the emsdk environment, so it is loaded from `$EMSDK` or `~/emsdk`.
+emsdk_check() {
+    if ! command -v emcc >/dev/null; then
+        local env="${EMSDK:-$HOME/emsdk}/emsdk_env.sh"
+        [[ -f "$env" ]] || die "emcc is not on the PATH and $env does not exist"
+        set +u
+        # shellcheck source=/dev/null
+        source "$env" >/dev/null 2>&1
+        set -u
+        command -v emcc >/dev/null || die "emcc is not on the PATH after sourcing $env"
+    fi
+    ok "emcc for the Emscripten smoke test: $(command -v emcc)"
+}
+
 package_version() {
     awk '
         /^\[package\]$/ { package = 1; next }
@@ -100,6 +124,8 @@ verify_release() {
     commit="$(git rev-parse "$commit^{commit}")"
     [[ "$(git rev-parse HEAD)" == "$commit" ]] ||
         die "local HEAD is not the release commit $commit"
+    checkout_check
+    emsdk_check
     branches "$remote"
     [[ "$(git rev-parse "refs/remotes/$remote/master")" == "$commit" ]] ||
         die "$commit is not the release commit"
@@ -166,6 +192,8 @@ publish_crates() {
         die "requested $version, manifests contain bindings=$bindings safe=$safe"
     [[ "$(bindings_dependency_version)" == "$version" ]] ||
         die "skia-safe does not require skia-bindings =$version"
+    checkout_check
+    emsdk_check
 
     svg_check "$previous"
     if ! git diff --quiet "$previous"..HEAD -- skia-svg-macros; then
