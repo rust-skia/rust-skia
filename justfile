@@ -52,6 +52,14 @@ check-skia-submodule-tag:
 audit-skia-deps:
     python3 .github/scripts/audit-skia-deps.py
 
+# Compare the Skia DEPS pins with Chromium's pins for a milestone.
+chromium-deps-pins milestone:
+    python3 .github/scripts/chromium-deps-pins.py {{ milestone }}
+
+# Check that every source path the third-party build files list exists in the pinned checkouts.
+check-third-party-sources:
+    python3 .github/scripts/check-third-party-sources.py
+
 # Verify the release commit, workflows/assets, binary downloads, and source builds.
 release-verify version previous commit remote="upstream":
     bash .github/scripts/release.sh verify "{{ version }}" "{{ previous }}" "{{ commit }}" "{{ remote }}"
@@ -193,14 +201,19 @@ build-local-build:
 # `[package.metadata].skia`, so edited, added, and dropped patches show up regardless of their
 # subject. By default it prints one line per patch, marked `=` (unchanged), `!` (edited), `<`
 # (dropped), or `>` (added). Run `just diff-skia ""` to see the patch diffs behind the `!` lines.
+#
+# The recipe fetches `master` from the `upstream` remote first, because a local master branch can
+# be behind and would hide the fork patches that master gained since it was last pulled. Pass a
+# different ref as `master` when the rust-skia repository has another remote name.
 # Diff the Skia fork patch stack of the submodule checkout with the one master records.
-diff-skia flags="--no-patch":
+diff-skia flags="--no-patch" master="upstream/master":
     #!/usr/bin/env bash
     set -euo pipefail
     milestone() { sed -nE 's/^skia = "m([0-9]+)[.-].*/\1/p'; }
+    git fetch --quiet "$(dirname {{ master }})" "$(basename {{ master }})"
     cd skia-bindings/skia
-    master_tip="$(git -C ../.. rev-parse master:skia-bindings/skia)"
-    master_base="$(git merge-base "$master_tip" "upstream/chrome/m$(git -C ../.. show master:skia-bindings/Cargo.toml | milestone)")"
+    master_tip="$(git -C ../.. rev-parse {{ master }}:skia-bindings/skia)"
+    master_base="$(git merge-base "$master_tip" "upstream/chrome/m$(git -C ../.. show {{ master }}:skia-bindings/Cargo.toml | milestone)")"
     base="$(git merge-base HEAD "upstream/chrome/m$(milestone <../Cargo.toml)")"
     git range-diff {{ flags }} "$master_base..$master_tip" "$base..HEAD"
 

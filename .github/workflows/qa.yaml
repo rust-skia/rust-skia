@@ -27,6 +27,16 @@ jobs:
         rustup component add rustfmt
     - run: |
         cargo fmt -- --check
+    # The platform workflows are generated, so a hand edit or a generator change committed without
+    # regenerating would otherwise go unnoticed.
+    #
+    # The workspace directory belongs to the runner user, but the container runs as root. Git
+    # therefore treats the repository as unsafe and does not recognize it until it is marked safe.
+    - name: Check generated workflows
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        just workflows
+        git diff --exit-code -- .github/workflows
 
   audit:
     runs-on: ubuntu-24.04

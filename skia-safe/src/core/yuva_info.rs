@@ -34,7 +34,9 @@ variant_name!(PlaneConfig::YUV);
 /// UV subsampling is also specified in the enum value names using J:a:b notation (e.g. 4:2:0 is
 /// 1/2 horizontal and 1/2 vertical resolution for U and V). If alpha is present it is not sub-
 /// sampled. Note that Subsampling values other than k444 are only valid with [`PlaneConfig`] values
-/// that have U and V in different planes than Y (and A, if present).
+/// that have U and V in different planes than Y (and A, if present), with the exception of
+/// [`PlaneConfig::YUYV`] which represents packed 4:2:2 and is only valid with
+/// [`Subsampling::S422`].
 #[repr(i32)]
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub enum Subsampling {

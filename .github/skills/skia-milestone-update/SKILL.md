@@ -78,6 +78,19 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    git -C skia-bindings/skia log --oneline refs/tags/OLD_TAG..upstream/chrome/mXX
    ```
 
+   Then confirm that the parent branch contains rust-skia's `master`
+   (`upstream/master` when `origin` is a personal fork):
+
+   ```sh
+   git merge-base --is-ancestor upstream/master HEAD
+   ```
+
+   If it does not, rebase the parent branch onto `upstream/master` before anything else, and
+   re-read this skill from there. `master` can gain fork tags, CI checks, and changes to
+   this skill while a milestone branch is open. During m157, the branch missed `m156.4` and
+   `m156.5`, so its fork stack lacked the third-party pin patches, and it carried an older
+   copy of this skill.
+
 2. Review the upstream diff. If it changes public headers, complete the full header
    accounting below before updating wrappers. Record internal-only changes as requiring
    no binding update.
@@ -245,6 +258,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     brotli, take the version from `third_party/<lib>/README.chromium` on that branch.
     For zlib, take the commit of the `chromium/src/third_party/zlib` mirror whose tree
     equals Chromium's `third_party/zlib` tree on that branch.
+    `just chromium-deps-pins NEW_MILESTONE` performs these lookups. For each pinned
+    library, it prints both pins and which one is newer by history. Pins it reports as
+    diverged need the release versions compared by hand.
   - The one exception: when Chromium's commit has a known vulnerability that applies to
     rust-skia and a newer stable release fixes it, pin that release. In m156, Chromium's
     expat had 22 known vulnerabilities, and expat 2.9.0 had two.
@@ -261,8 +277,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     organization diff above.
   - `just audit-skia-deps` must pass. It checks every pin against OSV.dev and applies
     the ignore file.
-  - Verify with a source build that compiles every pinned library, run after touching
-    `skia-bindings/build.rs`:
+  - Verify with a source build that compiles every pinned library, run on Linux after
+    touching `skia-bindings/build.rs`:
 
     ```sh
     touch skia-bindings/build.rs
@@ -271,8 +287,32 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     The build script does not track `DEPS` or the `third_party` build files. Without
     the touch, Cargo reuses the previous Skia build and the new pins are never compiled.
-    Only the current platform's branches of each `BUILD.gn` are compiled, so also check
-    that every source path the changed build files list exists in the new checkouts.
+    Run it on Linux, because only Linux compiles the freetype pin. macOS, iOS, and
+    Windows render fonts with CoreText or DirectWrite and build Skia without freetype,
+    so the build drops `embed-freetype` and `freetype-woff2` there as redundant. On a Mac,
+    run the build in the CI image (`ghcr.io/pragmatrix/rust-skia-linux`, see `AGENTS.md`).
+  - Only the current platform's branches of each `BUILD.gn` are compiled, so a stale
+    path in another platform's branch, or in a header list, breaks no local build.
+    `just check-third-party-sources` must pass. It checks every path the
+    `third_party` build files list against the checkouts of the pinned libraries, and
+    names the libraries it skipped because their checkout is not at the pin.
+- **Toolchain requirements:** list the upstream commits that may raise a compiler,
+  C++ library, or OS minimum, and read each commit message:
+
+  ```sh
+  git -C skia-bindings/skia log --oneline -i -E \
+    --grep='C\+\+2[0-9]|compiler|toolchain|deployment target|minimum (os|version|sdk)|libc\+\+|libstdc\+\+' \
+    refs/tags/OLD_TAG..refs/tags/NEW_TAG
+  ```
+
+  The release notes miss some of these requirements. In m157 they announced iOS 14 for
+  Graphite's `std::atomic` wait, but not that the same wait needs macOS 11 and gcc 11's
+  libstdc++. Local builds do not reproduce CI's minimums, because CI pins
+  `MACOSX_DEPLOYMENT_TARGET` in `mk-workflows` and cross-compiles Linux aarch64 against
+  the libstdc++ in the CI image (see `AGENTS.md`). Surface each requirement to the user as
+  a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
+  whether a `rust-skia:` fork patch existed only to support the old one. m157.1 dropped
+  three `@available` workarounds that way.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).

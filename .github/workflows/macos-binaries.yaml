@@ -53,38 +53,6 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
-          - features: ''
-            macosxDeploymentTarget: '10.13'
-          - features: 'gl'
-            macosxDeploymentTarget: '10.13'
-          - features: 'textlayout'
-            macosxDeploymentTarget: '10.13'
-          - features: 'ganesh,metal'
-            macosxDeploymentTarget: '10.14'
-          - features: 'ganesh,vulkan'
-            macosxDeploymentTarget: '10.13'
-          - features: 'graphite,metal'
-            macosxDeploymentTarget: '10.14'
-          - features: 'ganesh,gl,metal'
-            macosxDeploymentTarget: '10.14'
-          - features: 'ganesh,gl,textlayout'
-            macosxDeploymentTarget: '10.13'
-          - features: 'ganesh,metal,textlayout'
-            macosxDeploymentTarget: '10.14'
-          - features: 'ganesh,textlayout,vulkan'
-            macosxDeploymentTarget: '10.13'
-          - features: 'svg,textlayout,webp'
-            macosxDeploymentTarget: '10.13'
-          - features: 'ganesh,gl,metal,textlayout'
-            macosxDeploymentTarget: '10.14'
-          - features: 'ganesh,gl,textlayout,vulkan'
-            macosxDeploymentTarget: '10.13'
-          - features: 'ganesh,gl,metal,svg,textlayout'
-            macosxDeploymentTarget: '10.14'
-          - features: 'ganesh,gl,svg,textlayout,vulkan'
-            macosxDeploymentTarget: '10.13'
-          - features: 'ganesh,metal,svg,textlayout,webp'
-            macosxDeploymentTarget: '10.14'
         exclude:
           - target: aarch64-apple-ios
             features: 'ganesh,vulkan'
@@ -113,7 +81,7 @@ jobs:
     runs-on: macos-15
     env:
       SKIA_DEBUG: 0
-      MACOSX_DEPLOYMENT_TARGET: '${{ matrix.macosxDeploymentTarget }}'
+      MACOSX_DEPLOYMENT_TARGET: '11.0'
 
     steps:
     - uses: actions/checkout@v3

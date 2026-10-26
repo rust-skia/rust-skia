@@ -12,6 +12,7 @@
 #include "include/core/SkSize.h"
 #include "include/core/SkSurface.h"
 #include "include/gpu/GpuTypes.h"
+#include "include/gpu/MutableTextureState.h"
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
@@ -120,6 +121,13 @@ extern "C" void C_Context_deleteBackendTexture(skgpu::graphite::Context* self, c
 
 extern "C" bool C_Context_isDeviceLost(const skgpu::graphite::Context* self) {
     return self->isDeviceLost();
+}
+
+extern "C" bool C_Context_setMutableState(
+    skgpu::graphite::Context* self,
+    const skgpu::graphite::BackendTexture* texture,
+    const skgpu::MutableTextureState* state) {
+    return self->setMutableState(*texture, *state);
 }
 
 // skgpu::graphite::Context is owned via std::unique_ptr (Context::MakeMetal etc.
