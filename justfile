@@ -124,7 +124,7 @@ publish-bindings-docs: bindings-docs
     cd skia-bindings && cargo publish -vv --no-verify --allow-dirty
     rm skia-bindings/bindings_docs.rs
 
-# Publish skia-svg-macros. It changes rarely, so it is published only when it changed.
+# Publish skia-svg-macros. release.sh runs this only when the crate changed.
 publish-svg-macros:
     cd skia-svg-macros && cargo publish -vv
 
