@@ -1,8 +1,8 @@
 #![allow(unused)]
 use crate::prelude::safer;
-use sb::TraitObject;
 use skia_bindings as sb;
-use std::{marker::PhantomData, mem};
+use std::ffi::c_void;
+use std::marker::PhantomData;
 
 /// A sink / receiver for array data that is copied from C++ to a Rust [`Vec`].
 #[derive(Debug)]
@@ -11,24 +11,24 @@ pub struct VecSink<'a, T> {
     pd: PhantomData<&'a mut Vec<T>>,
 }
 
-impl<T: 'static> VecSink<'_, T> {
+impl<'a, T: 'static> VecSink<'a, T> {
     /// Create a new sink that calls back into the closure given.
-    pub fn new(v: &mut dyn FnMut(&[T])) -> VecSink<T> {
+    pub fn new<F: FnMut(&[T])>(v: &'a mut F) -> Self {
         VecSink {
             sink: sb::VecSink {
-                fn_trait: unsafe { mem::transmute::<&mut dyn FnMut(&[T]), TraitObject>(v) },
-                set_fn: Some(Self::set_fn),
+                data: (v as *mut F).cast(),
+                set_fn: Some(Self::set_fn::<F>),
                 _phantom_0: PhantomData,
             },
             pd: PhantomData,
         }
     }
 
-    pub fn new_mut(v: &mut dyn FnMut(&mut [T])) -> VecSink<T> {
+    pub fn new_mut<F: FnMut(&mut [T])>(v: &'a mut F) -> Self {
         VecSink {
             sink: sb::VecSink {
-                fn_trait: unsafe { mem::transmute::<&mut dyn FnMut(&mut [T]), TraitObject>(v) },
-                set_fn: Some(Self::set_fn_mut),
+                data: (v as *mut F).cast(),
+                set_fn: Some(Self::set_fn_mut::<F>),
                 _phantom_0: PhantomData,
             },
             pd: PhantomData,
@@ -39,16 +39,22 @@ impl<T: 'static> VecSink<'_, T> {
         &mut self.sink
     }
 
-    unsafe extern "C" fn set_fn(ptr: *mut T, len: usize, rust_fn: TraitObject) {
+    /// `data` is the `&mut F` erased in `new`, the only place that pairs it with this function.
+    unsafe extern "C" fn set_fn<F: FnMut(&[T])>(ptr: *mut T, len: usize, data: *mut c_void) {
         unsafe {
-            let rust_fn: &mut dyn FnMut(&[T]) = mem::transmute(rust_fn);
+            let rust_fn = &mut *data.cast::<F>();
             (rust_fn)(safer::from_raw_parts(ptr, len));
         }
     }
 
-    unsafe extern "C" fn set_fn_mut(ptr: *mut T, len: usize, rust_fn: TraitObject) {
+    /// `data` is the `&mut F` erased in `new_mut`, the only place that pairs it with this function.
+    unsafe extern "C" fn set_fn_mut<F: FnMut(&mut [T])>(
+        ptr: *mut T,
+        len: usize,
+        data: *mut c_void,
+    ) {
         unsafe {
-            let rust_fn: &mut dyn FnMut(&mut [T]) = mem::transmute(rust_fn);
+            let rust_fn = &mut *data.cast::<F>();
             (rust_fn)(safer::from_raw_parts_mut(ptr, len));
         }
     }
@@ -60,13 +66,13 @@ pub struct Sink<'a, T> {
     pd: PhantomData<&'a mut T>,
 }
 
-impl<T: 'static> Sink<'_, T> {
+impl<'a, T: 'static> Sink<'a, T> {
     /// Create a new sink that calls back into the closure given.
-    pub fn new(v: &mut dyn FnMut(&T)) -> Sink<T> {
+    pub fn new<F: FnMut(&T)>(v: &'a mut F) -> Self {
         Sink {
             sink: sb::Sink {
-                fn_trait: unsafe { mem::transmute::<&mut dyn FnMut(&T), TraitObject>(v) },
-                set_fn: Some(Self::set_fn),
+                data: (v as *mut F).cast(),
+                set_fn: Some(Self::set_fn::<F>),
                 _phantom_0: PhantomData,
             },
             pd: PhantomData,
@@ -77,9 +83,10 @@ impl<T: 'static> Sink<'_, T> {
         &mut self.sink
     }
 
-    unsafe extern "C" fn set_fn(ptr: *const T, rust_fn: TraitObject) {
+    /// `data` is the `&mut F` erased in `new`, the only place that pairs it with this function.
+    unsafe extern "C" fn set_fn<F: FnMut(&T)>(ptr: *const T, data: *mut c_void) {
         unsafe {
-            let rust_fn: &mut dyn FnMut(&T) = mem::transmute(rust_fn);
+            let rust_fn = &mut *data.cast::<F>();
             (rust_fn)(&*ptr);
         }
     }
