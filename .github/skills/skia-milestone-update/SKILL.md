@@ -258,6 +258,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     brotli, take the version from `third_party/<lib>/README.chromium` on that branch.
     For zlib, take the commit of the `chromium/src/third_party/zlib` mirror whose tree
     equals Chromium's `third_party/zlib` tree on that branch.
+    `just chromium-deps-pins NEW_MILESTONE` performs these lookups. For each pinned
+    library, it prints both pins and which one is newer by history. Pins it reports as
+    diverged need the release versions compared by hand.
   - The one exception: when Chromium's commit has a known vulnerability that applies to
     rust-skia and a newer stable release fixes it, pin that release. In m156, Chromium's
     expat had 22 known vulnerabilities, and expat 2.9.0 had two.
@@ -274,8 +277,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     organization diff above.
   - `just audit-skia-deps` must pass. It checks every pin against OSV.dev and applies
     the ignore file.
-  - Verify with a source build that compiles every pinned library, run after touching
-    `skia-bindings/build.rs`:
+  - Verify with a source build that compiles every pinned library, run on Linux after
+    touching `skia-bindings/build.rs`:
 
     ```sh
     touch skia-bindings/build.rs
@@ -284,8 +287,15 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     The build script does not track `DEPS` or the `third_party` build files. Without
     the touch, Cargo reuses the previous Skia build and the new pins are never compiled.
-    Only the current platform's branches of each `BUILD.gn` are compiled, so also check
-    that every source path the changed build files list exists in the new checkouts.
+    Run it on Linux, because only Linux compiles the freetype pin. macOS, iOS, and
+    Windows render fonts with CoreText or DirectWrite and build Skia without freetype,
+    so the build drops `embed-freetype` and `freetype-woff2` there as redundant. On a Mac,
+    run the build in the CI image (`ghcr.io/pragmatrix/rust-skia-linux`, see `AGENTS.md`).
+  - Only the current platform's branches of each `BUILD.gn` are compiled, so a stale
+    path in another platform's branch, or in a header list, breaks no local build.
+    `just check-third-party-sources` must pass. It checks every path the
+    `third_party` build files list against the checkouts of the pinned libraries, and
+    names the libraries it skipped because their checkout is not at the pin.
 - **Toolchain requirements:** list the upstream commits that may raise a compiler,
   C++ library, or OS minimum, and read each commit message:
 
