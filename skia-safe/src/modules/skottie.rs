@@ -298,8 +298,12 @@ impl Animation {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
     use super::*;
-    use crate::surfaces;
+    use crate::resources::{ImageAsset, ResourceProvider};
+    use crate::{Data, Typeface, surfaces};
 
     #[test]
     fn parse_minimal_animation() {
@@ -364,5 +368,88 @@ mod tests {
         let builder: Builder = Default::default();
         let json = r#"{"v":"5.5.7","fr":30,"ip":0,"op":60,"w":200,"h":200,"layers":[]}"#;
         let _anim = builder.make(json).expect("build failed");
+    }
+
+    /// A boxed provider must still receive its override of the defaulted `load_image_asset`, and
+    /// C++ must drop it exactly once.
+    #[test]
+    fn boxed_resource_provider_receives_every_call() {
+        let calls = Rc::new(RefCell::new(Vec::new()));
+        let provider: Box<dyn ResourceProvider> = Box::new(RecordingResourceProvider {
+            calls: calls.clone(),
+        });
+        drop(
+            Builder::new()
+                .set_resource_provider(provider)
+                .make(FONT_AND_IMAGE_ANIMATION),
+        );
+        let mut calls = calls.take();
+        calls.sort();
+        assert_eq!(
+            calls,
+            [
+                "drop",
+                "load_image_asset images/ image.png image",
+                "load_typeface TestFont fonts/test.ttf",
+            ]
+        );
+    }
+
+    /// An animation with one font and one image layer, so that building it calls
+    /// `load_typeface` and `load_image_asset` once each.
+    const FONT_AND_IMAGE_ANIMATION: &str = r#"{
+        "v":"5.7.0","fr":30,"ip":0,"op":30,"w":100,"h":100,
+        "assets":[{"id":"image","w":10,"h":10,"u":"images/","p":"image.png"}],
+        "fonts":{"list":[
+            {"fName":"TestFont","fFamily":"Test","fStyle":"Regular","fPath":"fonts/test.ttf"}
+        ]},
+        "layers":[{"ty":2,"refId":"image","ip":0,"op":30,"st":0,"ks":{}}]
+    }"#;
+
+    /// Records each call that reaches it, including its own drop. It overrides
+    /// `load_image_asset`, so a wrapper that does not forward the override would record `load`
+    /// instead.
+    struct RecordingResourceProvider {
+        calls: Rc<RefCell<Vec<String>>>,
+    }
+
+    impl ResourceProvider for RecordingResourceProvider {
+        fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data> {
+            self.record(format!("load {resource_path} {resource_name}"));
+            None
+        }
+
+        fn load_image_asset(
+            &self,
+            resource_path: &str,
+            resource_name: &str,
+            resource_id: &str,
+        ) -> Option<ImageAsset> {
+            self.record(format!(
+                "load_image_asset {resource_path} {resource_name} {resource_id}"
+            ));
+            None
+        }
+
+        fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
+            self.record(format!("load_typeface {name} {url}"));
+            None
+        }
+
+        fn font_mgr(&self) -> FontMgr {
+            FontMgr::new()
+        }
+    }
+
+    impl Drop for RecordingResourceProvider {
+        fn drop(&mut self) {
+            self.record("drop".into());
+        }
+    }
+
+    impl RecordingResourceProvider {
+        fn record(&self, call: String) {
+            self.calls.borrow_mut().push(call);
+        }
     }
 }
