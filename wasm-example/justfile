@@ -1,0 +1,37 @@
+# List the recipes.
+default:
+    @just --list --unsorted
+
+# The Emscripten SDK root is `$EMSDK`, else a `~/emsdk` checkout, else the asdf-managed install.
+# The skia-bindings build script detects the SDK layout inside the root.
+# Build the example for the web, passing `args` on to cargo.
+build *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    emsdk="${EMSDK:-}"
+    if [[ -z "$emsdk" && -d "$HOME/emsdk" ]]; then
+        emsdk="$HOME/emsdk"
+    fi
+    if [[ -z "$emsdk" ]] && command -v asdf >/dev/null; then
+        version="$(asdf current emsdk 2>/dev/null | tr -s ' ' | cut -d ' ' -f 2 || true)"
+        if [[ -n "$version" ]]; then
+            emsdk="$HOME/.asdf/installs/emsdk/$version"
+        fi
+    fi
+    if [[ -z "$emsdk" ]]; then
+        echo "Could not find the Emscripten SDK. Set EMSDK to its root." >&2
+        exit 1
+    fi
+    # emsdk_env.sh sets up EMSDK and the PATH with em++, whatever the SDK layout inside the root.
+    set +u
+    source "$emsdk/emsdk_env.sh" >/dev/null
+    set -u
+    export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2 -s MODULARIZE=1 -s EXPORT_NAME=createRustSkiaModule -s EXPORTED_RUNTIME_METHODS=GL"
+    cargo build --target wasm32-unknown-emscripten {{ args }}
+
+# Build the example for the web in release mode.
+build-release: (build "--release")
+
+# Serve this directory at http://localhost:8000 (requires Python 3).
+serve:
+    python3 -m http.server
