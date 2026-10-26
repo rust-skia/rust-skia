@@ -105,8 +105,8 @@ verify_release() {
     [[ "$count" -gt 0 ]] || die "binary release $version has no assets"
     jq -r '.url, (.assets[].name)' <<<"$assets"
 
-    make crate-bindings-binaries
-    make crate-bindings-build
+    just crate-bindings-binaries
+    just crate-bindings-build
     svg_dry_run "$previous"
 }
 
@@ -148,11 +148,11 @@ publish_crates() {
 
     svg_check "$previous"
     if ! git diff --quiet "$previous"..HEAD -- skia-svg-macros; then
-        publish_if_needed skia-svg-macros "$svg" make publish-svg-macros
+        publish_if_needed skia-svg-macros "$svg" just publish-svg-macros
     fi
-    publish_if_needed skia-bindings "$version" make publish-bindings-docs
-    publish_if_needed skia-safe "$version" make publish-safe
-    make crate-post-release-test RELEASE_VERSION="$version"
+    publish_if_needed skia-bindings "$version" just publish-bindings-docs
+    publish_if_needed skia-safe "$version" just publish-safe
+    just crate-post-release-test "$version"
 }
 
 publish_github() {

@@ -217,10 +217,10 @@ fn fake_bindings() -> Result<(), io::Error> {
     if !source.exists() {
         return Err(io::Error::other(
             "bindings_docs.rs is missing from the published skia-bindings \
-             tarball. The release Makefile must run `make publish-bindings-docs` \
-             (not `make publish-bindings`) so the documentation bindings end up \
-             in the tarball. Without this file, docs.rs builds of skia-safe and \
-             every downstream crate fail here. See \
+             tarball. Publish skia-bindings with `just publish-bindings-docs`, \
+             which puts the documentation bindings in the tarball. Without this \
+             file, docs.rs builds of skia-safe and every downstream crate fail \
+             here. See \
              https://github.com/rust-skia/rust-skia/issues/720",
         ));
     }

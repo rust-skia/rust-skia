@@ -10,7 +10,7 @@ Skia `chrome/mXX` branch. Use the bundled [`PR_TEMPLATE.md`](PR_TEMPLATE.md) as
 the working PR checklist and follow every item. It is based on the
 [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR)
 wiki page and extends it with project-specific coverage such as Graphite. The
-`make diff-skia` caveat lives in `AGENTS.md` — read it before starting.
+`just diff-skia` caveat lives in `AGENTS.md` — read it before starting.
 
 ## Inputs
 
@@ -43,7 +43,7 @@ next ordinal.
 
 Choose `OLD_TAG` as the newest previous-milestone tag: patches can land on it after
 an earlier tag was cut, and a milestone based on the stale one drops them. The
-`make diff-skia` checklist item below is what catches this.
+`just diff-skia` checklist item below is what catches this.
 
 Name the temporary local working branch distinctly from every tag, for example
 `mNEW_MILESTONE-refresh` (`m154-refresh`). Never give a branch the same name as a
@@ -150,7 +150,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    history is still an ancestor relationship; only the tree was damaged). Re-apply the
    milestone deltas on top of `master`'s content and re-verify before proceeding.
 
-7. Run `make diff-skia`, `cargo check -p skia-bindings`,
+7. Run `just diff-skia`, `cargo check -p skia-bindings`,
    `cargo check -p skia-safe`, and the platform tests appropriate to the change.
    Reconfirm after the builds, with explicit refs, that the checkout, the new tag, and
    the staged gitlink all point at the rebased tip:
@@ -274,7 +274,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     Only the current platform's branches of each `BUILD.gn` are compiled, so also check
     that every source path the changed build files list exists in the new checkouts.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
-  commands. `make diff-skia` only compares the fork patch stack against master (it is
+  commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
 - **Account for every changed public header** before editing wrappers. Start from the
   full list of changed public headers and the complete diff of all of them, then walk
