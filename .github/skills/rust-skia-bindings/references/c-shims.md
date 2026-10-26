@@ -205,18 +205,22 @@ accept that the containing type must be heap-allocated (see
 
 ## Callbacks
 
-`std::function` is opaque. Two mechanisms replace it.
+`std::function` is opaque. Two mechanisms replace it, and both hand C++ the Rust object
+as a thin `void* data` next to `extern "C"` callbacks. Each callback is generic over the
+concrete Rust type (`set_fn::<F>`, `load::<T>`), so it casts `data` back to exactly the
+type the constructor erased.
 
 **`Sink`/`VecSink`** for a Rust closure that C++ calls synchronously. `bindings.h`
-declares a `TraitObject { void* data; void* vtable; }` plus a `set_fn` pointer; Rust
-transmutes a `&mut dyn FnMut(..)` into that pair in `skia-safe/src/interop/cpp.rs`.
-The `PhantomData<&'a mut …>` ties the sink to the borrow, so the callback cannot
-escape the call.
+declares `void* data` plus a `set_fn` pointer, and `skia-safe/src/interop/cpp.rs`
+fills them from a `&'a mut F`. The `PhantomData<&'a mut …>` ties the sink to the
+borrow, so the callback cannot escape the call.
 
 **A C++ adapter class** overriding a virtual interface, driven by an
 `extern "C"` function-pointer table — `rust_resource_provider.h`,
 `shaper.cpp` (`RustRunHandler`), and the `RustStream`/`RustWStream` shims in
-`bindings.cpp`. A Rust panic must not unwind into C++; catch it and abort:
+`bindings.cpp`. A provider that C++ keeps alive owns `data`, which is a
+`Box::into_raw` reclaimed in a `drop` callback. A handler used only during a call
+borrows it. A Rust panic must not unwind into C++; catch it and abort:
 
 ```rust
 match std::panic::catch_unwind(reader) {
