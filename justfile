@@ -52,6 +52,14 @@ check-skia-submodule-tag:
 audit-skia-deps:
     python3 .github/scripts/audit-skia-deps.py
 
+# Compare the Skia DEPS pins with Chromium's pins for a milestone.
+chromium-deps-pins milestone:
+    python3 .github/scripts/chromium-deps-pins.py {{ milestone }}
+
+# Check that every source path the third-party build files list exists in the pinned checkouts.
+check-third-party-sources:
+    python3 .github/scripts/check-third-party-sources.py
+
 # Verify the release commit, workflows/assets, binary downloads, and source builds.
 release-verify version previous commit remote="upstream":
     bash .github/scripts/release.sh verify "{{ version }}" "{{ previous }}" "{{ commit }}" "{{ remote }}"
