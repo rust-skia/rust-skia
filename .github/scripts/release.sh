@@ -28,6 +28,8 @@ summary() {
 checkout_check() {
     [[ -z "$(git status --porcelain)" ]] ||
         die "the working tree has changes or the Skia submodule is not at the recorded commit"
+    # The tag check looks at local tags, which `git submodule update` does not always fetch.
+    git -C skia-bindings/skia fetch --tags --force --quiet
     just check-skia-submodule-tag
     ok "clean working tree with the Skia submodule at the recorded tag"
 }
