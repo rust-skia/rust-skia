@@ -1,0 +1,24 @@
+# Directories of the Skia checkout that rust-skia does not use.
+unused_dirs := "bench dm docs example experimental fuzz gm infra platform_tools resources site specs tests"
+
+# List the recipes.
+default:
+    @just --list --unsorted
+
+# Print the short commit hash of the Skia submodule checkout.
+skia-short-hash:
+    cd skia && git rev-parse --short HEAD
+
+# Remove the directories that rust-skia does not use from the Skia checkout and its index.
+rm-unused:
+    cd skia && git rm -r {{ unused_dirs }}
+
+# Delete the third-party dependency checkouts of Skia.
+rm-externals:
+    rm -rf skia/third_party/externals/*
+
+# Delete the git lock files that interrupted git operations leave behind.
+rm-locks:
+    find . -type f -name 'index.lock' -print0 | xargs -0 rm -f
+    find . -type f -name 'HEAD.lock' -print0 | xargs -0 rm -f
+    find . -type f -name 'shallow.lock' -print0 | xargs -0 rm -f
