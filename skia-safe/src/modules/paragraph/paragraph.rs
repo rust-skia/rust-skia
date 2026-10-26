@@ -699,6 +699,19 @@ mod tests {
         }
     }
 
+    /// Exercises the single-value `Sink` path.
+    #[test]
+    #[serial_test::serial]
+    fn line_metrics_at_matches_line_metrics() {
+        let paragraph = mk_lorem_ipsum_paragraph();
+        let line_metrics = paragraph.get_line_metrics();
+        let second_line = paragraph.get_line_metrics_at(1).unwrap();
+        assert_eq!(second_line.line_number, 1);
+        assert_eq!(second_line.start_index, line_metrics[1].start_index);
+        assert_eq!(second_line.end_index, line_metrics[1].end_index);
+        assert_eq!(second_line.width, line_metrics[1].width);
+    }
+
     /// Regression test for <https://github.com/rust-skia/rust-skia/issues/585>
     #[test]
     #[serial_test::serial]

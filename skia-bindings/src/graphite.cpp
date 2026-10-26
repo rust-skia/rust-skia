@@ -17,6 +17,7 @@
 #include "include/gpu/graphite/ContextOptions.h"
 #include "include/gpu/graphite/GraphiteTypes.h"
 #include "include/gpu/graphite/Image.h"
+#include "include/gpu/graphite/ImageProvider.h"
 #include "include/gpu/graphite/Recorder.h"
 #include "include/gpu/graphite/Surface.h"
 #include "include/gpu/graphite/TextureInfo.h"
@@ -249,6 +250,55 @@ extern "C" void C_RecorderOptions_destruct(skgpu::graphite::RecorderOptions* sel
     self->~RecorderOptions();
 }
 
+//
+// gpu/graphite/ImageProvider.h
+//
+
+namespace ImageProvider {
+    extern "C" {
+        typedef void (*Drop)(void*);
+        typedef SkImage* (*FindOrCreate)(
+            void*, skgpu::graphite::Recorder*, const SkImage*, const SkImage::RequiredProperties*);
+    }
+}
+
+class RustImageProvider final : public skgpu::graphite::ImageProvider {
+public:
+    struct Param {
+        // The Rust provider, owned by the `RustImageProvider` and released in its destructor
+        // through `drop`.
+        void* data;
+        ::ImageProvider::Drop drop;
+        ::ImageProvider::FindOrCreate findOrCreate;
+    };
+
+    explicit RustImageProvider(const Param& param)
+    : _param(param)
+    { }
+
+    ~RustImageProvider() override {
+        _param.drop(_param.data);
+    }
+
+    sk_sp<SkImage> findOrCreate(skgpu::graphite::Recorder* recorder,
+                                const SkImage* image,
+                                SkImage::RequiredProperties requiredProps) override {
+        return sp(_param.findOrCreate(_param.data, recorder, image, &requiredProps));
+    }
+
+private:
+    Param _param;
+};
+
+extern "C" RustImageProvider* C_RustImageProvider_New(const RustImageProvider::Param* param) {
+    return new RustImageProvider(*param);
+}
+
+extern "C" void C_RecorderOptions_setImageProvider(
+        skgpu::graphite::RecorderOptions* self, RustImageProvider* imageProvider) {
+    self->fImageProvider = sp(imageProvider);
+}
+
 extern "C" skgpu::graphite::Recording* C_Recorder_snap(skgpu::graphite::Recorder* self) {
     return self->snap().release();
 }
@@ -352,10 +402,12 @@ extern "C" SkImage* C_SkImages_WrapTextureGraphite(
 
 extern "C" SkImage* C_SkImages_TextureFromImageGraphite(
         skgpu::graphite::Recorder* recorder,
-        const SkImage* image) {
+        const SkImage* image,
+        const SkImage::RequiredProperties* requiredProps) {
     return SkImages::TextureFromImage(
             recorder,
-            image).release();
+            image,
+            *requiredProps).release();
 }
 
 extern "C" SkImage* C_SkImages_SubsetTextureFromGraphite(

@@ -6,7 +6,7 @@ use skia_bindings as sb;
 
 use super::{BackendTexture, Recorder};
 use crate::prelude::*;
-use crate::{AlphaType, ColorSpace, ColorType, IRect, Image};
+use crate::{AlphaType, ColorSpace, ColorType, IRect, Image, image::RequiredProperties};
 
 /// Wrap an existing backend texture as an Image using Graphite
 ///
@@ -50,8 +50,13 @@ pub fn wrap_texture(
 /// # Returns
 /// A new texture-backed `Image`, or `None` if creation failed
 pub fn texture_from_image(recorder: &mut Recorder, image: &Image) -> Option<Image> {
-    let image_ptr =
-        unsafe { sb::C_SkImages_TextureFromImageGraphite(recorder.native_mut(), image.native()) };
+    let image_ptr = unsafe {
+        sb::C_SkImages_TextureFromImageGraphite(
+            recorder.native_mut(),
+            image.native(),
+            RequiredProperties::default().native(),
+        )
+    };
 
     Image::from_ptr(image_ptr)
 }
