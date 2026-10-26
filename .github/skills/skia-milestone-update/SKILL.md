@@ -78,6 +78,19 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    git -C skia-bindings/skia log --oneline refs/tags/OLD_TAG..upstream/chrome/mXX
    ```
 
+   Then confirm that the parent branch contains rust-skia's `master`
+   (`upstream/master` when `origin` is a personal fork):
+
+   ```sh
+   git merge-base --is-ancestor upstream/master HEAD
+   ```
+
+   If it does not, rebase the parent branch onto `upstream/master` before anything else, and
+   re-read this skill from there. `master` can gain fork tags, CI checks, and changes to
+   this skill while a milestone branch is open. During m157, the branch missed `m156.4` and
+   `m156.5`, so its fork stack lacked the third-party pin patches, and it carried an older
+   copy of this skill.
+
 2. Review the upstream diff. If it changes public headers, complete the full header
    accounting below before updating wrappers. Record internal-only changes as requiring
    no binding update.
