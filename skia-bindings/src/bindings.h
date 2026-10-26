@@ -28,28 +28,30 @@ extern "C" struct TraitObject {
 
 /// A VecSink is passed from Rust to C++ for receiving a slice of values.
 template<typename T> struct VecSink {
-    TraitObject fn_trait;
-    void (*set_fn)(T *, size_t, TraitObject);
+    // The Rust closure, borrowed for the duration of the call. Only `set_fn` knows its type.
+    void* data;
+    void (*set_fn)(T *, size_t, void*);
 
     void set(T* ptr, size_t len) {
-        set_fn(ptr, len, fn_trait);
+        set_fn(ptr, len, data);
     }
 
     void set(std::vector<T>& v) {
         if (v.empty()) {
-            set_fn(nullptr, 0, fn_trait);
+            set_fn(nullptr, 0, data);
         } else {
-            set_fn(v.data(), v.size(), fn_trait);
+            set_fn(v.data(), v.size(), data);
         }
     }
 };
 
 template<typename T> struct Sink {
-    TraitObject fn_trait;
-    void (*set_fn)(const T *, TraitObject);
+    // The Rust closure, borrowed for the duration of the call. Only `set_fn` knows its type.
+    void* data;
+    void (*set_fn)(const T *, void*);
 
     void set(const T& value) {
-        set_fn(&value, fn_trait);
+        set_fn(&value, data);
     }
 };
 
