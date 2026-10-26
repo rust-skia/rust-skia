@@ -96,19 +96,21 @@ extern "C" void C_SkShaper_RunHandler_delete(SkShaper::RunHandler* self) {
 }
 
 namespace RunHandler {
-    extern "C" typedef void (*BeginLine)(TraitObject);
-    extern "C" typedef void (*RunInfo)(TraitObject, const SkShaper::RunHandler::RunInfo*);
-    extern "C" typedef void (*CommitRunInfo)(TraitObject);
-    extern "C" typedef SkShaper::RunHandler::Buffer (*RunBuffer)(TraitObject, const SkShaper::RunHandler::RunInfo*);
-    extern "C" typedef void (*CommitRunBuffer)(TraitObject, const SkShaper::RunHandler::RunInfo*);
-    extern "C" typedef void (*CommitLine)(TraitObject);
+    extern "C" typedef void (*BeginLine)(void*);
+    extern "C" typedef void (*RunInfo)(void*, const SkShaper::RunHandler::RunInfo*);
+    extern "C" typedef void (*CommitRunInfo)(void*);
+    extern "C" typedef SkShaper::RunHandler::Buffer (*RunBuffer)(void*, const SkShaper::RunHandler::RunInfo*);
+    extern "C" typedef void (*CommitRunBuffer)(void*, const SkShaper::RunHandler::RunInfo*);
+    extern "C" typedef void (*CommitLine)(void*);
 }
 
 class RustRunHandler: SkShaper::RunHandler {
 
 public:
     struct Param {
-        TraitObject trait;
+        // The Rust run handler, borrowed for the duration of the shaping call. Only the callbacks
+        // below know its type.
+        void* data;
         ::RunHandler::BeginLine beginLine;
         ::RunHandler::RunInfo runInfo;
         ::RunHandler::CommitRunInfo commitRunInfo;
@@ -124,27 +126,27 @@ public:
 
 private:
     void beginLine() override {
-        _param.beginLine(_param.trait);
+        _param.beginLine(_param.data);
     }
 
     void runInfo(const RunInfo &info) override {
-        _param.runInfo(_param.trait, &info);
+        _param.runInfo(_param.data, &info);
     }
 
     void commitRunInfo() override {
-        _param.commitRunInfo(_param.trait);
+        _param.commitRunInfo(_param.data);
     }
 
     Buffer runBuffer(const RunInfo &info) override {
-        return _param.runBuffer(_param.trait, &info);
+        return _param.runBuffer(_param.data, &info);
     }
 
     void commitRunBuffer(const RunInfo &info) override {
-        _param.commitRunBuffer(_param.trait, &info);
+        _param.commitRunBuffer(_param.data, &info);
     }
 
     void commitLine() override {
-        _param.commitLine(_param.trait);
+        _param.commitLine(_param.data);
     }
 
 private:
