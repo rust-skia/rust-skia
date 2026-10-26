@@ -40,7 +40,7 @@ jobs:
     - name: 'Test local builds (#527)'
       shell: bash
       run: |
-        make test-local-build
+        just test-local-build
 
   linux-wasm:
     runs-on: ubuntu-24.04

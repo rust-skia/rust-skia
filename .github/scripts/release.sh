@@ -9,6 +9,46 @@ die() {
     exit 1
 }
 
+# The checks that passed, repeated by `summary` so that the end of a long build log shows them.
+passed=()
+
+ok() {
+    passed+=("$*")
+    echo "OK: $*"
+}
+
+summary() {
+    echo
+    echo "Summary:"
+    printf 'OK: %s\n' "${passed[@]}"
+}
+
+# The packaged skia-bindings crate contains the Skia sources of the submodule checkout, so a
+# modified tree or a checkout at a commit other than the one recorded would be published.
+checkout_check() {
+    [[ -z "$(git status --porcelain)" ]] ||
+        die "the working tree has changes or the Skia submodule is not at the recorded commit"
+    # The tag check looks at local tags, which `git submodule update` does not always fetch.
+    git -C skia-bindings/skia fetch --tags --force --quiet
+    just check-skia-submodule-tag
+    ok "clean working tree with the Skia submodule at the recorded tag"
+}
+
+# The post-release smoke test builds for Emscripten and needs `emcc`. A non-interactive shell
+# often lacks the emsdk environment, so it is loaded from `$EMSDK` or `~/emsdk`.
+emsdk_check() {
+    if ! command -v emcc >/dev/null; then
+        local env="${EMSDK:-$HOME/emsdk}/emsdk_env.sh"
+        [[ -f "$env" ]] || die "emcc is not on the PATH and $env does not exist"
+        set +u
+        # shellcheck source=/dev/null
+        source "$env" >/dev/null 2>&1
+        set -u
+        command -v emcc >/dev/null || die "emcc is not on the PATH after sourcing $env"
+    fi
+    ok "emcc for the Emscripten smoke test: $(command -v emcc)"
+}
+
 package_version() {
     awk '
         /^\[package\]$/ { package = 1; next }
@@ -43,12 +83,12 @@ svg_check() {
         die "skia-safe requires $dependency but skia-svg-macros is $current"
 
     if git diff --quiet "$previous"..HEAD -- skia-svg-macros; then
-        echo "skia-svg-macros: unchanged since $previous; no publication needed"
+        ok "skia-svg-macros unchanged since $previous; no publication needed"
         return
     fi
     [[ "$current" != "$previous_svg" ]] ||
         die "skia-svg-macros changed but its version is still $current"
-    echo "skia-svg-macros: publish $current before skia-safe (previously $previous_svg)"
+    ok "skia-svg-macros changed; publish $current before skia-safe (previously $previous_svg)"
 }
 
 svg_dry_run() {
@@ -56,6 +96,7 @@ svg_dry_run() {
     svg_check "$previous"
     if ! git diff --quiet "$previous"..HEAD -- skia-svg-macros; then
         (cd skia-svg-macros && cargo publish --dry-run)
+        ok "skia-svg-macros publication dry run"
     fi
 }
 
@@ -67,7 +108,7 @@ branches() {
     release="$(git rev-parse "refs/remotes/$remote/release")"
     [[ "$master" == "$release" ]] ||
         die "$remote/master (${master:0:12}) and $remote/release (${release:0:12}) differ"
-    echo "OK: $remote/master and $remote/release point to $master"
+    ok "$remote/master and $remote/release point to $master"
 }
 
 tag_check() {
@@ -76,7 +117,7 @@ tag_check() {
     git fetch "$remote" tag "$version"
     [[ "$(git rev-parse "$version^{commit}")" == "$commit" ]] ||
         die "tag $version does not point to $commit"
-    echo "OK: $version points to $commit"
+    ok "$version points to $commit"
 }
 
 verify_release() {
@@ -85,9 +126,12 @@ verify_release() {
     commit="$(git rev-parse "$commit^{commit}")"
     [[ "$(git rev-parse HEAD)" == "$commit" ]] ||
         die "local HEAD is not the release commit $commit"
+    checkout_check
+    emsdk_check
     branches "$remote"
     [[ "$(git rev-parse "refs/remotes/$remote/master")" == "$commit" ]] ||
         die "$commit is not the release commit"
+    ok "local HEAD and $remote/master are the release commit $commit"
 
     runs="$(gh run list --repo rust-skia/rust-skia --branch release \
         --commit "$commit" --limit 30 \
@@ -98,16 +142,21 @@ verify_release() {
         jq -e --arg workflow "$workflow" '
             any(.[]; .name == $workflow and .status == "completed" and .conclusion == "success")
         ' <<<"$runs" >/dev/null || die "$workflow did not complete successfully"
+        ok "$workflow succeeded"
     done
 
     assets="$(gh release view "$version" --repo rust-skia/skia-binaries --json assets,url)"
     count="$(jq '.assets | length' <<<"$assets")"
     [[ "$count" -gt 0 ]] || die "binary release $version has no assets"
     jq -r '.url, (.assets[].name)' <<<"$assets"
+    ok "binary release $version has $count assets"
 
-    make crate-bindings-binaries
-    make crate-bindings-build
+    just crate-bindings-binaries
+    ok "skia-bindings publication dry runs with downloaded binaries"
+    just crate-bindings-build
+    ok "skia-bindings package source builds"
     svg_dry_run "$previous"
+    summary
 }
 
 wait_for_crate() {
@@ -145,14 +194,16 @@ publish_crates() {
         die "requested $version, manifests contain bindings=$bindings safe=$safe"
     [[ "$(bindings_dependency_version)" == "$version" ]] ||
         die "skia-safe does not require skia-bindings =$version"
+    checkout_check
+    emsdk_check
 
     svg_check "$previous"
     if ! git diff --quiet "$previous"..HEAD -- skia-svg-macros; then
-        publish_if_needed skia-svg-macros "$svg" make publish-svg-macros
+        publish_if_needed skia-svg-macros "$svg" just publish-svg-macros
     fi
-    publish_if_needed skia-bindings "$version" make publish-bindings-docs
-    publish_if_needed skia-safe "$version" make publish-safe
-    make crate-post-release-test RELEASE_VERSION="$version"
+    publish_if_needed skia-bindings "$version" just publish-bindings-docs
+    publish_if_needed skia-safe "$version" just publish-safe
+    just crate-post-release-test "$version"
 }
 
 publish_github() {

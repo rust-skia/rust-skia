@@ -44,7 +44,7 @@ milestone `mXX`; a same-milestone cut takes the next tag ordinal and keeps the c
 
 Fork patches are named `rust-skia: <summary>`.
 
-`make diff-skia` range-diffs the fork patch stack of the submodule checkout (every commit on top of
+`just diff-skia` range-diffs the fork patch stack of the submodule checkout (every commit on top of
 `upstream/chrome/mXX`) against the stack master records; it needs the `upstream` remote
 (google/skia) with both milestone branches fetched. It answers whether the fork patches match
 master; include/API diffs between milestones use direct

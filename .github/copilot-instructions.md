@@ -6,7 +6,7 @@ Update it whenever you learn something new about the project's patterns, convent
 ## Project
 - Follow the existing project structure and idioms.
 - Prefer small, self-contained changes unless explicitly asked for broader refactors.
-- Update generated GitHub workflows through `mk-workflows`, then run `make workflows`; do not edit generated workflow YAML directly.
+- Update generated GitHub workflows through `mk-workflows`, then run `just workflows`; do not edit generated workflow YAML directly.
 - For targeted ports (for example, "add missing bindings"), keep diffs strictly scoped to the missing API surface.
 - Do not refactor adjacent working code unless it is required for correctness, compatibility, or explicitly requested.
 
@@ -50,7 +50,7 @@ The following is the complete list of workspace skills:
 ## Documentation
 - Markdown documentation updates to existing files are fine.
 - Ask before creating new Markdown documentation files.
-- Verify documentation links with `make doc`.
+- Verify documentation links with `just doc`.
 - Use `[`Self::method()`]` instead of `[`method(&self)`]` for intra-doc links to methods.
 - Escape array indexing in comments (e.g., `` `pts[0]` ``) to avoid them being interpreted as links.
 - Use fully qualified paths (e.g., `[`crate::Canvas`]`) if the type is not in the immediate scope.

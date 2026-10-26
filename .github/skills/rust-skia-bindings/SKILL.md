@@ -100,7 +100,7 @@ touch skia-bindings/src/bindings.cpp && cargo check -p skia-bindings
 
 Bindgen is re-run when any `src/*.cpp` or the Skia `include/` directory changes.
 The output lands in `target/*/build/skia-bindings-*/out/skia/bindings.rs`;
-`make locate-bindings` prints the newest one and `make open-bindings` opens it.
+`just locate-bindings` prints the newest one and `just open-bindings` opens it.
 Read the generated bindings to confirm names, signatures, and field presence before
 writing the Rust wrapper. The bindings are feature-dependent, so check with the same
 features you intend to test.
@@ -118,7 +118,7 @@ file. Port the C++ documentation following the `cpp-to-rust-documentation` skill
 - `cargo check -p skia-safe` with the relevant features, plus the full feature set
   used by CI if the change touches a shared file.
 - The in-file tests, and `skia-safe/tests/send_sync.rs` when `Send`/`Sync` changed.
-- For wrapper changes, the public API diff: `make diff-api`.
+- For wrapper changes, the public API diff: `just diff-api`.
 - Re-read the C++ header and the Rust file side by side to confirm ordering parity
   of top-level types, nested types, methods, and debug fields.
 

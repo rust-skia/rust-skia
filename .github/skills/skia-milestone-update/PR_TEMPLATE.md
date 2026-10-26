@@ -33,14 +33,14 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
     > (release the crates with the PR's merge).
 - [ ] Any pending changes in the Skia `chrome/mXX` branch that aren't synchronized yet?
 - [ ] Rebase on or merge with master.
-- [ ] Do the fork patches in the `skia-bindings/skia` subdirectory match with `master` (`make diff-skia`).
+- [ ] Do the fork patches in the `skia-bindings/skia` subdirectory match with `master` (`just diff-skia`).
 - [ ] Update versions of `skia-bindings/Cargo.toml` and `skia-safe/Cargo.toml` and also add the version to the new `deprecated` attributes.
-- [ ] Review API changes: `make diff-api`.  
+- [ ] Review API changes: `just diff-api`.  
     > The diff compares with the latest crates.io release, so it also lists what master
     > changed since that release. An item belongs to this PR only if
     > `git diff master...HEAD -- skia-safe/src` touches it.
 - [ ] Do one final review of all the changes.
-- [ ] Run `make doc` and fix all warnings.
+- [ ] Run `just doc` and fix all warnings.
 
 ## Wrapper updates
 

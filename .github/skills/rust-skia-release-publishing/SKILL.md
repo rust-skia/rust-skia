@@ -24,7 +24,7 @@ Before requesting approval for crate publication:
    `cargo info --registry crates-io <crate>@<version>`. An unqualified lookup
    can resolve the local workspace package and falsely report it as published.
 - With no source-build or package check running, generate documentation
-   bindings using `env -u FORCE_SKIA_BUILD -u FORCE_SKIA_BINARIES_DOWNLOAD make
+   bindings using `env -u FORCE_SKIA_BUILD -u FORCE_SKIA_BINARIES_DOWNLOAD just
    bindings-docs`. Require a successful exit and a non-empty
    `/tmp/bindings.rs` before publishing any crate, including
    `skia-svg-macros`. This catches a damaged nested dependency checkout before

@@ -2,18 +2,18 @@
 
 ## Build and Run the Example
 
-To build this sample you will need to install Emscripten. By default the build script looks for the current installed [asdf](http://asdf-vm.com/) version of `emsdk`. If Emscripten is installed by other means on your system, you can customize its location by setting the `EMSDK` environment variable.
+To build this sample you will need to install Emscripten. The build uses the Emscripten SDK that the `EMSDK` environment variable points to. Without it, the build looks for a `~/emsdk` checkout, then for the [asdf](http://asdf-vm.com/) version of `emsdk`.
 
 Then build the example:
 
 ```shell
-make build
+just build
 ```
 
 Start a web server (requires Python 3):
 
 ```shell
-make serve
+just serve
 ```
 
 Then open http://localhost:8000/web/ in your browser.
