@@ -44,7 +44,7 @@ mod texture_info;
 mod implementation {
     // Core types
     pub use super::context::Context;
-    pub use super::recorder::{BorrowedRecorder, Recorder, RecorderOptions};
+    pub use super::recorder::{BorrowedRecorder, ImageProvider, Recorder, RecorderOptions};
     pub use super::recording::Recording;
 
     // Configuration and options

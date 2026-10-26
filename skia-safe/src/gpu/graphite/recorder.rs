@@ -1,6 +1,7 @@
+use std::ffi::c_void;
 use std::fmt;
 use std::marker::PhantomData;
-use std::mem::ManuallyDrop;
+use std::mem::{self, ManuallyDrop};
 use std::ops::Deref;
 
 use skia_bindings as sb;
@@ -8,7 +9,7 @@ use skia_bindings as sb;
 use super::{Recording, TextureInfo};
 use crate::gpu::BackendApi;
 use crate::prelude::*;
-use crate::{Canvas, ImageInfo};
+use crate::{Canvas, Image, ImageInfo, image::RequiredProperties};
 
 /// Configuration for recorder creation
 pub type RecorderOptions = Handle<sb::skgpu_graphite_RecorderOptions>;
@@ -39,6 +40,110 @@ impl RecorderOptions {
     pub fn new() -> Self {
         Self::construct(|options| unsafe { sb::C_RecorderOptions_Construct(options) })
     }
+
+    /// Sets the [`ImageProvider`] that recorders created with these options ask for a
+    /// Graphite-backed version of every image that is not Graphite-backed.
+    ///
+    /// Without a provider, Graphite drops draws of raster and other non-Graphite images.
+    pub fn set_image_provider<T: ImageProvider + 'static>(
+        &mut self,
+        image_provider: T,
+    ) -> &mut Self {
+        let param = sb::RustImageProvider_Param {
+            data: Box::into_raw(Box::new(image_provider)).cast(),
+            drop: Some(drop_provider::<T>),
+            findOrCreate: Some(find_or_create::<T>),
+        };
+        unsafe {
+            let provider = sb::C_RustImageProvider_New(&param);
+            sb::C_RecorderOptions_setImageProvider(self.native_mut(), provider);
+        }
+        self
+    }
+}
+
+/// Lets clients cache the Graphite-backed versions of images that are not Graphite-backed.
+///
+/// Whenever Graphite draws an [`Image`] that is not Graphite-backed (a raster image, for example),
+/// it calls [`find_or_create`](Self::find_or_create). The returned image must be Graphite-backed
+/// and preserve the dimensions and alpha type of the original. If it is `None` or does not meet the
+/// requirements, Graphite drops the draw.
+///
+/// Graphite does not cache these images itself. A provider that caches them by
+/// [`Image::unique_id`], as Chrome does, avoids uploading the same image on every draw:
+///
+/// ```no_run
+/// use std::collections::HashMap;
+/// use skia_safe::{gpu::graphite, image::RequiredProperties, Image};
+///
+/// #[derive(Default)]
+/// struct CachingProvider(HashMap<(u32, bool), Image>);
+///
+/// impl graphite::ImageProvider for CachingProvider {
+///     fn find_or_create(
+///         &mut self,
+///         recorder: &mut graphite::BorrowedRecorder,
+///         image: &Image,
+///         required: RequiredProperties,
+///     ) -> Option<Image> {
+///         let key = (image.unique_id(), required.mipmapped);
+///         if let Some(cached) = self.0.get(&key) {
+///             return Some(cached.clone());
+///         }
+///         let uploaded = recorder.texture_from_image(image, required)?;
+///         self.0.insert(key, uploaded.clone());
+///         Some(uploaded)
+///     }
+/// }
+///
+/// let mut options = graphite::RecorderOptions::new();
+/// options.set_image_provider(CachingProvider::default());
+/// ```
+///
+/// If the same provider is given to multiple recorders, the client is responsible for any
+/// synchronization; see the Skia documentation of `skgpu::graphite::ImageProvider`.
+pub trait ImageProvider {
+    /// Returns a Graphite-backed version of `image` that has the `required` properties, or `None`
+    /// to drop the draw.
+    fn find_or_create(
+        &mut self,
+        recorder: &mut BorrowedRecorder,
+        image: &Image,
+        required: RequiredProperties,
+    ) -> Option<Image>;
+}
+
+unsafe extern "C" fn drop_provider<T>(provider: *mut c_void) {
+    mem::drop(unsafe { Box::from_raw(provider.cast::<T>()) });
+}
+
+/// `provider` is the `Box<T>` leaked in [`RecorderOptions::set_image_provider`], the only place
+/// that pairs it with this callback. It stays valid until `drop_provider` reclaims it.
+unsafe extern "C" fn find_or_create<T: ImageProvider>(
+    provider: *mut c_void,
+    recorder: *mut sb::skgpu_graphite_Recorder,
+    image: *const sb::SkImage,
+    required: *const sb::SkImage_RequiredProperties,
+) -> *mut sb::SkImage {
+    let provider = unsafe { &mut *provider.cast::<T>() };
+    let Some(recorder) = Recorder::from_ptr(recorder) else {
+        return std::ptr::null_mut();
+    };
+    let mut recorder = BorrowedRecorder {
+        recorder: ManuallyDrop::new(recorder),
+        _owner: PhantomData,
+    };
+    let image_ptr = image as *mut sb::SkImage;
+    let Some(image) = Image::from_unshared_ptr_ref(&image_ptr) else {
+        return std::ptr::null_mut();
+    };
+    let required = RequiredProperties {
+        mipmapped: unsafe { (*required).fMipmapped },
+    };
+    provider
+        .find_or_create(&mut recorder, image, required)
+        .map(|image| image.into_ptr())
+        .unwrap_or(std::ptr::null_mut())
 }
 
 // `skgpu::graphite::Recorder` is handed out as `std::unique_ptr<Recorder>`
@@ -83,6 +188,22 @@ impl<'a> BorrowedRecorder<'a> {
     /// See [`Recorder::snap`].
     pub fn snap(&mut self) -> Option<Recording> {
         self.recorder.snap()
+    }
+
+    /// Uploads `image` and returns a Graphite-backed version of it with the `required`
+    /// properties. See [`super::images::texture_from_image`].
+    pub fn texture_from_image(
+        &mut self,
+        image: &Image,
+        required: RequiredProperties,
+    ) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImages_TextureFromImageGraphite(
+                self.recorder.native_mut(),
+                image.native(),
+                required.native(),
+            )
+        })
     }
 
     /// See [`Recorder::make_deferred_canvas`].
@@ -175,5 +296,35 @@ mod tests {
         let options = RecorderOptions::new();
         let _default_options = RecorderOptions::default();
         let _ = format!("{:?}", options);
+    }
+
+    #[test]
+    fn image_provider_is_dropped_with_the_options() {
+        use std::rc::Rc;
+
+        struct Provider(Rc<()>);
+        impl ImageProvider for Provider {
+            fn find_or_create(
+                &mut self,
+                _recorder: &mut BorrowedRecorder,
+                _image: &Image,
+                _required: RequiredProperties,
+            ) -> Option<Image> {
+                None
+            }
+        }
+
+        let alive = Rc::new(());
+        let mut options = RecorderOptions::new();
+        options.set_image_provider(Provider(alive.clone()));
+        assert_eq!(Rc::strong_count(&alive), 2);
+        options.set_image_provider(Provider(alive.clone()));
+        assert_eq!(
+            Rc::strong_count(&alive),
+            2,
+            "replacing a provider drops the old one"
+        );
+        drop(options);
+        assert_eq!(Rc::strong_count(&alive), 1);
     }
 }
