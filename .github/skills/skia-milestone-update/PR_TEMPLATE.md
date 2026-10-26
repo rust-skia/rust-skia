@@ -15,8 +15,9 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
   `/third_party/*/BUILD.gn`, and `/third_party/*/*.gni`. List each changed file under
   "Build organization" below.
 - [ ] Review every third-party pin in `DEPS`. Each is the newer of Chromium's commit for the
-  milestone and Skia's own pin, or a stable release that fixes a known vulnerability in it, and
-  `just audit-skia-deps` passes.
+  milestone and Skia's own pin (`just chromium-deps-pins XX`), or a stable release that fixes a
+  known vulnerability in it. `just audit-skia-deps` and `just check-third-party-sources` pass,
+  and the source build that compiles the pins ran on Linux.
   List each changed pin under "Third-party dependencies" below.
 - [ ] Skia builds.
 - [ ] `/skia-bindings` builds.
