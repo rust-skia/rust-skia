@@ -9,10 +9,10 @@ Read the [release checklist](../../release-checklist.md) and the
 [release notes rules](../../release-notes-guidelines.md). Coordinate executable
 operations through the verification recipes in the repository `justfile`.
 
-Establish the release version, previous version, exact release commit, notes
-file, and canonical remote. Never proceed across a mismatch: remote `master`
-and `release`, binary artifacts, and the candidate commit must identify the
-same release.
+Establish the release version, previous version, exact release commit, and
+canonical remote. Never proceed across a mismatch: remote `master` and
+`release`, binary artifacts, and the candidate commit must identify the same
+release.
 
 1. Run `just release-verify <version> <previous-version> <commit>`. It requires
    a clean working tree with the Skia submodule at its recorded tag, and `emcc`
@@ -37,7 +37,19 @@ same release.
    through a foreign renderer. Read
    `/tmp/rust-skia-release-vector/comparison/summary.tsv` and inspect its
    `review` directory.
-4. Validate the release notes against the repository rules.
+4. Write the release notes. The maintainer does not write them, so unless the
+   user names an existing notes file, draft
+   `$TMPDIR/rust-skia-<version>-notes.md` from the PRs merged since the
+   previous tag, following the release notes rules. The intro paragraph states
+   only what the release aligns to and the range it covers. End the notes with
+   the repository's AI disclosure, directly above the `Full Changelog:` line:
+
+   ```markdown
+   > [!NOTE]
+   > This was created with AI assistance.
+   ```
+
+   Validate the finished notes against the release notes rules.
 5. Report the verified version, previous version, exact commit, notes file,
    canonical remote, and image-review result.
 

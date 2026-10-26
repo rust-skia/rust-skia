@@ -1,8 +1,8 @@
 # Release Checklist
 
-Start here only after the `release` branch is ready, its binary workflows have
-finished, and the release notes are prepared. All executable steps go through
-`just`.
+Start here only after the `release` branch is ready and its binary workflows
+have finished. The release verification skill drafts the release notes. All
+executable steps go through `just`.
 
 Set `<version>`, `<previous>`, `<commit>`, and `<notes>` to concrete values.
 
