@@ -25,15 +25,20 @@ pub mod contexts {
     //! Creates a [`crate::Context`] wrapping a Ganesh GPU backend with OpenGL.
     use skia_bindings as sb;
 
-    use crate::{Context, ContextOptions, gpu::gl, prelude::*};
+    use crate::{Context, ContextOptions, gpu, gpu::gl, prelude::*};
 
     /// Creates a context wrapping a Ganesh GPU backend with OpenGL
-    pub fn make_ganesh(
+    pub fn make_ganesh<'a>(
         interface: impl Into<gl::Interface>,
-        options: &ContextOptions,
+        context_options: &ContextOptions,
+        gpu_options: impl Into<Option<&'a gpu::ContextOptions>>,
     ) -> Option<Context> {
         Context::from_ptr(unsafe {
-            sb::C_SkContexts_MakeGaneshGL(interface.into().into_ptr(), options.native())
+            sb::C_SkContexts_MakeGaneshGL(
+                interface.into().into_ptr(),
+                context_options.native(),
+                gpu_options.into().native_ptr_or_null(),
+            )
         })
     }
 }

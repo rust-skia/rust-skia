@@ -38,16 +38,19 @@ pub mod contexts {
     //! Free functions to create Graphite contexts on the Vulkan backend.
 
     use super::*;
+    use crate::prelude::NativePointerOrNull;
 
-    pub fn make_graphite(
+    pub fn make_graphite<'a>(
         backend_context: &gpu_vk::BackendContext,
-        options: &crate::ContextOptions,
+        context_options: &crate::ContextOptions,
+        graphite_options: impl Into<Option<&'a ContextOptions>>,
     ) -> Option<crate::Context> {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
             let context = crate::Context::from_ptr(sb::C_SkContexts_MakeGraphiteVulkan(
                 backend_context.native.as_ptr() as _,
-                options.native(),
+                context_options.native(),
+                graphite_options.into().native_ptr_or_null(),
             ));
             drop(end_resolving);
             context
