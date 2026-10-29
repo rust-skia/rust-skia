@@ -85,13 +85,31 @@ impl<'a> Document<'a, state::Open> {
         self.state.pages
     }
 
-    // This function consumes the document and returns a document containing a
-    // canvas that represents the page it's currently drawing on.
+    /// Begin a new page.
+    ///
+    /// This function consumes the document and returns a document containing a canvas that
+    /// represents the page it's currently drawing on.
+    ///
+    /// Panics if the native document does not provide a canvas for the page, for example when
+    /// the page size is not positive. Use [`Self::try_begin_page`] to keep the document instead.
     pub fn begin_page(
-        mut self,
+        self,
         size: impl Into<Size>,
         content: Option<&Rect>,
     ) -> Document<'a, state::OnPage> {
+        self.try_begin_page(size, content)
+            .unwrap_or_else(|_| panic!("SkDocument::beginPage did not return a canvas"))
+    }
+
+    /// Begin a new page, returning the unchanged document if the native document does not
+    /// provide a canvas for it.
+    ///
+    /// On `Err`, the document is still open: it can be [`Self::close`]d or [`Self::abort`]ed.
+    pub fn try_begin_page(
+        mut self,
+        size: impl Into<Size>,
+        content: Option<&Rect>,
+    ) -> Result<Document<'a, state::OnPage>, Self> {
         let size = size.into();
         let canvas = unsafe {
             self.document.native_mut().beginPage(
@@ -100,15 +118,18 @@ impl<'a> Document<'a, state::Open> {
                 content.native_ptr_or_null(),
             )
         };
+        let Some(canvas) = ptr::NonNull::new(canvas) else {
+            return Err(self);
+        };
 
-        Document {
+        Ok(Document {
             stream: self.stream,
             document: self.document,
             state: state::OnPage {
-                canvas: ptr::NonNull::new(canvas).unwrap(),
+                canvas,
                 page: self.state.pages + 1,
             },
-        }
+        })
     }
 
     /// Close the document and return the encoded representation.

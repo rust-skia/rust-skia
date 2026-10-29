@@ -405,12 +405,24 @@ pub mod pdf {
     ///   called or the document is deleted.
     /// - `metadata` - a PDF metadata object. Some fields may be left empty.
     ///
-    /// Returns `None` if there is an error, otherwise a newly created PDF-backed [`Document`].
+    /// Panics if Skia cannot create the document. Use [`try_new_document`] to get `None` instead.
     pub fn new_document<'a>(
         writer: &'a mut impl io::Write,
         // We need to make the metadata alive as long as the document, because of `structure_element_tree_root`.
         metadata: Option<&'a Metadata<'a>>,
     ) -> Document<'a> {
+        try_new_document(writer, metadata).expect("SkPDF::MakeDocument did not return a document")
+    }
+
+    /// Create a PDF-backed document, writing the results into a writer.
+    ///
+    /// Same as [`new_document`], but returns `None` if Skia cannot create the document, for
+    /// example when PDF support is not compiled into the native library.
+    pub fn try_new_document<'a>(
+        writer: &'a mut impl io::Write,
+        // We need to make the metadata alive as long as the document, because of `structure_element_tree_root`.
+        metadata: Option<&'a Metadata<'a>>,
+    ) -> Option<Document<'a>> {
         let mut md = InternalMetadata::default();
         if let Some(metadata) = metadata {
             let internal = md.native_mut();
@@ -450,10 +462,9 @@ pub mod pdf {
         let mut stream = RustWStream::new(writer);
         let document = RCHandle::from_ptr(unsafe {
             sb::C_SkPDF_MakeDocument(stream.stream_mut(), md.native())
-        })
-        .unwrap();
+        })?;
 
-        Document::new(stream, document)
+        Some(Document::new(stream, document))
     }
 
     //
@@ -528,6 +539,19 @@ mod tests {
         let v = root.child_vector();
         assert_eq!(v[0].type_string(), "nested");
         assert_eq!(v[1].type_string(), "nested2");
+    }
+
+    #[test]
+    fn try_constructors_round_trip() {
+        let mut output = Vec::new();
+        let document = pdf::try_new_document(&mut output, None).expect("PDF document");
+        let mut page = document
+            .try_begin_page((200, 200), None)
+            .unwrap_or_else(|_| panic!("page"));
+        page.canvas().clear(Color::WHITE);
+        page.end_page().close();
+        assert!(!output.is_empty(), "PDF output should not be empty");
+        assert!(output.starts_with(b"%PDF-"), "output should be a PDF");
     }
 
     #[test]
