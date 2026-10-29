@@ -25,18 +25,20 @@ pub mod direct_contexts {
 pub mod contexts {
     use skia_bindings as sb;
 
-    use crate::{Context, ContextOptions, gpu::d3d, prelude::*};
+    use crate::{Context, ContextOptions, gpu, gpu::d3d, prelude::*};
 
     #[allow(clippy::missing_safety_doc)]
     /// Creates a context wrapping a Ganesh GPU backend with D3D
-    pub unsafe fn make_ganesh(
+    pub unsafe fn make_ganesh<'a>(
         backend_context: &d3d::BackendContext,
-        options: &ContextOptions,
+        context_options: &ContextOptions,
+        gpu_options: impl Into<Option<&'a gpu::ContextOptions>>,
     ) -> Option<Context> {
         unsafe {
             Context::from_ptr(sb::C_SkContexts_MakeGaneshD3D(
                 backend_context.native(),
-                options.native(),
+                context_options.native(),
+                gpu_options.into().native_ptr_or_null(),
             ))
         }
     }

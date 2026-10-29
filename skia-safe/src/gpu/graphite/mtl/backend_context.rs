@@ -71,14 +71,19 @@ pub mod contexts {
     use skia_bindings as sb;
 
     use super::BackendContext;
-    use crate::{Context, ContextOptions, prelude::*};
+    use crate::{Context, ContextOptions, gpu::graphite, prelude::*};
 
-    pub fn make_graphite(
+    pub fn make_graphite<'a>(
         backend_context: &BackendContext,
-        options: &ContextOptions,
+        context_options: &ContextOptions,
+        graphite_options: impl Into<Option<&'a graphite::ContextOptions>>,
     ) -> Option<Context> {
         Context::from_ptr(unsafe {
-            sb::C_SkContexts_MakeGraphiteMetal(backend_context.native(), options.native())
+            sb::C_SkContexts_MakeGraphiteMetal(
+                backend_context.native(),
+                context_options.native(),
+                graphite_options.into().native_ptr_or_null(),
+            )
         })
     }
 }

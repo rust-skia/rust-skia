@@ -16,6 +16,12 @@ const LINUX_JOB: &str = include_str!("templates/linux-job.yaml");
 const WASM_JOB: &str = include_str!("templates/wasm-job.yaml");
 const WINDOWS_JOB: &str = include_str!("templates/windows-job.yaml");
 const WINDOWS_ARM_JOB: &str = include_str!("templates/windows-arm-job.yaml");
+
+/// The minimum macOS version that every macOS build targets.
+///
+/// Skia's Graphite backend uses C++20 `std::atomic::wait` and `notify_one`, which libc++ makes
+/// available starting with macOS 11.0.
+const MACOSX_DEPLOYMENT_TARGET: &str = "11.0";
 const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
 const TARGET_TEMPLATE: &str = include_str!("templates/target.yaml");
 
@@ -194,7 +200,7 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         ("skiaDebug".into(), skia_debug.into()),
     ];
 
-    if let Some(macosx_deployment_target) = macosx_deployment_target(workflow, job, targets) {
+    if let Some(macosx_deployment_target) = macosx_deployment_target(workflow) {
         replacements.push((
             "macosxDeploymentTarget".into(),
             macosx_deployment_target.into(),
@@ -247,22 +253,6 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
     }
 
     if let JobFeatures::Matrix(features_list) = &job.features {
-        // Add macosxDeploymentTarget includes for macOS matrix workflows
-        if matches!(workflow.host_os, HostOS::MacOS) {
-            for feature in features_list {
-                let deployment_target = if feature.contains("metal") {
-                    "10.14"
-                } else {
-                    "10.13"
-                };
-                matrix_lines.push(format!("      - features: '{}'", feature));
-                matrix_lines.push(format!(
-                    "        macosxDeploymentTarget: '{}'",
-                    deployment_target
-                ));
-            }
-        }
-
         let mut excludes = Vec::new();
         for features in features_list {
             for target in targets {
@@ -294,31 +284,11 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
     rendered
 }
 
-fn macosx_deployment_target(
-    workflow: &Workflow,
-    job: &Job,
-    targets: &[TargetConf],
-) -> Option<&'static str> {
-    if let HostOS::MacOS = workflow.host_os {
-        let metal = "metal".to_owned();
-        match &job.features {
-            JobFeatures::Direct(features) => {
-                let uses_metal = targets
-                    .iter()
-                    .any(|target| effective_features(workflow, features, target).contains(&metal));
-                if uses_metal {
-                    return Some("10.14");
-                } else {
-                    return Some("10.13");
-                }
-            }
-            JobFeatures::Matrix(_) => {
-                // Deployment target is set via matrix includes
-                return Some("${{ matrix.macosxDeploymentTarget }}");
-            }
-        }
+fn macosx_deployment_target(workflow: &Workflow) -> Option<&'static str> {
+    match workflow.host_os {
+        HostOS::MacOS => Some(MACOSX_DEPLOYMENT_TARGET),
+        _ => None,
     }
-    None
 }
 
 fn render_generic_steps(workflow: &Workflow, _job: &Job) -> String {

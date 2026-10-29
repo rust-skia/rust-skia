@@ -31,6 +31,7 @@ pub struct Options {
     /// keyword's length is restricted to at most 79 characters and it can't contain a non-breaking
     /// space character.
     pub comments: Vec<encode::Comment>,
+    // TODO: fHdrMetadata (skhdr::Metadata is private)
 }
 
 /// Encode the `src` pixels to the `dst` stream.

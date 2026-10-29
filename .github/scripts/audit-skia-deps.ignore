@@ -5,5 +5,7 @@
 
 CVE-2026-113351 expat 2.9.0 is the latest release, and the fix exists only on expat's master branch. Take the next expat release.
 CVE-2026-115506 expat 2.9.0 is the latest release, and the fix exists only on expat's master branch. Take the next expat release.
+CVE-2026-117610 expat 2.9.0 is the latest release, and the fix exists only on expat's master branch. Skia never creates an external entity subparser, so the affected code is unreachable. Take the next expat release.
+CVE-2026-118370 expat 2.9.0 is the latest release, and the fix exists only on expat's master branch. Take the next expat release.
 CVE-2026-113679 harfbuzz's WebAssembly shaper is not compiled, because Skia's build does not define HAVE_WASM.
 CVE-2026-113680 harfbuzz's WebAssembly shaper is not compiled, because Skia's build does not define HAVE_WASM.

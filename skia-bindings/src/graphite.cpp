@@ -12,6 +12,7 @@
 #include "include/core/SkSize.h"
 #include "include/core/SkSurface.h"
 #include "include/gpu/GpuTypes.h"
+#include "include/gpu/MutableTextureState.h"
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
@@ -120,6 +121,13 @@ extern "C" void C_Context_deleteBackendTexture(skgpu::graphite::Context* self, c
 
 extern "C" bool C_Context_isDeviceLost(const skgpu::graphite::Context* self) {
     return self->isDeviceLost();
+}
+
+extern "C" bool C_Context_setMutableState(
+    skgpu::graphite::Context* self,
+    const skgpu::graphite::BackendTexture* texture,
+    const skgpu::MutableTextureState* state) {
+    return self->setMutableState(*texture, *state);
 }
 
 // skgpu::graphite::Context is owned via std::unique_ptr (Context::MakeMetal etc.
@@ -393,8 +401,12 @@ extern "C" skgpu::graphite::Context* C_ContextFactory_MakeMetal(
 
 extern "C" SkContext* C_SkContexts_MakeGraphiteMetal(
     const skgpu::graphite::MtlBackendContext* backendContext,
-    const SkContextOptions* options) {
-    return SkContexts::MakeGraphite(*backendContext, *options).release();
+    const SkContextOptions* contextOptions,
+    const skgpu::graphite::ContextOptions* graphiteOptions) {
+    return SkContexts::MakeGraphite(
+        *backendContext,
+        *contextOptions,
+        graphiteOptions ? *graphiteOptions : skgpu::graphite::ContextOptions()).release();
 }
 
 extern "C" void C_BackendTextures_MakeMetal(
@@ -426,8 +438,11 @@ extern "C" skgpu::graphite::Context* C_ContextFactory_MakeVulkan(
 
 extern "C" SkContext* C_SkContexts_MakeGraphiteVulkan(
     const void* backendContext,
-    const SkContextOptions* options) {
+    const SkContextOptions* contextOptions,
+    const skgpu::graphite::ContextOptions* graphiteOptions) {
     return SkContexts::MakeGraphite(
-        *static_cast<const skgpu::VulkanBackendContext*>(backendContext), *options).release();
+        *static_cast<const skgpu::VulkanBackendContext*>(backendContext),
+        *contextOptions,
+        graphiteOptions ? *graphiteOptions : skgpu::graphite::ContextOptions()).release();
 }
 #endif
