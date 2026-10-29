@@ -18,7 +18,7 @@ categories = [
 ]
 license = "MIT"
 
-version = "0.157.0"
+version = "0.158.0"
 authors = ["Armin Sander <armin@replicator.org>"]
 edition.workspace = true
 rust-version.workspace = true
@@ -79,8 +79,8 @@ _wgpu = ["graphite", "dep:skia-wgpu"]
 
 [dependencies]
 bitflags = "2.0"
-skia-bindings = { version = "=0.157.0", path = "../skia-bindings", default-features = false }
-skia-wgpu = { version = "=0.157.0", path = "../skia-wgpu", optional = true }
+skia-bindings = { version = "=0.158.0", path = "../skia-bindings", default-features = false }
+skia-wgpu = { version = "=0.158.0", path = "../skia-wgpu", optional = true }
 
 
 # D3D types & ComPtr
