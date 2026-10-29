@@ -185,8 +185,10 @@ extern "C" GrDirectContext* C_GrDirectContexts_MakeVulkan(
 
 extern "C" SkContext* C_SkContexts_MakeGaneshVulkan(
     const skgpu::VulkanBackendContext* backendContext,
-    const SkContextOptions* options) {
-    return SkContexts::MakeGanesh(*backendContext, *options).release();
+    const SkContextOptions* contextOptions,
+    const GrContextOptions* grOptions) {
+    return SkContexts::MakeGanesh(
+        *backendContext, *contextOptions, grOptions ? *grOptions : GrContextOptions()).release();
 }
 #endif
 

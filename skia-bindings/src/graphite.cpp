@@ -401,8 +401,12 @@ extern "C" skgpu::graphite::Context* C_ContextFactory_MakeMetal(
 
 extern "C" SkContext* C_SkContexts_MakeGraphiteMetal(
     const skgpu::graphite::MtlBackendContext* backendContext,
-    const SkContextOptions* options) {
-    return SkContexts::MakeGraphite(*backendContext, *options).release();
+    const SkContextOptions* contextOptions,
+    const skgpu::graphite::ContextOptions* graphiteOptions) {
+    return SkContexts::MakeGraphite(
+        *backendContext,
+        *contextOptions,
+        graphiteOptions ? *graphiteOptions : skgpu::graphite::ContextOptions()).release();
 }
 
 extern "C" void C_BackendTextures_MakeMetal(
@@ -434,8 +438,11 @@ extern "C" skgpu::graphite::Context* C_ContextFactory_MakeVulkan(
 
 extern "C" SkContext* C_SkContexts_MakeGraphiteVulkan(
     const void* backendContext,
-    const SkContextOptions* options) {
+    const SkContextOptions* contextOptions,
+    const skgpu::graphite::ContextOptions* graphiteOptions) {
     return SkContexts::MakeGraphite(
-        *static_cast<const skgpu::VulkanBackendContext*>(backendContext), *options).release();
+        *static_cast<const skgpu::VulkanBackendContext*>(backendContext),
+        *contextOptions,
+        graphiteOptions ? *graphiteOptions : skgpu::graphite::ContextOptions()).release();
 }
 #endif

@@ -186,7 +186,7 @@ impl fmt::Debug for ParagraphStyle {
             .field("text_align", &self.text_align())
             .field("max_lines", &self.max_lines())
             .field("ellipsis", &self.ellipsis())
-            .field("height", &self.height())
+            .field("height", &self.native().fHeight)
             .field("text_height_behavior", &self.text_height_behavior())
             .field("unlimited_lines", &self.unlimited_lines())
             .field("ellipsized", &self.ellipsized())
@@ -199,6 +199,7 @@ impl fmt::Debug for ParagraphStyle {
                 &self.letter_spacing_by_css_spec(),
             )
             .field("render_soft_hyphens", &self.render_soft_hyphens())
+            .field("soft_hyphen_string", &self.soft_hyphen_string())
             .finish()
     }
 }
@@ -270,10 +271,18 @@ impl ParagraphStyle {
         self
     }
 
+    #[deprecated(
+        since = "0.158.0",
+        note = "Has no effect on layout. Line height comes from TextStyle and StrutStyle."
+    )]
     pub fn height(&self) -> scalar {
         self.native().fHeight
     }
 
+    #[deprecated(
+        since = "0.158.0",
+        note = "Has no effect on layout. Line height comes from TextStyle and StrutStyle."
+    )]
     pub fn set_height(&mut self, height: scalar) -> &mut Self {
         self.native_mut().fHeight = height;
         self
@@ -351,6 +360,19 @@ impl ParagraphStyle {
 
     pub fn set_render_soft_hyphens(&mut self, value: bool) -> &mut Self {
         self.native_mut().fRenderSoftHyphens = value;
+        self
+    }
+
+    /// The string rendered at line breaks that occur at a U+00AD soft hyphen when
+    /// [`render_soft_hyphens()`](Self::render_soft_hyphens) is `true`. Defaults to `"-"`.
+    pub fn soft_hyphen_string(&self) -> &str {
+        self.native().fSoftHyphenString.as_str()
+    }
+
+    /// Sets the string rendered at soft hyphen line breaks. It has no effect when soft hyphen
+    /// rendering is disabled.
+    pub fn set_soft_hyphen_string(&mut self, value: impl AsRef<str>) -> &mut Self {
+        self.native_mut().fSoftHyphenString.set_str(value);
         self
     }
 }

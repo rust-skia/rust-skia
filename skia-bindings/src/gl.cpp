@@ -166,8 +166,10 @@ extern "C" GrDirectContext* C_GrDirectContext_MakeGL(GrGLInterface* interface, c
 
 extern "C" SkContext* C_SkContexts_MakeGaneshGL(
     GrGLInterface* interface,
-    const SkContextOptions* options) {
-    return SkContexts::MakeGanesh(sp(interface), *options).release();
+    const SkContextOptions* contextOptions,
+    const GrContextOptions* grOptions) {
+    return SkContexts::MakeGanesh(
+        sp(interface), *contextOptions, grOptions ? *grOptions : GrContextOptions()).release();
 }
 
 //
