@@ -123,7 +123,6 @@
 #include "include/svg/SkSVGCanvas.h"
 
 // utils/
-#include "include/utils/SkCamera.h"
 #include "include/utils/SkCustomTypeface.h"
 #include "include/utils/SkNullCanvas.h"
 #include "include/utils/SkOrderedFontMgr.h"
@@ -4383,14 +4382,6 @@ extern "C" void C_Utils_Types(
         SkTextUtils *,
         SkParsePath *,
         SkCustomTypefaceBuilder *) {}
-
-extern "C" Sk3DView* C_Sk3DView_new() {
-    return new Sk3DView();
-}
-
-extern "C" void C_Sk3DView_delete(Sk3DView* self) {
-    delete self;
-}
 
 extern "C" void C_SkCustomTypefaceBuilder_destruct(SkCustomTypefaceBuilder *self) {
     self->~SkCustomTypefaceBuilder();
