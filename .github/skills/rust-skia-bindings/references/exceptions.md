@@ -51,9 +51,8 @@ the interior-pointer rule is the common case, because Rust may move the value:
 pub type PathBuilder = RefHandle<SkPathBuilder>;
 ```
 
-Other instances: `camera.rs` ("the implementation uses interior pointers, so we let
-Skia do the allocation"), `interop/stream.rs` (`RustStream` must be deletable by C++),
-and `yuva_backend_textures.rs`, where the rule chains: *"Because BackendTexture itself
+Other instances: `interop/stream.rs` (`RustStream` must be deletable by C++), and
+`yuva_backend_textures.rs`, where the rule chains: *"Because BackendTexture itself
 is a RefHandle, we need to put GrYUVABackendTextures on the heap, too."*
 
 ## 3. A type must be heap-allocated, not placement-constructed into Rust storage

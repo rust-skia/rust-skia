@@ -247,7 +247,6 @@ Note: `SkAndroidCodec.h` (rich) not wrapped at all (TODO in codec.rs).
 | `utils/shadow_utils.rs` | `SkShadowUtils.h` | **none — 5 undoc** | **rich** ⭐ |
 | `utils/null_canvas.rs` | `SkNullCanvas.h` | none — 2 undoc | some |
 | `utils/ordered_font_mgr.rs` | `SkOrderedFontMgr.h` | none — 3 undoc | some |
-| `utils/camera.rs` | `SkCamera.h` | none — 19 undoc | **NO DOCS** (low) |
 | `utils/custom_typeface.rs` | `SkCustomTypeface.h` | none — 9 undoc | **NO DOCS** (low) |
 | `utils/parse_path.rs` | `SkParsePath.h` | none — 6 undoc | **NO DOCS** (low) |
 | `utils/text_utils.rs` | `SkTextUtils.h` | none — 6 undoc | **NO DOCS** (low) |
