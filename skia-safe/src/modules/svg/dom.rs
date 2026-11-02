@@ -56,7 +56,7 @@ impl Dom {
         resource_provider: impl Into<NativeResourceProvider>,
     ) -> Result<Self, LoadError> {
         let mut reader = RustStream::new(&mut reader);
-        let stream = reader.stream_mut();
+        let stream = reader.stream_ptr();
         let resource_provider = resource_provider.into();
 
         let out = unsafe { sb::C_SkSVGDOM_MakeFromStream(stream, resource_provider.into_ptr()) };

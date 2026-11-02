@@ -15,6 +15,9 @@ impl NativeAccess for PathIter<'_> {
     fn native(&self) -> &SkPathIter {
         &self.0
     }
+}
+
+impl NativeAccessMut for PathIter<'_> {
     fn native_mut(&mut self) -> &mut SkPathIter {
         &mut self.0
     }
@@ -42,7 +45,9 @@ impl NativeAccess for PathIterRec<'_> {
     fn native(&self) -> &Self::Native {
         &self.0
     }
+}
 
+impl NativeAccessMut for PathIterRec<'_> {
     fn native_mut(&mut self) -> &mut Self::Native {
         &mut self.0
     }
@@ -130,6 +135,9 @@ impl NativeAccess for PathContourIter<'_> {
     fn native(&self) -> &SkPathContourIter {
         &self.0
     }
+}
+
+impl NativeAccessMut for PathContourIter<'_> {
     fn native_mut(&mut self) -> &mut SkPathContourIter {
         &mut self.0
     }
@@ -157,7 +165,9 @@ impl NativeAccess for PathContourIterRec<'_> {
     fn native(&self) -> &Self::Native {
         &self.0
     }
+}
 
+impl NativeAccessMut for PathContourIterRec<'_> {
     fn native_mut(&mut self) -> &mut Self::Native {
         &mut self.0
     }

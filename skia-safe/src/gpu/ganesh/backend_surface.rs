@@ -280,7 +280,7 @@ impl BackendTexture {
     ///
     /// Vulkan: VkImageLayout and QueueFamilyIndex
     pub fn set_mutable_state(&mut self, state: &MutableTextureState) {
-        unsafe { self.native_mut().setMutableState(state.native()) }
+        unsafe { sb::GrBackendTexture_setMutableState(self.native_ptr(), state.native()) }
     }
 
     /// Returns true if we are working with protected content.
@@ -295,7 +295,7 @@ impl BackendTexture {
     /// Returns true if both textures are valid and refer to the same API texture.
     #[allow(clippy::wrong_self_convention)]
     pub fn is_same_texture(&mut self, texture: &BackendTexture) -> bool {
-        unsafe { self.native_mut().isSameTexture(texture.native()) }
+        unsafe { sb::GrBackendTexture_isSameTexture(self.native_ptr(), texture.native()) }
     }
 }
 

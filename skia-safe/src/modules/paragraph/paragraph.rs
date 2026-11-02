@@ -74,7 +74,7 @@ impl Paragraph {
     }
 
     pub fn layout(&mut self, width: scalar) {
-        unsafe { sb::C_Paragraph_layout(self.native_mut(), width) }
+        unsafe { sb::C_Paragraph_layout(self.native_ptr(), width) }
     }
 
     pub fn paint(&self, canvas: &Canvas, p: impl Into<Point>) {
@@ -167,13 +167,13 @@ impl Paragraph {
     }
 
     pub fn mark_dirty(&mut self) {
-        unsafe { sb::C_Paragraph_markDirty(self.native_mut()) }
+        unsafe { sb::C_Paragraph_markDirty(self.native_ptr()) }
     }
 
     /// This function will return the number of unresolved glyphs or
     /// `None` if not applicable (has not been shaped yet - valid case)
     pub fn unresolved_glyphs(&mut self) -> Option<usize> {
-        unsafe { sb::C_Paragraph_unresolvedGlyphs(self.native_mut()) }
+        unsafe { sb::C_Paragraph_unresolvedGlyphs(self.native_ptr()) }
             .try_into()
             .ok()
     }
@@ -201,7 +201,7 @@ impl Paragraph {
     {
         unsafe {
             sb::C_Paragraph_visit(
-                self.native_mut(),
+                self.native_ptr(),
                 &mut visitor as *mut F as *mut _,
                 Some(visitor_trampoline::<'a, F>),
             );
@@ -227,7 +227,7 @@ impl Paragraph {
     {
         unsafe {
             sb::C_Paragraph_extendedVisit(
-                self.native_mut(),
+                self.native_ptr(),
                 &mut visitor as *mut F as *mut _,
                 Some(visitor_trampoline::<'a, F>),
             );
@@ -260,7 +260,7 @@ impl Paragraph {
         let mut path = Path::default();
         let unconverted_glyphs = unsafe {
             sb::C_Paragraph_getPath(
-                self.native_mut(),
+                self.native_ptr(),
                 line_number.try_into().unwrap(),
                 path.native_mut(),
             )
@@ -284,7 +284,7 @@ impl Paragraph {
     ///
     /// Returns: `true` if there is such a glyph
     pub fn contains_emoji(&mut self, text_blob: &mut TextBlob) -> bool {
-        unsafe { sb::C_Paragraph_containsEmoji(self.native_mut(), text_blob.native_mut()) }
+        unsafe { sb::C_Paragraph_containsEmoji(self.native_ptr(), text_blob.native_mut()) }
     }
 
     /// Checks if a given text blob contains colored font or bitmap
@@ -294,7 +294,7 @@ impl Paragraph {
     /// Returns: `true` if there is such a glyph
     pub fn contains_color_font_or_bitmap(&mut self, text_blob: &mut TextBlob) -> bool {
         unsafe {
-            sb::C_Paragraph_containsColorFontOrBitmap(self.native_mut(), text_blob.native_mut())
+            sb::C_Paragraph_containsColorFontOrBitmap(self.native_ptr(), text_blob.native_mut())
         }
     }
 
@@ -430,7 +430,7 @@ impl Paragraph {
     /// Returns: `false` only if the offset is out of bounds
     pub fn get_glyph_info_at_utf16_offset(&mut self, code_unit_index: usize) -> Option<GlyphInfo> {
         GlyphInfo::try_construct(|gi| unsafe {
-            sb::C_Paragraph_getGlyphInfoAtUTF16Offset(self.native_mut(), code_unit_index, gi)
+            sb::C_Paragraph_getGlyphInfoAtUTF16Offset(self.native_ptr(), code_unit_index, gi)
         })
     }
 
@@ -448,7 +448,7 @@ impl Paragraph {
     pub fn get_closest_utf16_glyph_info_at(&mut self, d: impl Into<Point>) -> Option<GlyphInfo> {
         let d = d.into();
         GlyphInfo::try_construct(|gi| unsafe {
-            sb::C_Paragraph_getClosestUTF16GlyphInfoAt(self.native_mut(), d.x, d.y, gi)
+            sb::C_Paragraph_getClosestUTF16GlyphInfoAt(self.native_ptr(), d.x, d.y, gi)
         })
     }
 
@@ -468,7 +468,7 @@ impl Paragraph {
     /// Returns: font info or an empty font info if the text is not found
     pub fn get_font_at_utf16_offset(&mut self, code_unit_index: usize) -> Font {
         Font::construct(|f| unsafe {
-            sb::C_Paragraph_getFontAtUTF16Offset(self.native_mut(), code_unit_index, f)
+            sb::C_Paragraph_getFontAtUTF16Offset(self.native_ptr(), code_unit_index, f)
         })
     }
 

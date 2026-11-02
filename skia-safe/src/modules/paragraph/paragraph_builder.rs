@@ -22,18 +22,18 @@ impl fmt::Debug for ParagraphBuilder {
 
 impl ParagraphBuilder {
     pub fn push_style(&mut self, style: &TextStyle) -> &mut Self {
-        unsafe { sb::C_ParagraphBuilder_pushStyle(self.native_mut(), style.native()) }
+        unsafe { sb::C_ParagraphBuilder_pushStyle(self.native_ptr(), style.native()) }
         self
     }
 
     pub fn pop(&mut self) -> &mut Self {
-        unsafe { sb::C_ParagraphBuilder_pop(self.native_mut()) }
+        unsafe { sb::C_ParagraphBuilder_pop(self.native_ptr()) }
         self
     }
 
     pub fn peek_style(&mut self) -> TextStyle {
         let mut ts = TextStyle::default();
-        unsafe { sb::C_ParagraphBuilder_peekStyle(self.native_mut(), ts.native_mut()) }
+        unsafe { sb::C_ParagraphBuilder_peekStyle(self.native_ptr(), ts.native_mut()) }
         ts
     }
 
@@ -41,7 +41,7 @@ impl ParagraphBuilder {
         let str = str.as_ref();
         unsafe {
             sb::C_ParagraphBuilder_addText(
-                self.native_mut(),
+                self.native_ptr(),
                 str.as_ptr() as *const raw::c_char,
                 str.len(),
             )
@@ -51,20 +51,20 @@ impl ParagraphBuilder {
 
     pub fn add_placeholder(&mut self, placeholder_style: &PlaceholderStyle) -> &mut Self {
         unsafe {
-            sb::C_ParagraphBuilder_addPlaceholder(self.native_mut(), placeholder_style.native())
+            sb::C_ParagraphBuilder_addPlaceholder(self.native_ptr(), placeholder_style.native())
         }
         self
     }
 
     pub fn build(&mut self) -> Paragraph {
-        Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_mut()) }).unwrap()
+        Paragraph::from_ptr(unsafe { sb::C_ParagraphBuilder_Build(self.native_ptr()) }).unwrap()
     }
 
     pub fn get_text(&mut self) -> &str {
         unsafe {
             let mut ptr = ptr::null_mut();
             let mut len = 0;
-            sb::C_ParagraphBuilder_getText(self.native_mut(), &mut ptr, &mut len);
+            sb::C_ParagraphBuilder_getText(self.native_ptr(), &mut ptr, &mut len);
             // ptr may indeed be `null` if there is no text.
             str::from_utf8_unchecked(safer::from_raw_parts(ptr as *const u8, len))
         }
@@ -78,7 +78,7 @@ impl ParagraphBuilder {
     // TODO: Wrap SetWords*, SetGraphemeBreaks*, setLineBreaks*, getClientICUData, setUnicode.
 
     pub fn reset(&mut self) {
-        unsafe { sb::C_ParagraphBuilder_Reset(self.native_mut()) }
+        unsafe { sb::C_ParagraphBuilder_Reset(self.native_ptr()) }
     }
 
     pub fn new(style: &ParagraphStyle, font_collection: impl Into<FontCollection>) -> Self {

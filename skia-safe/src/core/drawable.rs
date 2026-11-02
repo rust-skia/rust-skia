@@ -186,7 +186,7 @@ pub mod gpu_draw_handler {
     impl GPUDrawHandler {
         pub fn draw(&mut self, info: &crate::gpu::vk::BackendDrawableInfo) {
             unsafe {
-                sb::C_SkDrawable_GpuDrawHandler_draw(self.native_mut(), info.native());
+                sb::C_SkDrawable_GpuDrawHandler_draw(self.native_ptr(), info.native());
             }
         }
     }

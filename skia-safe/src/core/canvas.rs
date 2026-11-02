@@ -2509,7 +2509,9 @@ impl NativeAccess for AutoRestoredCanvas<'_> {
     fn native(&self) -> &SkAutoCanvasRestore {
         &self.restore
     }
+}
 
+impl NativeAccessMut for AutoRestoredCanvas<'_> {
     fn native_mut(&mut self) -> &mut SkAutoCanvasRestore {
         &mut self.restore
     }

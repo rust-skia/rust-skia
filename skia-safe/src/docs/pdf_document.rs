@@ -160,6 +160,9 @@ pub mod pdf {
         fn native(&self) -> &SkPDF_StructureElementNode {
             unsafe { self.0.as_ref() }
         }
+    }
+
+    impl NativeAccessMut for StructureElementNode<'_> {
         fn native_mut(&mut self) -> &mut SkPDF_StructureElementNode {
             unsafe { self.0.as_mut() }
         }

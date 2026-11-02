@@ -127,7 +127,7 @@ pub mod images {
     /// Returns: created [`Image`], or `None`
     pub fn deferred_from_generator(mut image_generator: ImageGenerator) -> Option<Image> {
         let image = Image::from_ptr(unsafe {
-            sb::C_SkImages_DeferredFromGenerator(image_generator.native_mut())
+            sb::C_SkImages_DeferredFromGenerator(image_generator.native_ptr())
         });
         mem::forget(image_generator);
         image

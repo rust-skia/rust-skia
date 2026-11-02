@@ -123,7 +123,7 @@ impl Recorder {
     /// # Returns
     /// A `Recording` containing the recorded operations, or `None` if recording failed
     pub fn snap(&mut self) -> Option<Recording> {
-        Recording::from_ptr(unsafe { sb::C_Recorder_snap(self.native_mut()) })
+        Recording::from_ptr(unsafe { sb::C_Recorder_snap(self.native_ptr()) })
     }
 
     // Note: Canvas creation in Graphite is typically done through Surface creation
@@ -145,7 +145,7 @@ impl Recorder {
     ) -> Option<&Canvas> {
         let canvas_ptr = unsafe {
             sb::C_Recorder_makeDeferredCanvas(
-                self.native_mut(),
+                self.native_ptr(),
                 image_info.native(),
                 texture_info.native(),
             )

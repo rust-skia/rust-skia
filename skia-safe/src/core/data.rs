@@ -164,7 +164,7 @@ impl Data {
     /// of calling read().
     pub fn from_stream(mut stream: impl io::Read, size: usize) -> Option<Self> {
         let mut stream = RustStream::new(&mut stream);
-        Data::from_ptr(unsafe { sb::C_SkData_MakeFromStream(stream.stream_mut(), size) })
+        Data::from_ptr(unsafe { sb::C_SkData_MakeFromStream(stream.stream_ptr(), size) })
     }
 
     pub fn new_empty() -> Self {

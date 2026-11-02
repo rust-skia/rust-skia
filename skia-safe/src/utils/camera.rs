@@ -121,33 +121,33 @@ impl RefHandle<Sk3DView> {
     }
 
     pub fn save(&mut self) -> &mut Self {
-        unsafe { self.native_mut().save() }
+        unsafe { sb::Sk3DView_save(self.native_ptr()) }
         self
     }
 
     pub fn restore(&mut self) -> &mut Self {
-        unsafe { self.native_mut().restore() }
+        unsafe { sb::Sk3DView_restore(self.native_ptr()) }
         self
     }
 
     pub fn translate(&mut self, d: impl Into<V3>) -> &mut Self {
         let d = d.into();
-        unsafe { self.native_mut().translate(d.x, d.y, d.z) }
+        unsafe { sb::Sk3DView_translate(self.native_ptr(), d.x, d.y, d.z) }
         self
     }
 
     pub fn rotate_x(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().rotateX(deg) }
+        unsafe { sb::Sk3DView_rotateX(self.native_ptr(), deg) }
         self
     }
 
     pub fn rotate_y(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().rotateY(deg) }
+        unsafe { sb::Sk3DView_rotateY(self.native_ptr(), deg) }
         self
     }
 
     pub fn rotate_z(&mut self, deg: scalar) -> &mut Self {
-        unsafe { self.native_mut().rotateZ(deg) }
+        unsafe { sb::Sk3DView_rotateZ(self.native_ptr(), deg) }
         self
     }
 

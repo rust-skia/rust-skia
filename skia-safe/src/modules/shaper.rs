@@ -110,7 +110,7 @@ where
     T: NativeBase<SkShaper_RunIterator>,
 {
     fn consume(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_consume(self.native_mut().base_mut()) }
+        unsafe { sb::C_SkShaper_RunIterator_consume(self.native_ptr().cast()) }
     }
 
     fn end_of_current_run(&self) -> usize {
@@ -543,10 +543,10 @@ impl Shaper {
                 self.native(),
                 bytes.as_ptr() as _,
                 bytes.len(),
-                font_run_iterator.native_mut(),
-                bidi_run_iterator.native_mut(),
-                script_run_iterator.native_mut(),
-                language_run_iterator.native_mut(),
+                font_run_iterator.native_ptr(),
+                bidi_run_iterator.native_ptr(),
+                script_run_iterator.native_ptr(),
+                language_run_iterator.native_ptr(),
                 width,
                 run_handler.as_native_run_handler(),
             )
@@ -573,10 +573,10 @@ impl Shaper {
                 self.native(),
                 bytes.as_ptr() as _,
                 bytes.len(),
-                font_run_iterator.native_mut(),
-                bidi_run_iterator.native_mut(),
-                script_run_iterator.native_mut(),
-                language_run_iterator.native_mut(),
+                font_run_iterator.native_ptr(),
+                bidi_run_iterator.native_ptr(),
+                script_run_iterator.native_ptr(),
+                language_run_iterator.native_ptr(),
                 features.as_ptr(),
                 features.len(),
                 width,
@@ -609,10 +609,10 @@ impl Shaper {
                 self.native(),
                 bytes.as_ptr() as _,
                 bytes.len(),
-                font_run_iterator.native_mut(),
-                bidi_run_iterator.native_mut(),
-                script_run_iterator.native_mut(),
-                language_run_iterator.native_mut(),
+                font_run_iterator.native_ptr(),
+                bidi_run_iterator.native_ptr(),
+                script_run_iterator.native_ptr(),
+                language_run_iterator.native_ptr(),
                 features.as_ptr(),
                 features.len(),
                 width,
@@ -706,6 +706,9 @@ impl NativeAccess for TextBlobBuilderRunHandler<'_> {
     fn native(&self) -> &SkTextBlobBuilderRunHandler {
         &self.0
     }
+}
+
+impl NativeAccessMut for TextBlobBuilderRunHandler<'_> {
     fn native_mut(&mut self) -> &mut SkTextBlobBuilderRunHandler {
         &mut self.0
     }

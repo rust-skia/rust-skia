@@ -26,6 +26,12 @@ where
     /// Access the wrapped pointer.
     fn inner(&self) -> &N;
     /// Access the wrapped pointer.
+    ///
+    /// Some native types store pointers into their own memory, and C++ writes through them.
+    /// Calling C++ functions that modify such a type through the returned reference is undefined
+    /// behavior in Rust, because a `&mut N` promises that nothing else writes to the object while
+    /// the reference exists. For these calls, use [`PointerWrapper::unwrap`] and
+    /// [`PointerWrapper::wrap`] to work with the raw pointer instead.
     fn inner_mut(&mut self) -> &mut N;
 }
 
@@ -156,7 +162,7 @@ where
     }
 
     fn inner_mut(&mut self) -> &mut N {
-        self.native_mut()
+        unsafe { &mut *self.native_ptr() }
     }
 }
 

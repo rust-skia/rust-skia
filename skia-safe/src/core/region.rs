@@ -150,7 +150,7 @@ impl Region {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Region_getBoundaryPath>
     pub fn add_boundary_path(&self, path: &mut PathBuilder) -> bool {
-        unsafe { self.native().addBoundaryPath(path.native_mut()) }
+        unsafe { self.native().addBoundaryPath(path.native_ptr()) }
     }
 
     #[deprecated(since = "0.91.0", note = "Use boundary_path()")]

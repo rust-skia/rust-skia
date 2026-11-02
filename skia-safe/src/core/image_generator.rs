@@ -29,7 +29,7 @@ impl ImageGenerator {
     /// Returns a reference to the encoded (i.e. compressed) representation of this data, or `None`
     /// if there is none.
     pub fn encoded_data(&mut self) -> Option<Data> {
-        Data::from_ptr_const(unsafe { sb::C_SkImageGenerator_refEncodedData(self.native_mut()) })
+        Data::from_ptr_const(unsafe { sb::C_SkImageGenerator_refEncodedData(self.native_ptr()) })
     }
 
     /// Returns the [`ImageInfo`] associated with this generator.
@@ -76,8 +76,12 @@ impl ImageGenerator {
     pub fn get_pixels(&mut self, info: &ImageInfo, pixels: &mut [u8], row_bytes: usize) -> bool {
         assert!(info.valid_pixels(row_bytes, pixels));
         unsafe {
-            self.native_mut()
-                .getPixels(info.native(), pixels.as_mut_ptr() as _, row_bytes)
+            sb::SkImageGenerator_getPixels(
+                self.native_ptr(),
+                info.native(),
+                pixels.as_mut_ptr() as _,
+                row_bytes,
+            )
         }
     }
 

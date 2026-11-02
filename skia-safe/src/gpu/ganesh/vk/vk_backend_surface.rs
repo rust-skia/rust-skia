@@ -99,7 +99,7 @@ pub mod backend_textures {
         texture: &mut BackendTexture,
         layout: ImageLayout,
     ) -> &mut BackendTexture {
-        unsafe { sb::C_GrBackendTextures_SetVkImageLayout(texture.native_mut(), layout) }
+        unsafe { sb::C_GrBackendTextures_SetVkImageLayout(texture.native_ptr(), layout) }
         texture
     }
 }

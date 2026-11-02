@@ -55,7 +55,7 @@ impl Context {
             }
         };
 
-        let recorder_ptr = unsafe { sb::C_Context_makeRecorder(self.native_mut(), options_ptr) };
+        let recorder_ptr = unsafe { sb::C_Context_makeRecorder(self.native_ptr(), options_ptr) };
         Recorder::from_ptr(recorder_ptr)
     }
 
@@ -68,7 +68,7 @@ impl Context {
     /// [`InsertStatus::Success`], or the specific failure reason (see the
     /// [`InsertStatus`] variants).
     pub fn insert_recording(&mut self, info: &InsertRecordingInfo<'_>) -> InsertStatus {
-        unsafe { sb::C_Context_insertRecording(self.native_mut(), info.native()) }
+        unsafe { sb::C_Context_insertRecording(self.native_ptr(), info.native()) }
     }
 
     /// Submit pending work to the GPU
@@ -88,7 +88,7 @@ impl Context {
             }
         };
 
-        unsafe { sb::C_Context_submit(self.native_mut(), info_ptr) }
+        unsafe { sb::C_Context_submit(self.native_ptr(), info_ptr) }
     }
 
     /// Submit pending work and block until it has completed on the GPU.
@@ -108,7 +108,7 @@ impl Context {
     /// `Context::checkAsyncWorkCompletion()` returns `void`. To wait for GPU
     /// completion, use [`submit_and_wait`](Self::submit_and_wait).
     pub fn check_async_work_completion(&mut self) {
-        unsafe { sb::C_Context_checkAsyncWorkCompletion(self.native_mut()) }
+        unsafe { sb::C_Context_checkAsyncWorkCompletion(self.native_ptr()) }
     }
 
     /// Called to delete the passed in [`BackendTexture`]. This should only be called if the
@@ -121,7 +121,7 @@ impl Context {
     /// be used again.
     pub fn delete_backend_texture(&mut self, texture: &BackendTexture) {
         unsafe {
-            sb::C_Context_deleteBackendTexture(self.native_mut(), texture.native());
+            sb::C_Context_deleteBackendTexture(self.native_ptr(), texture.native());
         }
     }
 
@@ -185,7 +185,7 @@ impl Context {
 
         unsafe {
             sb::C_Context_readPixels(
-                self.native_mut(),
+                self.native_ptr(),
                 surface.native_mut(),
                 dst_info.native(),
                 dst_pixels.as_mut_ptr() as *mut std::ffi::c_void,

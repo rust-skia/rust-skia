@@ -14,7 +14,9 @@ impl NativeAccess for Recorder<'_> {
     fn native(&self) -> &Self::Native {
         self.0
     }
+}
 
+impl NativeAccessMut for Recorder<'_> {
     fn native_mut(&mut self) -> &mut Self::Native {
         self.0
     }

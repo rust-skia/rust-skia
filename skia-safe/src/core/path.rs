@@ -1052,6 +1052,9 @@ impl NativeAccess for Iter<'_> {
     fn native(&self) -> &SkPath_Iter {
         &self.0
     }
+}
+
+impl NativeAccessMut for Iter<'_> {
     fn native_mut(&mut self) -> &mut SkPath_Iter {
         &mut self.0
     }
@@ -1194,6 +1197,10 @@ impl NativeAccess for RawIter<'_> {
     fn native(&self) -> &SkPath_RawIter {
         &self.0
     }
+}
+
+#[allow(deprecated)]
+impl NativeAccessMut for RawIter<'_> {
     fn native_mut(&mut self) -> &mut SkPath_RawIter {
         &mut self.0
     }

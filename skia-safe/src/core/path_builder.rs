@@ -198,7 +198,7 @@ impl PathBuilder {
     /// # Returns
     /// reference to [`PathBuilder`]
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
-        self.native_mut().fFillType = ft;
+        unsafe { (*self.native_ptr()).fFillType = ft };
         self
     }
 
@@ -220,7 +220,7 @@ impl PathBuilder {
     /// # Returns
     /// reference to [`PathBuilder`]
     pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
-        self.native_mut().fIsVolatile = is_volatile;
+        unsafe { (*self.native_ptr()).fIsVolatile = is_volatile };
         self
     }
 
@@ -1023,8 +1023,8 @@ impl PathBuilder {
     /// # Returns
     /// reference to [`PathBuilder`]
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
-        let n = self.native_mut();
-        n.fFillType = n.fFillType.toggle_inverse();
+        let n = self.native_ptr();
+        unsafe { (*n).fFillType = (*n).fFillType.toggle_inverse() };
         self
     }
 

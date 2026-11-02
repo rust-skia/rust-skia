@@ -382,7 +382,8 @@ impl Codec<'_> {
         assert_eq!(pixels.len(), info.compute_byte_size(row_bytes));
         unsafe {
             let native_options = options.map(|options| Self::native_options(options));
-            self.native_mut().getPixels(
+            sb::SkCodec_getPixels(
+                self.native_ptr(),
                 info.native(),
                 pixels.as_mut_ptr() as *mut _,
                 row_bytes,
@@ -405,8 +406,13 @@ impl Codec<'_> {
         row_bytes: usize,
     ) -> Result {
         unsafe {
-            self.native_mut()
-                .getPixels(info.native(), pixels, row_bytes, ptr::null())
+            sb::SkCodec_getPixels(
+                self.native_ptr(),
+                info.native(),
+                pixels,
+                row_bytes,
+                ptr::null(),
+            )
         }
     }
 
@@ -419,7 +425,8 @@ impl Codec<'_> {
     ) -> Result {
         unsafe {
             let native_options = options.map(|options| Self::native_options(options));
-            self.native_mut().getPixels(
+            sb::SkCodec_getPixels(
+                self.native_ptr(),
                 pixmap.info().native(),
                 pixmap.writable_addr(),
                 pixmap.row_bytes(),
@@ -455,7 +462,7 @@ impl Codec<'_> {
         let mut result = Result::InternalError;
         Image::from_ptr(unsafe {
             sb::C_SkCodec_getImage(
-                self.native_mut(),
+                self.native_ptr(),
                 info.native(),
                 options.as_ptr_or_null(),
                 &mut result,
@@ -490,7 +497,7 @@ impl Codec<'_> {
     /// - `pixmaps` Contains preallocated pixmaps configured according to a successful call to
     ///   [`Codec::query_yuva_info()`].
     pub fn get_yuva_planes(&mut self, pixmaps: &YUVAPixmaps) -> Result {
-        unsafe { self.native_mut().getYUVAPlanes(pixmaps.native()) }
+        unsafe { sb::SkCodec_getYUVAPlanes(self.native_ptr(), pixmaps.native()) }
     }
 
     /// Prepare for an incremental decode with the specified options.
@@ -522,7 +529,8 @@ impl Codec<'_> {
             .into()
             .map(|options| unsafe { Self::native_options(options) });
         unsafe {
-            self.native_mut().startIncrementalDecode(
+            sb::SkCodec_startIncrementalDecode(
+                self.native_ptr(),
                 dst_info.native(),
                 dst.as_mut_ptr() as _,
                 row_bytes,
@@ -554,7 +562,7 @@ impl Codec<'_> {
     /// have been completely decoded. [`Result::IncompleteInput`] otherwise.
     pub fn incremental_decode(&mut self) -> (Result, Option<usize>) {
         let mut rows_decoded = Default::default();
-        let r = unsafe { sb::C_SkCodec_incrementalDecode(self.native_mut(), &mut rows_decoded) };
+        let r = unsafe { sb::C_SkCodec_incrementalDecode(self.native_ptr(), &mut rows_decoded) };
         if r == Result::IncompleteInput {
             (r, Some(rows_decoded.try_into().unwrap()))
         } else {
@@ -587,8 +595,11 @@ impl Codec<'_> {
             .into()
             .map(|options| unsafe { Self::native_options(options) });
         unsafe {
-            self.native_mut()
-                .startScanlineDecode(dst_info.native(), options.as_ptr_or_null())
+            sb::SkCodec_startScanlineDecode(
+                self.native_ptr(),
+                dst_info.native(),
+                options.as_ptr_or_null(),
+            )
         }
     }
 
@@ -606,7 +617,8 @@ impl Codec<'_> {
     pub fn get_scanlines(&mut self, dst: &mut [u8], count_lines: usize, row_bytes: usize) -> usize {
         assert!(mem::size_of_val(dst) >= count_lines * row_bytes);
         unsafe {
-            self.native_mut().getScanlines(
+            sb::SkCodec_getScanlines(
+                self.native_ptr(),
                 dst.as_mut_ptr() as _,
                 count_lines.try_into().unwrap(),
                 row_bytes,
@@ -629,10 +641,7 @@ impl Codec<'_> {
     /// calling [`Codec::start_scanline_decode()`]; if `count_lines` is so large that it moves the
     /// current scanline past the end of the image.
     pub fn skip_scanlines(&mut self, count_lines: usize) -> bool {
-        unsafe {
-            self.native_mut()
-                .skipScanlines(count_lines.try_into().unwrap())
-        }
+        unsafe { sb::SkCodec_skipScanlines(self.native_ptr(), count_lines.try_into().unwrap()) }
     }
 
     /// An enum representing the order in which scanlines will be returned by the scanline decoder.
@@ -670,7 +679,7 @@ impl Codec<'_> {
     /// report a low frame count. After the underlying stream provides additional data, then calling
     /// [`Codec::get_frame_count()`] again may return an updated, increased frame count.
     pub fn get_frame_count(&mut self) -> usize {
-        unsafe { sb::C_SkCodec_getFrameCount(self.native_mut()) }
+        unsafe { sb::C_SkCodec_getFrameCount(self.native_ptr()) }
             .try_into()
             .unwrap()
     }
@@ -695,7 +704,7 @@ impl Codec<'_> {
         let mut info = FrameInfo::default();
         unsafe {
             sb::C_SkCodec_getFrameInfo(
-                self.native_mut(),
+                self.native_ptr(),
                 index.try_into().unwrap(),
                 info.native_mut(),
             )
@@ -720,7 +729,7 @@ impl Codec<'_> {
     /// [`Codec::is_animated()`] can be used to disambiguate between these two cases.
     pub fn get_repetition_count(&mut self) -> Option<usize> {
         const REPETITION_COUNT_INFINITE: i32 = -1;
-        let count = unsafe { sb::C_SkCodec_getRepetitionCount(self.native_mut()) };
+        let count = unsafe { sb::C_SkCodec_getRepetitionCount(self.native_ptr()) };
         if count != REPETITION_COUNT_INFINITE {
             Some(count.try_into().unwrap())
         } else {
@@ -747,7 +756,7 @@ impl Codec<'_> {
     /// image frame. Such codecs should be able to give a definitive "yes" or "no" answer as soon as
     /// they are constructed. PNG format is one example where this happens.
     pub fn is_animated(&mut self) -> IsAnimated {
-        unsafe { sb::C_SkCodec_isAnimated(self.native_mut()) }
+        unsafe { sb::C_SkCodec_isAnimated(self.native_ptr()) }
     }
 
     // TODO: Register
@@ -756,8 +765,8 @@ impl Codec<'_> {
         self.inner.native()
     }
 
-    fn native_mut(&mut self) -> &mut SkCodec {
-        self.inner.native_mut()
+    fn native_ptr(&mut self) -> *mut SkCodec {
+        self.inner.native_ptr()
     }
 
     pub(crate) fn from_ptr<'a>(codec: *mut SkCodec) -> Option<Codec<'a>> {

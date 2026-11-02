@@ -47,6 +47,9 @@ impl NativeAccess for StreamAsset {
     fn native(&self) -> &SkStreamAsset {
         unsafe { self.0.as_ref() }
     }
+}
+
+impl NativeAccessMut for StreamAsset {
     fn native_mut(&mut self) -> &mut SkStreamAsset {
         unsafe { self.0.as_mut() }
     }
@@ -86,6 +89,9 @@ impl NativeAccess for MemoryStream<'_> {
     fn native(&self) -> &SkMemoryStream {
         unsafe { self.native.as_ref() }
     }
+}
+
+impl NativeAccessMut for MemoryStream<'_> {
     fn native_mut(&mut self) -> &mut SkMemoryStream {
         unsafe { self.native.as_mut() }
     }
@@ -178,12 +184,12 @@ pub struct RustStream<'a> {
 
 #[allow(unused)]
 impl RustStream<'_> {
-    pub fn stream_mut(&mut self) -> &mut SkStream {
-        self.inner.native_mut().base_mut()
+    pub fn stream_ptr(&mut self) -> *mut SkStream {
+        self.inner.native_ptr().cast()
     }
 
     pub fn into_native(mut self) -> *mut SkStream {
-        let stream = self.inner.native_mut().base_mut() as *mut _;
+        let stream = self.inner.native_ptr().cast();
         mem::forget(self.inner);
         stream
     }
@@ -448,7 +454,7 @@ mod tests {
 
         let mut first_byte = 0i8;
         unsafe {
-            stream.stream_mut().readS8(&mut first_byte);
+            skia_bindings::SkStream_readS8(stream.stream_ptr(), &mut first_byte);
         }
         assert_eq!(first_byte, 12i8)
     }

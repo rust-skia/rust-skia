@@ -107,7 +107,7 @@ impl PathEffect {
     ) -> bool {
         unsafe {
             self.native().filterPath(
-                dst.native_mut(),
+                dst.native_ptr(),
                 src.native(),
                 stroke_rec.native_mut(),
                 cull_rect.as_ref().native(),
@@ -134,7 +134,7 @@ impl PathEffect {
     ) -> bool {
         unsafe {
             self.native().filterPath(
-                dst.native_mut(),
+                dst.native_ptr(),
                 src.native(),
                 stroke_rec.native_mut(),
                 cull_rect.as_ref().native(),

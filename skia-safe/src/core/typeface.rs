@@ -187,7 +187,7 @@ impl Typeface {
         let mut stream = RustStream::new(&mut data);
         Typeface::from_ptr(unsafe {
             sb::C_SkTypeface_MakeDeserialize(
-                stream.stream_mut(),
+                stream.stream_ptr(),
                 last_resort_mgr.into().into_ptr_or_null(),
             )
         })
@@ -436,7 +436,7 @@ impl Iterator for LocalizedStringsIter {
         let mut language = interop::String::default();
         unsafe {
             sb::C_SkTypeface_LocalizedStrings_next(
-                self.native_mut(),
+                self.native_ptr(),
                 string.native_mut(),
                 language.native_mut(),
             )

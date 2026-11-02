@@ -183,13 +183,20 @@ pub trait NativeAccess {
     /// Provides shared access to the native type of the wrapper.
     fn native(&self) -> &Self::Native;
 
-    /// Provides exclusive access to the native type of the wrapper.
-    fn native_mut(&mut self) -> &mut Self::Native;
-
     // Returns a ptr to the native mutable value.
     unsafe fn native_mut_force(&self) -> *mut Self::Native {
         self.native() as *const Self::Native as *mut Self::Native
     }
+}
+
+/// Trait that enables exclusive access to a native representation of a wrapper type.
+///
+/// [`RefHandle`] does not implement this trait. Its native objects live on the C++ heap and may
+/// store pointers into their own memory, so calls that modify them go through
+/// [`RefHandle::native_ptr`] instead.
+pub trait NativeAccessMut: NativeAccess {
+    /// Provides exclusive access to the native type of the wrapper.
+    fn native_mut(&mut self) -> &mut Self::Native;
 }
 
 /// Implements Drop for native types we can not implement Drop for.
@@ -351,7 +358,9 @@ impl<N: NativeDrop> NativeAccess for Handle<N> {
     fn native(&self) -> &N {
         unsafe { &*(self.0.get()) }
     }
+}
 
+impl<N: NativeDrop> NativeAccessMut for Handle<N> {
     fn native_mut(&mut self) -> &mut N {
         self.0.get_mut()
     }
@@ -432,7 +441,7 @@ where
 
 impl<H, N> NativePointerOrNullMut for Option<&mut H>
 where
-    H: NativeAccess<Native = N>,
+    H: NativeAccessMut<Native = N>,
 {
     type Native = N;
 
@@ -499,8 +508,11 @@ impl<N: NativeDelete> NativeAccess for RefHandle<N> {
     fn native(&self) -> &N {
         unsafe { self.0.as_ref() }
     }
-    fn native_mut(&mut self) -> &mut N {
-        unsafe { self.0.as_mut() }
+
+    /// Returns the handle's own pointer. A pointer derived from [`Self::native`] would only
+    /// permit reads.
+    unsafe fn native_mut_force(&self) -> *mut N {
+        self.0.as_ptr()
     }
 }
 
@@ -613,7 +625,7 @@ mod rc_handle_tests {
 
     use skia_bindings::{SkFontMgr, SkTypeface};
 
-    use crate::{FontMgr, Typeface, prelude::NativeAccess};
+    use crate::{FontMgr, Typeface, prelude::NativeAccessMut};
 
     #[test]
     fn rc_native_ref_null() {
@@ -638,7 +650,9 @@ impl<N: NativeRefCounted> NativeAccess for RCHandle<N> {
     fn native(&self) -> &N {
         unsafe { self.0.as_ref() }
     }
+}
 
+impl<N: NativeRefCounted> NativeAccessMut for RCHandle<N> {
     /// Returns a mutable reference to the native representation.
     fn native_mut(&mut self) -> &mut N {
         unsafe { self.0.as_mut() }
