@@ -18,9 +18,9 @@ pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
 // <https://github.com/rust-skia/rust-skia/issues/537>
 // unsafe_send_sync!(Paragraph);
 
-impl NativeDrop for sb::skia_textlayout_Paragraph {
-    fn drop(&mut self) {
-        unsafe { sb::C_Paragraph_delete(self) }
+impl NativeDelete for sb::skia_textlayout_Paragraph {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_Paragraph_delete(ptr) }
     }
 }
 

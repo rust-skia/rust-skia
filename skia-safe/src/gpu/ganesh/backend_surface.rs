@@ -134,9 +134,9 @@ impl BackendFormat {
 pub type BackendTexture = RefHandle<GrBackendTexture>;
 unsafe_send_sync!(BackendTexture);
 
-impl NativeDrop for GrBackendTexture {
-    fn drop(&mut self) {
-        unsafe { sb::C_GrBackendTexture_delete(self) }
+impl NativeDelete for GrBackendTexture {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_GrBackendTexture_delete(ptr) }
     }
 }
 

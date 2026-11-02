@@ -19,9 +19,9 @@ variant_name!(ArcSize::Large);
 pub type PathBuilder = RefHandle<SkPathBuilder>;
 unsafe_send_sync!(PathBuilder);
 
-impl NativeDrop for SkPathBuilder {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkPathBuilder_delete(self) }
+impl NativeDelete for SkPathBuilder {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkPathBuilder_delete(ptr) }
     }
 }
 

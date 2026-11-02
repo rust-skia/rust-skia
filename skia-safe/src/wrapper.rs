@@ -141,7 +141,7 @@ where
 
 unsafe impl<N> PointerWrapper<N> for RefHandle<N>
 where
-    N: NativeDrop,
+    N: NativeDelete,
 {
     fn wrap(ptr: *mut N) -> Option<Self> {
         Self::from_ptr(ptr)

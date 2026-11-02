@@ -103,9 +103,9 @@ impl Default for View3D {
     }
 }
 
-impl NativeDrop for Sk3DView {
-    fn drop(&mut self) {
-        unsafe { sb::C_Sk3DView_delete(self) }
+impl NativeDelete for Sk3DView {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_Sk3DView_delete(ptr) }
     }
 }
 

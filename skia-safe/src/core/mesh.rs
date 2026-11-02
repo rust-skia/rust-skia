@@ -505,9 +505,9 @@ variant_name!(Mode::TriangleStrip);
 // moved by Rust.
 pub type Mesh = RefHandle<SkMesh>;
 
-impl NativeDrop for SkMesh {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkMesh_delete(self) }
+impl NativeDelete for SkMesh {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkMesh_delete(ptr) }
     }
 }
 

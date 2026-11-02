@@ -119,9 +119,9 @@ impl YUVABackendTextureInfo {
 pub type YUVABackendTextures = RefHandle<GrYUVABackendTextures>;
 unsafe_send_sync!(YUVABackendTextures);
 
-impl NativeDrop for GrYUVABackendTextures {
-    fn drop(&mut self) {
-        unsafe { sb::C_GrYUVABackendTextures_delete(self) }
+impl NativeDelete for GrYUVABackendTextures {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_GrYUVABackendTextures_delete(ptr) }
     }
 }
 

@@ -170,9 +170,9 @@ pub mod gpu_draw_handler {
     /// Currently this is only supported for the GPU Vulkan backend.
     pub type GPUDrawHandler = RefHandle<SkDrawable_GpuDrawHandler>;
 
-    impl NativeDrop for SkDrawable_GpuDrawHandler {
-        fn drop(&mut self) {
-            unsafe { sb::C_SkDrawable_GpuDrawHandler_delete(self) }
+    impl NativeDelete for SkDrawable_GpuDrawHandler {
+        unsafe fn delete(ptr: *mut Self) {
+            unsafe { sb::C_SkDrawable_GpuDrawHandler_delete(ptr) }
         }
     }
 

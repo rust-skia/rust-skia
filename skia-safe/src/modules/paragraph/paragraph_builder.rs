@@ -8,9 +8,9 @@ use crate::prelude::*;
 pub type ParagraphBuilder = RefHandle<sb::skia_textlayout_ParagraphBuilder>;
 unsafe_send_sync!(ParagraphBuilder);
 
-impl NativeDrop for sb::skia_textlayout_ParagraphBuilder {
-    fn drop(&mut self) {
-        unsafe { sb::C_ParagraphBuilder_delete(self) }
+impl NativeDelete for sb::skia_textlayout_ParagraphBuilder {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_ParagraphBuilder_delete(ptr) }
     }
 }
 

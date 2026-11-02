@@ -23,9 +23,9 @@ pub type Context = RefHandle<sb::skgpu_graphite_Context>;
 // non-`const` and so take `&mut self`, mirroring `DirectContext::submit`; only
 // `isDeviceLost() const` keeps `&self`.
 
-impl NativeDrop for sb::skgpu_graphite_Context {
-    fn drop(&mut self) {
-        unsafe { sb::C_Context_delete(self) }
+impl NativeDelete for sb::skgpu_graphite_Context {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_Context_delete(ptr) }
     }
 }
 

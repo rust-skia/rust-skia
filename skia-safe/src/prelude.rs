@@ -197,6 +197,20 @@ pub trait NativeDrop {
     fn drop(&mut self);
 }
 
+/// Deletes a native object that C++ allocated on the heap and that a [`RefHandle`] owns.
+///
+/// This trait takes a raw pointer instead of `&mut self`. The object is freed during the call,
+/// and Rust forbids freeing memory while a reference to it is still in use.
+pub trait NativeDelete {
+    /// Deletes the object that `ptr` points to.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object that the caller owns. The caller must not use `ptr`
+    /// afterwards.
+    unsafe fn delete(ptr: *mut Self);
+}
+
 /// Clone for bindings types we can not implement Clone for.
 pub trait NativeClone {
     fn clone(&self) -> Self;
@@ -465,21 +479,21 @@ where
 /// A wrapper type that represents a native type with a pointer to
 /// the native object.
 #[repr(transparent)]
-pub struct RefHandle<N: NativeDrop>(ptr::NonNull<N>);
+pub struct RefHandle<N: NativeDelete>(ptr::NonNull<N>);
 
-impl<N: NativeDrop> Drop for RefHandle<N> {
+impl<N: NativeDelete> Drop for RefHandle<N> {
     fn drop(&mut self) {
-        self.native_mut().drop()
+        unsafe { N::delete(self.0.as_ptr()) }
     }
 }
 
-impl<N: NativeDrop + NativePartialEq> PartialEq for RefHandle<N> {
+impl<N: NativeDelete + NativePartialEq> PartialEq for RefHandle<N> {
     fn eq(&self, rhs: &Self) -> bool {
         self.native().eq(rhs.native())
     }
 }
 
-impl<N: NativeDrop> NativeAccess for RefHandle<N> {
+impl<N: NativeDelete> NativeAccess for RefHandle<N> {
     type Native = N;
 
     fn native(&self) -> &N {
@@ -490,7 +504,7 @@ impl<N: NativeDrop> NativeAccess for RefHandle<N> {
     }
 }
 
-impl<N: NativeDrop> RefHandle<N> {
+impl<N: NativeDelete> RefHandle<N> {
     /// Creates a RefHandle from a native pointer.
     ///
     /// From this time on, the handle owns the object that the pointer points

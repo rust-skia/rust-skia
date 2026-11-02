@@ -91,9 +91,9 @@ bitflags::bitflags! {
 /// ```
 pub type Builder = RefHandle<sb::skottie_Animation_Builder>;
 
-impl NativeDrop for sb::skottie_Animation_Builder {
-    fn drop(&mut self) {
-        unsafe { sb::C_skottie_Builder_delete(self) }
+impl NativeDelete for sb::skottie_Animation_Builder {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_skottie_Builder_delete(ptr) }
     }
 }
 

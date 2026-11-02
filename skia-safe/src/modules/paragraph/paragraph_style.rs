@@ -153,9 +153,9 @@ impl StrutStyle {
 pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
 unsafe_send_sync!(ParagraphStyle);
 
-impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
-    fn drop(&mut self) {
-        unsafe { sb::C_ParagraphStyle_delete(self) }
+impl NativeDelete for sb::skia_textlayout_ParagraphStyle {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_ParagraphStyle_delete(ptr) }
     }
 }
 

@@ -191,9 +191,9 @@ impl RustStream<'_> {
 
 impl NativeBase<SkStream> for sb::RustStream {}
 
-impl NativeDrop for sb::RustStream {
-    fn drop(&mut self) {
-        unsafe { sb::C_RustStream_delete(self) }
+impl NativeDelete for sb::RustStream {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_RustStream_delete(ptr) }
     }
 }
 

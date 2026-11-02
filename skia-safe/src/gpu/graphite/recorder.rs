@@ -100,9 +100,9 @@ impl<'a> BorrowedRecorder<'a> {
 // `&self`/`&mut self` methods drive C++ with no internal lock. Matches the
 // Ganesh `gpu::RecordingContext`, which is neither `Send` nor `Sync`.
 
-impl NativeDrop for sb::skgpu_graphite_Recorder {
-    fn drop(&mut self) {
-        unsafe { sb::C_Recorder_delete(self) }
+impl NativeDelete for sb::skgpu_graphite_Recorder {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_Recorder_delete(ptr) }
     }
 }
 

@@ -6,9 +6,9 @@ use skia_bindings::{self as sb, SkImageGenerator};
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 unsafe_send_sync!(ImageGenerator);
 
-impl NativeDrop for SkImageGenerator {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkImageGenerator_delete(self) }
+impl NativeDelete for SkImageGenerator {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkImageGenerator_delete(ptr) }
     }
 }
 

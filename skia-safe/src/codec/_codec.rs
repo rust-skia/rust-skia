@@ -193,9 +193,9 @@ pub struct Codec<'a> {
     pd: PhantomData<&'a mut dyn io::Read>,
 }
 
-impl NativeDrop for SkCodec {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkCodec_delete(self) }
+impl NativeDelete for SkCodec {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkCodec_delete(ptr) }
     }
 }
 

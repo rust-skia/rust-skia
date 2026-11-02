@@ -415,9 +415,9 @@ impl Typeface {
 
 pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;
 
-impl NativeDrop for SkTypeface_LocalizedStrings {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkTypeface_LocalizedStrings_unref(self) }
+impl NativeDelete for SkTypeface_LocalizedStrings {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkTypeface_LocalizedStrings_unref(ptr) }
     }
 }
 

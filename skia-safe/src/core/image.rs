@@ -273,9 +273,9 @@ pub type AsyncReadResult = RefHandle<SkImage_AsyncReadResult>;
 // are const. The data itself still dies with the GPU context (see `data()`).
 unsafe_send_sync!(AsyncReadResult);
 
-impl NativeDrop for SkImage_AsyncReadResult {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkImage_AsyncReadResult_delete(self) }
+impl NativeDelete for SkImage_AsyncReadResult {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkImage_AsyncReadResult_delete(ptr) }
     }
 }
 
