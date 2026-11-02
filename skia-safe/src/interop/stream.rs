@@ -7,7 +7,7 @@ use crate::{Data, prelude::*};
 use skia_bindings::{
     self as sb, SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream,
 };
-use std::{ffi, fmt, io, marker::PhantomData, mem, pin::Pin, ptr};
+use std::{ffi, fmt, io, marker::PhantomData, mem, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of [`Stream`].
 #[repr(transparent)]
@@ -331,16 +331,30 @@ unsafe extern "C" fn seek_current_trampoline<T: io::Seek>(
 
 #[allow(unused)]
 pub struct RustWStream<'a> {
-    /// We need to be able to refer to the inner RustWStream to be referred to by pointer, so box
-    /// it.
-    inner: Pin<Box<Handle<sb::RustWStream>>>,
+    /// The native stream that C++ writes into.
+    ///
+    /// C++ may keep a pointer to the stream. For example, a PDF document writes into its stream
+    /// until the document is closed. The stream lives on the heap, so its address stays the same
+    /// when this `RustWStream` moves. It is held through a raw pointer instead of a `Box`, because
+    /// Rust assumes that nothing else changes the contents of a `Box` while the value that owns
+    /// it is passed to a function. C++ writes to the stream during such calls, for example when
+    /// `Document::begin_page()` writes the PDF header, and with a `Box` that would be undefined
+    /// behavior.
+    inner: ptr::NonNull<Handle<sb::RustWStream>>,
     _phantom: PhantomData<&'a mut ()>,
+}
+
+impl Drop for RustWStream<'_> {
+    fn drop(&mut self) {
+        drop(unsafe { Box::from_raw(self.inner.as_ptr()) })
+    }
 }
 
 #[allow(unused)]
 impl RustWStream<'_> {
-    pub fn stream_mut(&mut self) -> &mut SkWStream {
-        self.inner.native_mut().base_mut()
+    /// Returns a pointer to the stream that C++ may keep and write through.
+    pub fn stream_ptr(&mut self) -> *mut SkWStream {
+        self.inner.as_ptr().cast()
     }
 }
 
@@ -354,15 +368,16 @@ impl NativeDrop for sb::RustWStream {
 
 impl<'a> RustWStream<'a> {
     pub fn new<T: io::Write>(writer: &'a mut T) -> Self {
+        let inner = Box::new(Handle::construct(|ptr| unsafe {
+            sb::C_RustWStream_construct(
+                ptr,
+                writer as *mut T as *mut ffi::c_void,
+                Some(write_trampoline::<T>),
+                Some(flush_trampoline::<T>),
+            );
+        }));
         return RustWStream {
-            inner: Box::pin(Handle::construct(|ptr| unsafe {
-                sb::C_RustWStream_construct(
-                    ptr,
-                    writer as *mut T as *mut ffi::c_void,
-                    Some(write_trampoline::<T>),
-                    Some(flush_trampoline::<T>),
-                );
-            })),
+            inner: ptr::NonNull::new(Box::into_raw(inner)).unwrap(),
             _phantom: PhantomData,
         };
 

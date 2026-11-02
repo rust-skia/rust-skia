@@ -161,7 +161,7 @@ impl Typeface {
     /// - `behavior` controls whether font data is included.
     pub fn serialize_stream(&self, mut write: impl io::Write, behavior: SerializeBehavior) {
         let mut stream = RustWStream::new(&mut write);
-        unsafe { sb::C_SkTypeface_serialize2(self.native(), stream.stream_mut(), behavior) }
+        unsafe { sb::C_SkTypeface_serialize2(self.native(), stream.stream_ptr(), behavior) }
     }
 
     /// Returns serialized typeface data.

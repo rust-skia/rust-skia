@@ -46,7 +46,7 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
 
     unsafe {
         sb::C_SkPngRustEncoder_Encode(
-            stream.stream_mut(),
+            stream.stream_ptr(),
             pixmap.native(),
             options.compression_level,
             comments.into_ptr(),

@@ -76,7 +76,7 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
 
     unsafe {
         skia_bindings::C_SkJpegEncoder_Encode(
-            stream.stream_mut(),
+            stream.stream_ptr(),
             pixmap.native(),
             options.quality as _,
             options.downsample.native(),
@@ -102,7 +102,7 @@ pub fn encode_yuva_pixmaps<W: io::Write>(
 
     unsafe {
         skia_bindings::C_SkJpegEncoder_EncodeYUVAPixmaps(
-            stream.stream_mut(),
+            stream.stream_ptr(),
             src.native(),
             src_color_space.native_ptr_or_null(),
             options.quality as _,

@@ -452,7 +452,7 @@ pub mod pdf {
 
         let mut stream = RustWStream::new(writer);
         let document = RCHandle::from_ptr(unsafe {
-            sb::C_SkPDF_MakeDocument(stream.stream_mut(), md.native())
+            sb::C_SkPDF_MakeDocument(stream.stream_ptr(), md.native())
         })
         .unwrap();
 
