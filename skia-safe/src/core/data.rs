@@ -14,16 +14,16 @@ unsafe_send_sync!(Data);
 require_base_type!(SkData, sb::SkNVRefCnt);
 
 impl NativeRefCounted for SkData {
-    fn _ref(&self) {
-        unsafe { sb::C_SkData_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_SkData_ref(ptr) }
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkData_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkData_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkData_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_SkData_unique(ptr) }
     }
 }
 
@@ -164,7 +164,7 @@ impl Data {
     /// of calling read().
     pub fn from_stream(mut stream: impl io::Read, size: usize) -> Option<Self> {
         let mut stream = RustStream::new(&mut stream);
-        Data::from_ptr(unsafe { sb::C_SkData_MakeFromStream(stream.stream_mut(), size) })
+        Data::from_ptr(unsafe { sb::C_SkData_MakeFromStream(stream.stream_ptr(), size) })
     }
 
     pub fn new_empty() -> Self {

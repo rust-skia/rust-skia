@@ -165,7 +165,7 @@ impl StrokeRec {
     /// - `dst` path builder receiving the result
     /// - `src` source path
     pub fn apply_to_path(&self, dst: &mut PathBuilder, src: &Path) -> bool {
-        unsafe { self.native().applyToPath(dst.native_mut(), src.native()) }
+        unsafe { self.native().applyToPath(dst.native_ptr(), src.native()) }
     }
 
     #[deprecated(since = "0.88.0", note = "Use apply_to_path()")]
@@ -173,7 +173,7 @@ impl StrokeRec {
         let mut builder = PathBuilder::default();
         let r = unsafe {
             self.native()
-                .applyToPath(builder.native_mut(), path.native())
+                .applyToPath(builder.native_ptr(), path.native())
         };
         if r {
             *path = builder.into()

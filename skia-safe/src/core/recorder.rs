@@ -30,7 +30,9 @@ impl NativeAccess for RecorderRef {
     fn native(&self) -> &SkRecorder {
         unsafe { &*self.0.get() }
     }
+}
 
+impl NativeAccessMut for RecorderRef {
     fn native_mut(&mut self) -> &mut SkRecorder {
         unsafe { &mut (*self.0.get()) }
     }

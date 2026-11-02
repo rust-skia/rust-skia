@@ -29,7 +29,7 @@ pub fn draw_text(
     let p = p.into();
     unsafe {
         SkTextUtils::Draw(
-            canvas.native_mut(),
+            canvas.native_ptr(),
             ptr,
             size,
             encoding.into_native(),

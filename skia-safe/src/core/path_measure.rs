@@ -174,7 +174,7 @@ impl PathMeasure {
         let mut p = PathBuilder::default();
         unsafe {
             self.native_mut()
-                .getSegment(start_d, stop_d, p.native_mut(), start_with_move_to)
+                .getSegment(start_d, stop_d, p.native_ptr(), start_with_move_to)
         }
         .then(|| p.detach())
     }
@@ -197,7 +197,7 @@ impl PathMeasure {
     ) -> bool {
         unsafe {
             self.native_mut()
-                .getSegment(start_d, stop_d, dst.native_mut(), start_with_move_to)
+                .getSegment(start_d, stop_d, dst.native_ptr(), start_with_move_to)
         }
     }
 

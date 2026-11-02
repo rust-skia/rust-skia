@@ -25,9 +25,9 @@ pub use run_handler::RunHandler;
 pub type Shaper = RefHandle<SkShaper>;
 unsafe_send_sync!(Shaper);
 
-impl NativeDrop for SkShaper {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_delete(self) }
+impl NativeDelete for SkShaper {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkShaper_delete(ptr) }
     }
 }
 
@@ -106,11 +106,11 @@ pub trait RunIterator {
 
 impl<T> RunIterator for RefHandle<T>
 where
-    T: NativeDrop,
+    T: NativeDelete,
     T: NativeBase<SkShaper_RunIterator>,
 {
     fn consume(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_consume(self.native_mut().base_mut()) }
+        unsafe { sb::C_SkShaper_RunIterator_consume(self.native_ptr().cast()) }
     }
 
     fn end_of_current_run(&self) -> usize {
@@ -126,9 +126,9 @@ pub type FontRunIterator = RefHandle<SkShaper_FontRunIterator>;
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_FontRunIterator {}
 
-impl NativeDrop for SkShaper_FontRunIterator {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
+impl NativeDelete for SkShaper_FontRunIterator {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkShaper_RunIterator_delete(ptr.cast()) }
     }
 }
 
@@ -182,9 +182,9 @@ pub type BiDiRunIterator = RefHandle<SkShaper_BiDiRunIterator>;
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_BiDiRunIterator {}
 
-impl NativeDrop for SkShaper_BiDiRunIterator {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
+impl NativeDelete for SkShaper_BiDiRunIterator {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkShaper_RunIterator_delete(ptr.cast()) }
     }
 }
 
@@ -233,9 +233,9 @@ pub type ScriptRunIterator = RefHandle<SkShaper_ScriptRunIterator>;
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_ScriptRunIterator {}
 
-impl NativeDrop for SkShaper_ScriptRunIterator {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
+impl NativeDelete for SkShaper_ScriptRunIterator {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkShaper_RunIterator_delete(ptr.cast()) }
     }
 }
 
@@ -294,9 +294,9 @@ pub type LanguageRunIterator = RefHandle<SkShaper_LanguageRunIterator>;
 
 impl NativeBase<SkShaper_RunIterator> for SkShaper_LanguageRunIterator {}
 
-impl NativeDrop for SkShaper_LanguageRunIterator {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkShaper_RunIterator_delete(self.base_mut()) }
+impl NativeDelete for SkShaper_LanguageRunIterator {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkShaper_RunIterator_delete(ptr.cast()) }
     }
 }
 
@@ -543,10 +543,10 @@ impl Shaper {
                 self.native(),
                 bytes.as_ptr() as _,
                 bytes.len(),
-                font_run_iterator.native_mut(),
-                bidi_run_iterator.native_mut(),
-                script_run_iterator.native_mut(),
-                language_run_iterator.native_mut(),
+                font_run_iterator.native_ptr(),
+                bidi_run_iterator.native_ptr(),
+                script_run_iterator.native_ptr(),
+                language_run_iterator.native_ptr(),
                 width,
                 run_handler.as_native_run_handler(),
             )
@@ -573,10 +573,10 @@ impl Shaper {
                 self.native(),
                 bytes.as_ptr() as _,
                 bytes.len(),
-                font_run_iterator.native_mut(),
-                bidi_run_iterator.native_mut(),
-                script_run_iterator.native_mut(),
-                language_run_iterator.native_mut(),
+                font_run_iterator.native_ptr(),
+                bidi_run_iterator.native_ptr(),
+                script_run_iterator.native_ptr(),
+                language_run_iterator.native_ptr(),
                 features.as_ptr(),
                 features.len(),
                 width,
@@ -609,10 +609,10 @@ impl Shaper {
                 self.native(),
                 bytes.as_ptr() as _,
                 bytes.len(),
-                font_run_iterator.native_mut(),
-                bidi_run_iterator.native_mut(),
-                script_run_iterator.native_mut(),
-                language_run_iterator.native_mut(),
+                font_run_iterator.native_ptr(),
+                bidi_run_iterator.native_ptr(),
+                script_run_iterator.native_ptr(),
+                language_run_iterator.native_ptr(),
                 features.as_ptr(),
                 features.len(),
                 width,
@@ -706,6 +706,9 @@ impl NativeAccess for TextBlobBuilderRunHandler<'_> {
     fn native(&self) -> &SkTextBlobBuilderRunHandler {
         &self.0
     }
+}
+
+impl NativeAccessMut for TextBlobBuilderRunHandler<'_> {
     fn native_mut(&mut self) -> &mut SkTextBlobBuilderRunHandler {
         &mut self.0
     }

@@ -28,7 +28,7 @@ pub fn wrap_texture(
 ) -> Option<Image> {
     let image_ptr = unsafe {
         sb::C_SkImages_WrapTextureGraphite(
-            recorder.native_mut(),
+            recorder.native_ptr(),
             backend_texture.native(),
             color_type.into_native(),
             alpha_type,
@@ -51,7 +51,7 @@ pub fn wrap_texture(
 /// A new texture-backed `Image`, or `None` if creation failed
 pub fn texture_from_image(recorder: &mut Recorder, image: &Image) -> Option<Image> {
     let image_ptr =
-        unsafe { sb::C_SkImages_TextureFromImageGraphite(recorder.native_mut(), image.native()) };
+        unsafe { sb::C_SkImages_TextureFromImageGraphite(recorder.native_ptr(), image.native()) };
 
     Image::from_ptr(image_ptr)
 }
@@ -75,7 +75,7 @@ pub fn subset_texture_from(
 ) -> Option<Image> {
     let image_ptr = unsafe {
         sb::C_SkImages_SubsetTextureFromGraphite(
-            recorder.native_mut(),
+            recorder.native_ptr(),
             image.native(),
             subset.native(),
         )

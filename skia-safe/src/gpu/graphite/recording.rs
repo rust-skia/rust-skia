@@ -14,9 +14,9 @@ pub type Recording = RefHandle<sb::skgpu_graphite_Recording>;
 // this mirrors `Context`/`Recorder`, which are also `!Sync`.
 unsafe impl Send for Recording {}
 
-impl NativeDrop for sb::skgpu_graphite_Recording {
-    fn drop(&mut self) {
-        unsafe { sb::C_Recording_delete(self) }
+impl NativeDelete for sb::skgpu_graphite_Recording {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_Recording_delete(ptr) }
     }
 }
 

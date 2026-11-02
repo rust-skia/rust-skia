@@ -100,9 +100,9 @@ impl<'a> BorrowedRecorder<'a> {
 // `&self`/`&mut self` methods drive C++ with no internal lock. Matches the
 // Ganesh `gpu::RecordingContext`, which is neither `Send` nor `Sync`.
 
-impl NativeDrop for sb::skgpu_graphite_Recorder {
-    fn drop(&mut self) {
-        unsafe { sb::C_Recorder_delete(self) }
+impl NativeDelete for sb::skgpu_graphite_Recorder {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_Recorder_delete(ptr) }
     }
 }
 
@@ -123,7 +123,7 @@ impl Recorder {
     /// # Returns
     /// A `Recording` containing the recorded operations, or `None` if recording failed
     pub fn snap(&mut self) -> Option<Recording> {
-        Recording::from_ptr(unsafe { sb::C_Recorder_snap(self.native_mut()) })
+        Recording::from_ptr(unsafe { sb::C_Recorder_snap(self.native_ptr()) })
     }
 
     // Note: Canvas creation in Graphite is typically done through Surface creation
@@ -145,7 +145,7 @@ impl Recorder {
     ) -> Option<&Canvas> {
         let canvas_ptr = unsafe {
             sb::C_Recorder_makeDeferredCanvas(
-                self.native_mut(),
+                self.native_ptr(),
                 image_info.native(),
                 texture_info.native(),
             )
@@ -153,7 +153,7 @@ impl Recorder {
         if canvas_ptr.is_null() {
             None
         } else {
-            Some(Canvas::borrow_from_native(unsafe { &*canvas_ptr }))
+            Some(unsafe { Canvas::borrow_from_native(canvas_ptr) })
         }
     }
 

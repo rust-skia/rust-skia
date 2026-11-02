@@ -56,7 +56,7 @@ impl Dom {
         resource_provider: impl Into<NativeResourceProvider>,
     ) -> Result<Self, LoadError> {
         let mut reader = RustStream::new(&mut reader);
-        let stream = reader.stream_mut();
+        let stream = reader.stream_ptr();
         let resource_provider = resource_provider.into();
 
         let out = unsafe { sb::C_SkSVGDOM_MakeFromStream(stream, resource_provider.into_ptr()) };
@@ -100,7 +100,7 @@ impl Dom {
         #[cfg(all(feature = "embed-icudtl", feature = "textlayout"))]
         crate::icu::init();
 
-        unsafe { sb::SkSVGDOM::render(self.native() as &_, canvas.native_mut()) }
+        unsafe { sb::SkSVGDOM::render(self.native() as &_, canvas.native_ptr()) }
     }
 
     /// Specify a "container size" for the SVG dom.

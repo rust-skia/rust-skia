@@ -123,7 +123,7 @@ mod core {
     assert_impl_all!(PathFillType: Send, Sync);
 
     assert_not_impl_all!(PathIter: Send, Sync);
-    assert_not_impl_all!(PathIterRec: Send, Sync);
+    assert_impl_all!(PathIterRec: Send, Sync);
     assert_not_impl_all!(PathContourIter: Send, Sync);
     assert_not_impl_all!(PathContourIterRec: Send, Sync);
 

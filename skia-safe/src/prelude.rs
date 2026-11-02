@@ -89,25 +89,51 @@ impl RefCount for skia_bindings::SkNVRefCnt {
 }
 
 pub trait NativeRefCounted: Sized {
-    fn _ref(&self);
-    fn _unref(&self);
-    fn unique(&self) -> bool;
+    /// Increases the reference count.
+    ///
+    /// This function takes a raw pointer instead of `&self`. C++ writes the count through a
+    /// `const` pointer, and Rust forbids writes to memory behind a shared reference.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object.
+    unsafe fn _ref(ptr: *const Self);
+    /// Decreases the reference count and deletes the object when the count reaches zero.
+    ///
+    /// This function takes a raw pointer instead of `&self`. C++ may delete the object during
+    /// the call, and Rust forbids freeing memory while a reference to it is still in use.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object that holds a reference the caller owns. The caller gives
+    /// up that reference and must not use `ptr` afterwards.
+    unsafe fn _unref(ptr: *const Self);
+    /// Returns `true` if the caller holds the only reference.
+    ///
+    /// This function takes a raw pointer instead of `&self`, like [`Self::_ref`]. Other threads
+    /// may change the count during the call, and a shared reference would assert that the
+    /// object's memory does not change.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object.
+    unsafe fn unique(ptr: *const Self) -> bool;
     fn _ref_cnt(&self) -> usize {
         unimplemented!();
     }
 }
 
 impl NativeRefCounted for SkRefCntBase {
-    fn _ref(&self) {
-        unsafe { C_SkRefCntBase_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { C_SkRefCntBase_ref(ptr) }
     }
 
-    fn _unref(&self) {
-        unsafe { C_SkRefCntBase_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { C_SkRefCntBase_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { C_SkRefCntBase_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { C_SkRefCntBase_unique(ptr) }
     }
 
     #[allow(clippy::cast_ptr_alignment)]
@@ -125,12 +151,25 @@ impl NativeRefCounted for SkRefCntBase {
 pub trait NativeRefCountedBase {
     type Base: NativeRefCounted;
 
-    /// Returns the ref counter base class of the ref counted type.
+    /// Returns a pointer to the ref counter base class of the ref counted type.
     ///
-    /// Default implementation assumes that the base class ptr is the same as the
-    /// ptr to self.
-    fn ref_counted_base(&self) -> &Self::Base {
-        unsafe { &*(self as *const _ as *const Self::Base) }
+    /// The default implementation assumes that the base class is at the same address as the ref
+    /// counted type. It casts the pointer without creating a reference, so the result keeps the
+    /// permissions of `ptr`. [`NativeRefCounted::_unref`] relies on that, because C++ writes
+    /// through the base pointer when it deletes the object.
+    fn ref_counted_base_ptr(ptr: *const Self) -> *const Self::Base
+    where
+        Self: Sized,
+    {
+        ptr.cast()
+    }
+
+    /// Returns the ref counter base class of the ref counted type.
+    fn ref_counted_base(&self) -> &Self::Base
+    where
+        Self: Sized,
+    {
+        unsafe { &*Self::ref_counted_base_ptr(self) }
     }
 }
 
@@ -138,16 +177,16 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 where
     Native: NativeRefCountedBase<Base = Base>,
 {
-    fn _ref(&self) {
-        self.ref_counted_base()._ref();
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { Base::_ref(Self::ref_counted_base_ptr(ptr)) }
     }
 
-    fn _unref(&self) {
-        self.ref_counted_base()._unref();
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { Base::_unref(Self::ref_counted_base_ptr(ptr)) }
     }
 
-    fn unique(&self) -> bool {
-        self.ref_counted_base().unique()
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { Base::unique(Self::ref_counted_base_ptr(ptr)) }
     }
 
     fn _ref_cnt(&self) -> usize {
@@ -161,18 +200,42 @@ pub trait NativeAccess {
     /// Provides shared access to the native type of the wrapper.
     fn native(&self) -> &Self::Native;
 
-    /// Provides exclusive access to the native type of the wrapper.
-    fn native_mut(&mut self) -> &mut Self::Native;
-
-    // Returns a ptr to the native mutable value.
+    /// Returns a pointer for C++ calls that may write.
+    ///
+    /// The default derives the pointer from [`Self::native`], which permits only reads.
+    /// [`RefHandle`] and [`RCHandle`] override it to return their own pointer.
     unsafe fn native_mut_force(&self) -> *mut Self::Native {
         self.native() as *const Self::Native as *mut Self::Native
     }
 }
 
+/// Trait that enables exclusive access to a native representation of a wrapper type.
+///
+/// [`RefHandle`] does not implement this trait. Its native objects live on the C++ heap and may
+/// store pointers into their own memory, so calls that modify them go through
+/// [`RefHandle::native_ptr`] instead.
+pub trait NativeAccessMut: NativeAccess {
+    /// Provides exclusive access to the native type of the wrapper.
+    fn native_mut(&mut self) -> &mut Self::Native;
+}
+
 /// Implements Drop for native types we can not implement Drop for.
 pub trait NativeDrop {
     fn drop(&mut self);
+}
+
+/// Deletes a native object that C++ allocated on the heap and that a [`RefHandle`] owns.
+///
+/// This trait takes a raw pointer instead of `&mut self`. The object is freed during the call,
+/// and Rust forbids freeing memory while a reference to it is still in use.
+pub trait NativeDelete {
+    /// Deletes the object that `ptr` points to.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object that the caller owns. The caller must not use `ptr`
+    /// afterwards.
+    unsafe fn delete(ptr: *mut Self);
 }
 
 /// Clone for bindings types we can not implement Clone for.
@@ -315,7 +378,9 @@ impl<N: NativeDrop> NativeAccess for Handle<N> {
     fn native(&self) -> &N {
         unsafe { &*(self.0.get()) }
     }
+}
 
+impl<N: NativeDrop> NativeAccessMut for Handle<N> {
     fn native_mut(&mut self) -> &mut N {
         self.0.get_mut()
     }
@@ -396,7 +461,7 @@ where
 
 impl<H, N> NativePointerOrNullMut for Option<&mut H>
 where
-    H: NativeAccess<Native = N>,
+    H: NativeAccessMut<Native = N>,
 {
     type Native = N;
 
@@ -443,32 +508,35 @@ where
 /// A wrapper type that represents a native type with a pointer to
 /// the native object.
 #[repr(transparent)]
-pub struct RefHandle<N: NativeDrop>(ptr::NonNull<N>);
+pub struct RefHandle<N: NativeDelete>(ptr::NonNull<N>);
 
-impl<N: NativeDrop> Drop for RefHandle<N> {
+impl<N: NativeDelete> Drop for RefHandle<N> {
     fn drop(&mut self) {
-        self.native_mut().drop()
+        unsafe { N::delete(self.0.as_ptr()) }
     }
 }
 
-impl<N: NativeDrop + NativePartialEq> PartialEq for RefHandle<N> {
+impl<N: NativeDelete + NativePartialEq> PartialEq for RefHandle<N> {
     fn eq(&self, rhs: &Self) -> bool {
         self.native().eq(rhs.native())
     }
 }
 
-impl<N: NativeDrop> NativeAccess for RefHandle<N> {
+impl<N: NativeDelete> NativeAccess for RefHandle<N> {
     type Native = N;
 
     fn native(&self) -> &N {
         unsafe { self.0.as_ref() }
     }
-    fn native_mut(&mut self) -> &mut N {
-        unsafe { self.0.as_mut() }
+
+    /// Returns the handle's own pointer. A pointer derived from [`Self::native`] would only
+    /// permit reads.
+    unsafe fn native_mut_force(&self) -> *mut N {
+        self.0.as_ptr()
     }
 }
 
-impl<N: NativeDrop> RefHandle<N> {
+impl<N: NativeDelete> RefHandle<N> {
     /// Creates a RefHandle from a native pointer.
     ///
     /// From this time on, the handle owns the object that the pointer points
@@ -481,6 +549,16 @@ impl<N: NativeDrop> RefHandle<N> {
         let p = self.0.as_ptr();
         mem::forget(self);
         p
+    }
+
+    /// Returns a raw pointer to the native object for calls that may modify it.
+    ///
+    /// Some native types store pointers into their own memory, and C++ writes through them. A
+    /// `&mut N` would promise Rust that nothing else writes to the object while it exists, so
+    /// calls into such types use this pointer with the raw `sb::<Type>_*` functions instead of the
+    /// bindgen methods that take `&mut self`.
+    pub(crate) fn native_ptr(&mut self) -> *mut N {
+        self.0.as_ptr()
     }
 }
 
@@ -528,7 +606,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     #[inline]
     pub(crate) fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
         ptr::NonNull::new(ptr).map(|ptr| {
-            unsafe { ptr.as_ref()._ref() };
+            unsafe { N::_ref(ptr.as_ptr()) };
             Self(ptr)
         })
     }
@@ -551,6 +629,14 @@ impl<N: NativeRefCounted> RCHandle<N> {
     pub(crate) fn as_ptr(&self) -> &ptr::NonNull<N> {
         &self.0
     }
+
+    /// Returns a raw pointer to the native object for calls that may modify it.
+    ///
+    /// Some native types store pointers into their own memory, and C++ writes through them. See
+    /// [`RefHandle::native_ptr`] for why such calls must not go through a `&mut N`.
+    pub(crate) fn native_ptr(&mut self) -> *mut N {
+        self.0.as_ptr()
+    }
 }
 
 #[cfg(test)]
@@ -559,7 +645,7 @@ mod rc_handle_tests {
 
     use skia_bindings::{SkFontMgr, SkTypeface};
 
-    use crate::{FontMgr, Typeface, prelude::NativeAccess};
+    use crate::{FontMgr, Typeface, prelude::NativeAccessMut};
 
     #[test]
     fn rc_native_ref_null() {
@@ -585,6 +671,14 @@ impl<N: NativeRefCounted> NativeAccess for RCHandle<N> {
         unsafe { self.0.as_ref() }
     }
 
+    /// Returns the handle's own pointer. A pointer derived from [`Self::native`] would only
+    /// permit reads.
+    unsafe fn native_mut_force(&self) -> *mut N {
+        self.0.as_ptr()
+    }
+}
+
+impl<N: NativeRefCounted> NativeAccessMut for RCHandle<N> {
     /// Returns a mutable reference to the native representation.
     fn native_mut(&mut self) -> &mut N {
         unsafe { self.0.as_mut() }
@@ -595,7 +689,7 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
     fn clone(&self) -> Self {
         // Support shared mutability when a ref-counted handle is cloned.
         let ptr = self.0;
-        unsafe { ptr.as_ref()._ref() };
+        unsafe { N::_ref(ptr.as_ptr()) };
         Self(ptr)
     }
 }
@@ -603,7 +697,7 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
 impl<N: NativeRefCounted> Drop for RCHandle<N> {
     #[inline]
     fn drop(&mut self) {
-        unsafe { self.0.as_ref()._unref() };
+        unsafe { N::_unref(self.0.as_ptr()) };
     }
 }
 
@@ -980,7 +1074,7 @@ pub trait ConditionallySend: Sized {
 /// another thread when its reference count is 1.
 impl<H: NativeRefCountedBase> ConditionallySend for RCHandle<H> {
     fn can_send(&self) -> bool {
-        self.native().unique()
+        unsafe { H::unique(self.0.as_ptr()) }
     }
 
     fn wrap_send(self) -> Result<Sendable<Self>, Self> {

@@ -161,7 +161,7 @@ impl Typeface {
     /// - `behavior` controls whether font data is included.
     pub fn serialize_stream(&self, mut write: impl io::Write, behavior: SerializeBehavior) {
         let mut stream = RustWStream::new(&mut write);
-        unsafe { sb::C_SkTypeface_serialize2(self.native(), stream.stream_mut(), behavior) }
+        unsafe { sb::C_SkTypeface_serialize2(self.native(), stream.stream_ptr(), behavior) }
     }
 
     /// Returns serialized typeface data.
@@ -187,7 +187,7 @@ impl Typeface {
         let mut stream = RustStream::new(&mut data);
         Typeface::from_ptr(unsafe {
             sb::C_SkTypeface_MakeDeserialize(
-                stream.stream_mut(),
+                stream.stream_ptr(),
                 last_resort_mgr.into().into_ptr_or_null(),
             )
         })
@@ -415,9 +415,9 @@ impl Typeface {
 
 pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;
 
-impl NativeDrop for SkTypeface_LocalizedStrings {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkTypeface_LocalizedStrings_unref(self) }
+impl NativeDelete for SkTypeface_LocalizedStrings {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkTypeface_LocalizedStrings_unref(ptr) }
     }
 }
 
@@ -436,7 +436,7 @@ impl Iterator for LocalizedStringsIter {
         let mut language = interop::String::default();
         unsafe {
             sb::C_SkTypeface_LocalizedStrings_next(
-                self.native_mut(),
+                self.native_ptr(),
                 string.native_mut(),
                 language.native_mut(),
             )

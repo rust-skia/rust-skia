@@ -400,8 +400,7 @@ impl Surface {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Surface_getCanvas>
     pub fn canvas(&mut self) -> &Canvas {
-        let canvas_ref = unsafe { &*self.native_mut().getCanvas() };
-        Canvas::borrow_from_native(canvas_ref)
+        unsafe { Canvas::borrow_from_native(self.native_mut().getCanvas()) }
     }
 
     // TODO: capabilities()
@@ -505,7 +504,7 @@ impl Surface {
         let sampling = sampling.into();
         unsafe {
             self.native_mut().draw(
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 offset.x,
                 offset.y,
                 sampling.native(),

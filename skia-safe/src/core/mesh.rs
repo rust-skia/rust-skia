@@ -178,16 +178,16 @@ pub type MeshSpecification = RCHandle<SkMeshSpecification>;
 unsafe_send_sync!(MeshSpecification);
 
 impl NativeRefCounted for SkMeshSpecification {
-    fn _ref(&self) {
-        unsafe { sb::C_SkMeshSpecification_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_SkMeshSpecification_ref(ptr) }
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkMeshSpecification_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkMeshSpecification_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkMeshSpecification_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_SkMeshSpecification_unique(ptr) }
     }
 }
 
@@ -505,9 +505,9 @@ variant_name!(Mode::TriangleStrip);
 // moved by Rust.
 pub type Mesh = RefHandle<SkMesh>;
 
-impl NativeDrop for SkMesh {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkMesh_delete(self) }
+impl NativeDelete for SkMesh {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkMesh_delete(ptr) }
     }
 }
 

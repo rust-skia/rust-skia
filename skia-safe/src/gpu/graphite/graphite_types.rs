@@ -1,7 +1,5 @@
 use skia_bindings as sb;
 
-use crate::prelude::*;
-
 /// Status of recording insertion (`skgpu::graphite::InsertStatus::V`).
 ///
 /// [`Success`](InsertStatus::Success) is the only success value; every other
@@ -42,7 +40,7 @@ impl<'a> InsertRecordingInfo<'a> {
         // stable heap address instead (`new`/`delete` on the C++ side).
         let inner = std::ptr::NonNull::new(unsafe { sb::C_InsertRecordingInfo_new() })
             .expect("C_InsertRecordingInfo_new returned null");
-        unsafe { (*inner.as_ptr()).fRecording = recording.native_mut() };
+        unsafe { (*inner.as_ptr()).fRecording = recording.native_ptr() };
         Self {
             inner,
             _recording: std::marker::PhantomData,

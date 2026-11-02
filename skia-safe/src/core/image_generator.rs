@@ -6,9 +6,9 @@ use skia_bindings::{self as sb, SkImageGenerator};
 pub type ImageGenerator = RefHandle<SkImageGenerator>;
 unsafe_send_sync!(ImageGenerator);
 
-impl NativeDrop for SkImageGenerator {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkImageGenerator_delete(self) }
+impl NativeDelete for SkImageGenerator {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkImageGenerator_delete(ptr) }
     }
 }
 
@@ -29,7 +29,7 @@ impl ImageGenerator {
     /// Returns a reference to the encoded (i.e. compressed) representation of this data, or `None`
     /// if there is none.
     pub fn encoded_data(&mut self) -> Option<Data> {
-        Data::from_ptr_const(unsafe { sb::C_SkImageGenerator_refEncodedData(self.native_mut()) })
+        Data::from_ptr_const(unsafe { sb::C_SkImageGenerator_refEncodedData(self.native_ptr()) })
     }
 
     /// Returns the [`ImageInfo`] associated with this generator.
@@ -76,8 +76,12 @@ impl ImageGenerator {
     pub fn get_pixels(&mut self, info: &ImageInfo, pixels: &mut [u8], row_bytes: usize) -> bool {
         assert!(info.valid_pixels(row_bytes, pixels));
         unsafe {
-            self.native_mut()
-                .getPixels(info.native(), pixels.as_mut_ptr() as _, row_bytes)
+            sb::SkImageGenerator_getPixels(
+                self.native_ptr(),
+                info.native(),
+                pixels.as_mut_ptr() as _,
+                row_bytes,
+            )
         }
     }
 

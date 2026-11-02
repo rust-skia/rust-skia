@@ -67,7 +67,7 @@ pub mod backend_textures {
     }
 
     pub fn gl_texture_parameters_modified(texture: &mut BackendTexture) {
-        unsafe { sb::C_GrBackendTextures_GLTextureParametersModified(texture.native_mut()) }
+        unsafe { sb::C_GrBackendTextures_GLTextureParametersModified(texture.native_ptr()) }
     }
 }
 

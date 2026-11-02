@@ -44,7 +44,7 @@ pub fn encode<W: io::Write>(pixmap: &Pixmap, writer: &mut W, options: &Options) 
     let mut stream = RustWStream::new(writer);
     unsafe {
         skia_bindings::C_SkWebpEncoder_Encode(
-            stream.stream_mut(),
+            stream.stream_ptr(),
             pixmap.native(),
             options.compression,
             options.quality,

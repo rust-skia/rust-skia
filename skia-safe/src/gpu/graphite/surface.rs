@@ -39,7 +39,7 @@ pub fn render_target(
 
     let surface_ptr = unsafe {
         sb::C_SkSurfaces_RenderTargetGraphite(
-            recorder.native_mut(),
+            recorder.native_ptr(),
             image_info.native(),
             mipmapped,
             surface_props_ptr,
@@ -74,7 +74,7 @@ pub fn wrap_backend_texture(
 
     let surface_ptr = unsafe {
         sb::C_SkSurfaces_WrapBackendTextureGraphite(
-            recorder.native_mut(),
+            recorder.native_ptr(),
             backend_texture.native(),
             color_type.into_native(),
             color_space.into().into_ptr_or_null(),

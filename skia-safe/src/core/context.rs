@@ -113,9 +113,9 @@ impl ContextOptions {
 /// Skia's central context object for shared resources and internal caches.
 pub type Context = RefHandle<SkContext>;
 
-impl NativeDrop for SkContext {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkContext_delete(self) }
+impl NativeDelete for SkContext {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkContext_delete(ptr) }
     }
 }
 

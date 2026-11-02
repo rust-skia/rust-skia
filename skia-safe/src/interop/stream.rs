@@ -7,7 +7,7 @@ use crate::{Data, prelude::*};
 use skia_bindings::{
     self as sb, SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream,
 };
-use std::{ffi, fmt, io, marker::PhantomData, mem, pin::Pin, ptr};
+use std::{ffi, fmt, io, marker::PhantomData, mem, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of [`Stream`].
 #[repr(transparent)]
@@ -47,6 +47,9 @@ impl NativeAccess for StreamAsset {
     fn native(&self) -> &SkStreamAsset {
         unsafe { self.0.as_ref() }
     }
+}
+
+impl NativeAccessMut for StreamAsset {
     fn native_mut(&mut self) -> &mut SkStreamAsset {
         unsafe { self.0.as_mut() }
     }
@@ -86,6 +89,9 @@ impl NativeAccess for MemoryStream<'_> {
     fn native(&self) -> &SkMemoryStream {
         unsafe { self.native.as_ref() }
     }
+}
+
+impl NativeAccessMut for MemoryStream<'_> {
     fn native_mut(&mut self) -> &mut SkMemoryStream {
         unsafe { self.native.as_mut() }
     }
@@ -178,12 +184,13 @@ pub struct RustStream<'a> {
 
 #[allow(unused)]
 impl RustStream<'_> {
-    pub fn stream_mut(&mut self) -> &mut SkStream {
-        self.inner.native_mut().base_mut()
+    /// Returns a pointer to the stream for C++ calls that read from it.
+    pub fn stream_ptr(&mut self) -> *mut SkStream {
+        self.inner.native_ptr().cast()
     }
 
     pub fn into_native(mut self) -> *mut SkStream {
-        let stream = self.inner.native_mut().base_mut() as *mut _;
+        let stream = self.inner.native_ptr().cast();
         mem::forget(self.inner);
         stream
     }
@@ -191,9 +198,9 @@ impl RustStream<'_> {
 
 impl NativeBase<SkStream> for sb::RustStream {}
 
-impl NativeDrop for sb::RustStream {
-    fn drop(&mut self) {
-        unsafe { sb::C_RustStream_delete(self) }
+impl NativeDelete for sb::RustStream {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_RustStream_delete(ptr) }
     }
 }
 
@@ -325,16 +332,32 @@ unsafe extern "C" fn seek_current_trampoline<T: io::Seek>(
 
 #[allow(unused)]
 pub struct RustWStream<'a> {
-    /// We need to be able to refer to the inner RustWStream to be referred to by pointer, so box
-    /// it.
-    inner: Pin<Box<Handle<sb::RustWStream>>>,
+    /// The native stream that C++ writes into.
+    ///
+    /// C++ may keep a pointer to the stream. For example, a PDF document writes into its stream
+    /// until the document is closed. The stream lives on the heap, so its address stays the same
+    /// when this `RustWStream` moves. It is held through a raw pointer instead of a `Box`, because
+    /// Rust assumes that nothing else changes the contents of a `Box` while the value that owns
+    /// it is passed to a function. C++ writes to the stream during such calls, for example when
+    /// `Document::begin_page()` writes the PDF header, and with a `Box` that would be undefined
+    /// behavior.
+    inner: ptr::NonNull<Handle<sb::RustWStream>>,
     _phantom: PhantomData<&'a mut ()>,
+}
+
+impl Drop for RustWStream<'_> {
+    /// Freeing the stream here, and not through a field's drop, keeps the writer borrowed for
+    /// `'a` until the C++ stream and any document that writes into it are gone.
+    fn drop(&mut self) {
+        drop(unsafe { Box::from_raw(self.inner.as_ptr()) })
+    }
 }
 
 #[allow(unused)]
 impl RustWStream<'_> {
-    pub fn stream_mut(&mut self) -> &mut SkWStream {
-        self.inner.native_mut().base_mut()
+    /// Returns a pointer to the stream that C++ may keep and write through.
+    pub fn stream_ptr(&mut self) -> *mut SkWStream {
+        self.inner.as_ptr().cast()
     }
 }
 
@@ -348,15 +371,16 @@ impl NativeDrop for sb::RustWStream {
 
 impl<'a> RustWStream<'a> {
     pub fn new<T: io::Write>(writer: &'a mut T) -> Self {
+        let inner = Box::new(Handle::construct(|ptr| unsafe {
+            sb::C_RustWStream_construct(
+                ptr,
+                writer as *mut T as *mut ffi::c_void,
+                Some(write_trampoline::<T>),
+                Some(flush_trampoline::<T>),
+            );
+        }));
         return RustWStream {
-            inner: Box::pin(Handle::construct(|ptr| unsafe {
-                sb::C_RustWStream_construct(
-                    ptr,
-                    writer as *mut T as *mut ffi::c_void,
-                    Some(write_trampoline::<T>),
-                    Some(flush_trampoline::<T>),
-                );
-            })),
+            inner: ptr::NonNull::new(Box::into_raw(inner)).unwrap(),
             _phantom: PhantomData,
         };
 
@@ -448,7 +472,7 @@ mod tests {
 
         let mut first_byte = 0i8;
         unsafe {
-            stream.stream_mut().readS8(&mut first_byte);
+            skia_bindings::SkStream_readS8(stream.stream_ptr(), &mut first_byte);
         }
         assert_eq!(first_byte, 12i8)
     }

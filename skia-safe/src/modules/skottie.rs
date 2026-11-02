@@ -29,16 +29,16 @@ unsafe_send_sync!(Animation);
 require_base_type!(sb::skottie_Animation, SkNVRefCnt);
 
 impl NativeRefCounted for sb::skottie_Animation {
-    fn _ref(&self) {
-        unsafe { sb::C_skottie_Animation_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_skottie_Animation_ref(ptr) }
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_skottie_Animation_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_skottie_Animation_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_skottie_Animation_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_skottie_Animation_unique(ptr) }
     }
 }
 
@@ -91,9 +91,9 @@ bitflags::bitflags! {
 /// ```
 pub type Builder = RefHandle<sb::skottie_Animation_Builder>;
 
-impl NativeDrop for sb::skottie_Animation_Builder {
-    fn drop(&mut self) {
-        unsafe { sb::C_skottie_Builder_delete(self) }
+impl NativeDelete for sb::skottie_Animation_Builder {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_skottie_Builder_delete(ptr) }
     }
 }
 
@@ -124,7 +124,7 @@ impl Builder {
     ///
     /// Consumes and returns self for method chaining.
     pub fn set_font_manager(mut self, font_mgr: FontMgr) -> Self {
-        unsafe { sb::C_skottie_Builder_setFontManager(self.native_mut(), font_mgr.into_ptr()) }
+        unsafe { sb::C_skottie_Builder_setFontManager(self.native_ptr(), font_mgr.into_ptr()) }
         self
     }
 
@@ -136,7 +136,7 @@ impl Builder {
     /// Consumes and returns self for method chaining.
     pub fn set_resource_provider(mut self, provider: impl Into<NativeResourceProvider>) -> Self {
         let provider = provider.into();
-        unsafe { sb::C_skottie_Builder_setResourceProvider(self.native_mut(), provider.into_ptr()) }
+        unsafe { sb::C_skottie_Builder_setResourceProvider(self.native_ptr(), provider.into_ptr()) }
         self
     }
 
@@ -146,7 +146,7 @@ impl Builder {
     pub fn make(mut self, json: impl AsRef<str>) -> Option<Animation> {
         let json = json.as_ref();
         Animation::from_ptr(unsafe {
-            sb::C_skottie_Builder_make(self.native_mut(), json.as_ptr() as _, json.len())
+            sb::C_skottie_Builder_make(self.native_ptr(), json.as_ptr() as _, json.len())
         })
     }
 
@@ -157,7 +157,7 @@ impl Builder {
     pub fn make_from_file(mut self, path: impl AsRef<Path>) -> Option<Animation> {
         let path = CString::new(path.as_ref().to_str()?).ok()?;
         Animation::from_ptr(unsafe {
-            sb::C_skottie_Builder_makeFromFile(self.native_mut(), path.as_ptr())
+            sb::C_skottie_Builder_makeFromFile(self.native_ptr(), path.as_ptr())
         })
     }
 }
@@ -264,7 +264,7 @@ impl Animation {
         unsafe {
             sb::C_skottie_Animation_render(
                 self.native(),
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 dst.as_ref()
                     .map(|r| r.native() as *const _)
                     .unwrap_or(std::ptr::null()),
@@ -286,7 +286,7 @@ impl Animation {
         unsafe {
             sb::C_skottie_Animation_render_with_flags(
                 self.native(),
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 dst.as_ref()
                     .map(|r| r.native() as *const _)
                     .unwrap_or(std::ptr::null()),

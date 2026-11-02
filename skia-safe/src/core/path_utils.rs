@@ -26,7 +26,7 @@ pub fn fill_path_with_paint<'a>(
         sb::C_PathUtils_FillPathWithPaint(
             src.native(),
             paint.native(),
-            dst.native_mut(),
+            dst.native_ptr(),
             cull_rect.native_ptr_or_null(),
             matrix.native(),
         )

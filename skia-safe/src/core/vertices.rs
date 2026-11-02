@@ -27,16 +27,16 @@ unsafe_send_sync!(Vertices);
 require_base_type!(SkVertices, SkNVRefCnt);
 
 impl NativeRefCounted for SkVertices {
-    fn _ref(&self) {
-        unsafe { sb::C_SkVertices_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_SkVertices_ref(ptr) }
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkVertices_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkVertices_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkVertices_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_SkVertices_unique(ptr) }
     }
 }
 

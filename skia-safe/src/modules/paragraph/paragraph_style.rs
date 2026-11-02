@@ -153,9 +153,9 @@ impl StrutStyle {
 pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
 unsafe_send_sync!(ParagraphStyle);
 
-impl NativeDrop for sb::skia_textlayout_ParagraphStyle {
-    fn drop(&mut self) {
-        unsafe { sb::C_ParagraphStyle_delete(self) }
+impl NativeDelete for sb::skia_textlayout_ParagraphStyle {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_ParagraphStyle_delete(ptr) }
     }
 }
 
@@ -213,7 +213,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_strut_style(&mut self, strut_style: StrutStyle) -> &mut Self {
-        self.native_mut().fStrutStyle.replace_with(strut_style);
+        unsafe { (*self.native_ptr()).fStrutStyle.replace_with(strut_style) };
         self
     }
 
@@ -223,9 +223,11 @@ impl ParagraphStyle {
 
     pub fn set_text_style(&mut self, text_style: &TextStyle) -> &mut Self {
         // TODO: implement the assignment operator in C.
-        self.native_mut()
-            .fDefaultTextStyle
-            .replace_with(text_style.clone());
+        unsafe {
+            (*self.native_ptr())
+                .fDefaultTextStyle
+                .replace_with(text_style.clone())
+        };
         self
     }
 
@@ -234,7 +236,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_text_direction(&mut self, direction: TextDirection) -> &mut Self {
-        self.native_mut().fTextDirection = direction;
+        unsafe { (*self.native_ptr()).fTextDirection = direction };
         self
     }
 
@@ -243,7 +245,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_text_align(&mut self, align: TextAlign) -> &mut Self {
-        self.native_mut().fTextAlign = align;
+        unsafe { (*self.native_ptr()).fTextAlign = align };
         self
     }
 
@@ -255,7 +257,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_max_lines(&mut self, lines: impl Into<Option<usize>>) -> &mut Self {
-        self.native_mut().fLinesLimit = lines.into().unwrap_or(usize::MAX);
+        unsafe { (*self.native_ptr()).fLinesLimit = lines.into().unwrap_or(usize::MAX) };
         self
     }
 
@@ -266,7 +268,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_ellipsis(&mut self, ellipsis: impl AsRef<str>) -> &mut Self {
-        self.native_mut().fEllipsis.set_str(ellipsis);
+        unsafe { (*self.native_ptr()).fEllipsis.set_str(ellipsis) };
         self
     }
 
@@ -275,7 +277,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_height(&mut self, height: scalar) -> &mut Self {
-        self.native_mut().fHeight = height;
+        unsafe { (*self.native_ptr()).fHeight = height };
         self
     }
 
@@ -284,7 +286,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_text_height_behavior(&mut self, v: TextHeightBehavior) -> &mut Self {
-        self.native_mut().fTextHeightBehavior = v;
+        unsafe { (*self.native_ptr()).fTextHeightBehavior = v };
         self
     }
 
@@ -305,7 +307,7 @@ impl ParagraphStyle {
     }
 
     pub fn turn_hinting_off(&mut self) -> &mut Self {
-        self.native_mut().fHintingIsOn = false;
+        unsafe { (*self.native_ptr()).fHintingIsOn = false };
         self
     }
 
@@ -314,7 +316,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_fake_missing_font_styles(&mut self, value: bool) -> &mut Self {
-        self.native_mut().fFakeMissingFontStyles = value;
+        unsafe { (*self.native_ptr()).fFakeMissingFontStyles = value };
         self
     }
 
@@ -323,7 +325,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_replace_tab_characters(&mut self, value: bool) -> &mut Self {
-        self.native_mut().fReplaceTabCharacters = value;
+        unsafe { (*self.native_ptr()).fReplaceTabCharacters = value };
         self
     }
 
@@ -332,7 +334,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_apply_rounding_hack(&mut self, value: bool) -> &mut Self {
-        self.native_mut().fApplyRoundingHack = value;
+        unsafe { (*self.native_ptr()).fApplyRoundingHack = value };
         self
     }
 
@@ -341,7 +343,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_letter_spacing_by_css_spec(&mut self, value: bool) -> &mut Self {
-        self.native_mut().fLetterSpacingByCSSSpec = value;
+        unsafe { (*self.native_ptr()).fLetterSpacingByCSSSpec = value };
         self
     }
 
@@ -350,7 +352,7 @@ impl ParagraphStyle {
     }
 
     pub fn set_render_soft_hyphens(&mut self, value: bool) -> &mut Self {
-        self.native_mut().fRenderSoftHyphens = value;
+        unsafe { (*self.native_ptr()).fRenderSoftHyphens = value };
         self
     }
 }

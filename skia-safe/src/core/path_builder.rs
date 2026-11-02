@@ -19,9 +19,9 @@ variant_name!(ArcSize::Large);
 pub type PathBuilder = RefHandle<SkPathBuilder>;
 unsafe_send_sync!(PathBuilder);
 
-impl NativeDrop for SkPathBuilder {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkPathBuilder_delete(self) }
+impl NativeDelete for SkPathBuilder {
+    unsafe fn delete(ptr: *mut Self) {
+        unsafe { sb::C_SkPathBuilder_delete(ptr) }
     }
 }
 
@@ -182,7 +182,7 @@ impl PathBuilder {
         let mut p = Path::default();
         unsafe {
             sb::C_SkPathBuilder_detach(
-                self.native_mut(),
+                self.native_ptr(),
                 mx.into().native_ptr_or_null(),
                 p.native_mut(),
             )
@@ -198,7 +198,7 @@ impl PathBuilder {
     /// # Returns
     /// reference to [`PathBuilder`]
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
-        self.native_mut().fFillType = ft;
+        unsafe { (*self.native_ptr()).fFillType = ft };
         self
     }
 
@@ -220,7 +220,7 @@ impl PathBuilder {
     /// # Returns
     /// reference to [`PathBuilder`]
     pub fn set_is_volatile(&mut self, is_volatile: bool) -> &mut Self {
-        self.native_mut().fIsVolatile = is_volatile;
+        unsafe { (*self.native_ptr()).fIsVolatile = is_volatile };
         self
     }
 
@@ -232,7 +232,7 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn reset(&mut self) -> &mut Self {
         unsafe {
-            self.native_mut().reset();
+            sb::SkPathBuilder_reset(self.native_ptr());
         }
         self
     }
@@ -244,7 +244,7 @@ impl PathBuilder {
     /// Thus, each contour can only have 1 move verb in it (the last one specified).
     pub fn move_to(&mut self, pt: impl Into<Point>) -> &mut Self {
         unsafe {
-            self.native_mut().moveTo(pt.into().into_native());
+            sb::SkPathBuilder_moveTo(self.native_ptr(), pt.into().into_native());
         }
         self
     }
@@ -261,7 +261,7 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn line_to(&mut self, pt: impl Into<Point>) -> &mut Self {
         unsafe {
-            self.native_mut().lineTo(pt.into().into_native());
+            sb::SkPathBuilder_lineTo(self.native_ptr(), pt.into().into_native());
         }
         self
     }
@@ -281,8 +281,11 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn quad_to(&mut self, p1: impl Into<Point>, p2: impl Into<Point>) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .quadTo(p1.into().into_native(), p2.into().into_native());
+            sb::SkPathBuilder_quadTo(
+                self.native_ptr(),
+                p1.into().into_native(),
+                p2.into().into_native(),
+            );
         }
         self
     }
@@ -312,8 +315,12 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn conic_to(&mut self, p1: impl Into<Point>, p2: impl Into<Point>, w: scalar) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .conicTo(p1.into().into_native(), p2.into().into_native(), w);
+            sb::SkPathBuilder_conicTo(
+                self.native_ptr(),
+                p1.into().into_native(),
+                p2.into().into_native(),
+                w,
+            );
         }
         self
     }
@@ -339,7 +346,8 @@ impl PathBuilder {
         p3: impl Into<Point>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().cubicTo(
+            sb::SkPathBuilder_cubicTo(
+                self.native_ptr(),
                 p1.into().into_native(),
                 p2.into().into_native(),
                 p3.into().into_native(),
@@ -360,7 +368,7 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn close(&mut self) -> &mut Self {
         unsafe {
-            self.native_mut().close();
+            sb::SkPathBuilder_close(self.native_ptr());
         }
         self
     }
@@ -374,7 +382,7 @@ impl PathBuilder {
     pub fn polyline_to(&mut self, points: &[Point]) -> &mut Self {
         unsafe {
             sb::C_SkPathBuilder_polylineTo(
-                self.native_mut(),
+                self.native_ptr(),
                 points.native().as_ptr(),
                 points.len(),
             );
@@ -393,7 +401,7 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn r_move_to(&mut self, pt: impl Into<Vector>) -> &mut Self {
         unsafe {
-            self.native_mut().rMoveTo(pt.into().into_native());
+            sb::SkPathBuilder_rMoveTo(self.native_ptr(), pt.into().into_native());
         }
         self
     }
@@ -412,7 +420,7 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn r_line_to(&mut self, pt: impl Into<Vector>) -> &mut Self {
         unsafe {
-            self.native_mut().rLineTo(pt.into().into_native());
+            sb::SkPathBuilder_rLineTo(self.native_ptr(), pt.into().into_native());
         }
         self
     }
@@ -435,8 +443,11 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn r_quad_to(&mut self, pt1: impl Into<Vector>, pt2: impl Into<Vector>) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .rQuadTo(pt1.into().into_native(), pt2.into().into_native());
+            sb::SkPathBuilder_rQuadTo(
+                self.native_ptr(),
+                pt1.into().into_native(),
+                pt2.into().into_native(),
+            );
         }
         self
     }
@@ -472,8 +483,12 @@ impl PathBuilder {
         w: scalar,
     ) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .rConicTo(pt1.into().into_native(), pt2.into().into_native(), w);
+            sb::SkPathBuilder_rConicTo(
+                self.native_ptr(),
+                pt1.into().into_native(),
+                pt2.into().into_native(),
+                w,
+            );
         }
         self
     }
@@ -503,7 +518,8 @@ impl PathBuilder {
         pt3: impl Into<Vector>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().rCubicTo(
+            sb::SkPathBuilder_rCubicTo(
+                self.native_ptr(),
                 pt1.into().into_native(),
                 pt2.into().into_native(),
                 pt3.into().into_native(),
@@ -548,7 +564,8 @@ impl PathBuilder {
         let r = r.into();
         let d = dxdy.into();
         unsafe {
-            self.native_mut().rArcTo(
+            sb::SkPathBuilder_rArcTo(
+                self.native_ptr(),
                 r.into_native(),
                 x_axis_rotate,
                 large_arc,
@@ -583,7 +600,8 @@ impl PathBuilder {
         force_move_to: bool,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().arcTo(
+            sb::SkPathBuilder_arcTo(
+                self.native_ptr(),
                 oval.as_ref().native(),
                 start_angle_deg,
                 sweep_angle_deg,
@@ -620,8 +638,12 @@ impl PathBuilder {
         radius: scalar,
     ) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .arcTo1(p1.into().into_native(), p2.into().into_native(), radius);
+            sb::SkPathBuilder_arcTo1(
+                self.native_ptr(),
+                p1.into().into_native(),
+                p2.into().into_native(),
+                radius,
+            );
         }
         self
     }
@@ -659,7 +681,8 @@ impl PathBuilder {
         xy: impl Into<Point>,
     ) -> &mut Self {
         unsafe {
-            self.native_mut().arcTo2(
+            sb::SkPathBuilder_arcTo2(
+                self.native_ptr(),
                 r.into().into_native(),
                 x_axis_rotate,
                 large_arc,
@@ -692,8 +715,12 @@ impl PathBuilder {
         sweep_angle_deg: scalar,
     ) -> &mut Self {
         unsafe {
-            self.native_mut()
-                .addArc(oval.as_ref().native(), start_angle_deg, sweep_angle_deg);
+            sb::SkPathBuilder_addArc(
+                self.native_ptr(),
+                oval.as_ref().native(),
+                start_angle_deg,
+                sweep_angle_deg,
+            );
         }
         self
     }
@@ -735,8 +762,12 @@ impl PathBuilder {
         let dir = dir.into().unwrap_or_default();
         let start_index = start_index.into().unwrap_or(0);
         unsafe {
-            self.native_mut()
-                .addRect(rect.as_ref().native(), dir, start_index.try_into().unwrap());
+            sb::SkPathBuilder_addRect(
+                self.native_ptr(),
+                rect.as_ref().native(),
+                dir,
+                start_index.try_into().unwrap(),
+            );
         }
         self
     }
@@ -762,8 +793,12 @@ impl PathBuilder {
         // m86: default start index changed from 0 to 1
         let start_index = start_index.into().unwrap_or(1);
         unsafe {
-            self.native_mut()
-                .addOval(rect.as_ref().native(), dir, start_index.try_into().unwrap());
+            sb::SkPathBuilder_addOval(
+                self.native_ptr(),
+                rect.as_ref().native(),
+                dir,
+                start_index.try_into().unwrap(),
+            );
         }
         self
     }
@@ -792,7 +827,8 @@ impl PathBuilder {
                 .into()
                 .unwrap_or(if dir == PathDirection::CW { 6 } else { 7 });
         unsafe {
-            self.native_mut().addRRect(
+            sb::SkPathBuilder_addRRect(
+                self.native_ptr(),
                 rect.as_ref().native(),
                 dir,
                 start_index.try_into().unwrap(),
@@ -822,8 +858,7 @@ impl PathBuilder {
         let center = center.into();
         let dir = dir.into().unwrap_or_default();
         unsafe {
-            self.native_mut()
-                .addCircle(center.into_native(), radius, dir);
+            sb::SkPathBuilder_addCircle(self.native_ptr(), center.into_native(), radius, dir);
         }
         self
     }
@@ -841,7 +876,7 @@ impl PathBuilder {
     pub fn add_polygon(&mut self, pts: &[Point], close: bool) -> &mut Self {
         unsafe {
             sb::C_SkPathBuilder_addPolygon(
-                self.native_mut(),
+                self.native_ptr(),
                 pts.native().as_ptr(),
                 pts.len(),
                 close,
@@ -889,7 +924,8 @@ impl PathBuilder {
     ) -> &mut Self {
         let offset = offset.into();
         unsafe {
-            self.native_mut().addPath(
+            sb::SkPathBuilder_addPath(
+                self.native_ptr(),
                 path.native(),
                 offset.x,
                 offset.y,
@@ -916,7 +952,8 @@ impl PathBuilder {
         mode: impl Into<Option<path::AddPathMode>>,
     ) {
         unsafe {
-            self.native_mut().addPath1(
+            sb::SkPathBuilder_addPath1(
+                self.native_ptr(),
                 src.native(),
                 matrix.native(),
                 mode.into().unwrap_or(path::AddPathMode::Append),
@@ -938,7 +975,8 @@ impl PathBuilder {
         extra_conic_count: usize,
     ) {
         unsafe {
-            self.native_mut().incReserve(
+            sb::SkPathBuilder_incReserve(
+                self.native_ptr(),
                 extra_pt_count.try_into().unwrap(),
                 extra_verb_count.try_into().unwrap(),
                 extra_conic_count.try_into().unwrap(),
@@ -955,7 +993,7 @@ impl PathBuilder {
     pub fn offset(&mut self, d: impl Into<Vector>) -> &mut Self {
         let d = d.into();
         unsafe {
-            self.native_mut().offset(d.x, d.y);
+            sb::SkPathBuilder_offset(self.native_ptr(), d.x, d.y);
         }
         self
     }
@@ -969,7 +1007,7 @@ impl PathBuilder {
     /// reference to [`PathBuilder`]
     pub fn transform(&mut self, matrix: &Matrix) -> &mut Self {
         unsafe {
-            self.native_mut().transform(matrix.native());
+            sb::SkPathBuilder_transform(self.native_ptr(), matrix.native());
         }
         self
     }
@@ -985,8 +1023,8 @@ impl PathBuilder {
     /// # Returns
     /// reference to [`PathBuilder`]
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
-        let n = self.native_mut();
-        n.fFillType = n.fFillType.toggle_inverse();
+        let n = self.native_ptr();
+        unsafe { (*n).fFillType = (*n).fFillType.toggle_inverse() };
         self
     }
 
@@ -1016,7 +1054,7 @@ impl PathBuilder {
     /// - `p` the new point value
     pub fn set_point(&mut self, index: usize, p: impl Into<Point>) {
         let p = p.into();
-        unsafe { sb::C_SkPathBuilder_setPoint(self.native_mut(), index, *p.native()) }
+        unsafe { sb::C_SkPathBuilder_setPoint(self.native_ptr(), index, *p.native()) }
     }
 
     /// Change the last point in the builder.
@@ -1037,7 +1075,7 @@ impl PathBuilder {
     #[deprecated(since = "0.93.0", note = "Use set_last_point() or set_point()")]
     pub fn set_last_pt(&mut self, p: impl Into<Point>) {
         let p = p.into();
-        unsafe { self.native_mut().setLastPt(p.into_native()) };
+        unsafe { sb::SkPathBuilder_setLastPt(self.native_ptr(), p.into_native()) };
     }
 
     /// Returns the number of points in [`PathBuilder`].

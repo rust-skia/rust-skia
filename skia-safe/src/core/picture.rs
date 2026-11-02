@@ -47,7 +47,7 @@ impl Picture {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Picture_playback>
     pub fn playback(&self, canvas: &Canvas) {
-        unsafe { sb::C_SkPicture_playback(self.native(), canvas.native_mut()) }
+        unsafe { sb::C_SkPicture_playback(self.native(), canvas.native_ptr()) }
     }
 
     /// Returns cull [`Rect`] for this picture, passed in when [`Picture`] was created. Returned

@@ -72,8 +72,7 @@
 //! - [`textlayout`] — multi-line, styled text layout via Skia's `skparagraph`
 //!   module (enabled by the `textlayout` feature).
 //! - [`shapers`] — text shaping backends built on Skia's `SkShaper`.
-//! - [`utils`] — miscellaneous helpers: path parsing, text drawing, shadows, cameras,
-//!   and typefaces.
+//! - [`utils`] — miscellaneous helpers: path parsing, text drawing, shadows, and typefaces.
 //! - [`wrapper`] — FFI interoperability traits for the wrapper types.
 //!
 //! # Features

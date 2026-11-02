@@ -56,7 +56,7 @@ pub fn draw_shadow(
 ) {
     unsafe {
         SkShadowUtils::DrawShadow(
-            canvas.native_mut(),
+            canvas.native_ptr(),
             path.native(),
             z_plane_params.into().native(),
             light_pos.into().native(),

@@ -351,16 +351,16 @@ unsafe_send_sync!(ColorSpace);
 require_base_type!(SkColorSpace, SkNVRefCnt);
 
 impl NativeRefCounted for SkColorSpace {
-    fn _ref(&self) {
-        unsafe { sb::C_SkColorSpace_ref(self) };
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_SkColorSpace_ref(ptr) };
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkColorSpace_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkColorSpace_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkColorSpace_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_SkColorSpace_unique(ptr) }
     }
 }
 

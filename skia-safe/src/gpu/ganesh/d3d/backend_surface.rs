@@ -69,7 +69,7 @@ pub mod backend_textures {
         texture: &mut BackendTexture,
         resource_state: d3d::ResourceStateEnum,
     ) -> &mut BackendTexture {
-        unsafe { sb::C_GrBackendTextures_SetD3DResourceState(texture.native_mut(), resource_state) }
+        unsafe { sb::C_GrBackendTextures_SetD3DResourceState(texture.native_ptr(), resource_state) }
         texture
     }
 }
