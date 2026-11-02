@@ -18,8 +18,8 @@ impl NativeRefCounted for SkData {
         unsafe { sb::C_SkData_ref(self) }
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkData_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkData_unref(ptr) }
     }
 
     fn unique(&self) -> bool {

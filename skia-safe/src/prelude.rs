@@ -90,7 +90,16 @@ impl RefCount for skia_bindings::SkNVRefCnt {
 
 pub trait NativeRefCounted: Sized {
     fn _ref(&self);
-    fn _unref(&self);
+    /// Decreases the reference count and deletes the object when the count reaches zero.
+    ///
+    /// This function takes a raw pointer instead of `&self`. C++ may delete the object during
+    /// the call, and Rust forbids freeing memory while a reference to it is still in use.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object that holds a reference the caller owns. The caller gives
+    /// up that reference and must not use `ptr` afterwards.
+    unsafe fn _unref(ptr: *const Self);
     fn unique(&self) -> bool;
     fn _ref_cnt(&self) -> usize {
         unimplemented!();
@@ -102,8 +111,8 @@ impl NativeRefCounted for SkRefCntBase {
         unsafe { C_SkRefCntBase_ref(self) }
     }
 
-    fn _unref(&self) {
-        unsafe { C_SkRefCntBase_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { C_SkRefCntBase_unref(ptr) }
     }
 
     fn unique(&self) -> bool {
@@ -125,12 +134,25 @@ impl NativeRefCounted for SkRefCntBase {
 pub trait NativeRefCountedBase {
     type Base: NativeRefCounted;
 
-    /// Returns the ref counter base class of the ref counted type.
+    /// Returns a pointer to the ref counter base class of the ref counted type.
     ///
-    /// Default implementation assumes that the base class ptr is the same as the
-    /// ptr to self.
-    fn ref_counted_base(&self) -> &Self::Base {
-        unsafe { &*(self as *const _ as *const Self::Base) }
+    /// The default implementation assumes that the base class is at the same address as the ref
+    /// counted type. It casts the pointer without creating a reference, so the result keeps the
+    /// permissions of `ptr`. [`NativeRefCounted::_unref`] relies on that, because C++ writes
+    /// through the base pointer when it deletes the object.
+    fn ref_counted_base_ptr(ptr: *const Self) -> *const Self::Base
+    where
+        Self: Sized,
+    {
+        ptr.cast()
+    }
+
+    /// Returns the ref counter base class of the ref counted type.
+    fn ref_counted_base(&self) -> &Self::Base
+    where
+        Self: Sized,
+    {
+        unsafe { &*Self::ref_counted_base_ptr(self) }
     }
 }
 
@@ -142,8 +164,8 @@ where
         self.ref_counted_base()._ref();
     }
 
-    fn _unref(&self) {
-        self.ref_counted_base()._unref();
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { Base::_unref(Self::ref_counted_base_ptr(ptr)) }
     }
 
     fn unique(&self) -> bool {
@@ -613,7 +635,7 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
 impl<N: NativeRefCounted> Drop for RCHandle<N> {
     #[inline]
     fn drop(&mut self) {
-        unsafe { self.0.as_ref()._unref() };
+        unsafe { N::_unref(self.0.as_ptr()) };
     }
 }
 

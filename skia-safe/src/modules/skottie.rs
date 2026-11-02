@@ -33,8 +33,8 @@ impl NativeRefCounted for sb::skottie_Animation {
         unsafe { sb::C_skottie_Animation_ref(self) }
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_skottie_Animation_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_skottie_Animation_unref(ptr) }
     }
 
     fn unique(&self) -> bool {

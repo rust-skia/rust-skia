@@ -182,8 +182,8 @@ impl NativeRefCounted for SkMeshSpecification {
         unsafe { sb::C_SkMeshSpecification_ref(self) }
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkMeshSpecification_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkMeshSpecification_unref(ptr) }
     }
 
     fn unique(&self) -> bool {

@@ -355,8 +355,8 @@ impl NativeRefCounted for SkColorSpace {
         unsafe { sb::C_SkColorSpace_ref(self) };
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkColorSpace_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkColorSpace_unref(ptr) }
     }
 
     fn unique(&self) -> bool {

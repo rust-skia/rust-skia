@@ -21,8 +21,8 @@ impl NativeRefCounted for SkTextBlob {
         unsafe { sb::C_SkTextBlob_ref(self) };
     }
 
-    fn _unref(&self) {
-        unsafe { sb::C_SkTextBlob_unref(self) }
+    unsafe fn _unref(ptr: *const Self) {
+        unsafe { sb::C_SkTextBlob_unref(ptr) }
     }
 
     fn unique(&self) -> bool {

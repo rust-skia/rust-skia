@@ -16,9 +16,6 @@ impl NativeBase<SkFlattenable> for SkShader {}
 
 impl NativeRefCountedBase for SkShader {
     type Base = SkRefCntBase;
-    fn ref_counted_base(&self) -> &Self::Base {
-        self.base()
-    }
 }
 
 impl NativeFlattenable for SkShader {
