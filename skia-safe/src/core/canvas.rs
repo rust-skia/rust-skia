@@ -2344,10 +2344,7 @@ impl Canvas {
     pub(crate) fn own_from_native_ptr<'lt>(native: *mut SkCanvas) -> Option<OwnedCanvas<'lt>> {
         if !native.is_null() {
             Some(OwnedCanvas::<'lt>(
-                ptr::NonNull::new(
-                    Self::borrow_from_native(unsafe { &*native }) as *const _ as *mut _
-                )
-                .unwrap(),
+                ptr::NonNull::new(native.cast::<Canvas>()).unwrap(),
                 PhantomData,
             ))
         } else {
@@ -2355,8 +2352,18 @@ impl Canvas {
         }
     }
 
-    pub(crate) fn borrow_from_native(native: &SkCanvas) -> &Self {
-        unsafe { transmute_ref(native) }
+    /// Borrows a native canvas as a [`Canvas`].
+    ///
+    /// This function takes a raw pointer instead of a `&SkCanvas`. A shared reference to
+    /// `SkCanvas` would forbid writes to the canvas memory, but drawing writes to it. [`Canvas`]
+    /// wraps the native canvas in an [`UnsafeCell`], so a `&Canvas` created directly from the
+    /// pointer permits these writes.
+    ///
+    /// # Safety
+    ///
+    /// `native` must point to a live `SkCanvas` that stays alive for `'a`.
+    pub(crate) unsafe fn borrow_from_native<'a>(native: *mut SkCanvas) -> &'a Self {
+        unsafe { &*native.cast::<Self>() }
     }
 }
 

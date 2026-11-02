@@ -31,15 +31,15 @@ impl PictureRecorder {
     ///   of this rect is undefined, and may be drawn or it may not
     /// - `use_bbh` whether to use a bounding box hierarchy
     pub fn begin_recording(&mut self, bounds: impl AsRef<Rect>, use_bbh: bool) -> &Canvas {
-        let canvas_ref = unsafe {
-            &*sb::C_SkPictureRecorder_beginRecording(
+        let canvas = unsafe {
+            sb::C_SkPictureRecorder_beginRecording(
                 self.native_mut(),
                 bounds.as_ref().native(),
                 use_bbh,
             )
         };
 
-        Canvas::borrow_from_native(canvas_ref)
+        unsafe { Canvas::borrow_from_native(canvas) }
     }
 
     /// Returns the recording canvas if one is active, or `None` if recording is not active. This
@@ -49,7 +49,7 @@ impl PictureRecorder {
         if canvas.is_null() {
             return None;
         }
-        Some(Canvas::borrow_from_native(unsafe { &*canvas }))
+        Some(unsafe { Canvas::borrow_from_native(canvas) })
     }
 
     /// Signals that the caller is done recording. This invalidates the canvas returned by

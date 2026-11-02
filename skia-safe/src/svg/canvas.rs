@@ -22,7 +22,7 @@ impl Deref for Canvas {
     type Target = crate::Canvas;
 
     fn deref(&self) -> &Self::Target {
-        crate::Canvas::borrow_from_native(unsafe { &*self.canvas })
+        unsafe { crate::Canvas::borrow_from_native(self.canvas) }
     }
 }
 
@@ -38,10 +38,9 @@ bitflags! {
 impl fmt::Debug for Canvas {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Canvas")
-            .field(
-                "canvas",
-                crate::Canvas::borrow_from_native(unsafe { &*self.canvas }),
-            )
+            .field("canvas", unsafe {
+                crate::Canvas::borrow_from_native(self.canvas)
+            })
             .field("stream", &self.stream)
             .finish()
     }

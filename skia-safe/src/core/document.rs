@@ -54,10 +54,9 @@ pub mod state {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.debug_struct("OnPage")
                 .field("page", &self.page)
-                .field(
-                    "canvas",
-                    Canvas::borrow_from_native(unsafe { self.canvas.as_ref() }),
-                )
+                .field("canvas", unsafe {
+                    Canvas::borrow_from_native(self.canvas.as_ptr())
+                })
                 .finish()
         }
     }
@@ -129,7 +128,7 @@ impl<'a> Document<'a, state::OnPage> {
 
     /// Borrows the canvas for the current page on the document.
     pub fn canvas(&mut self) -> &Canvas {
-        Canvas::borrow_from_native(unsafe { self.state.canvas.as_ref() })
+        unsafe { Canvas::borrow_from_native(self.state.canvas.as_ptr()) }
     }
 
     /// Ends the page.

@@ -153,7 +153,7 @@ impl Recorder {
         if canvas_ptr.is_null() {
             None
         } else {
-            Some(Canvas::borrow_from_native(unsafe { &*canvas_ptr }))
+            Some(unsafe { Canvas::borrow_from_native(canvas_ptr) })
         }
     }
 
