@@ -263,7 +263,9 @@ impl Drop for OwnedCanvas<'_> {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_destructor>
     fn drop(&mut self) {
-        unsafe { sb::C_SkCanvas_delete(self.native()) }
+        // The canvas is deleted through the owned pointer, because Rust forbids freeing memory
+        // while a reference to it, like the one `native()` returns, is still in use.
+        unsafe { sb::C_SkCanvas_delete(self.0.as_ptr().cast()) }
     }
 }
 
