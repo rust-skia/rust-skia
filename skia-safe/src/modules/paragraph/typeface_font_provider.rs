@@ -116,13 +116,13 @@ impl TypefaceFontProvider {
                 Some(alias) => {
                     let alias = interop::String::from_str(alias);
                     sb::C_TypefaceFontProvider_registerTypeface(
-                        self.native_mut(),
+                        self.native_ptr(),
                         typeface.into_ptr(),
                         alias.native(),
                     )
                 }
                 None => sb::C_TypefaceFontProvider_registerTypeface(
-                    self.native_mut(),
+                    self.native_ptr(),
                     typeface.into_ptr(),
                     ptr::null(),
                 ),

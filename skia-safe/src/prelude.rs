@@ -583,6 +583,14 @@ impl<N: NativeRefCounted> RCHandle<N> {
     pub(crate) fn as_ptr(&self) -> &ptr::NonNull<N> {
         &self.0
     }
+
+    /// Returns a raw pointer to the native object for calls that may modify it.
+    ///
+    /// Some native types store pointers into their own memory, and C++ writes through them. See
+    /// [`RefHandle::native_ptr`] for why such calls must not go through a `&mut N`.
+    pub(crate) fn native_ptr(&mut self) -> *mut N {
+        self.0.as_ptr()
+    }
 }
 
 #[cfg(test)]

@@ -19,7 +19,7 @@ impl DebugAttributes for Container {
 
 impl Container {
     pub fn append_child(&mut self, node: impl Into<Node>) {
-        unsafe { sb::C_SkSVGContainer_appendChild(self.native_mut(), node.into().into_ptr()) }
+        unsafe { sb::C_SkSVGContainer_appendChild(self.native_ptr(), node.into().into_ptr()) }
     }
 
     pub fn children(&self) -> &[Node] {
