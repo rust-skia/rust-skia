@@ -45,9 +45,6 @@ Known instances that no test reports:
 - Every `RCHandle` native has an atomic reference count (`fRefCnt` in `SkRefCnt` and `SkNVRefCnt`).
   C++ increments it through a `const` pointer whenever it creates an `sk_sp` from a `const` object.
   This happens in many calls that receive `native()`.
-- `Camera3D::patch_to_matrix()` passes `&SkCamera3D`, whose `const` method `patchToMatrix()` updates
-  the `mutable` members `fOrientation` and `fNeedToUpdate`. `Sk3DView` already avoids this by
-  passing the handle's own pointer.
 
 A complete fix changes `native()` to return a raw pointer for every handle kind and rewrites about
 490 call sites that call bindgen methods or read fields through `native()`. `Matrix` needs a separate
