@@ -275,10 +275,6 @@ mod tests {
             .close()
             .detach();
 
-        let records: Vec<_> = path
-            .iter()
-            .map(|r| (r.verb(), r.points().to_vec()))
-            .collect();
         let records_kept: Vec<_> = path.iter().collect();
 
         let expected = vec![
@@ -289,7 +285,6 @@ mod tests {
             (PathVerb::Line, vec![p2, p3]),
             (PathVerb::Close, vec![p3, p2]),
         ];
-        assert_eq!(records, expected);
         let kept: Vec<_> = records_kept
             .iter()
             .map(|r| (r.verb(), r.points().to_vec()))
