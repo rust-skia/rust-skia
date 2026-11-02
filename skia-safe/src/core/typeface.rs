@@ -645,7 +645,6 @@ mod tests {
             assert_eq!(tf2.ct_font(), Some(font));
         }
 
-        #[cfg(target_os = "macos")]
         #[test]
         fn named_typeface_round_trip() {
             let tf = round_trip("Helvetica", "Helvetica");
@@ -654,7 +653,6 @@ mod tests {
         }
 
         /// PingFang SC is a face of a system font collection (PingFang*.ttc).
-        #[cfg(target_os = "macos")]
         #[test]
         fn ttc_typeface_round_trip() {
             let tf = round_trip("PingFangSC-Regular", "PingFang SC");
