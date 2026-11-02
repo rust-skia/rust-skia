@@ -90,7 +90,8 @@ host's `target/` directory is not touched.
 docker run -d --name bsan-skia \
   -v "$PWD":/src -v bsan-skia-target:/target -v bsan-skia-cargo:/root/.cargo/registry \
   -e CARGO_TARGET_DIR=/target -w /src \
-  ghcr.io/borrowsanitizer/bsan:latest sleep infinity
+  ghcr.io/borrowsanitizer/bsan@sha256:805350ca503eac7d14ee445f8a2bf08a9798f8d1723df3de70addc31affbf276 \
+  sleep infinity
 docker exec bsan-skia bash -c 'apt-get update && apt-get install -y libfontconfig1-dev libfreetype-dev'
 docker exec bsan-skia cargo bsan setup
 ```
