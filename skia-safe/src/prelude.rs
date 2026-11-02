@@ -200,7 +200,10 @@ pub trait NativeAccess {
     /// Provides shared access to the native type of the wrapper.
     fn native(&self) -> &Self::Native;
 
-    // Returns a ptr to the native mutable value.
+    /// Returns a pointer for C++ calls that may write.
+    ///
+    /// The default derives the pointer from [`Self::native`], which permits only reads.
+    /// [`RefHandle`] and [`RCHandle`] override it to return their own pointer.
     unsafe fn native_mut_force(&self) -> *mut Self::Native {
         self.native() as *const Self::Native as *mut Self::Native
     }
@@ -551,9 +554,9 @@ impl<N: NativeDelete> RefHandle<N> {
     /// Returns a raw pointer to the native object for calls that may modify it.
     ///
     /// Some native types store pointers into their own memory, and C++ writes through them. A
-    /// `&mut N` from [`NativeAccess::native_mut`] would promise Rust that nothing else writes to
-    /// the object while it exists, so calls into such types use this pointer with the raw
-    /// `sb::<Type>_*` functions instead of the bindgen methods that take `&mut self`.
+    /// `&mut N` would promise Rust that nothing else writes to the object while it exists, so
+    /// calls into such types use this pointer with the raw `sb::<Type>_*` functions instead of the
+    /// bindgen methods that take `&mut self`.
     pub(crate) fn native_ptr(&mut self) -> *mut N {
         self.0.as_ptr()
     }
@@ -666,6 +669,12 @@ impl<N: NativeRefCounted> NativeAccess for RCHandle<N> {
     /// Returns a reference to the native representation.
     fn native(&self) -> &N {
         unsafe { self.0.as_ref() }
+    }
+
+    /// Returns the handle's own pointer. A pointer derived from [`Self::native`] would only
+    /// permit reads.
+    unsafe fn native_mut_force(&self) -> *mut N {
+        self.0.as_ptr()
     }
 }
 
