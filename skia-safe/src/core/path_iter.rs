@@ -35,22 +35,29 @@ impl fmt::Debug for PathIter<'_> {
     }
 }
 
+/// A cubic uses the most points of all verbs, four.
+const MAX_REC_POINTS: usize = 4;
+
+// Fails to compile when Skia adds a verb, so MAX_REC_POINTS gets rechecked.
+const _: () = match PathVerb::Move {
+    PathVerb::Move
+    | PathVerb::Line
+    | PathVerb::Quad
+    | PathVerb::Conic
+    | PathVerb::Cubic
+    | PathVerb::Close => (),
+};
+
+/// One verb of a path and the points it uses, as returned by [`PathIter`].
+///
+/// The record owns a copy of its points. The lifetime parameter is kept for API compatibility.
 #[derive(Copy, Clone)]
-#[repr(transparent)]
-pub struct PathIterRec<'a>(SkPathIter_Rec, PhantomData<&'a ()>);
-
-impl NativeAccess for PathIterRec<'_> {
-    type Native = SkPathIter_Rec;
-
-    fn native(&self) -> &Self::Native {
-        &self.0
-    }
-}
-
-impl NativeAccessMut for PathIterRec<'_> {
-    fn native_mut(&mut self) -> &mut Self::Native {
-        &mut self.0
-    }
+pub struct PathIterRec<'a> {
+    points: [Point; MAX_REC_POINTS],
+    points_len: usize,
+    conic_weight: f32,
+    verb: PathVerb,
+    _lifetime: PhantomData<&'a ()>,
 }
 
 impl fmt::Debug for PathIterRec<'_> {
@@ -64,21 +71,36 @@ impl fmt::Debug for PathIterRec<'_> {
 }
 
 impl PathIterRec<'_> {
-    pub fn points(&self) -> &[Point] {
-        unsafe {
-            safer::from_raw_parts(
-                Point::from_native_ptr(self.native().fPoints.fPtr),
-                self.native().fPoints.fSize,
-            )
+    /// Copies the points of a native record.
+    ///
+    /// For move and close verbs, the native points live inside the `SkPathIter`, not in the path,
+    /// and the next call to `next()` overwrites them. An [`Iterator`] can not return items that
+    /// borrow from itself, so the record has to own its points.
+    fn from_native(rec: &SkPathIter_Rec) -> Self {
+        let source: &[Point] = unsafe {
+            safer::from_raw_parts(Point::from_native_ptr(rec.fPoints.fPtr), rec.fPoints.fSize)
+        };
+        let mut points = [Point::default(); MAX_REC_POINTS];
+        points[..source.len()].copy_from_slice(source);
+        Self {
+            points,
+            points_len: source.len(),
+            conic_weight: rec.fConicWeight,
+            verb: rec.fVerb,
+            _lifetime: PhantomData,
         }
     }
 
+    pub fn points(&self) -> &[Point] {
+        &self.points[..self.points_len]
+    }
+
     pub fn conic_weight(&self) -> f32 {
-        self.native().fConicWeight
+        self.conic_weight
     }
 
     pub fn verb(&self) -> PathVerb {
-        self.native().fVerb
+        self.verb
     }
 }
 
@@ -115,7 +137,7 @@ impl<'a> Iterator for PathIter<'a> {
     /// close: `points()[0..1]` ... as if close were a line from `pts[0]` to `pts[1]`
     fn next(&mut self) -> Option<Self::Item> {
         try_construct(|r| unsafe { sb::C_SkPathIter_next(self.native_mut(), r) })
-            .map(|r| PathIterRec(r.into_inner(), PhantomData))
+            .map(|r| PathIterRec::from_native(&r.into_inner()))
     }
 }
 
@@ -230,5 +252,48 @@ impl<'a> Iterator for PathContourIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         try_construct(|r| unsafe { sb::C_SkPathContourIter_next(self.native_mut(), r) })
             .map(|r| PathContourIterRec(r.into_inner(), PhantomData))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{PathBuilder, PathVerb, Point};
+
+    /// The second contour overwrites the native iterator's move and close points.
+    #[test]
+    fn records_keep_their_points_after_the_iterator_advances() {
+        let p0 = Point::new(0.0, 0.0);
+        let p1 = Point::new(1.0, 0.0);
+        let p2 = Point::new(5.0, 5.0);
+        let p3 = Point::new(6.0, 5.0);
+        let path = PathBuilder::new()
+            .move_to(p0)
+            .line_to(p1)
+            .close()
+            .move_to(p2)
+            .line_to(p3)
+            .close()
+            .detach();
+
+        let records: Vec<_> = path
+            .iter()
+            .map(|r| (r.verb(), r.points().to_vec()))
+            .collect();
+        let records_kept: Vec<_> = path.iter().collect();
+
+        let expected = vec![
+            (PathVerb::Move, vec![p0]),
+            (PathVerb::Line, vec![p0, p1]),
+            (PathVerb::Close, vec![p1, p0]),
+            (PathVerb::Move, vec![p2]),
+            (PathVerb::Line, vec![p2, p3]),
+            (PathVerb::Close, vec![p3, p2]),
+        ];
+        assert_eq!(records, expected);
+        let kept: Vec<_> = records_kept
+            .iter()
+            .map(|r| (r.verb(), r.points().to_vec()))
+            .collect();
+        assert_eq!(kept, expected);
     }
 }
