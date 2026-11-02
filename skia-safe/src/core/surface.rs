@@ -505,7 +505,7 @@ impl Surface {
         let sampling = sampling.into();
         unsafe {
             self.native_mut().draw(
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 offset.x,
                 offset.y,
                 sampling.native(),

@@ -498,7 +498,7 @@ pub mod pdf {
     /// - `node_id` - The node ID for subsequent drawing commands.
     pub fn set_node_id(canvas: &Canvas, node_id: i32) {
         unsafe {
-            sb::C_SkPDF_SetNodeId(canvas.native_mut(), node_id);
+            sb::C_SkPDF_SetNodeId(canvas.native_ptr(), node_id);
         }
     }
 }

@@ -264,7 +264,7 @@ impl Animation {
         unsafe {
             sb::C_skottie_Animation_render(
                 self.native(),
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 dst.as_ref()
                     .map(|r| r.native() as *const _)
                     .unwrap_or(std::ptr::null()),
@@ -286,7 +286,7 @@ impl Animation {
         unsafe {
             sb::C_skottie_Animation_render_with_flags(
                 self.native(),
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 dst.as_ref()
                     .map(|r| r.native() as *const _)
                     .unwrap_or(std::ptr::null()),

@@ -100,7 +100,7 @@ impl Dom {
         #[cfg(all(feature = "embed-icudtl", feature = "textlayout"))]
         crate::icu::init();
 
-        unsafe { sb::SkSVGDOM::render(self.native() as &_, canvas.native_mut()) }
+        unsafe { sb::SkSVGDOM::render(self.native() as &_, canvas.native_ptr()) }
     }
 
     /// Specify a "container size" for the SVG dom.

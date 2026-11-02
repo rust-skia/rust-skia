@@ -217,9 +217,14 @@ impl Canvas {
         unsafe { &*self.0.get() }
     }
 
-    #[allow(clippy::mut_from_ref)]
-    pub(crate) fn native_mut(&self) -> &mut SkCanvas {
-        unsafe { &mut (*self.0.get()) }
+    /// Returns a raw pointer to the native canvas for calls that may modify it.
+    ///
+    /// `SkCanvas` stores pointers into its own memory, and C++ writes through them. A `&mut
+    /// SkCanvas` would promise Rust that nothing else writes to the canvas while it exists, so
+    /// mutating calls go through the raw `sb::SkCanvas_*` functions with this pointer instead of
+    /// through the bindgen methods that take `&mut self`.
+    pub(crate) fn native_ptr(&self) -> *mut SkCanvas {
+        self.0.get()
     }
 }
 
@@ -495,7 +500,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_makeSurface>
     pub fn new_surface(&self, info: &ImageInfo, props: Option<&SurfaceProps>) -> Option<Surface> {
         Surface::from_ptr(unsafe {
-            sb::C_SkCanvas_makeSurface(self.native_mut(), info.native(), props.native_ptr_or_null())
+            sb::C_SkCanvas_makeSurface(self.native_ptr(), info.native(), props.native_ptr_or_null())
         })
     }
 
@@ -567,7 +572,8 @@ impl Canvas {
         let mut row_bytes = 0;
         let mut origin = IPoint::default();
         let ptr = unsafe {
-            self.native_mut().accessTopLayerPixels(
+            sb::SkCanvas_accessTopLayerPixels(
+                self.native_ptr(),
                 info.native_mut(),
                 &mut row_bytes,
                 origin.native_mut(),
@@ -604,7 +610,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_peekPixels>
     pub fn peek_pixels(&self) -> Option<Pixmap> {
         let mut pixmap = Pixmap::default();
-        unsafe { self.native_mut().peekPixels(pixmap.native_mut()) }.then_some(pixmap)
+        unsafe { sb::SkCanvas_peekPixels(self.native_ptr(), pixmap.native_mut()) }.then_some(pixmap)
     }
 
     /// Copies [`Rect`] of pixels from [`Canvas`] into `dst_pixels`. [`Matrix`] and clip are
@@ -655,7 +661,8 @@ impl Canvas {
         let required_size = dst_info.compute_byte_size(dst_row_bytes);
         (dst_pixels.len() >= required_size)
             && unsafe {
-                self.native_mut().readPixels(
+                sb::SkCanvas_readPixels(
+                    self.native_ptr(),
                     dst_info.native(),
                     dst_pixels.as_mut_ptr() as _,
                     dst_row_bytes,
@@ -704,7 +711,7 @@ impl Canvas {
     #[must_use]
     pub fn read_pixels_to_pixmap(&self, pixmap: &mut Pixmap, src: impl Into<IPoint>) -> bool {
         let src = src.into();
-        unsafe { self.native_mut().readPixels1(pixmap.native(), src.x, src.y) }
+        unsafe { sb::SkCanvas_readPixels1(self.native_ptr(), pixmap.native(), src.x, src.y) }
     }
 
     /// Copies [`Rect`] of pixels from [`Canvas`] into bitmap. [`Matrix`] and clip are
@@ -746,10 +753,7 @@ impl Canvas {
     #[must_use]
     pub fn read_pixels_to_bitmap(&self, bitmap: &mut Bitmap, src: impl Into<IPoint>) -> bool {
         let src = src.into();
-        unsafe {
-            self.native_mut()
-                .readPixels2(bitmap.native_mut(), src.x, src.y)
-        }
+        unsafe { sb::SkCanvas_readPixels2(self.native_ptr(), bitmap.native_mut(), src.x, src.y) }
     }
 
     /// Copies [`Rect`] from pixels to [`Canvas`]. [`Matrix`] and clip are ignored.
@@ -799,7 +803,8 @@ impl Canvas {
         let required_size = info.compute_byte_size(row_bytes);
         (pixels.len() >= required_size)
             && unsafe {
-                self.native_mut().writePixels(
+                sb::SkCanvas_writePixels(
+                    self.native_ptr(),
                     info.native(),
                     pixels.as_ptr() as _,
                     row_bytes,
@@ -849,10 +854,7 @@ impl Canvas {
     #[must_use]
     pub fn write_pixels_from_bitmap(&self, bitmap: &Bitmap, offset: impl Into<IPoint>) -> bool {
         let offset = offset.into();
-        unsafe {
-            self.native_mut()
-                .writePixels1(bitmap.native(), offset.x, offset.y)
-        }
+        unsafe { sb::SkCanvas_writePixels1(self.native_ptr(), bitmap.native(), offset.x, offset.y) }
     }
 
     /// Saves [`Matrix`] and clip.
@@ -873,7 +875,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_save>
     pub fn save(&self) -> usize {
-        unsafe { self.native_mut().save().try_into().unwrap() }
+        unsafe { sb::SkCanvas_save(self.native_ptr()).try_into().unwrap() }
     }
 
     // The save_layer(bounds, paint) variants have been replaced by SaveLayerRec.
@@ -903,8 +905,11 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_saveLayerAlpha>
     pub fn save_layer_alpha_f(&self, bounds: impl Into<Option<Rect>>, alpha: f32) -> usize {
         unsafe {
-            self.native_mut()
-                .saveLayerAlphaf(bounds.into().native().as_ptr_or_null(), alpha)
+            sb::SkCanvas_saveLayerAlphaf(
+                self.native_ptr(),
+                bounds.into().native().as_ptr_or_null(),
+                alpha,
+            )
         }
         .try_into()
         .unwrap()
@@ -937,7 +942,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_saveLayer_4>
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_saveLayer_3>
     pub fn save_layer(&self, layer_rec: &SaveLayerRec) -> usize {
-        unsafe { self.native_mut().saveLayer1(layer_rec.native()) }
+        unsafe { sb::SkCanvas_saveLayer1(self.native_ptr(), layer_rec.native()) }
             .try_into()
             .unwrap()
     }
@@ -952,7 +957,7 @@ impl Canvas {
     ///
     ///
     pub fn restore(&self) -> &Self {
-        unsafe { self.native_mut().restore() };
+        unsafe { sb::SkCanvas_restore(self.native_ptr()) };
         self
     }
 
@@ -978,10 +983,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_restoreToCount>
     pub fn restore_to_count(&self, save_count: usize) -> &Self {
-        unsafe {
-            self.native_mut()
-                .restoreToCount(save_count.try_into().unwrap())
-        }
+        unsafe { sb::SkCanvas_restoreToCount(self.native_ptr(), save_count.try_into().unwrap()) }
         self
     }
 
@@ -997,7 +999,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_translate>
     pub fn translate(&self, d: impl Into<Vector>) -> &Self {
         let d = d.into();
-        unsafe { self.native_mut().translate(d.x, d.y) }
+        unsafe { sb::SkCanvas_translate(self.native_ptr(), d.x, d.y) }
         self
     }
 
@@ -1013,7 +1015,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_scale>
     pub fn scale(&self, (sx, sy): (scalar, scalar)) -> &Self {
-        unsafe { self.native_mut().scale(sx, sy) }
+        unsafe { sb::SkCanvas_scale(self.native_ptr(), sx, sy) }
         self
     }
 
@@ -1035,8 +1037,8 @@ impl Canvas {
     pub fn rotate(&self, degrees: scalar, p: Option<Point>) -> &Self {
         unsafe {
             match p {
-                Some(point) => self.native_mut().rotate1(degrees, point.x, point.y),
-                None => self.native_mut().rotate(degrees),
+                Some(point) => sb::SkCanvas_rotate1(self.native_ptr(), degrees, point.x, point.y),
+                None => sb::SkCanvas_rotate(self.native_ptr(), degrees),
             }
         }
         self
@@ -1056,7 +1058,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_skew>
     pub fn skew(&self, (sx, sy): (scalar, scalar)) -> &Self {
-        unsafe { self.native_mut().skew(sx, sy) }
+        unsafe { sb::SkCanvas_skew(self.native_ptr(), sx, sy) }
         self
     }
 
@@ -1069,12 +1071,12 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_concat>
     pub fn concat(&self, matrix: &Matrix) -> &Self {
-        unsafe { self.native_mut().concat(matrix.native()) }
+        unsafe { sb::SkCanvas_concat(self.native_ptr(), matrix.native()) }
         self
     }
 
     pub fn concat_44(&self, m: &M44) -> &Self {
-        unsafe { self.native_mut().concat1(m.native()) }
+        unsafe { sb::SkCanvas_concat1(self.native_ptr(), m.native()) }
         self
     }
 
@@ -1085,7 +1087,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_setMatrix>
     pub fn set_matrix(&self, matrix: &M44) -> &Self {
-        unsafe { self.native_mut().setMatrix(matrix.native()) }
+        unsafe { sb::SkCanvas_setMatrix(self.native_ptr(), matrix.native()) }
         self
     }
 
@@ -1094,7 +1096,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_resetMatrix>
     pub fn reset_matrix(&self) -> &Self {
-        unsafe { self.native_mut().resetMatrix() }
+        unsafe { sb::SkCanvas_resetMatrix(self.native_ptr()) }
         self
     }
 
@@ -1114,7 +1116,8 @@ impl Canvas {
         do_anti_alias: impl Into<Option<bool>>,
     ) -> &Self {
         unsafe {
-            self.native_mut().clipRect(
+            sb::SkCanvas_clipRect(
+                self.native_ptr(),
                 rect.as_ref().native(),
                 op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
@@ -1145,7 +1148,8 @@ impl Canvas {
         do_anti_alias: impl Into<Option<bool>>,
     ) -> &Self {
         unsafe {
-            self.native_mut().clipRRect(
+            sb::SkCanvas_clipRRect(
+                self.native_ptr(),
                 rrect.as_ref().native(),
                 op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
@@ -1172,7 +1176,8 @@ impl Canvas {
         do_anti_alias: impl Into<Option<bool>>,
     ) -> &Self {
         unsafe {
-            self.native_mut().clipPath(
+            sb::SkCanvas_clipPath(
+                self.native_ptr(),
                 path.native(),
                 op.into().unwrap_or_default(),
                 do_anti_alias.into().unwrap_or_default(),
@@ -1184,7 +1189,7 @@ impl Canvas {
     pub fn clip_shader(&self, shader: impl Into<Shader>, op: impl Into<Option<ClipOp>>) -> &Self {
         unsafe {
             sb::C_SkCanvas_clipShader(
-                self.native_mut(),
+                self.native_ptr(),
                 shader.into().into_ptr(),
                 op.into().unwrap_or(ClipOp::Intersect),
             )
@@ -1202,8 +1207,11 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_clipRegion>
     pub fn clip_region(&self, device_rgn: &Region, op: impl Into<Option<ClipOp>>) -> &Self {
         unsafe {
-            self.native_mut()
-                .clipRegion(device_rgn.native(), op.into().unwrap_or_default())
+            sb::SkCanvas_clipRegion(
+                self.native_ptr(),
+                device_rgn.native(),
+                op.into().unwrap_or_default(),
+            )
         }
         self
     }
@@ -1251,8 +1259,11 @@ impl Canvas {
         mode: impl Into<Option<BlendMode>>,
     ) -> &Self {
         unsafe {
-            self.native_mut()
-                .drawColor(&color.into().into_native(), mode.into().unwrap_or_default())
+            sb::SkCanvas_drawColor(
+                self.native_ptr(),
+                &color.into().into_native(),
+                mode.into().unwrap_or_default(),
+            )
         }
         self
     }
@@ -1277,7 +1288,7 @@ impl Canvas {
     /// It is not necessary to call `discard()` once done with [`Canvas`];
     /// any cached data is deleted when owning [`Surface`] or `Device` is deleted.
     pub fn discard(&self) -> &Self {
-        unsafe { sb::C_SkCanvas_discard(self.native_mut()) }
+        unsafe { sb::C_SkCanvas_discard(self.native_ptr()) }
         self
     }
 
@@ -1289,7 +1300,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawPaint>
     pub fn draw_paint(&self, paint: &Paint) -> &Self {
-        unsafe { self.native_mut().drawPaint(paint.native()) }
+        unsafe { sb::SkCanvas_drawPaint(self.native_ptr(), paint.native()) }
         self
     }
 
@@ -1325,7 +1336,7 @@ impl Canvas {
     pub fn draw_points(&self, mode: PointMode, pts: &[Point], paint: &Paint) -> &Self {
         unsafe {
             sb::C_SkCanvas_drawPoints(
-                self.native_mut(),
+                self.native_ptr(),
                 mode,
                 pts.native().as_ptr(),
                 pts.len(),
@@ -1349,7 +1360,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawPoint>
     pub fn draw_point(&self, p: impl Into<Point>, paint: &Paint) -> &Self {
         let p = p.into();
-        unsafe { self.native_mut().drawPoint(p.x, p.y, paint.native()) }
+        unsafe { sb::SkCanvas_drawPoint(self.native_ptr(), p.x, p.y, paint.native()) }
         self
     }
 
@@ -1365,10 +1376,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawLine>
     pub fn draw_line(&self, p1: impl Into<Point>, p2: impl Into<Point>, paint: &Paint) -> &Self {
         let (p1, p2) = (p1.into(), p2.into());
-        unsafe {
-            self.native_mut()
-                .drawLine(p1.x, p1.y, p2.x, p2.y, paint.native())
-        }
+        unsafe { sb::SkCanvas_drawLine(self.native_ptr(), p1.x, p1.y, p2.x, p2.y, paint.native()) }
         self
     }
 
@@ -1382,10 +1390,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawRect>
     pub fn draw_rect(&self, rect: impl AsRef<Rect>, paint: &Paint) -> &Self {
-        unsafe {
-            self.native_mut()
-                .drawRect(rect.as_ref().native(), paint.native())
-        }
+        unsafe { sb::SkCanvas_drawRect(self.native_ptr(), rect.as_ref().native(), paint.native()) }
         self
     }
 
@@ -1410,10 +1415,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawRegion>
     pub fn draw_region(&self, region: &Region, paint: &Paint) -> &Self {
-        unsafe {
-            self.native_mut()
-                .drawRegion(region.native(), paint.native())
-        }
+        unsafe { sb::SkCanvas_drawRegion(self.native_ptr(), region.native(), paint.native()) }
         self
     }
 
@@ -1426,10 +1428,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawOval>
     pub fn draw_oval(&self, oval: impl AsRef<Rect>, paint: &Paint) -> &Self {
-        unsafe {
-            self.native_mut()
-                .drawOval(oval.as_ref().native(), paint.native())
-        }
+        unsafe { sb::SkCanvas_drawOval(self.native_ptr(), oval.as_ref().native(), paint.native()) }
         self
     }
 
@@ -1446,8 +1445,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawRRect>
     pub fn draw_rrect(&self, rrect: impl AsRef<RRect>, paint: &Paint) -> &Self {
         unsafe {
-            self.native_mut()
-                .drawRRect(rrect.as_ref().native(), paint.native())
+            sb::SkCanvas_drawRRect(self.native_ptr(), rrect.as_ref().native(), paint.native())
         }
         self
     }
@@ -1477,7 +1475,8 @@ impl Canvas {
         paint: &Paint,
     ) -> &Self {
         unsafe {
-            self.native_mut().drawDRRect(
+            sb::SkCanvas_drawDRRect(
+                self.native_ptr(),
                 outer.as_ref().native(),
                 inner.as_ref().native(),
                 paint.native(),
@@ -1499,8 +1498,13 @@ impl Canvas {
     pub fn draw_circle(&self, center: impl Into<Point>, radius: scalar, paint: &Paint) -> &Self {
         let center = center.into();
         unsafe {
-            self.native_mut()
-                .drawCircle(center.x, center.y, radius, paint.native())
+            sb::SkCanvas_drawCircle(
+                self.native_ptr(),
+                center.x,
+                center.y,
+                radius,
+                paint.native(),
+            )
         }
         self
     }
@@ -1533,7 +1537,8 @@ impl Canvas {
         paint: &Paint,
     ) -> &Self {
         unsafe {
-            self.native_mut().drawArc(
+            sb::SkCanvas_drawArc(
+                self.native_ptr(),
                 oval.as_ref().native(),
                 start_angle,
                 sweep_angle,
@@ -1595,8 +1600,13 @@ impl Canvas {
         paint: &Paint,
     ) -> &Self {
         unsafe {
-            self.native_mut()
-                .drawRoundRect(rect.as_ref().native(), rx, ry, paint.native())
+            sb::SkCanvas_drawRoundRect(
+                self.native_ptr(),
+                rect.as_ref().native(),
+                rx,
+                ry,
+                paint.native(),
+            )
         }
         self
     }
@@ -1615,7 +1625,7 @@ impl Canvas {
     ///
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawPath>
     pub fn draw_path(&self, path: &Path, paint: &Paint) -> &Self {
-        unsafe { self.native_mut().drawPath(path.native(), paint.native()) }
+        unsafe { sb::SkCanvas_drawPath(self.native_ptr(), path.native(), paint.native()) }
         self
     }
 
@@ -1654,7 +1664,8 @@ impl Canvas {
     ) -> &Self {
         let left_top = left_top.into();
         unsafe {
-            self.native_mut().drawImage(
+            sb::SkCanvas_drawImage(
+                self.native_ptr(),
                 image.as_ref().native(),
                 left_top.x,
                 left_top.y,
@@ -1676,7 +1687,8 @@ impl Canvas {
         let sampling = sampling.into();
         match src {
             Some((src, constraint)) => unsafe {
-                self.native_mut().drawImageRect(
+                sb::SkCanvas_drawImageRect(
+                    self.native_ptr(),
                     image.as_ref().native(),
                     src.native(),
                     dst.as_ref().native(),
@@ -1686,7 +1698,8 @@ impl Canvas {
                 )
             },
             None => unsafe {
-                self.native_mut().drawImageRect1(
+                sb::SkCanvas_drawImageRect1(
+                    self.native_ptr(),
                     image.as_ref().native(),
                     dst.as_ref().native(),
                     sampling.native(),
@@ -1728,7 +1741,8 @@ impl Canvas {
         paint: Option<&Paint>,
     ) -> &Self {
         unsafe {
-            self.native_mut().drawImageNine(
+            sb::SkCanvas_drawImageNine(
+                self.native_ptr(),
                 image.as_ref().native(),
                 center.as_ref().native(),
                 dst.as_ref().native(),
@@ -1774,7 +1788,8 @@ impl Canvas {
         paint: Option<&Paint>,
     ) -> &Self {
         unsafe {
-            self.native_mut().drawImageLattice(
+            sb::SkCanvas_drawImageLattice(
+                self.native_ptr(),
                 image.as_ref().native(),
                 &lattice.native().native,
                 dst.as_ref().native(),
@@ -1818,7 +1833,8 @@ impl Canvas {
         let origin = origin.into();
         let bytes = str.as_ref().as_bytes();
         unsafe {
-            self.native_mut().drawSimpleText(
+            sb::SkCanvas_drawSimpleText(
+                self.native_ptr(),
                 bytes.as_ptr() as _,
                 bytes.len(),
                 TextEncoding::UTF8.into_native(),
@@ -1872,7 +1888,7 @@ impl Canvas {
         let origin = origin.into();
         unsafe {
             sb::C_SkCanvas_drawGlyphs2(
-                self.native_mut(),
+                self.native_ptr(),
                 glyphs.as_ptr(),
                 count,
                 positions.native().as_ptr(),
@@ -1930,7 +1946,7 @@ impl Canvas {
                 assert_eq!(points.len(), count);
                 unsafe {
                     sb::C_SkCanvas_drawGlyphs(
-                        self.native_mut(),
+                        self.native_ptr(),
                         glyphs,
                         count,
                         points.native().as_ptr(),
@@ -1944,7 +1960,7 @@ impl Canvas {
                 assert_eq!(xforms.len(), count);
                 unsafe {
                     sb::C_SkCanvas_drawGlyphsRSXform(
-                        self.native_mut(),
+                        self.native_ptr(),
                         glyphs,
                         count,
                         xforms.native().as_ptr(),
@@ -1986,7 +2002,8 @@ impl Canvas {
         #[cfg(all(feature = "textlayout", feature = "embed-icudtl"))]
         crate::icu::init();
         unsafe {
-            self.native_mut().drawTextBlob(
+            sb::SkCanvas_drawTextBlob(
+                self.native_ptr(),
                 blob.as_ref().native(),
                 origin.x,
                 origin.y,
@@ -2016,7 +2033,8 @@ impl Canvas {
         paint: Option<&Paint>,
     ) -> &Self {
         unsafe {
-            self.native_mut().drawPicture(
+            sb::SkCanvas_drawPicture(
+                self.native_ptr(),
                 picture.as_ref().native(),
                 matrix.native_ptr_or_null(),
                 paint.native_ptr_or_null(),
@@ -2047,8 +2065,7 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawVertices_2>
     pub fn draw_vertices(&self, vertices: &Vertices, mode: BlendMode, paint: &Paint) -> &Self {
         unsafe {
-            self.native_mut()
-                .drawVertices(vertices.native(), mode, paint.native())
+            sb::SkCanvas_drawVertices(self.native_ptr(), vertices.native(), mode, paint.native())
         }
         self
     }
@@ -2082,7 +2099,7 @@ impl Canvas {
     ) -> &Self {
         unsafe {
             sb::C_SkCanvas_drawMesh(
-                self.native_mut(),
+                self.native_ptr(),
                 mesh.native(),
                 blender.into().into_ptr_or_null(),
                 paint.native(),
@@ -2133,7 +2150,8 @@ impl Canvas {
             .map(|c| c.native().as_ptr())
             .unwrap_or(ptr::null());
         unsafe {
-            self.native_mut().drawPatch(
+            sb::SkCanvas_drawPatch(
+                self.native_ptr(),
                 cubics.native().as_ptr(),
                 colors,
                 tex_coords
@@ -2188,7 +2206,7 @@ impl Canvas {
         }
         unsafe {
             sb::C_SkCanvas_drawAtlas(
-                self.native_mut(),
+                self.native_ptr(),
                 atlas.native(),
                 xform.native().as_ptr(),
                 count,
@@ -2216,8 +2234,11 @@ impl Canvas {
     /// Example (C++): <https://fiddle.skia.org/c/@Canvas_drawDrawable>
     pub fn draw_drawable(&self, drawable: &mut Drawable, matrix: Option<&Matrix>) {
         unsafe {
-            self.native_mut()
-                .drawDrawable(drawable.native_mut(), matrix.native_ptr_or_null())
+            sb::SkCanvas_drawDrawable(
+                self.native_ptr(),
+                drawable.native_mut(),
+                matrix.native_ptr_or_null(),
+            )
         }
     }
 
@@ -2235,8 +2256,7 @@ impl Canvas {
     pub fn draw_drawable_at(&self, drawable: &mut Drawable, offset: impl Into<Point>) {
         let offset = offset.into();
         unsafe {
-            self.native_mut()
-                .drawDrawable1(drawable.native_mut(), offset.x, offset.y)
+            sb::SkCanvas_drawDrawable1(self.native_ptr(), drawable.native_mut(), offset.x, offset.y)
         }
     }
 
@@ -2254,7 +2274,8 @@ impl Canvas {
     pub fn draw_annotation(&self, rect: impl AsRef<Rect>, key: &str, value: &Data) -> &Self {
         let key = CString::new(key).unwrap();
         unsafe {
-            self.native_mut().drawAnnotation(
+            sb::SkCanvas_drawAnnotation(
+                self.native_ptr(),
                 rect.as_ref().native(),
                 key.as_ptr(),
                 value.native_mut_force(),
@@ -2380,7 +2401,7 @@ pub trait SetMatrix {
 impl SetMatrix for Canvas {
     /// DEPRECATED -- use [`M44`] version
     fn set_matrix(&self, matrix: &Matrix) -> &Self {
-        unsafe { self.native_mut().setMatrix1(matrix.native()) }
+        unsafe { sb::SkCanvas_setMatrix1(self.native_ptr(), matrix.native()) }
         self
     }
 }
@@ -2514,7 +2535,7 @@ impl AutoCanvasRestore {
     /// Returns utility to restore [`Canvas`] state on destructor
     pub fn guard(canvas: &Canvas, do_save: bool) -> AutoRestoredCanvas {
         let restore = construct(|acr| unsafe {
-            sb::C_SkAutoCanvasRestore_Construct(acr, canvas.native_mut(), do_save)
+            sb::C_SkAutoCanvasRestore_Construct(acr, canvas.native_ptr(), do_save)
         });
 
         AutoRestoredCanvas { canvas, restore }

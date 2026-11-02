@@ -79,7 +79,7 @@ impl Paragraph {
 
     pub fn paint(&self, canvas: &Canvas, p: impl Into<Point>) {
         let p = p.into();
-        unsafe { sb::C_Paragraph_paint(self.native_mut_force(), canvas.native_mut(), p.x, p.y) }
+        unsafe { sb::C_Paragraph_paint(self.native_mut_force(), canvas.native_ptr(), p.x, p.y) }
     }
 
     /// Returns a vector of bounding boxes that enclose all text between

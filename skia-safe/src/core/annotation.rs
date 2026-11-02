@@ -22,7 +22,7 @@ pub mod annotate {
     pub fn rect_with_url(canvas: &Canvas, rect: impl AsRef<Rect>, data: &Data) {
         unsafe {
             SkAnnotateRectWithURL(
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 rect.as_ref().native(),
                 data.native_mut_force(),
             )
@@ -39,7 +39,7 @@ pub mod annotate {
     pub fn named_destination(canvas: &Canvas, point: impl Into<Point>, data: &Data) {
         unsafe {
             SkAnnotateNamedDestination(
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 point.into().native(),
                 data.native_mut_force(),
             )
@@ -56,7 +56,7 @@ pub mod annotate {
     pub fn link_to_destination(canvas: &Canvas, rect: impl AsRef<Rect>, data: &Data) {
         unsafe {
             SkAnnotateLinkToDestination(
-                canvas.native_mut(),
+                canvas.native_ptr(),
                 rect.as_ref().native(),
                 data.native_mut_force(),
             )

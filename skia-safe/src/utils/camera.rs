@@ -158,7 +158,7 @@ impl RefHandle<Sk3DView> {
     }
 
     pub fn apply_to_canvas(&self, canvas: &Canvas) -> &Self {
-        unsafe { self.native().applyToCanvas(canvas.native_mut()) }
+        unsafe { self.native().applyToCanvas(canvas.native_ptr()) }
         self
     }
 

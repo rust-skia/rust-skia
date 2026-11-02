@@ -48,7 +48,7 @@ impl Drawable {
     pub fn draw(&mut self, canvas: &Canvas, matrix: Option<&Matrix>) {
         unsafe {
             self.native_mut()
-                .draw(canvas.native_mut(), matrix.native_ptr_or_null())
+                .draw(canvas.native_ptr(), matrix.native_ptr_or_null())
         }
     }
 
@@ -60,7 +60,7 @@ impl Drawable {
         let point = point.into();
         unsafe {
             self.native_mut()
-                .draw1(canvas.native_mut(), point.x, point.y)
+                .draw1(canvas.native_ptr(), point.x, point.y)
         }
     }
 

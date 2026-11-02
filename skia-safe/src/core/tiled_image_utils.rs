@@ -22,7 +22,7 @@ pub fn draw_image_rect(
     let constraint = constraint.into().unwrap_or(canvas::SrcRectConstraint::Fast);
     unsafe {
         C_SkTiledImageUtils_DrawImageRect(
-            canvas.native_mut(),
+            canvas.native_ptr(),
             image.native(),
             src.as_ref().native(),
             dst.as_ref().native(),
