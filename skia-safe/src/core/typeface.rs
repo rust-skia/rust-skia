@@ -413,6 +413,37 @@ impl Typeface {
     // TODO: Register()
 }
 
+/// A raw CoreText `CTFontRef`.
+///
+/// Cast from or to the `CTFont` type of the CoreText crate of your choice.
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "visionos"))]
+pub type CTFontRef = *const std::ffi::c_void;
+
+/// ports/SkTypeface_mac.h
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "visionos"))]
+impl Typeface {
+    /// Returns a new reference to the typeface for the specified `CTFontRef`.
+    ///
+    /// Skia retains `font`; the caller keeps its own reference.
+    ///
+    /// # Safety
+    ///
+    /// `font` must be a valid, non-null `CTFontRef`.
+    pub unsafe fn from_ct_font(font: CTFontRef) -> Option<Typeface> {
+        Typeface::from_ptr(unsafe { sb::C_SkMakeTypefaceFromCTFont(font) })
+    }
+
+    /// Returns the platform-specific `CTFontRef` of this typeface, or `None` if it is not backed
+    /// by CoreText.
+    ///
+    /// The returned reference is borrowed: it is released when this typeface is destroyed, so
+    /// retain it to keep it alive longer.
+    pub fn ct_font(&self) -> Option<CTFontRef> {
+        let font = unsafe { sb::C_SkTypeface_GetCTFontRef(self.native()) };
+        (!font.is_null()).then_some(font)
+    }
+}
+
 pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;
 
 impl NativeDrop for SkTypeface_LocalizedStrings {
@@ -514,5 +545,17 @@ mod tests {
         } else {
             println!("On this platform the default font does not supply existing font data.");
         }
+    }
+
+    #[cfg(any(target_os = "macos", target_os = "ios", target_os = "visionos"))]
+    #[test]
+    fn ct_font_round_trip() {
+        let tf = FontMgr::new()
+            .legacy_make_typeface(None, FontStyle::normal())
+            .unwrap();
+        let ct_font = tf.ct_font().unwrap();
+        let tf2 = unsafe { Typeface::from_ct_font(ct_font) }.unwrap();
+        assert!(Typeface::equal(&tf, &tf2));
+        assert_eq!(tf2.ct_font(), Some(ct_font));
     }
 }
