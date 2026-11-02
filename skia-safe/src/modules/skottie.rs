@@ -29,16 +29,16 @@ unsafe_send_sync!(Animation);
 require_base_type!(sb::skottie_Animation, SkNVRefCnt);
 
 impl NativeRefCounted for sb::skottie_Animation {
-    fn _ref(&self) {
-        unsafe { sb::C_skottie_Animation_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_skottie_Animation_ref(ptr) }
     }
 
     unsafe fn _unref(ptr: *const Self) {
         unsafe { sb::C_skottie_Animation_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_skottie_Animation_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_skottie_Animation_unique(ptr) }
     }
 }
 

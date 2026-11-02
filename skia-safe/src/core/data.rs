@@ -14,16 +14,16 @@ unsafe_send_sync!(Data);
 require_base_type!(SkData, sb::SkNVRefCnt);
 
 impl NativeRefCounted for SkData {
-    fn _ref(&self) {
-        unsafe { sb::C_SkData_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_SkData_ref(ptr) }
     }
 
     unsafe fn _unref(ptr: *const Self) {
         unsafe { sb::C_SkData_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkData_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_SkData_unique(ptr) }
     }
 }
 

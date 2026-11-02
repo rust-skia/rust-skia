@@ -17,16 +17,16 @@ unsafe_send_sync!(TextBlob);
 require_base_type!(SkTextBlob, sb::SkNVRefCnt);
 
 impl NativeRefCounted for SkTextBlob {
-    fn _ref(&self) {
-        unsafe { sb::C_SkTextBlob_ref(self) };
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_SkTextBlob_ref(ptr) };
     }
 
     unsafe fn _unref(ptr: *const Self) {
         unsafe { sb::C_SkTextBlob_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkTextBlob_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_SkTextBlob_unique(ptr) }
     }
 }
 

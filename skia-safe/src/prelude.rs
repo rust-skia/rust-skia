@@ -89,7 +89,15 @@ impl RefCount for skia_bindings::SkNVRefCnt {
 }
 
 pub trait NativeRefCounted: Sized {
-    fn _ref(&self);
+    /// Increases the reference count.
+    ///
+    /// This function takes a raw pointer instead of `&self`. C++ writes the count through a
+    /// `const` pointer, and Rust forbids writes to memory behind a shared reference.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object.
+    unsafe fn _ref(ptr: *const Self);
     /// Decreases the reference count and deletes the object when the count reaches zero.
     ///
     /// This function takes a raw pointer instead of `&self`. C++ may delete the object during
@@ -100,23 +108,32 @@ pub trait NativeRefCounted: Sized {
     /// `ptr` must point to a live object that holds a reference the caller owns. The caller gives
     /// up that reference and must not use `ptr` afterwards.
     unsafe fn _unref(ptr: *const Self);
-    fn unique(&self) -> bool;
+    /// Returns `true` if the caller holds the only reference.
+    ///
+    /// This function takes a raw pointer instead of `&self`, like [`Self::_ref`]. Other threads
+    /// may change the count during the call, and a shared reference would assert that the
+    /// object's memory does not change.
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a live object.
+    unsafe fn unique(ptr: *const Self) -> bool;
     fn _ref_cnt(&self) -> usize {
         unimplemented!();
     }
 }
 
 impl NativeRefCounted for SkRefCntBase {
-    fn _ref(&self) {
-        unsafe { C_SkRefCntBase_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { C_SkRefCntBase_ref(ptr) }
     }
 
     unsafe fn _unref(ptr: *const Self) {
         unsafe { C_SkRefCntBase_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { C_SkRefCntBase_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { C_SkRefCntBase_unique(ptr) }
     }
 
     #[allow(clippy::cast_ptr_alignment)]
@@ -160,16 +177,16 @@ impl<Native, Base: NativeRefCounted> NativeRefCounted for Native
 where
     Native: NativeRefCountedBase<Base = Base>,
 {
-    fn _ref(&self) {
-        self.ref_counted_base()._ref();
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { Base::_ref(Self::ref_counted_base_ptr(ptr)) }
     }
 
     unsafe fn _unref(ptr: *const Self) {
         unsafe { Base::_unref(Self::ref_counted_base_ptr(ptr)) }
     }
 
-    fn unique(&self) -> bool {
-        self.ref_counted_base().unique()
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { Base::unique(Self::ref_counted_base_ptr(ptr)) }
     }
 
     fn _ref_cnt(&self) -> usize {
@@ -586,7 +603,7 @@ impl<N: NativeRefCounted> RCHandle<N> {
     #[inline]
     pub(crate) fn from_unshared_ptr(ptr: *mut N) -> Option<Self> {
         ptr::NonNull::new(ptr).map(|ptr| {
-            unsafe { ptr.as_ref()._ref() };
+            unsafe { N::_ref(ptr.as_ptr()) };
             Self(ptr)
         })
     }
@@ -663,7 +680,7 @@ impl<N: NativeRefCounted> Clone for RCHandle<N> {
     fn clone(&self) -> Self {
         // Support shared mutability when a ref-counted handle is cloned.
         let ptr = self.0;
-        unsafe { ptr.as_ref()._ref() };
+        unsafe { N::_ref(ptr.as_ptr()) };
         Self(ptr)
     }
 }
@@ -1048,7 +1065,7 @@ pub trait ConditionallySend: Sized {
 /// another thread when its reference count is 1.
 impl<H: NativeRefCountedBase> ConditionallySend for RCHandle<H> {
     fn can_send(&self) -> bool {
-        self.native().unique()
+        unsafe { H::unique(self.0.as_ptr()) }
     }
 
     fn wrap_send(self) -> Result<Sendable<Self>, Self> {

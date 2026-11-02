@@ -178,16 +178,16 @@ pub type MeshSpecification = RCHandle<SkMeshSpecification>;
 unsafe_send_sync!(MeshSpecification);
 
 impl NativeRefCounted for SkMeshSpecification {
-    fn _ref(&self) {
-        unsafe { sb::C_SkMeshSpecification_ref(self) }
+    unsafe fn _ref(ptr: *const Self) {
+        unsafe { sb::C_SkMeshSpecification_ref(ptr) }
     }
 
     unsafe fn _unref(ptr: *const Self) {
         unsafe { sb::C_SkMeshSpecification_unref(ptr) }
     }
 
-    fn unique(&self) -> bool {
-        unsafe { sb::C_SkMeshSpecification_unique(self) }
+    unsafe fn unique(ptr: *const Self) -> bool {
+        unsafe { sb::C_SkMeshSpecification_unique(ptr) }
     }
 }
 
