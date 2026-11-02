@@ -184,6 +184,7 @@ pub struct RustStream<'a> {
 
 #[allow(unused)]
 impl RustStream<'_> {
+    /// Returns a pointer to the stream for C++ calls that read from it.
     pub fn stream_ptr(&mut self) -> *mut SkStream {
         self.inner.native_ptr().cast()
     }
@@ -345,6 +346,8 @@ pub struct RustWStream<'a> {
 }
 
 impl Drop for RustWStream<'_> {
+    /// Freeing the stream here, and not through a field's drop, keeps the writer borrowed for
+    /// `'a` until the C++ stream and any document that writes into it are gone.
     fn drop(&mut self) {
         drop(unsafe { Box::from_raw(self.inner.as_ptr()) })
     }
