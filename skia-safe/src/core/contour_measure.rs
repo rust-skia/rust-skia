@@ -143,7 +143,7 @@ impl ContourMeasure {
             self.native().getSegment(
                 start_d,
                 stop_d,
-                path_builder.native_mut(),
+                path_builder.native_ptr(),
                 start_with_move_to,
             )
         }

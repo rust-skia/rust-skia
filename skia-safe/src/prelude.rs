@@ -482,6 +482,16 @@ impl<N: NativeDrop> RefHandle<N> {
         mem::forget(self);
         p
     }
+
+    /// Returns a raw pointer to the native object for calls that may modify it.
+    ///
+    /// Some native types store pointers into their own memory, and C++ writes through them. A
+    /// `&mut N` from [`NativeAccess::native_mut`] would promise Rust that nothing else writes to
+    /// the object while it exists, so calls into such types use this pointer with the raw
+    /// `sb::<Type>_*` functions instead of the bindgen methods that take `&mut self`.
+    pub(crate) fn native_ptr(&mut self) -> *mut N {
+        self.0.as_ptr()
+    }
 }
 
 /// A wrapper type represented by a reference counted pointer

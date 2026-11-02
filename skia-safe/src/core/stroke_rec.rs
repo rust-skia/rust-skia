@@ -173,7 +173,7 @@ impl StrokeRec {
         let mut builder = PathBuilder::default();
         let r = unsafe {
             self.native()
-                .applyToPath(builder.native_mut(), path.native())
+                .applyToPath(builder.native_ptr(), path.native())
         };
         if r {
             *path = builder.into()
