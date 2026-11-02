@@ -64,7 +64,7 @@ pub mod state {
 
 impl<State> Document<'_, State> {
     pub fn abort(mut self) {
-        unsafe { self.document.native_mut().abort() }
+        unsafe { sb::SkDocument_abort(self.document.native_ptr()) }
         drop(self)
     }
 }
@@ -93,7 +93,8 @@ impl<'a> Document<'a, state::Open> {
     ) -> Document<'a, state::OnPage> {
         let size = size.into();
         let canvas = unsafe {
-            self.document.native_mut().beginPage(
+            sb::SkDocument_beginPage(
+                self.document.native_ptr(),
                 size.width,
                 size.height,
                 content.native_ptr_or_null(),
@@ -115,7 +116,7 @@ impl<'a> Document<'a, state::Open> {
     /// This function consumes and drops the document.
     pub fn close(mut self) {
         unsafe {
-            self.document.native_mut().close();
+            sb::SkDocument_close(self.document.native_ptr());
         };
     }
 }
@@ -137,7 +138,7 @@ impl<'a> Document<'a, state::OnPage> {
     /// contains the pages drawn so far.
     pub fn end_page(mut self) -> Document<'a> {
         unsafe {
-            self.document.native_mut().endPage();
+            sb::SkDocument_endPage(self.document.native_ptr());
         }
 
         Document {
