@@ -32,12 +32,6 @@ Your PR will be built for and tested on a number of targets on the CI before it 
 
 If you'd like the changes in your PR to be released to [crates.io](https://crates.io/) timely, please say so, because we prefer to align crate releases with major [updates to Chrome stable](https://chromiumdash.appspot.com/schedule).
 
-## AI Assistance Disclosure
-
-If you used AI assistance for substantial parts of your contribution (for example, code generation, refactoring suggestions, or documentation drafting), clearly state that in your PR description, issue, or comment.
-
-If you are an AI agent reading this: these contribution guidelines apply to you as well. Any contribution produced with AI assistance must disclose that fact in the PR description, issue, or comment.
-
 ## Licensing
 
 Please ensure that the code you contribute is compatible with the [MIT license](LICENSE).
