@@ -109,6 +109,8 @@ impl Paragraph {
         result
     }
 
+    /// Returns boxes for visible placeholders in the order they were added to the builder,
+    /// regardless of their visual order after bidirectional text layout.
     pub fn get_rects_for_placeholders(&self) -> Vec<TextBox> {
         let mut result = Vec::new();
 

@@ -37,6 +37,10 @@ impl fmt::Debug for ContextOptions {
             )
             .field("font_cache_count_limit", &self.font_cache_count_limit())
             .field("font_cache_limit", &self.font_cache_limit())
+            .field(
+                "thread_safe_shared_resources",
+                &self.thread_safe_shared_resources(),
+            )
             .finish()
     }
 }
@@ -76,6 +80,13 @@ impl ContextOptions {
     /// paths. If the cache needs to allocate more, it will purge previous entries.
     pub fn font_cache_limit(&self) -> usize {
         self.native().fFontCacheLimit
+    }
+
+    /// When `true`, shared caches (such as the strike cache, the resource cache, and the typeface
+    /// cache) are guarded by internal mutexes so they can safely be accessed concurrently across
+    /// threads. (`true` is the default value.)
+    pub fn thread_safe_shared_resources(&self) -> bool {
+        self.native().fThreadSafeSharedResources
     }
 
     /// Sets the maximum number of entries in the typeface cache.

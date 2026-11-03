@@ -7,10 +7,16 @@ description: Perform a Skia milestone update for rust-skia or refresh the curren
 
 This skill performs a Skia milestone update for rust-skia, aligning it with a new
 Skia `chrome/mXX` branch. Use the bundled [`PR_TEMPLATE.md`](PR_TEMPLATE.md) as
-the working PR checklist and follow every item. It is based on the
+the working PR checklist and follow every item in order. The item on the Chrome
+release date blocks every item below it. While that release is 7 or more days away, stop
+at that item and tell the user the date. It is based on the
 [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR)
 wiki page and extends it with project-specific coverage such as Graphite. The
 `just diff-skia` caveat lives in `AGENTS.md` — read it before starting.
+
+CI builds and tests every platform on the PR. Leave each build or check that CI runs to
+CI, unless the checklist or this skill names it, and run the named ones natively on the
+local machine.
 
 ## Inputs
 
@@ -78,6 +84,29 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    git -C skia-bindings/skia log --oneline refs/tags/OLD_TAG..upstream/chrome/mXX
    ```
 
+   Then confirm that the parent branch contains rust-skia's `master`
+   (`upstream/master` when `origin` is a personal fork):
+
+   ```sh
+   git merge-base --is-ancestor upstream/master HEAD
+   ```
+
+   If it does not, rebase the parent branch onto `upstream/master` before anything else, and
+   re-read this skill from there. `master` can gain fork tags, CI checks, and changes to
+   this skill while a milestone branch is open. A branch that misses them builds on a fork
+   stack without `master`'s latest fork patches and follows an outdated copy of this skill.
+
+   Then list the `master` commits that moved the Skia gitlink since `OLD_TAG` was cut:
+
+   ```sh
+   git log --oneline --since="$(git -C skia-bindings/skia log -1 --format=%cI refs/tags/OLD_TAG)" upstream/master -- skia-bindings/skia
+   ```
+
+   A commit that moves the gitlink to a tag other than `OLD_TAG` brings fork patches that
+   `OLD_TAG` lacks. List them with `git -C skia-bindings/skia log --oneline
+   refs/tags/TAG_BEFORE..refs/tags/TAG_AFTER`, and cherry-pick each onto the rebased
+   stack after step 3, before the tag is cut.
+
 2. Review the upstream diff. If it changes public headers, complete the full header
    accounting below before updating wrappers. Record internal-only changes as requiring
    no binding update.
@@ -92,8 +121,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    git -C skia-bindings/skia rebase --onto upstream/chrome/mXX OLD_BASE
    ```
 
-   If the temporary branch already exists, switch to it instead of recreating it:
-   `git -C skia-bindings/skia switch refs/heads/mNEW_MILESTONE-refresh`.
+   If the temporary branch already exists, switch to it instead of recreating it. `git
+   switch` accepts only a bare branch name, which the naming rule above keeps distinct
+   from every tag: `git -C skia-bindings/skia switch mNEW_MILESTONE-refresh`.
 
 4. Verify that every downstream patch is unchanged and that the result is based on the
    refreshed upstream tip:
@@ -142,16 +172,20 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
    When the milestone commit was created before `master` gained changes to those files,
    a conflict resolution that keeps the milestone side (`--ours`/`--theirs`, "take mine")
-   silently reverts `master`'s changes to them. This is not hypothetical: it discarded
-   `master`'s README content and its `bindgen` upgrade during the m154 update. No build
-   or test fails, because a stale README is just text and the older `bindgen` still
-   builds, so `git diff` is the only reliable detector. Every removed line that `master`
-   added is a regression, even though `git log mNEW_MILESTONE..master` is empty (the
-   history is still an ancestor relationship; only the tree was damaged). Re-apply the
-   milestone deltas on top of `master`'s content and re-verify before proceeding.
+   silently reverts `master`'s changes to them, such as new README content or a
+   `bindgen` upgrade. No build or test fails, because a stale README is just text and the
+   older `bindgen` still builds, so `git diff` is the only reliable detector. Every removed
+   line that `master` added is a regression, even though `git log mNEW_MILESTONE..master`
+   is empty (the history is still an ancestor relationship; only the tree was damaged).
+   Re-apply the milestone deltas on top of `master`'s content and re-verify before
+   proceeding.
 
-7. Run `just diff-skia`, `cargo check -p skia-bindings`,
-   `cargo check -p skia-safe`, and the platform tests appropriate to the change.
+7. Run `just diff-skia`, then
+   `cargo clippy -p skia-safe --features all-<host> --all-targets -- -D warnings`, where
+   `<host>` is `macos`, `linux`, or `windows`, then the platform tests with the same
+   features. The default features leave feature-gated wrappers such as Graphite's
+   uncompiled, and one Skia build with `all-<host>` serves the check, the lints, and the
+   tests.
    Reconfirm after the builds, with explicit refs, that the checkout, the new tag, and
    the staged gitlink all point at the rebased tip:
 
@@ -189,8 +223,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     in `include/core/SkMilestone.h`.
   `Cargo.lock` is gitignored and untracked, so it is not part of the commit. Delete it
   when you bump the versions, so that the first build re-resolves it. A stale local lock
-  fails the build even when the tree is correct (m157: bindgen failed to compile against
-  two `syn` versions).
+  fails the build even when the tree is correct, for example when it makes bindgen
+  compile against two `syn` versions.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's ordinal.
@@ -205,9 +239,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- RELEASE_NOTES.md relnotes/
   ```
 
-  A note can announce a change that no header or build-file diff shows. In m157, "Graphite
-  now requires >= iOS 14.0" came from a `std::atomic::wait` in a source file, and it
-  required raising `MIN_IOS_VERSION` in `skia-bindings/build_support/platform/ios.rs`.
+  A note can announce a change that no header or build-file diff shows. A new minimum OS
+  version, for example, can come from a single call in a source file. A new iOS minimum
+  requires raising `MIN_IOS_VERSION` in `skia-bindings/build_support/platform/ios.rs`.
 - **Build organization diff:** review whether the build organization changed
   significantly by diffing the build files between the old and new tags:
 
@@ -217,7 +251,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
   `.gn` belongs in the list because rust-skia builds Skia as the gn root, so the
   `default_args` in `.gn` apply to our build. A flag that `gn/skia.gni` declares off can
-  therefore be on (m157: `skia_enable_packed_422_yuv`). The defines that bindgen
+  therefore be on, as `skia_enable_packed_422_yuv` is. The defines that bindgen
   actually sees are in `skia-defines.txt`, next to the generated `bindings.rs`.
   Record each file as `no change` or `updated build glue` in the accounting. Most
   source-list changes flow through existing Skia targets and need no rust-skia
@@ -229,14 +263,14 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 - **Third-party dependencies (`DEPS`):** review every `deps` entry of the fork's
   `DEPS` file on every tag cut. Upstream Skia's `DEPS` and `third_party/*/BUILD.gn`
   serve only Skia's standalone build. Chrome compiles Skia's code against Chromium's own
-  copies of these libraries, so upstream rarely updates them. In m156, libpng, expat,
-  freetype, and harfbuzz were seven months old and brotli four years.
+  copies of these libraries, so upstream rarely updates them. Its pins can lag months or
+  years behind the libraries' releases.
   - Pin each library to the newer of two commits: the one Chromium uses for the same
     milestone, and Skia's own pin. One commit is newer when its history contains the
     other. When neither contains the other, the commit with the higher release version
-    is newer, whatever the commit dates say. In m156, Chromium's VulkanMemoryAllocator
-    sat on an `angle-vma-3.0` maintenance branch, which is older than Skia's v3.3.0
-    line. When Chromium pins no copy of the library, keep Skia's pin. Chromium pins no
+    is newer, whatever the commit dates say. A maintenance branch, such as the
+    `angle-vma-*` branches Chromium uses for VulkanMemoryAllocator, can carry recent
+    commits on an older release line. When Chromium pins no copy of the library, keep Skia's pin. Chromium pins no
     D3D12MemoryAllocator, because Chrome never builds Skia's Direct3D backend. The
     milestone's Chromium branch number is `chromium_branch` in
     `https://chromiumdash.appspot.com/fetch_milestones?mstone=XX`. Chromium's `DEPS` on
@@ -245,9 +279,11 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     brotli, take the version from `third_party/<lib>/README.chromium` on that branch.
     For zlib, take the commit of the `chromium/src/third_party/zlib` mirror whose tree
     equals Chromium's `third_party/zlib` tree on that branch.
+    `just chromium-deps-pins NEW_MILESTONE` performs these lookups. For each pinned
+    library, it prints both pins and which one is newer by history. Pins it reports as
+    diverged need the release versions compared by hand.
   - The one exception: when Chromium's commit has a known vulnerability that applies to
-    rust-skia and a newer stable release fixes it, pin that release. In m156, Chromium's
-    expat had 22 known vulnerabilities, and expat 2.9.0 had two.
+    rust-skia and a newer stable release fixes it, pin that release.
   - A vulnerability applies when rust-skia compiles the affected code. For example,
     harfbuzz's WebAssembly shaper is never compiled, because Skia does not define
     `HAVE_WASM`. Record every accepted vulnerability with its reason in
@@ -261,7 +297,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     organization diff above.
   - `just audit-skia-deps` must pass. It checks every pin against OSV.dev and applies
     the ignore file.
-  - Verify with a source build that compiles every pinned library, run after touching
+  - Verify the pins with a source build on the local machine, after touching
     `skia-bindings/build.rs`:
 
     ```sh
@@ -271,8 +307,33 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     The build script does not track `DEPS` or the `third_party` build files. Without
     the touch, Cargo reuses the previous Skia build and the new pins are never compiled.
-    Only the current platform's branches of each `BUILD.gn` are compiled, so also check
-    that every source path the changed build files list exists in the new checkouts.
+    The local build compiles the pins its platform uses. macOS, iOS, and Windows render
+    fonts with CoreText or DirectWrite and build Skia without freetype, so the build drops `embed-freetype` and `freetype-woff2` there as
+    redundant. CI compiles the Linux pins. The Linux QA jobs on the PR build Skia from
+    source with `svg`, `textlayout`, and `webp`, and the Linux binaries job on the release
+    branch builds `embed-freetype`. No CI job builds `freetype-woff2`, so tell the user
+    when a pin change affects woff2.
+  - Only the current platform's branches of each `BUILD.gn` are compiled, so a stale
+    path in another platform's branch, or in a header list, breaks no local build.
+    `just check-third-party-sources` must pass. It checks every path the
+    `third_party` build files list against the checkouts of the pinned libraries. It fails
+    and names the libraries it skipped when their checkout is not at the pin.
+- **Toolchain requirements:** list the upstream commits that may raise a compiler,
+  C++ library, or OS minimum, and read each commit message:
+
+  ```sh
+  git -C skia-bindings/skia log --oneline -i -E \
+    --grep='C\+\+2[0-9]|compiler|toolchain|deployment target|minimum (os|version|sdk)|libc\+\+|libstdc\+\+' \
+    refs/tags/OLD_TAG..refs/tags/NEW_TAG
+  ```
+
+  The release notes miss some of these requirements. One new language or library feature
+  can raise the minimums of several platforms, while the notes name only one of them. Local builds do not reproduce CI's minimums, because CI pins
+  `MACOSX_DEPLOYMENT_TARGET` in `mk-workflows` and cross-compiles Linux aarch64 against
+  the libstdc++ in the CI image (see `AGENTS.md`). Surface each requirement to the user as
+  a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
+  whether a `rust-skia:` fork patch existed only to support the old one, such as an
+  `@available` workaround.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
@@ -285,8 +346,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   ```
 
   The `:(glob)` prefix makes `**/` match zero directories as well, so the list includes
-  headers that sit directly in a module's `include/` (m157: `Paragraph.h` and
-  `SkUnicode_apple.h`). Without it, `**/` requires at least one subdirectory. Review
+  headers that sit directly in a module's `include/`, such as
+  `modules/skparagraph/include/Paragraph.h`. Without it, `**/` requires at least one subdirectory. Review
   inline function and method implementations as carefully as declarations: they are
   compiled into consumers and can change behavior without changing the API signature.
   Include changes that look trivial (include moves, comments, friend declarations,
@@ -334,6 +395,10 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   without trying too hard before 1.0, use `#[deprecated]` if needed, look for `todo!()`
   macros that can now be resolved, and review `Send` & `Sync` and `Debug`
   implementations for new wrappers.
+- **Ported docs:** record every doc ported or changed for the milestone in a
+  `# mXX update` section of `skia-safe/docs-porting-tracker.md`, with the header each
+  doc comes from and any C++ sentence left out on purpose. The milestone line at the top
+  of the tracker points to that section.
 
 ## Release notes
 

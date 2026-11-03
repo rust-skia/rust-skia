@@ -2,7 +2,7 @@
 
 Persistent tracker of documentation ported from Skia C++ headers into `skia-safe` Rust rustdoc and **verified for completeness** against the C++ header (rule: C++ doc ported COMPLETELY, no shortening; only allowed drops = fiddle example links, out-param/nullptr→Option, ownership sentences, name translation + intra-doc links).
 
-**Milestone:** m156 (skia-bindings `skia = "m156.6"`; Skia submodule tag `m156.6`; crates `0.156.0`). The current state is described in the `# m154 update (2026-09-20)` section below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
+**Milestone:** m157 (skia-bindings `skia = "m157.2"`; Skia submodule tag `m157.2`; crates `0.157.0`). The current state is described in the `# m154 update (2026-09-20)` and `# m157 update (2026-11-03)` sections below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
 
 ## Verification method
 - Independent subagent audit comparing EVERY public item doc in each Rust file vs its C++ header.
@@ -201,6 +201,17 @@ Rust-specific additions (no C++ counterpart; they document the wrapper's contrac
 - `AsyncReadResult` and `AsyncReadResult::data()`: the data/pointer is invalidated when the GPU context is abandoned or dropped (from the method docs in `SkSurface.h`/`SkImage.h`).
 
 Open: `skgpu::graphite::Context` stays plain text, as in the neighbouring `read_pixels` docs, because the CI doc feature set does not enable `graphite` and a link would not resolve.
+
+---
+
+# m157 update (2026-11-03)
+
+Milestone m157: crates `0.157.0`, Skia submodule tag `m157.2`. The PR is rust-skia/rust-skia#1351. The docs of the new and changed m157 items are ported completely from the m157 headers:
+
+- `ContextOptions::thread_safe_shared_resources()`, from `fThreadSafeSharedResources` in `include/core/SkContextOptions.h`. The C++ sentence about setting the flag to false is left out, because rust-skia has no setter for it. Nothing in m157 reads the flag, and turning it off would make the `Send + Sync` wrappers of cached objects unsound.
+- `graphite::Context::set_mutable_state()`, from `setMutableState()` in `include/gpu/graphite/Context.h`.
+- `Subsampling`, whose doc gained the `PlaneConfig::YUYV` exception in `include/core/SkYUVAInfo.h`.
+- `Paragraph::get_rects_for_placeholders()`, from `getRectsForPlaceholders()` in `modules/skparagraph/include/Paragraph.h`.
 
 ---
 
