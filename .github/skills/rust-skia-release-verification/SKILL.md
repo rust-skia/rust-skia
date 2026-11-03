@@ -25,18 +25,18 @@ release.
    platform that produces QA artifacts (linux, macos, windows, windows-arm).
    The candidate comes from the `master` QA run at the exact release commit,
    because pushing `release` triggers binary workflows but not QA workflows.
-   Read `/tmp/rust-skia-release-images/comparison/summary.tsv` and inspect its
-   `review` directory. Exit status 0 is an exact match, 1 means differences
-   require review, and 2 means the check could not run. Added, removed, resized,
+   The script prints its report directory as `Report:` and its summary as
+   `Summary:`. Read that `summary.tsv` and inspect the `review` directory next
+   to it. Exit status 0 is an exact match, 1 means differences require
+   review, and 2 means the check could not run. Added, removed, resized,
    blank, corrupt, clipped, missing-text, wrong-color, and unexplained pixel
    changes block publication.
 3. Run `just release-verify-vector <previous-version> <commit>` and inspect the
    reported SVG/PDF differences (advisory). This rasterizes the `svg/` and
    `pdf/` trees with third-party tools (`rsvg-convert`, Ghostscript) that are
    not Skia, so a difference only indicates the vector content changed as seen
-   through a foreign renderer. Read
-   `/tmp/rust-skia-release-vector/comparison/summary.tsv` and inspect its
-   `review` directory.
+   through a foreign renderer. Read the `summary.tsv` it prints and inspect the
+   `review` directory next to it.
 4. Write the release notes. The maintainer does not write them, so unless the
    user names an existing notes file, draft
    `$TMPDIR/rust-skia-<version>-notes.md` from the PRs merged since the

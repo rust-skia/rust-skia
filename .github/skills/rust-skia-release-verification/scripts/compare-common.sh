@@ -5,6 +5,20 @@
 # comparison, differences, compared_any, and a `prepare_image` function that
 # maps a source file to a rasterized PNG for comparison.
 
+# Use the report directory the caller passed, or create a new one under
+# $TMPDIR. A fixed default directory would still hold the files of an earlier
+# run, and mixing two runs in one report would make it meaningless.
+init_report() {
+    local name="$1" tmp="${TMPDIR:-/tmp}"
+    if [[ -z "$report" ]]; then
+        report="$(mktemp -d "${tmp%/}/rust-skia-release-$name.XXXXXX")"
+    elif [[ -e "$report" && -n "$(find "$report" -mindepth 1 -print -quit)" ]]; then
+        echo "Report directory must be new or empty: $report" >&2
+        exit 2
+    fi
+    echo "Report: $report"
+}
+
 # Resolve the baseline and release commit SHAs from version/commit refs.
 resolve_shas() {
     baseline_sha="$(git rev-parse "$previous^{commit}")"
