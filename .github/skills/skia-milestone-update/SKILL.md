@@ -279,8 +279,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     organization diff above.
   - `just audit-skia-deps` must pass. It checks every pin against OSV.dev and applies
     the ignore file.
-  - Verify with a source build that compiles every pinned library, run on Linux after
-    touching `skia-bindings/build.rs`:
+  - Verify the pins with a source build on the local machine, after touching
+    `skia-bindings/build.rs`:
 
     ```sh
     touch skia-bindings/build.rs
@@ -289,10 +289,14 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     The build script does not track `DEPS` or the `third_party` build files. Without
     the touch, Cargo reuses the previous Skia build and the new pins are never compiled.
-    Run it on Linux, because only Linux compiles the freetype pin. macOS, iOS, and
-    Windows render fonts with CoreText or DirectWrite and build Skia without freetype,
-    so the build drops `embed-freetype` and `freetype-woff2` there as redundant. On a Mac,
-    run the build in the CI image (`ghcr.io/pragmatrix/rust-skia-linux`, see `AGENTS.md`).
+    Run only builds the local machine supports natively. Never use Docker, another
+    container runtime, or a virtual machine to build for another platform. The local build compiles the pins its platform
+    uses. macOS, iOS, and Windows render fonts with CoreText or DirectWrite and build Skia
+    without freetype, so the build drops `embed-freetype` and `freetype-woff2` there as
+    redundant. CI compiles the Linux pins. The Linux QA jobs on the PR build Skia from
+    source with `svg`, `textlayout`, and `webp`, and the Linux binaries job on the release
+    branch builds `embed-freetype`. No CI job builds `freetype-woff2`, so tell the user
+    when a pin change affects woff2.
   - Only the current platform's branches of each `BUILD.gn` are compiled, so a stale
     path in another platform's branch, or in a header list, breaks no local build.
     `just check-third-party-sources` must pass. It checks every path the
