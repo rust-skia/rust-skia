@@ -27,11 +27,9 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 - [ ] Review `Send` & `Sync` implementations for new wrappers.
 - [ ] Review `Debug` implementation for new wrapper types and functions.
 - [ ] Release date of the matching Chrome version in less than 7 days?  
-    > Look up the release date of the milestone's matching Chrome stable version in
-    > the [Chrome release schedule](https://chromiumdash.appspot.com/schedule). The JSON
-    > endpoint `https://chromiumdash.appspot.com/fetch_milestone_schedule?mstone=XX`
-    > returns it as `stable_date`. If the date is in less than 7 days, check this box
-    > (release the crates with the PR's merge).
+    > Blocks every item below until checked. Check it once `stable_date` from
+    > `https://chromiumdash.appspot.com/fetch_milestone_schedule?mstone=XX` is less than
+    > 7 days away (release the crates with the PR's merge).
 - [ ] Any pending changes in the Skia `chrome/mXX` branch that aren't synchronized yet?
 - [ ] Rebase on or merge with master.
 - [ ] Do the fork patches in the `skia-bindings/skia` subdirectory match with `master` (`just diff-skia`).

@@ -7,7 +7,9 @@ description: Perform a Skia milestone update for rust-skia or refresh the curren
 
 This skill performs a Skia milestone update for rust-skia, aligning it with a new
 Skia `chrome/mXX` branch. Use the bundled [`PR_TEMPLATE.md`](PR_TEMPLATE.md) as
-the working PR checklist and follow every item. It is based on the
+the working PR checklist and follow every item in order. The item on the Chrome
+release date blocks every item below it. While that release is 7 or more days away, stop
+at that item and tell the user the date. It is based on the
 [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR)
 wiki page and extends it with project-specific coverage such as Graphite. The
 `just diff-skia` caveat lives in `AGENTS.md` — read it before starting.
