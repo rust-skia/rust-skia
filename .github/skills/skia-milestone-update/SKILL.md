@@ -180,8 +180,12 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    Re-apply the milestone deltas on top of `master`'s content and re-verify before
    proceeding.
 
-7. Run `just diff-skia`, `cargo check -p skia-bindings`,
-   `cargo check -p skia-safe`, and the platform tests appropriate to the change.
+7. Run `just diff-skia`, then
+   `cargo clippy -p skia-safe --features all-<host> --all-targets -- -D warnings`, where
+   `<host>` is `macos`, `linux`, or `windows`, then the platform tests with the same
+   features. The default features leave feature-gated wrappers such as Graphite's
+   uncompiled, and one Skia build with `all-<host>` serves the check, the lints, and the
+   tests.
    Reconfirm after the builds, with explicit refs, that the checkout, the new tag, and
    the staged gitlink all point at the rebased tip:
 
