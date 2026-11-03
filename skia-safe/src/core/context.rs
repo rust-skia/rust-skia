@@ -119,13 +119,6 @@ impl ContextOptions {
         self.native_mut().fFontCacheLimit = limit;
         self
     }
-
-    /// Sets whether shared caches are guarded by internal mutexes. Set to `false` in
-    /// single-threaded environments to avoid locking overhead.
-    pub fn set_thread_safe_shared_resources(&mut self, thread_safe: bool) -> &mut Self {
-        self.native_mut().fThreadSafeSharedResources = thread_safe;
-        self
-    }
 }
 
 /// Skia's central context object for shared resources and internal caches.
