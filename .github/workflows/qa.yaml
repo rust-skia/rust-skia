@@ -36,7 +36,8 @@ jobs:
       run: |
         git config --global --add safe.directory "$GITHUB_WORKSPACE"
         just workflows
-        git diff --exit-code -- .github/workflows
+        git status --porcelain -- .github/workflows
+        test -z "$(git status --porcelain -- .github/workflows)"
 
   audit:
     runs-on: ubuntu-24.04
