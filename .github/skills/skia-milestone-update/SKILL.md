@@ -96,6 +96,17 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    this skill while a milestone branch is open. A branch that misses them builds on a fork
    stack without `master`'s latest fork patches and follows an outdated copy of this skill.
 
+   Then list the `master` commits that moved the Skia gitlink since `OLD_TAG` was cut:
+
+   ```sh
+   git log --oneline --since="$(git -C skia-bindings/skia log -1 --format=%cI refs/tags/OLD_TAG)" upstream/master -- skia-bindings/skia
+   ```
+
+   A commit that moves the gitlink to a tag other than `OLD_TAG` brings fork patches that
+   `OLD_TAG` lacks. List them with `git -C skia-bindings/skia log --oneline
+   refs/tags/TAG_BEFORE..refs/tags/TAG_AFTER`, and cherry-pick each onto the rebased
+   stack after step 3, before the tag is cut.
+
 2. Review the upstream diff. If it changes public headers, complete the full header
    accounting below before updating wrappers. Record internal-only changes as requiring
    no binding update.
