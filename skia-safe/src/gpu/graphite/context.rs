@@ -139,7 +139,7 @@ impl Context {
         state: &MutableTextureState,
     ) -> bool {
         unsafe {
-            sb::C_Context_setMutableState(self.native_mut(), texture.native(), state.native())
+            sb::C_Context_setMutableState(self.native_ptr(), texture.native(), state.native())
         }
     }
 
