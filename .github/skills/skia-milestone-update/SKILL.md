@@ -93,9 +93,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
    If it does not, rebase the parent branch onto `upstream/master` before anything else, and
    re-read this skill from there. `master` can gain fork tags, CI checks, and changes to
-   this skill while a milestone branch is open. During m157, the branch missed `m156.4` and
-   `m156.5`, so its fork stack lacked the third-party pin patches, and it carried an older
-   copy of this skill.
+   this skill while a milestone branch is open. A branch that misses them builds on a fork
+   stack without `master`'s latest fork patches and follows an outdated copy of this skill.
 
 2. Review the upstream diff. If it changes public headers, complete the full header
    accounting below before updating wrappers. Record internal-only changes as requiring
@@ -161,13 +160,13 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
    When the milestone commit was created before `master` gained changes to those files,
    a conflict resolution that keeps the milestone side (`--ours`/`--theirs`, "take mine")
-   silently reverts `master`'s changes to them. This is not hypothetical: it discarded
-   `master`'s README content and its `bindgen` upgrade during the m154 update. No build
-   or test fails, because a stale README is just text and the older `bindgen` still
-   builds, so `git diff` is the only reliable detector. Every removed line that `master`
-   added is a regression, even though `git log mNEW_MILESTONE..master` is empty (the
-   history is still an ancestor relationship; only the tree was damaged). Re-apply the
-   milestone deltas on top of `master`'s content and re-verify before proceeding.
+   silently reverts `master`'s changes to them, such as new README content or a
+   `bindgen` upgrade. No build or test fails, because a stale README is just text and the
+   older `bindgen` still builds, so `git diff` is the only reliable detector. Every removed
+   line that `master` added is a regression, even though `git log mNEW_MILESTONE..master`
+   is empty (the history is still an ancestor relationship; only the tree was damaged).
+   Re-apply the milestone deltas on top of `master`'s content and re-verify before
+   proceeding.
 
 7. Run `just diff-skia`, `cargo check -p skia-bindings`,
    `cargo check -p skia-safe`, and the platform tests appropriate to the change.
@@ -208,8 +207,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     in `include/core/SkMilestone.h`.
   `Cargo.lock` is gitignored and untracked, so it is not part of the commit. Delete it
   when you bump the versions, so that the first build re-resolves it. A stale local lock
-  fails the build even when the tree is correct (m157: bindgen failed to compile against
-  two `syn` versions).
+  fails the build even when the tree is correct, for example when it makes bindgen
+  compile against two `syn` versions.
   Add the synchronized crate version to any new `deprecated` attributes
   (`since = "0.XX.0"`). For a same-milestone upstream refresh, leave the crate
   versions unchanged and increment only the Skia fork tag's ordinal.
@@ -224,9 +223,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- RELEASE_NOTES.md relnotes/
   ```
 
-  A note can announce a change that no header or build-file diff shows. In m157, "Graphite
-  now requires >= iOS 14.0" came from a `std::atomic::wait` in a source file, and it
-  required raising `MIN_IOS_VERSION` in `skia-bindings/build_support/platform/ios.rs`.
+  A note can announce a change that no header or build-file diff shows. A new minimum OS
+  version, for example, can come from a single call in a source file. A new iOS minimum
+  requires raising `MIN_IOS_VERSION` in `skia-bindings/build_support/platform/ios.rs`.
 - **Build organization diff:** review whether the build organization changed
   significantly by diffing the build files between the old and new tags:
 
@@ -236,7 +235,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
   `.gn` belongs in the list because rust-skia builds Skia as the gn root, so the
   `default_args` in `.gn` apply to our build. A flag that `gn/skia.gni` declares off can
-  therefore be on (m157: `skia_enable_packed_422_yuv`). The defines that bindgen
+  therefore be on, as `skia_enable_packed_422_yuv` is. The defines that bindgen
   actually sees are in `skia-defines.txt`, next to the generated `bindings.rs`.
   Record each file as `no change` or `updated build glue` in the accounting. Most
   source-list changes flow through existing Skia targets and need no rust-skia
@@ -248,14 +247,14 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 - **Third-party dependencies (`DEPS`):** review every `deps` entry of the fork's
   `DEPS` file on every tag cut. Upstream Skia's `DEPS` and `third_party/*/BUILD.gn`
   serve only Skia's standalone build. Chrome compiles Skia's code against Chromium's own
-  copies of these libraries, so upstream rarely updates them. In m156, libpng, expat,
-  freetype, and harfbuzz were seven months old and brotli four years.
+  copies of these libraries, so upstream rarely updates them. Its pins can lag months or
+  years behind the libraries' releases.
   - Pin each library to the newer of two commits: the one Chromium uses for the same
     milestone, and Skia's own pin. One commit is newer when its history contains the
     other. When neither contains the other, the commit with the higher release version
-    is newer, whatever the commit dates say. In m156, Chromium's VulkanMemoryAllocator
-    sat on an `angle-vma-3.0` maintenance branch, which is older than Skia's v3.3.0
-    line. When Chromium pins no copy of the library, keep Skia's pin. Chromium pins no
+    is newer, whatever the commit dates say. A maintenance branch, such as the
+    `angle-vma-*` branches Chromium uses for VulkanMemoryAllocator, can carry recent
+    commits on an older release line. When Chromium pins no copy of the library, keep Skia's pin. Chromium pins no
     D3D12MemoryAllocator, because Chrome never builds Skia's Direct3D backend. The
     milestone's Chromium branch number is `chromium_branch` in
     `https://chromiumdash.appspot.com/fetch_milestones?mstone=XX`. Chromium's `DEPS` on
@@ -268,8 +267,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     library, it prints both pins and which one is newer by history. Pins it reports as
     diverged need the release versions compared by hand.
   - The one exception: when Chromium's commit has a known vulnerability that applies to
-    rust-skia and a newer stable release fixes it, pin that release. In m156, Chromium's
-    expat had 22 known vulnerabilities, and expat 2.9.0 had two.
+    rust-skia and a newer stable release fixes it, pin that release.
   - A vulnerability applies when rust-skia compiles the affected code. For example,
     harfbuzz's WebAssembly shaper is never compiled, because Skia does not define
     `HAVE_WASM`. Record every accepted vulnerability with its reason in
@@ -313,14 +311,13 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     refs/tags/OLD_TAG..refs/tags/NEW_TAG
   ```
 
-  The release notes miss some of these requirements. In m157 they announced iOS 14 for
-  Graphite's `std::atomic` wait, but not that the same wait needs macOS 11 and gcc 11's
-  libstdc++. Local builds do not reproduce CI's minimums, because CI pins
+  The release notes miss some of these requirements. One new language or library feature
+  can raise the minimums of several platforms, while the notes name only one of them. Local builds do not reproduce CI's minimums, because CI pins
   `MACOSX_DEPLOYMENT_TARGET` in `mk-workflows` and cross-compiles Linux aarch64 against
   the libstdc++ in the CI image (see `AGENTS.md`). Surface each requirement to the user as
   a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
-  whether a `rust-skia:` fork patch existed only to support the old one. m157.1 dropped
-  three `@available` workarounds that way.
+  whether a `rust-skia:` fork patch existed only to support the old one, such as an
+  `@available` workaround.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
@@ -333,8 +330,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   ```
 
   The `:(glob)` prefix makes `**/` match zero directories as well, so the list includes
-  headers that sit directly in a module's `include/` (m157: `Paragraph.h` and
-  `SkUnicode_apple.h`). Without it, `**/` requires at least one subdirectory. Review
+  headers that sit directly in a module's `include/`, such as
+  `modules/skparagraph/include/Paragraph.h`. Without it, `**/` requires at least one subdirectory. Review
   inline function and method implementations as carefully as declarations: they are
   compiled into consumers and can change behavior without changing the API signature.
   Include changes that look trivial (include moves, comments, friend declarations,
