@@ -27,6 +27,8 @@ import os
 import re
 import subprocess
 import sys
+import time
+import urllib.error
 import urllib.request
 
 DEFAULT_SKIA_PATH = "skia-bindings/skia"
@@ -39,9 +41,16 @@ IN_TREE_LIBRARIES = {"libpng", "brotli", "zlib"}
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
 
 
-def fetch(url):
-    with urllib.request.urlopen(url, timeout=60) as response:
-        return response.read().decode()
+def fetch(url, attempts=5):
+    # chromium.googlesource.com intermittently answers with 502 or 503, so server errors are retried.
+    for attempt in range(attempts):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as response:
+                return response.read().decode()
+        except urllib.error.HTTPError as error:
+            if error.code < 500 or attempt == attempts - 1:
+                raise
+            time.sleep(2**attempt)
 
 
 def chromium_file(branch, path):
