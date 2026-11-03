@@ -28,6 +28,8 @@ To contribute Rust code, format the code with `cargo fmt` and be sure that there
 
 If possible, add a small test case for your changes.
 
+In your PR description, say how you verified your change: which tests or examples you ran, and on which platform and backend. This matters most for code the CI cannot run, such as GPU backends or targets it only builds for. Please submit only changes you understand and can explain during review.
+
 Your PR will be built for and tested on a number of targets on the CI before it can be merged. If that fails, we will do our best to help out.
 
 If you'd like the changes in your PR to be released to [crates.io](https://crates.io/) timely, please say so, because we prefer to align crate releases with major [updates to Chrome stable](https://chromiumdash.appspot.com/schedule).
