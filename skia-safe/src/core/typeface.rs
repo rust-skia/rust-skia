@@ -413,6 +413,37 @@ impl Typeface {
     // TODO: Register()
 }
 
+/// A raw CoreText `CTFontRef`.
+///
+/// Cast from or to the `CTFont` type of the CoreText crate of your choice.
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "visionos"))]
+pub type CTFontRef = *const std::ffi::c_void;
+
+/// ports/SkTypeface_mac.h
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "visionos"))]
+impl Typeface {
+    /// Returns a new reference to the typeface for the specified `CTFontRef`.
+    ///
+    /// Skia retains `font`; the caller keeps its own reference.
+    ///
+    /// # Safety
+    ///
+    /// `font` must be a valid, non-null `CTFontRef`.
+    pub unsafe fn from_ct_font(font: CTFontRef) -> Option<Typeface> {
+        Typeface::from_ptr(unsafe { sb::C_SkMakeTypefaceFromCTFont(font) })
+    }
+
+    /// Returns the platform-specific `CTFontRef` of this typeface, or `None` if it is not backed
+    /// by CoreText.
+    ///
+    /// The returned reference is borrowed: it is released when this typeface is destroyed, so
+    /// retain it to keep it alive longer.
+    pub fn ct_font(&self) -> Option<CTFontRef> {
+        let font = unsafe { sb::C_SkTypeface_GetCTFontRef(self.native()) };
+        (!font.is_null()).then_some(font)
+    }
+}
+
 pub type LocalizedStringsIter = RefHandle<SkTypeface_LocalizedStrings>;
 
 impl NativeDelete for SkTypeface_LocalizedStrings {
@@ -513,6 +544,120 @@ mod tests {
             assert!(!data.is_empty());
         } else {
             println!("On this platform the default font does not supply existing font data.");
+        }
+    }
+
+    #[cfg(any(target_os = "macos", target_os = "ios", target_os = "visionos"))]
+    mod ct_font {
+        use std::ffi::{CString, c_char, c_void};
+
+        use crate::{FontMgr, FontStyle, Typeface};
+
+        type CFTypeRef = *const c_void;
+        const K_CF_STRING_ENCODING_UTF8: u32 = 0x0800_0100;
+
+        #[link(name = "CoreFoundation", kind = "framework")]
+        unsafe extern "C" {
+            fn CFStringCreateWithCString(
+                alloc: CFTypeRef,
+                c_str: *const c_char,
+                encoding: u32,
+            ) -> CFTypeRef;
+            fn CFStringGetCString(
+                the_string: CFTypeRef,
+                buffer: *mut c_char,
+                buffer_size: isize,
+                encoding: u32,
+            ) -> u8;
+            fn CFEqual(cf1: CFTypeRef, cf2: CFTypeRef) -> u8;
+            fn CFRelease(cf: CFTypeRef);
+        }
+
+        #[link(name = "CoreText", kind = "framework")]
+        unsafe extern "C" {
+            fn CTFontCreateWithName(name: CFTypeRef, size: f64, matrix: *const c_void)
+            -> CFTypeRef;
+            fn CTFontCopyPostScriptName(font: CFTypeRef) -> CFTypeRef;
+        }
+
+        fn create_ct_font(postscript_name: &str) -> CFTypeRef {
+            let name = CString::new(postscript_name).unwrap();
+            unsafe {
+                let name = CFStringCreateWithCString(
+                    std::ptr::null(),
+                    name.as_ptr(),
+                    K_CF_STRING_ENCODING_UTF8,
+                );
+                assert!(!name.is_null());
+                let font = CTFontCreateWithName(name, 12.0, std::ptr::null());
+                CFRelease(name);
+                assert!(!font.is_null());
+                font
+            }
+        }
+
+        fn postscript_name(font: CFTypeRef) -> String {
+            let mut buffer = [0 as c_char; 256];
+            unsafe {
+                let name = CTFontCopyPostScriptName(font);
+                let ok = CFStringGetCString(
+                    name,
+                    buffer.as_mut_ptr(),
+                    buffer.len() as isize,
+                    K_CF_STRING_ENCODING_UTF8,
+                );
+                CFRelease(name);
+                assert_ne!(ok, 0);
+                std::ffi::CStr::from_ptr(buffer.as_ptr())
+                    .to_string_lossy()
+                    .into_owned()
+            }
+        }
+
+        fn round_trip(postscript_name_in: &str, family_name: &str) -> Typeface {
+            let font = create_ct_font(postscript_name_in);
+            // CoreText silently substitutes a fallback for unknown names.
+            assert_eq!(postscript_name(font), postscript_name_in);
+
+            let tf = unsafe { Typeface::from_ct_font(font) }.unwrap();
+            assert_eq!(tf.family_name(), family_name);
+            let tf_font = tf.ct_font().unwrap();
+            assert_ne!(unsafe { CFEqual(tf_font, font) }, 0);
+
+            // Skia keeps its own reference.
+            unsafe { CFRelease(font) };
+            assert_eq!(postscript_name(tf.ct_font().unwrap()), postscript_name_in);
+
+            let tf2 = unsafe { Typeface::from_ct_font(tf_font) }.unwrap();
+            assert!(Typeface::equal(&tf, &tf2));
+            assert_eq!(tf2.ct_font(), Some(tf_font));
+            tf
+        }
+
+        #[test]
+        fn default_typeface_round_trip() {
+            let tf = FontMgr::new()
+                .legacy_make_typeface(None, FontStyle::normal())
+                .unwrap();
+            let font = tf.ct_font().unwrap();
+            let tf2 = unsafe { Typeface::from_ct_font(font) }.unwrap();
+            assert!(Typeface::equal(&tf, &tf2));
+            assert_eq!(tf2.ct_font(), Some(font));
+        }
+
+        #[test]
+        fn named_typeface_round_trip() {
+            let tf = round_trip("Helvetica", "Helvetica");
+            let (data, _) = tf.to_font_bytes().unwrap();
+            assert!(!data.is_empty());
+        }
+
+        /// PingFang SC is a face of a system font collection (PingFang*.ttc).
+        #[test]
+        fn ttc_typeface_round_trip() {
+            let tf = round_trip("PingFangSC-Regular", "PingFang SC");
+            let glyph = tf.unichar_to_glyph('\u{4e2d}' as i32);
+            assert_ne!(glyph, 0);
         }
     }
 }

@@ -2614,6 +2614,27 @@ extern "C" SkFontMgr* C_SkFontMgr_NewSystem() {
     return mgr.release();
 }
 
+//
+// ports/SkTypeface_mac.h
+//
+
+#if defined(SK_FONTMGR_CORETEXT_AVAILABLE) && (defined(SK_BUILD_FOR_IOS) || defined(SK_BUILD_FOR_MAC))
+#include "include/ports/SkTypeface_mac.h"
+
+// `CTFontRef` is passed as `const void*` so that bindgen does not pull CoreText types into the
+// bindings.
+
+// Skia retains the font, the caller keeps its own reference.
+extern "C" SkTypeface* C_SkMakeTypefaceFromCTFont(const void* font) {
+    return SkMakeTypefaceFromCTFont(static_cast<CTFontRef>(font)).release();
+}
+
+// The returned font is borrowed and gets released when the typeface is destroyed.
+extern "C" const void* C_SkTypeface_GetCTFontRef(const SkTypeface* face) {
+    return SkTypeface_GetCTFontRef(face);
+}
+#endif
+
 extern "C" SkFontMgr* C_SkFontMgr_RefEmpty() {
     return SkFontMgr::RefEmpty().release();
 }
