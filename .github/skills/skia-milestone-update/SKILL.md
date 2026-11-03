@@ -121,8 +121,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
    git -C skia-bindings/skia rebase --onto upstream/chrome/mXX OLD_BASE
    ```
 
-   If the temporary branch already exists, switch to it instead of recreating it:
-   `git -C skia-bindings/skia switch refs/heads/mNEW_MILESTONE-refresh`.
+   If the temporary branch already exists, switch to it instead of recreating it. `git
+   switch` accepts only a bare branch name, which the naming rule above keeps distinct
+   from every tag: `git -C skia-bindings/skia switch mNEW_MILESTONE-refresh`.
 
 4. Verify that every downstream patch is unchanged and that the result is based on the
    refreshed upstream tip:
