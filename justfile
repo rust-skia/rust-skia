@@ -171,6 +171,15 @@ test-macos:
 workflows:
     cargo run -p mk-workflows
 
+# Fail when the committed workflows differ from what `mk-workflows` generates.
+check-workflows: workflows
+    git status --porcelain -- .github/workflows
+    test -z "$(git status --porcelain -- .github/workflows)"
+
+# Run the checks of the `qa` workflow, except cargo-deny, which needs its own tool.
+qa: check-skia-submodule-tag check-workflows audit-skia-deps
+    cargo fmt -- --check
+
 # The libraries are passed through `SKIA_BUILD_DEFINES` and `SKIA_LIBRARY_SEARCH_PATH`.
 # See https://github.com/rust-skia/rust-skia/pull/527.
 # Test a build that links locally built Skia libraries.
