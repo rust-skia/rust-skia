@@ -2,8 +2,15 @@
 # Shared helpers for the rust-skia release image/vector comparison scripts.
 # This file is sourced, not executed. It defines functions and expects the
 # caller to have set: report, platforms, repo, baseline_sha, release_sha,
-# comparison, differences, compared_any, and a `prepare_image` function that
-# maps a source file to a rasterized PNG for comparison.
+# comparison, differences, byte_differences, compared_any, and a
+# `prepare_image` function that maps a source file to a rasterized PNG for
+# comparison.
+#
+# Every compared file gets one of these statuses in summary.tsv. `identical`
+# means the two files are byte-for-byte equal. `matched` means the rendered
+# pixels are equal but the bytes differ, for example in PDF metadata such as
+# the Producer milestone. `changed`, `size-changed`, `added`, and `removed`
+# are differences that need review.
 
 # Use the report directory the caller passed, or create a new one under
 # $TMPDIR. A fixed default directory would still hold the files of an earlier
@@ -88,6 +95,10 @@ compare_format() {
         [[ -n "$path" ]] || continue
         old="$bdir/$path"
         new="$cdir/$path"
+        if cmp -s "$old" "$new"; then
+            printf 'identical\t0\t-\t%s\t%s/%s\n' "$tag" "$subdir" "$path" >>"$comparison/summary.tsv"
+            continue
+        fi
         old_img="$(prepare_image "$old" "$ext" "$tag" "$subdir" "$path")"
         new_img="$(prepare_image "$new" "$ext" "$tag" "$subdir" "$path")"
 
@@ -108,6 +119,7 @@ compare_format() {
         set -e
         if [[ $status -eq 0 ]]; then
             printf 'matched\t0\t%s\t%s\t%s/%s\n' "$old_size" "$tag" "$subdir" "$path" >>"$comparison/summary.tsv"
+            byte_differences=$((byte_differences + 1))
             rm -f "$diff_path"
         elif [[ $status -eq 1 ]]; then
             magick "$old_img" "$new_img" "$diff_path" +append "$review_path"

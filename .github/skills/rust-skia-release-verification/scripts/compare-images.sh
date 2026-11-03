@@ -6,7 +6,8 @@ set -euo pipefail
 # artifacts. These images are rendered by Skia itself, so a difference is a
 # genuine regression.
 #
-# Exit status: 0 = exact match, 1 = differences to review, 2 = could not run.
+# Exit status: 0 = every image pixel-identical, 1 = differences to review,
+# 2 = could not run.
 
 previous="${1:?previous version is required}"
 commit="${2:?release commit is required}"
@@ -32,6 +33,7 @@ comparison="$report/comparison"
 mkdir -p "$comparison/diff" "$comparison/review"
 printf 'status\tpixels\tdimensions\tplatform\tpath\n' >"$comparison/summary.tsv"
 differences=0
+byte_differences=0
 compared_any=0
 
 # CPU PNGs are compared directly; no rasterization needed.
@@ -59,6 +61,7 @@ for_each_platform
     exit 2
 }
 
+echo "Pixel-identical files whose bytes differ: $byte_differences"
 echo "Differences requiring review: $differences"
 echo "Summary: $comparison/summary.tsv"
 [[ $differences -eq 0 ]] || exit 1

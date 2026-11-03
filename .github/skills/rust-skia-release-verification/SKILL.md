@@ -27,10 +27,13 @@ release.
    because pushing `release` triggers binary workflows but not QA workflows.
    The script prints its report directory as `Report:` and its summary as
    `Summary:`. Read that `summary.tsv` and inspect the `review` directory next
-   to it. Exit status 0 is an exact match, 1 means differences require
-   review, and 2 means the check could not run. Added, removed, resized,
-   blank, corrupt, clipped, missing-text, wrong-color, and unexplained pixel
-   changes block publication.
+   to it. Exit status 0 means every image is pixel-identical, 1 means
+   differences require review, and 2 means the check could not run. Added,
+   removed, resized, blank, corrupt, clipped, missing-text, wrong-color, and
+   unexplained pixel changes block publication.
+   In the summary, `identical` means byte-for-byte equal and `matched` means
+   pixel-identical with different bytes. Report the two counts separately and
+   name what the differing bytes contain, such as PDF `Producer` metadata.
 3. Run `just release-verify-vector <previous-version> <commit>` and inspect the
    reported SVG/PDF differences (advisory). This rasterizes the `svg/` and
    `pdf/` trees with third-party tools (`rsvg-convert`, Ghostscript) that are

@@ -22,10 +22,11 @@ Set `<version>`, `<previous>`, `<commit>`, and `<notes>` to concrete values.
 - [ ] Review `<notes>` against the
       [release notes guidelines](release-notes-guidelines.md).
 
-Image comparison exits 0 for an exact match, 1 when differences need human
-review, and 2 when the check could not run. Stop for a failed workflow, missing
-artifact, source-build fallback, or unexplained image change. The vector gate
-is advisory: treat its differences as a signal to review, not a hard block.
+Image comparison exits 0 when every image is pixel-identical, 1 when
+differences need human review, and 2 when the check could not run. Stop for a
+failed workflow, missing artifact, source-build fallback, or unexplained image
+change. The vector gate is advisory: treat its differences as a signal to
+review, not a hard block.
 
 ## Publish
 
