@@ -210,7 +210,8 @@ diff-skia flags="--no-patch" master="upstream/master":
     #!/usr/bin/env bash
     set -euo pipefail
     milestone() { sed -nE 's/^skia = "m([0-9]+)[.-].*/\1/p'; }
-    git fetch --quiet "$(dirname {{ master }})" "$(basename {{ master }})"
+    master="{{ master }}"
+    git fetch --quiet "${master%%/*}" "${master#*/}"
     cd skia-bindings/skia
     master_tip="$(git -C ../.. rev-parse {{ master }}:skia-bindings/skia)"
     master_base="$(git merge-base "$master_tip" "upstream/chrome/m$(git -C ../.. show {{ master }}:skia-bindings/Cargo.toml | milestone)")"
