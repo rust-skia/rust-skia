@@ -395,6 +395,10 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   without trying too hard before 1.0, use `#[deprecated]` if needed, look for `todo!()`
   macros that can now be resolved, and review `Send` & `Sync` and `Debug`
   implementations for new wrappers.
+- **Ported docs:** record every doc ported or changed for the milestone in a
+  `# mXX update` section of `skia-safe/docs-porting-tracker.md`, with the header each
+  doc comes from and any C++ sentence left out on purpose. The milestone line at the top
+  of the tracker points to that section.
 
 ## Release notes
 
