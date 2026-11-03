@@ -30,6 +30,8 @@ For crate publication:
 - If the recipe stops because documentation generation reports missing or
    incompatible files under a nested Skia dependency, nothing has been
    published. Repair or resynchronize that checkout, then rerun the recipe.
+- The documentation build runs `cargo build -vv`, which also prints the
+   warnings of third-party dependencies. Only an error stops publication.
 - Post-publication smoke tests must install the exact release with
    `skia-safe@=<version>`, including the Emscripten build. An unpinned install
    can select an older release and produce an irrelevant failure.
