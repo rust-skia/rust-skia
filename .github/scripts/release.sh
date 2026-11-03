@@ -159,11 +159,17 @@ verify_release() {
     summary
 }
 
+# The registry is named explicitly, because an unqualified lookup resolves the local workspace
+# package and would report an unpublished version as published.
+crate_published() {
+    cargo info --registry crates-io "$1@$2" >/dev/null 2>&1
+}
+
 wait_for_crate() {
     local crate="$1" version="$2"
     local attempt
     for attempt in {1..12}; do
-        if cargo info --registry crates-io "$crate@$version" >/dev/null 2>&1; then
+        if crate_published "$crate" "$version"; then
             echo "Available: $crate@$version"
             return
         fi
@@ -176,12 +182,29 @@ wait_for_crate() {
 publish_if_needed() {
     local crate="$1" version="$2"
     shift 2
-    if cargo info --registry crates-io "$crate@$version" >/dev/null 2>&1; then
+    if crate_published "$crate" "$version"; then
         echo "Already published: $crate@$version"
     else
         "$@"
     fi
     wait_for_crate "$crate" "$version"
+}
+
+# The skia-bindings package carries the documentation bindings, and generating them builds Skia
+# from source. Generating them before the first publication makes a damaged nested dependency
+# checkout under skia-bindings/skia/third_party fail while nothing is published yet, instead of
+# after skia-svg-macros is already on crates.io. A run that resumes after skia-bindings was
+# published does not need them.
+bindings_docs_check() {
+    local version="$1"
+    if crate_published skia-bindings "$version"; then
+        echo "Already published: skia-bindings@$version; documentation bindings not needed"
+        return
+    fi
+    rm -f /tmp/bindings.rs
+    just bindings-docs || die "generating the documentation bindings failed; nothing was published"
+    [[ -s /tmp/bindings.rs ]] || die "just bindings-docs did not produce /tmp/bindings.rs"
+    ok "documentation bindings generated in /tmp/bindings.rs"
 }
 
 publish_crates() {
@@ -194,8 +217,12 @@ publish_crates() {
         die "requested $version, manifests contain bindings=$bindings safe=$safe"
     [[ "$(bindings_dependency_version)" == "$version" ]] ||
         die "skia-safe does not require skia-bindings =$version"
+    # The FORCE_SKIA_* overrides of the calling shell are cleared, so that the check of the
+    # documentation bindings and the builds that publish obtain Skia the same way.
+    unset FORCE_SKIA_BUILD FORCE_SKIA_BINARIES_DOWNLOAD
     checkout_check
     emsdk_check
+    bindings_docs_check "$version"
 
     svg_check "$previous"
     if ! git diff --quiet "$previous"..HEAD -- skia-svg-macros; then

@@ -18,21 +18,18 @@ result is missing, stale, or mismatched, stop and invoke the
 
 ## Failure prevention
 
-Before requesting approval for crate publication:
+For crate publication:
 
 - Query publication state with
    `cargo info --registry crates-io <crate>@<version>`. An unqualified lookup
    can resolve the local workspace package and falsely report it as published.
-- With no source-build or package check running, generate documentation
-   bindings using `env -u FORCE_SKIA_BUILD -u FORCE_SKIA_BINARIES_DOWNLOAD just
-   bindings-docs`. Require a successful exit and a non-empty
-   `/tmp/bindings.rs` before publishing any crate, including
-   `skia-svg-macros`. This catches a damaged nested dependency checkout before
-   publication becomes partial.
-- If documentation generation reports missing or incompatible files under a
-   nested Skia dependency, stop. Repair or resynchronize that checkout, then
-   rerun the documentation-binding preflight; never overlap it with another
-   Skia source build.
+- Start `just release-publish-crates` only while no other Skia source build or
+   package check is running. Before it publishes any crate, it builds Skia from
+   source to generate the documentation bindings, and concurrent builds damage
+   the nested dependency checkouts they share.
+- If the recipe stops because documentation generation reports missing or
+   incompatible files under a nested Skia dependency, nothing has been
+   published. Repair or resynchronize that checkout, then rerun the recipe.
 - Post-publication smoke tests must install the exact release with
    `skia-safe@=<version>`, including the Emscripten build. An unpinned install
    can select an older release and produce an irrelevant failure.
