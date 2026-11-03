@@ -32,6 +32,8 @@ In your PR description, say how you verified your change: which tests or example
 
 Your PR will be built for and tested on a number of targets on the CI before it can be merged. If that fails, we will do our best to help out.
 
+We often merge a PR that is good enough as a first iteration and then make corrections ourselves, instead of asking you for another round. If your PR allows edits from maintainers, we may also push corrections directly to its branch. So don't depend on that branch elsewhere, for example as a git dependency, because its history may change. Either way, we say so in the PR.
+
 If you'd like the changes in your PR to be released to [crates.io](https://crates.io/) timely, please say so, because we prefer to align crate releases with major [updates to Chrome stable](https://chromiumdash.appspot.com/schedule).
 
 ## Licensing
