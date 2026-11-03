@@ -14,6 +14,10 @@ at that item and tell the user the date. It is based on the
 wiki page and extends it with project-specific coverage such as Graphite. The
 `just diff-skia` caveat lives in `AGENTS.md` — read it before starting.
 
+CI builds and tests every platform on the PR. Leave each build or check that CI runs to
+CI, unless the checklist or this skill names it, and run the named ones natively on the
+local machine.
+
 ## Inputs
 
 - `OLD_TAG`: the current Skia submodule tag (e.g. `m154.5`)
@@ -289,10 +293,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     The build script does not track `DEPS` or the `third_party` build files. Without
     the touch, Cargo reuses the previous Skia build and the new pins are never compiled.
-    Run only builds the local machine supports natively. Never use Docker, another
-    container runtime, or a virtual machine to build for another platform. The local build compiles the pins its platform
-    uses. macOS, iOS, and Windows render fonts with CoreText or DirectWrite and build Skia
-    without freetype, so the build drops `embed-freetype` and `freetype-woff2` there as
+    The local build compiles the pins its platform uses. macOS, iOS, and Windows render
+    fonts with CoreText or DirectWrite and build Skia without freetype, so the build drops `embed-freetype` and `freetype-woff2` there as
     redundant. CI compiles the Linux pins. The Linux QA jobs on the PR build Skia from
     source with `svg`, `textlayout`, and `webp`, and the Linux binaries job on the release
     branch builds `embed-freetype`. No CI job builds `freetype-woff2`, so tell the user
