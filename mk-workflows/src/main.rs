@@ -16,14 +16,14 @@ const LINUX_JOB: &str = include_str!("templates/linux-job.yaml");
 const WASM_JOB: &str = include_str!("templates/wasm-job.yaml");
 const WINDOWS_JOB: &str = include_str!("templates/windows-job.yaml");
 const WINDOWS_ARM_JOB: &str = include_str!("templates/windows-arm-job.yaml");
+const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
+const TARGET_TEMPLATE: &str = include_str!("templates/target.yaml");
 
 /// The minimum macOS version that every macOS build targets.
 ///
 /// Skia's Graphite backend uses C++20 `std::atomic::wait` and `notify_one`, which libc++ makes
 /// available starting with macOS 11.0.
 const MACOSX_DEPLOYMENT_TARGET: &str = "11.0";
-const MACOS_JOB: &str = include_str!("templates/macos-job.yaml");
-const TARGET_TEMPLATE: &str = include_str!("templates/target.yaml");
 
 fn main() {
     for workflow in config::workflows() {
