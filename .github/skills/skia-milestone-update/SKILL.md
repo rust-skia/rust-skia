@@ -300,8 +300,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   - Only the current platform's branches of each `BUILD.gn` are compiled, so a stale
     path in another platform's branch, or in a header list, breaks no local build.
     `just check-third-party-sources` must pass. It checks every path the
-    `third_party` build files list against the checkouts of the pinned libraries, and
-    names the libraries it skipped because their checkout is not at the pin.
+    `third_party` build files list against the checkouts of the pinned libraries. It fails
+    and names the libraries it skipped when their checkout is not at the pin.
 - **Toolchain requirements:** list the upstream commits that may raise a compiler,
   C++ library, or OS minimum, and read each commit message:
 

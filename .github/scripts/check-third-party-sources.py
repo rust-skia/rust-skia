@@ -18,7 +18,8 @@ A library's checkout must be at the commit its DEPS entry pins, so that the chec
 of that commit. The script skips the libraries whose checkout is missing or at another commit and
 names them, so they can be synced with `git-sync-deps` and checked again.
 
-The script prints every missing path and exits with status 1 if there is one.
+The script prints every missing path. It exits with status 1 if a path is missing or a library
+was skipped, so that a check that could not see every library never passes.
 
 Usage: check-third-party-sources.py [path/to/skia]
 """
@@ -122,7 +123,7 @@ def main():
         print(f"Skipped, not at their DEPS pin: {', '.join(unsynced)}")
     print(f"Checked {checked} paths into {len(libraries) - len(unsynced)} pinned libraries, "
           f"{missing} missing.")
-    sys.exit(1 if missing else 0)
+    sys.exit(1 if missing or unsynced else 0)
 
 
 if __name__ == "__main__":
