@@ -33,6 +33,8 @@ DEFAULT_SKIA_PATH = "skia-bindings/skia"
 EXTERNALS_PREFIX = "third_party/externals/"
 CHROMIUMDASH = "https://chromiumdash.appspot.com/fetch_milestones?mstone="
 CHROMIUM_SRC = "https://chromium.googlesource.com/chromium/src/+/refs/branch-heads"
+# The libraries that are part of Chromium's own tree instead of being pinned in its DEPS.
+IN_TREE_LIBRARIES = {"libpng", "brotli", "zlib"}
 
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
 
@@ -106,7 +108,7 @@ def readme_field(branch, library, field):
 
 
 def in_tree_pin(branch, library, checkout):
-    """Return Chromium's pin for a library that is part of Chromium's own tree, or None."""
+    """Return Chromium's pin for a library in IN_TREE_LIBRARIES, or None when the lookup fails."""
     if library == "libpng":
         version = readme_field(branch, "libpng", "Version")
         git(checkout, "fetch", "--quiet", "--tags", "origin")
@@ -125,6 +127,8 @@ def in_tree_pin(branch, library, checkout):
 def verdict(checkout, ours, theirs):
     if ours == theirs:
         return "same"
+    if not ensure_commit(checkout, ours):
+        return "our commit could not be fetched"
     if not ensure_commit(checkout, theirs):
         return "Chromium's commit could not be fetched"
     if git(checkout, "merge-base", "--is-ancestor", ours, theirs).returncode == 0:
@@ -154,8 +158,11 @@ def main():
         repository, ours = value.rsplit("@", 1)
 
         theirs = chromium_pins.get(repository_path(repository))
-        if theirs is None and os.path.isdir(checkout):
+        if theirs is None and library in IN_TREE_LIBRARIES and os.path.isdir(checkout):
             theirs = in_tree_pin(branch, library, checkout)
+            if theirs is None:
+                print(f"{library}: ours {ours[:10]}, Chromium's in-tree pin not found")
+                continue
         if theirs is None:
             print(f"{library}: ours {ours[:10]}, Chromium pins none")
             continue
