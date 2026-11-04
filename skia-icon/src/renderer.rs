@@ -26,7 +26,9 @@ pub fn render_frame(
     canvas: &skia_safe::canvas::Canvas,
 ) -> usize {
     let step = 12.0 * bpm as f32 / 60.0 / fps as f32;
-    let frame_count = (360.0 / step) as usize;
+    // `step` is inexact in `f32`, so the quotient can land just below a whole number, which a
+    // plain cast would truncate to one frame too few.
+    let frame_count = (360.0 / step).round() as usize;
 
     let dims = canvas.image_info().dimensions();
     // Scale by the smaller dimension, but center the logo in the canvas so it
