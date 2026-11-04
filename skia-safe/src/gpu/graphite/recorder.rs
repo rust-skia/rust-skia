@@ -3,6 +3,7 @@ use std::fmt;
 use std::marker::PhantomData;
 use std::mem::{self, ManuallyDrop};
 use std::ops::Deref;
+use std::ptr;
 
 use skia_bindings as sb;
 
@@ -73,25 +74,27 @@ impl RecorderOptions {
 /// [`Image::unique_id`], as Chrome does, avoids uploading the same image on every draw:
 ///
 /// ```no_run
-/// use std::collections::HashMap;
+/// use std::{cell::RefCell, collections::HashMap};
 /// use skia_safe::{gpu::graphite, image::RequiredProperties, Image};
 ///
 /// #[derive(Default)]
-/// struct CachingProvider(HashMap<(u32, bool), Image>);
+/// struct CachingProvider(RefCell<HashMap<(u32, bool), Image>>);
 ///
 /// impl graphite::ImageProvider for CachingProvider {
 ///     fn find_or_create(
-///         &mut self,
-///         recorder: &mut graphite::BorrowedRecorder,
+///         &self,
+///         recorder: &graphite::BorrowedRecorder,
 ///         image: &Image,
 ///         required: RequiredProperties,
 ///     ) -> Option<Image> {
 ///         let key = (image.unique_id(), required.mipmapped);
-///         if let Some(cached) = self.0.get(&key) {
+///         if let Some(cached) = self.0.borrow().get(&key) {
 ///             return Some(cached.clone());
 ///         }
+///         // Uploading a picture-backed image replays its picture, which calls this provider
+///         // again, so the cache must not stay borrowed across the upload.
 ///         let uploaded = recorder.texture_from_image(image, required)?;
-///         self.0.insert(key, uploaded.clone());
+///         self.0.borrow_mut().insert(key, uploaded.clone());
 ///         Some(uploaded)
 ///     }
 /// }
@@ -100,14 +103,16 @@ impl RecorderOptions {
 /// options.set_image_provider(CachingProvider::default());
 /// ```
 ///
-/// If the same provider is given to multiple recorders, the client is responsible for any
-/// synchronization; see the Skia documentation of `skgpu::graphite::ImageProvider`.
+/// Graphite calls the provider again while it is still running whenever an upload draws, for
+/// example when a picture-backed image is uploaded. That is why the provider receives only shared
+/// references, and why a caching provider keeps its cache in a `RefCell` that it does not borrow
+/// across an upload.
 pub trait ImageProvider {
     /// Returns a Graphite-backed version of `image` that has the `required` properties, or `None`
     /// to drop the draw.
     fn find_or_create(
-        &mut self,
-        recorder: &mut BorrowedRecorder,
+        &self,
+        recorder: &BorrowedRecorder,
         image: &Image,
         required: RequiredProperties,
     ) -> Option<Image>;
@@ -125,25 +130,25 @@ unsafe extern "C" fn find_or_create<T: ImageProvider>(
     image: *const sb::SkImage,
     required: *const sb::SkImage_RequiredProperties,
 ) -> *mut sb::SkImage {
-    let provider = unsafe { &mut *provider.cast::<T>() };
+    let provider = unsafe { &*provider.cast::<T>() };
     let Some(recorder) = Recorder::from_ptr(recorder) else {
-        return std::ptr::null_mut();
+        return ptr::null_mut();
     };
-    let mut recorder = BorrowedRecorder {
+    let recorder = BorrowedRecorder {
         recorder: ManuallyDrop::new(recorder),
         _owner: PhantomData,
     };
     let image_ptr = image as *mut sb::SkImage;
     let Some(image) = Image::from_unshared_ptr_ref(&image_ptr) else {
-        return std::ptr::null_mut();
+        return ptr::null_mut();
     };
     let required = RequiredProperties {
         mipmapped: unsafe { (*required).fMipmapped },
     };
     provider
-        .find_or_create(&mut recorder, image, required)
+        .find_or_create(&recorder, image, required)
         .map(|image| image.into_ptr())
-        .unwrap_or(std::ptr::null_mut())
+        .unwrap_or(ptr::null_mut())
 }
 
 // `skgpu::graphite::Recorder` is handed out as `std::unique_ptr<Recorder>`
@@ -192,14 +197,10 @@ impl<'a> BorrowedRecorder<'a> {
 
     /// Uploads `image` and returns a Graphite-backed version of it with the `required`
     /// properties. See [`super::images::texture_from_image`].
-    pub fn texture_from_image(
-        &mut self,
-        image: &Image,
-        required: RequiredProperties,
-    ) -> Option<Image> {
+    pub fn texture_from_image(&self, image: &Image, required: RequiredProperties) -> Option<Image> {
         Image::from_ptr(unsafe {
             sb::C_SkImages_TextureFromImageGraphite(
-                self.recorder.native_ptr(),
+                self.recorder.native_mut_force(),
                 image.native(),
                 required.native(),
             )
@@ -307,8 +308,8 @@ mod tests {
         }
         impl ImageProvider for Provider {
             fn find_or_create(
-                &mut self,
-                _recorder: &mut BorrowedRecorder,
+                &self,
+                _recorder: &BorrowedRecorder,
                 _image: &Image,
                 _required: RequiredProperties,
             ) -> Option<Image> {
