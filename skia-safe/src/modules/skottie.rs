@@ -370,10 +370,10 @@ mod tests {
         let _anim = builder.make(json).expect("build failed");
     }
 
-    /// A boxed provider must still receive its override of the defaulted `load_image_asset`, and
-    /// C++ must drop it exactly once.
+    /// C++ holds a boxed provider as a `void*` to its `Box<dyn ResourceProvider>`. This test runs
+    /// that pointer through every callback and checks that C++ releases the provider exactly once.
     #[test]
-    fn boxed_resource_provider_receives_every_call() {
+    fn boxed_resource_provider_reaches_overrides_and_drops_once() {
         let calls = Rc::new(RefCell::new(Vec::new()));
         let provider: Box<dyn ResourceProvider> = Box::new(RecordingResourceProvider {
             calls: calls.clone(),
@@ -406,9 +406,8 @@ mod tests {
         "layers":[{"ty":2,"refId":"image","ip":0,"op":30,"st":0,"ks":{}}]
     }"#;
 
-    /// Records each call that reaches it, including its own drop. It overrides
-    /// `load_image_asset`, so a wrapper that does not forward the override would record `load`
-    /// instead.
+    /// Records each call that reaches it, including its own drop, so the test sees which callbacks
+    /// C++ invoked and that the drop ran once.
     struct RecordingResourceProvider {
         calls: Rc<RefCell<Vec<String>>>,
     }

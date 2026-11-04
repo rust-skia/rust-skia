@@ -1,7 +1,6 @@
 //! Resource provider interfaces for loading images, fonts, and other assets used by animation and vector modules (Skia's `skresources` module).
 use std::borrow::Cow;
 use std::ffi::{CStr, c_void};
-use std::fmt;
 use std::mem;
 use std::os::raw;
 use std::ptr;
@@ -95,129 +94,105 @@ impl NativeRefCountedBase for RustResourceProvider {
 
 impl<T: ResourceProvider + 'static> From<T> for NativeResourceProvider {
     fn from(resource_provider: T) -> Self {
-        let param = RustResourceProvider_Param {
-            data: Box::into_raw(Box::new(resource_provider)).cast(),
-            drop: Some(drop::<T>),
-            load: Some(load::<T>),
-            loadImageAsset: Some(load_image_asset::<T>),
-            loadTypeface: Some(load_typeface::<T>),
-            fontMgr: Some(font_mgr::<T>),
-        };
-
-        let skia_resource_provider =
-            NativeResourceProvider::from_ptr(unsafe { sb::C_RustResourceProvider_New(&param) })
-                .unwrap();
-
-        return skia_resource_provider;
-
-        unsafe extern "C" fn drop<T>(provider: *mut c_void) {
-            mem::drop(unsafe { Box::from_raw(provider.cast::<T>()) });
-        }
-
-        unsafe extern "C" fn load<T: ResourceProvider>(
-            provider: *mut c_void,
-            resource_path: *const raw::c_char,
-            resource_name: *const raw::c_char,
-        ) -> *mut SkData {
-            unsafe {
-                provider_ref::<T>(provider)
-                    .load(&uncstr(resource_path), &uncstr(resource_name))
-                    .map(|data| data.into_ptr())
-                    .unwrap_or(ptr::null_mut())
-            }
-        }
-
-        unsafe extern "C" fn load_image_asset<T: ResourceProvider>(
-            provider: *mut c_void,
-            resource_path: *const raw::c_char,
-            resource_name: *const raw::c_char,
-            resource_id: *const raw::c_char,
-        ) -> *mut skresources_ImageAsset {
-            unsafe {
-                provider_ref::<T>(provider)
-                    .load_image_asset(
-                        &uncstr(resource_path),
-                        &uncstr(resource_name),
-                        &uncstr(resource_id),
-                    )
-                    .map(|image_asset| image_asset.into_ptr())
-                    .unwrap_or(ptr::null_mut())
-            }
-        }
-
-        unsafe extern "C" fn load_typeface<T: ResourceProvider>(
-            provider: *mut c_void,
-            name: *const raw::c_char,
-            url: *const raw::c_char,
-        ) -> *mut SkTypeface {
-            unsafe {
-                provider_ref::<T>(provider)
-                    .load_typeface(&uncstr(name), &uncstr(url))
-                    .map(|typeface| typeface.into_ptr())
-                    .unwrap_or(ptr::null_mut())
-            }
-        }
-
-        unsafe extern "C" fn font_mgr<T: ResourceProvider>(
-            provider: *mut c_void,
-        ) -> *mut SkFontMgr {
-            unsafe { provider_ref::<T>(provider).font_mgr().into_ptr() }
-        }
-
-        /// `provider` is the `Box<T>` leaked in `from`, the only place that pairs it with the
-        /// callbacks above. It stays valid until `drop` reclaims it.
-        unsafe fn provider_ref<'a, T>(provider: *mut c_void) -> &'a T {
-            unsafe { &*provider.cast::<T>() }
-        }
-
-        unsafe fn uncstr(ptr: *const raw::c_char) -> Cow<'static, str> {
-            if !ptr.is_null() {
-                return unsafe { CStr::from_ptr(ptr).to_string_lossy() };
-            }
-            "".into()
-        }
+        native_resource_provider(Box::new(resource_provider))
     }
 }
 
 impl From<Box<dyn ResourceProvider>> for NativeResourceProvider {
     fn from(resource_provider: Box<dyn ResourceProvider>) -> Self {
-        DynResourceProvider(resource_provider).into()
+        native_resource_provider(resource_provider)
     }
 }
 
-/// Wraps a boxed resource provider, so that it can take the same conversion path as a concrete
-/// one. It must forward every method, because a method it does not forward would fall back to the
-/// trait's default and silently bypass an override of the boxed provider.
-struct DynResourceProvider(Box<dyn ResourceProvider>);
+/// Hands a boxed provider to a new C++ `RustResourceProvider`, which owns it from then on.
+///
+/// Both `From` impls go through here, so a concrete provider and a boxed trait object reach the
+/// same callbacks. C++ receives a pointer to the `Box<P>` rather than the `Box<P>` itself, because
+/// a `Box<dyn ResourceProvider>` is a fat pointer and does not fit into a `void*`.
+/// `boxed_resource_provider_reaches_overrides_and_drops_once` pins this.
+fn native_resource_provider<P: ResourceProvider + ?Sized + 'static>(
+    resource_provider: Box<P>,
+) -> NativeResourceProvider {
+    let param = RustResourceProvider_Param {
+        data: Box::into_raw(Box::new(resource_provider)).cast(),
+        drop: Some(drop::<P>),
+        load: Some(load::<P>),
+        loadImageAsset: Some(load_image_asset::<P>),
+        loadTypeface: Some(load_typeface::<P>),
+        fontMgr: Some(font_mgr::<P>),
+    };
 
-impl fmt::Debug for DynResourceProvider {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("DynResourceProvider")
-            .finish_non_exhaustive()
-    }
-}
+    let skia_resource_provider =
+        NativeResourceProvider::from_ptr(unsafe { sb::C_RustResourceProvider_New(&param) })
+            .unwrap();
 
-impl ResourceProvider for DynResourceProvider {
-    fn load(&self, resource_path: &str, resource_name: &str) -> Option<Data> {
-        self.0.load(resource_path, resource_name)
-    }
+    return skia_resource_provider;
 
-    fn load_image_asset(
-        &self,
-        resource_path: &str,
-        resource_name: &str,
-        resource_id: &str,
-    ) -> Option<ImageAsset> {
-        self.0
-            .load_image_asset(resource_path, resource_name, resource_id)
-    }
-
-    fn load_typeface(&self, name: &str, url: &str) -> Option<Typeface> {
-        self.0.load_typeface(name, url)
+    unsafe extern "C" fn drop<P: ?Sized>(provider: *mut c_void) {
+        mem::drop(unsafe { Box::from_raw(provider.cast::<Box<P>>()) });
     }
 
-    fn font_mgr(&self) -> FontMgr {
-        self.0.font_mgr()
+    unsafe extern "C" fn load<P: ResourceProvider + ?Sized>(
+        provider: *mut c_void,
+        resource_path: *const raw::c_char,
+        resource_name: *const raw::c_char,
+    ) -> *mut SkData {
+        unsafe {
+            provider_ref::<P>(provider)
+                .load(&uncstr(resource_path), &uncstr(resource_name))
+                .map(|data| data.into_ptr())
+                .unwrap_or(ptr::null_mut())
+        }
+    }
+
+    unsafe extern "C" fn load_image_asset<P: ResourceProvider + ?Sized>(
+        provider: *mut c_void,
+        resource_path: *const raw::c_char,
+        resource_name: *const raw::c_char,
+        resource_id: *const raw::c_char,
+    ) -> *mut skresources_ImageAsset {
+        unsafe {
+            provider_ref::<P>(provider)
+                .load_image_asset(
+                    &uncstr(resource_path),
+                    &uncstr(resource_name),
+                    &uncstr(resource_id),
+                )
+                .map(|image_asset| image_asset.into_ptr())
+                .unwrap_or(ptr::null_mut())
+        }
+    }
+
+    unsafe extern "C" fn load_typeface<P: ResourceProvider + ?Sized>(
+        provider: *mut c_void,
+        name: *const raw::c_char,
+        url: *const raw::c_char,
+    ) -> *mut SkTypeface {
+        unsafe {
+            provider_ref::<P>(provider)
+                .load_typeface(&uncstr(name), &uncstr(url))
+                .map(|typeface| typeface.into_ptr())
+                .unwrap_or(ptr::null_mut())
+        }
+    }
+
+    unsafe extern "C" fn font_mgr<P: ResourceProvider + ?Sized>(
+        provider: *mut c_void,
+    ) -> *mut SkFontMgr {
+        unsafe { provider_ref::<P>(provider).font_mgr().into_ptr() }
+    }
+
+    /// `provider` must be the pointer that `native_resource_provider` created together with
+    /// callbacks for this same `P`. It stays valid until `drop` reclaims it.
+    unsafe fn provider_ref<'a, P: ?Sized>(provider: *mut c_void) -> &'a P {
+        unsafe { &*provider.cast::<Box<P>>() }
+    }
+
+    unsafe fn uncstr(ptr: *const raw::c_char) -> Cow<'static, str> {
+        if !ptr.is_null() {
+            return unsafe { CStr::from_ptr(ptr).to_string_lossy() };
+        }
+        "".into()
     }
 }
 

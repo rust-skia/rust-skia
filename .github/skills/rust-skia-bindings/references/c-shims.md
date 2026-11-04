@@ -207,8 +207,9 @@ accept that the containing type must be heap-allocated (see
 
 `std::function` is opaque. Two mechanisms replace it, and both hand C++ the Rust object
 as a thin `void* data` next to `extern "C"` callbacks. Each callback is generic over the
-concrete Rust type (`set_fn::<F>`, `load::<T>`), so it casts `data` back to exactly the
-type the constructor erased.
+Rust type (`set_fn::<F>`, `load::<P>`), so it casts `data` back to exactly the type the
+constructor erased. When that type can be a trait object, such as `dyn ResourceProvider`,
+`data` points to its `Box<P>`, because a fat pointer does not fit into `void*`.
 
 **`Sink`/`VecSink`** for a Rust closure that C++ calls synchronously. `bindings.h`
 declares `void* data` plus a `set_fn` pointer, and `skia-safe/src/interop/cpp.rs`
