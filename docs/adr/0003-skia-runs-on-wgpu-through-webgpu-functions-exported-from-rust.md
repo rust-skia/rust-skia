@@ -70,9 +70,11 @@ Source builds with the `wgpu` feature generate the C header `webgpu.h` and the C
 `webgpu_cpp.h`, together with the headers that they include. The fork removed Dawn from `DEPS` ("rust-skia: Trim
 dependencies"), so `skia-bindings` records the Dawn revision as `[package.metadata].dawn`, next to
 the Skia fork tag. The build downloads GitHub's archive of that revision (about 26 MB), unpacks
-only the generator, `src/dawn/dawn.json`, a few static headers, and the license, and runs Dawn's
-generator with the Jinja2 copy from Skia's dependency sync. `SKIA_DAWN_SOURCE_DIR` points offline
-builds to a Dawn checkout instead. Builds without the `wgpu` feature run none of this, and
+only the generator, `src/dawn/dawn.json`, a few static headers, and the license. The fork's
+`DEPS` does not sync Jinja2 and MarkupSafe either, the Python packages that the generator imports,
+so the build downloads them from Chromium's Gitiles at the revisions in
+`[package.metadata].jinja2` and `[package.metadata].markupsafe`. Offline builds therefore do not
+support the `wgpu` feature. Builds without the `wgpu` feature run none of this, and
 prebuilt binaries already contain everything compiled from the headers. Skia moved its Dawn
 revision at every milestone from m140 to m157, and `dawn.json` changed in each of those intervals
 (1 to 21 commits, per the commit history of the `google/dawn` GitHub mirror). The milestone update

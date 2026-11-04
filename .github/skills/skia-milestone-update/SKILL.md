@@ -219,7 +219,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
     exactly;
-  - `skia-bindings/Cargo.toml` `[package.metadata].dawn`, see the Dawn note below;
+  - `skia-bindings/Cargo.toml` `[package.metadata].dawn`, `.jinja2`, and `.markupsafe`,
+    see the Dawn note below;
   - `skia-safe/src/core/milestone.rs` `MILESTONE` constant, matching `SK_MILESTONE`
     in `include/core/SkMilestone.h`.
   `Cargo.lock` is gitignored and untracked, so it is not part of the commit. Delete it
@@ -323,10 +324,12 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   headers and `dawn_proc.cpp` from the Dawn revision in `[package.metadata].dawn`
   (`docs/adr/0003`). No file in the repository shows how they change, so every tag cut
   diffs them.
-  - The fork's `DEPS` has no Dawn entry, so take the revision from upstream:
+  - The fork's `DEPS` has no entries for Dawn and for Jinja2 and MarkupSafe, the Python
+    packages of Dawn's generator. Take their revisions from upstream, and copy them into
+    `[package.metadata].dawn`, `.jinja2`, and `.markupsafe`:
 
     ```sh
-    git -C skia-bindings/skia show upstream/chrome/mNEW:DEPS | grep 'dawn.git@'
+    git -C skia-bindings/skia show upstream/chrome/mNEW:DEPS | grep -E 'dawn.git@|/jinja2@|/markupsafe@'
     ```
 
   - Before bumping, build with the old revision and keep its output. The generated files

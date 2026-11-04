@@ -185,39 +185,43 @@ fn download_dependencies() {
     }
 }
 
-/// Downloads Dawn at `revision` from GitHub's mirror and unpacks the `paths` of it into `target`.
+/// Downloads the gzipped tar archive at `url` and unpacks the files that `include` selects into
+/// `target`.
 ///
-/// The `wgpu` feature generates Skia's WebGPU headers from these files (see `build_support/dawn.rs`).
-/// The archive holds all of Dawn, about 26 MB, but only the generator inputs are unpacked.
+/// The paths that `include` receives and that `target` receives the files at are relative to the
+/// archive's directory `root`. GitHub's archives put everything into a root directory named
+/// `<repository>-<revision>`. Gitiles archives have no root directory, and their `root` is empty.
+/// The `wgpu` feature downloads Dawn and the Python packages of Dawn's generator with this (see
+/// `build_support/dawn.rs`).
 #[cfg(feature = "wgpu")]
-pub fn download_dawn(revision: &str, paths: &[&str], target: &Path) {
-    let archive_url = format!("https://codeload.github.com/google/dawn/tar.gz/{revision}");
-    println!("DOWNLOADING: {archive_url}");
-    // Codeload does not support resuming downloads.
-    let archive = utils::download(&archive_url, false)
-        .unwrap_or_else(|err| panic!("Failed to download {archive_url} ({err})"));
+pub fn download_archive(url: &str, root: &str, include: impl Fn(&Path) -> bool, target: &Path) {
+    println!("DOWNLOADING: {url}");
+    // Neither GitHub nor Gitiles supports resuming archive downloads.
+    let archive = utils::download(url, false)
+        .unwrap_or_else(|err| panic!("Failed to download {url} ({err})"));
 
     if target.exists() {
         fs::remove_dir_all(target).unwrap();
     }
-    // GitHub names the root directory of the archive `<repository>-<revision>`.
-    let root = format!("dawn-{revision}");
     let mut archive = tar::Archive::new(GzDecoder::new(Cursor::new(archive)));
     for entry in archive.entries().expect("failed to iterate over archive") {
         let mut entry = entry.unwrap();
+        // Directories are created for the files they contain. Pax headers are no files.
+        if !entry.header().entry_type().is_file() {
+            continue;
+        }
         let path = entry.path().unwrap().into_owned();
-        // Entries outside the root directory are pax headers.
-        let Ok(relative) = path.strip_prefix(&root) else {
+        let Ok(relative) = path.strip_prefix(root) else {
             continue;
         };
-        if paths.iter().any(|p| relative.starts_with(p)) {
-            // `starts_with` compares only the leading components, so a `..` further on could
-            // escape `target`.
+        if include(relative) {
+            // `include` may select by leading components only, so a `..` further on could escape
+            // `target`.
             assert!(
                 relative
                     .components()
                     .all(|c| matches!(c, Component::Normal(_))),
-                "Dawn archive entry {} leaves the unpack directory",
+                "Archive entry {} leaves the unpack directory",
                 path.display()
             );
             let destination = target.join(relative);

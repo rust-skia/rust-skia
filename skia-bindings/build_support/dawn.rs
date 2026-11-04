@@ -4,8 +4,9 @@
 //! Skia's Dawn backend is compiled against Dawn's generated WebGPU headers, and bindgen reads the
 //! same headers for the Rust types of the `skia-wgpu` shim (ADR 0003). Dawn's generator produces
 //! them from Dawn's `src/dawn/dawn.json`, at the Dawn revision in `[package.metadata].dawn`. Only
-//! source builds with the `wgpu` feature run this. Prebuilt binaries already contain everything
-//! compiled from these files.
+//! source builds with the `wgpu` feature run this. They download Dawn and the Python packages of
+//! its generator, so offline builds do not support the `wgpu` feature. Prebuilt binaries already
+//! contain everything compiled from these files.
 
 use std::ffi::OsString;
 use std::fs;
@@ -14,13 +15,8 @@ use std::process::Command;
 
 use crate::build_support::cargo;
 
-/// The environment variable that points to a Dawn checkout at `[package.metadata].dawn`. Offline
-/// builds need it, and other builds use it instead of downloading Dawn.
-pub const SOURCE_DIR_ENV: &str = "SKIA_DAWN_SOURCE_DIR";
-
-/// The paths of a Dawn checkout that generation reads. The download extracts only these.
-#[cfg(feature = "binary-cache")]
-pub const SOURCE_PATHS: &[&str] = &[
+/// The paths of Dawn that generation reads. The download unpacks only these.
+const SOURCE_PATHS: &[&str] = &[
     "generator",
     "src/dawn/dawn.json",
     "include/webgpu",
@@ -28,36 +24,63 @@ pub const SOURCE_PATHS: &[&str] = &[
     "LICENSE",
 ];
 
-/// Generates the Dawn files into [`dir`], unless they are already there for this revision.
+/// The Python packages that Dawn's generator imports. Each one is downloaded at the revision in the
+/// `[package.metadata]` entry of the same name, and the generator receives its directory as the
+/// argument `--<name>-path`.
+const PYTHON_PACKAGES: &[&str] = &["jinja2", "markupsafe"];
+
+/// Generates the Dawn files into [`dir`], unless they are already there for these revisions.
 ///
-/// The generator needs Jinja2 and MarkupSafe from Skia's synchronized dependencies, so this runs
-/// after `tools/git-sync-deps`. An offline build needs [`SOURCE_DIR_ENV`], because it must not
-/// download Dawn.
-pub fn prepare(skia_source_dir: &Path, python: &Path, offline: bool) {
-    let revision = revision();
-    let source = cargo::env_var(SOURCE_DIR_ENV);
-    // The source is part of the stamp, so that switching between a download and a checkout, or
-    // between two checkouts, generates again.
-    let stamp = format!("{revision} {}", source.as_deref().unwrap_or("download"));
+/// `offline` builds panic, because generation downloads Dawn and the generator's Python packages.
+pub fn prepare(python: &Path, offline: bool) {
+    assert!(
+        !offline,
+        "Offline builds do not support the `wgpu` feature, because it downloads Dawn and the \
+         Python packages of Dawn's generator."
+    );
+
+    let revisions = Revisions::from_metadata();
+    let stamp = revisions.stamp();
     let stamp_file = dir().join("REVISION");
     if fs::read_to_string(&stamp_file).is_ok_and(|s| s == stamp) {
         return;
     }
 
-    let source_dir = match source {
-        Some(source) => PathBuf::from(source),
-        None => {
-            assert!(
-                !offline,
-                "Offline builds with the `wgpu` feature need a Dawn checkout at revision \
-                 {revision}. Set {SOURCE_DIR_ENV} to its path."
-            );
-            download(&revision)
-        }
-    };
+    let source_dir = cargo::output_directory().join("dawn-source");
+    download(
+        &format!(
+            "https://codeload.github.com/google/dawn/tar.gz/{}",
+            revisions.dawn
+        ),
+        // GitHub names the root directory of the archive `<repository>-<revision>`.
+        &format!("dawn-{}", revisions.dawn),
+        |path| SOURCE_PATHS.iter().any(|p| path.starts_with(p)),
+        &source_dir,
+    );
+
+    // Dawn's generator imports each package from the directory that its `--<name>-path` argument
+    // names, so each package is unpacked into a directory of its own name.
+    let packages_dir = cargo::output_directory().join("dawn-python");
+    for (name, revision) in &revisions.python_packages {
+        download(
+            &format!(
+                "https://chromium.googlesource.com/chromium/src/third_party/{name}/+archive/{revision}.tar.gz"
+            ),
+            // Gitiles archives have no root directory.
+            "",
+            |_| true,
+            &packages_dir.join(name),
+        );
+    }
 
     let generated = cargo::output_directory().join("dawn-generated");
-    generate(&source_dir, &revision, skia_source_dir, python, &generated);
+    generate(
+        &source_dir,
+        &revisions.dawn,
+        &packages_dir,
+        python,
+        &generated,
+    );
     assemble(&source_dir, &generated, &dir());
     fs::write(stamp_file, stamp).unwrap();
 }
@@ -120,52 +143,79 @@ fn backend_sources(skia_source_dir: &Path) -> Vec<PathBuf> {
     sources
 }
 
-/// The Dawn revision that Skia's upstream `DEPS` pins for the current milestone. The milestone
-/// update copies it into `[package.metadata].dawn`.
-fn revision() -> String {
-    cargo::get_metadata()
-        .into_iter()
-        .find_map(|(name, value)| (name == "dawn").then_some(value))
-        .expect("`[package.metadata].dawn` is missing in skia-bindings/Cargo.toml")
+/// The revisions of Dawn and of the [`PYTHON_PACKAGES`], from `[package.metadata]`. Skia's
+/// upstream `DEPS` pins them for the current milestone, and the milestone update copies them.
+struct Revisions {
+    dawn: String,
+    /// Each name of [`PYTHON_PACKAGES`] with its revision.
+    python_packages: Vec<(&'static str, String)>,
 }
 
-/// Downloads the [`SOURCE_PATHS`] of Dawn at `revision` and returns the directory they are in.
-fn download(revision: &str) -> PathBuf {
+impl Revisions {
+    fn from_metadata() -> Self {
+        let metadata = cargo::get_metadata();
+        let revision = |name: &str| {
+            metadata
+                .iter()
+                .find_map(|(key, value)| (key == name).then(|| value.clone()))
+                .unwrap_or_else(|| {
+                    panic!("`[package.metadata].{name}` is missing in skia-bindings/Cargo.toml")
+                })
+        };
+        Self {
+            dawn: revision("dawn"),
+            python_packages: PYTHON_PACKAGES
+                .iter()
+                .map(|name| (*name, revision(name)))
+                .collect(),
+        }
+    }
+
+    /// Identifies the revisions, so that changing any of them generates again.
+    fn stamp(&self) -> String {
+        let mut stamp = self.dawn.clone();
+        for (name, revision) in &self.python_packages {
+            stamp += &format!(" {name}@{revision}");
+        }
+        stamp
+    }
+}
+
+/// Downloads the archive at `url` and unpacks the files of its `root` directory that `include`
+/// selects into `target`.
+fn download(url: &str, root: &str, include: impl Fn(&Path) -> bool, target: &Path) {
     #[cfg(feature = "binary-cache")]
     {
-        let target = cargo::output_directory().join("dawn-source");
-        crate::build_support::binary_cache::download_dawn(revision, SOURCE_PATHS, &target);
-        target
+        crate::build_support::binary_cache::download_archive(url, root, include, target);
     }
     #[cfg(not(feature = "binary-cache"))]
     {
-        panic!(
-            "Downloading Dawn {revision} needs the `binary-cache` feature. Enable it, or set \
-             {SOURCE_DIR_ENV} to a Dawn checkout at that revision."
-        );
+        let _ = (root, include, target);
+        panic!("The `wgpu` feature needs the `binary-cache` feature to download {url}.");
     }
 }
 
 /// Runs Dawn's generators for the C header, the C++ wrapper, the function table, the forwarding
 /// functions of `dawn_proc`, and the revision stamp that `dawnProcSetProcs` checks.
-fn generate(source_dir: &Path, revision: &str, skia_source_dir: &Path, python: &Path, out: &Path) {
+///
+/// `packages_dir` contains a directory for each of the [`PYTHON_PACKAGES`].
+fn generate(source_dir: &Path, revision: &str, packages_dir: &Path, python: &Path, out: &Path) {
     if out.exists() {
         fs::remove_dir_all(out).unwrap();
     }
     fs::create_dir_all(out).unwrap();
 
     let generator = source_dir.join("generator");
-    let externals = skia_source_dir.join("third_party/externals");
-    let common_args: [OsString; 8] = [
+    let mut common_args: Vec<OsString> = vec![
         "--template-dir".into(),
         generator.join("templates").into(),
-        "--jinja2-path".into(),
-        externals.join("jinja2").into(),
-        "--markupsafe-path".into(),
-        externals.join("markupsafe").into(),
         "--output-dir".into(),
         out.into(),
     ];
+    for name in PYTHON_PACKAGES {
+        common_args.push(format!("--{name}-path").into());
+        common_args.push(packages_dir.join(name).into());
+    }
 
     run_python(
         python,
