@@ -75,6 +75,9 @@ pub mod mtl;
 #[cfg(feature = "vulkan")]
 pub mod vk;
 
+#[cfg(feature = "wgpu")]
+pub mod dawn;
+
 pub use implementation::*;
 
 #[cfg(test)]

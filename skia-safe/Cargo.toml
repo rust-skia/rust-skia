@@ -60,6 +60,8 @@ save-svg-images = []
 gpu = []
 ganesh = ["skia-bindings/ganesh"]
 graphite = ["skia-bindings/graphite"]
+# Graphite's Dawn backend, which `skia-wgpu` runs on the `wgpu` crate (ADR 0003).
+wgpu = ["graphite", "skia-bindings/wgpu"]
 
 [dependencies]
 bitflags = "2.0"
