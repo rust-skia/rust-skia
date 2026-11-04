@@ -1,33 +1,24 @@
-//! A `wgpu` application that renders a rotating cube, whose faces show a texture that Skia draws
-//! into every frame: the animated rust-skia logo of the `skia-icon` crate.
-//!
-//! Skia renders with its Graphite Dawn backend, which `skia-wgpu` runs on the application's `wgpu`
-//! device (ADR 0003). Skia and the application submit to the same `wgpu` queue, so the cube pass
-//! sees the texture that Skia finished drawing earlier in the frame without further
-//! synchronization.
-//!
-//! Run with `cargo run -p skia-wgpu --features wgpu-30 --example wgpu-window`.
+//! The window, the cube, and the Skia layer that draws the cube's texture.
 
 use std::pin::pin;
 use std::sync::Arc;
 use std::task::{Context, Poll, Waker};
 use std::time::Instant;
 
+use skia_safe::wgpu;
 use wgpu::util::DeviceExt;
-use wgpu30 as wgpu;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::window::{Window, WindowId};
 
-use skia_safe::gpu::graphite::{self, dawn};
+use skia_safe::gpu::graphite;
 use skia_safe::{Color, ColorType, M44, V3};
-use skia_wgpu::{BackendHandles, TextureHandle};
 
 /// The width and height of the texture that Skia draws into.
 const TEXTURE_SIZE: u32 = 512;
 
-fn main() {
+pub fn run() {
     let event_loop = EventLoop::new().expect("creating the event loop failed");
     event_loop
         .run_app(&mut App::default())
@@ -65,8 +56,7 @@ impl ApplicationHandler for App {
     }
 }
 
-/// Everything that renders a frame. Fields drop in declaration order, so the Skia objects go
-/// before the WebGPU handles they reference.
+/// Everything that renders a frame.
 struct State {
     skia: SkiaLayer,
     cube: Cube,
@@ -167,32 +157,21 @@ impl State {
     }
 }
 
-/// Skia's Graphite context on the application's device, and the texture it draws into.
+/// Skia's Graphite context on the application's device, and the surface on the cube's texture.
 struct SkiaLayer {
     surface: skia_safe::Surface,
     recorder: graphite::Recorder,
     context: graphite::Context,
-    _backend_texture: graphite::BackendTexture,
-    _texture: TextureHandle,
-    _backend_context: dawn::BackendContext,
-    _handles: BackendHandles,
 }
 
 impl SkiaLayer {
     fn new(device: &wgpu::Device, queue: &wgpu::Queue, texture: &wgpu::Texture) -> Self {
-        let handles = BackendHandles::new(device, queue);
-        let backend_context = unsafe {
-            dawn::BackendContext::new(handles.instance(), handles.device(), handles.queue())
-        };
-        let mut context = dawn::context_factory::make_dawn(&backend_context, None)
-            .expect("no Graphite Dawn context");
+        let mut context = graphite::wgpu::context_factory::make_wgpu(device, queue, None)
+            .expect("no Graphite context for the wgpu device");
         let mut recorder = context.make_recorder(None).expect("no recorder");
-
-        let texture = TextureHandle::new(texture).expect("the texture format is supported");
-        let backend_texture = unsafe { dawn::backend_textures::make_dawn(texture.handle()) };
-        let surface = graphite::surfaces::wrap_backend_texture(
+        let surface = graphite::wgpu::surfaces::wrap_texture(
             &mut recorder,
-            &backend_texture,
+            texture,
             ColorType::RGBA8888,
             None,
             None,
@@ -202,10 +181,6 @@ impl SkiaLayer {
             surface,
             recorder,
             context,
-            _backend_texture: backend_texture,
-            _texture: texture,
-            _backend_context: backend_context,
-            _handles: handles,
         }
     }
 

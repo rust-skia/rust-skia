@@ -9,26 +9,8 @@ edition.workspace = true
 rust-version.workspace = true
 
 [features]
-wgpu-30 = ["dep:wgpu30"]
+wgpu-30 = ["dep:wgpu30", "skia-bindings/wgpu"]
 
 [dependencies]
-skia-bindings = { version = "=0.157.0", path = "../skia-bindings", features = ["wgpu"] }
+skia-bindings = { version = "=0.157.0", path = "../skia-bindings" }
 wgpu30 = { package = "wgpu", version = "30", optional = true }
-
-[dev-dependencies]
-skia-safe = { path = "../skia-safe", features = ["wgpu"] }
-# The animated rust-skia logo of the `wgpu-window` example.
-skia-icon = { path = "../skia-icon" }
-# The same configuration as in `skia-safe`: winit's default features, except that the Wayland
-# window decorations draw no title text, whose renderer pulls in an unmaintained crate.
-winit = { version = "0.30.2", default-features = false, features = [
-    "rwh_06",
-    "x11",
-    "wayland",
-    "wayland-dlopen",
-    "wayland-csd-adwaita-notitle",
-] }
-
-[[example]]
-name = "wgpu-window"
-required-features = ["wgpu-30"]

@@ -1,20 +1,20 @@
-//! Renders with Skia's Graphite Dawn backend through the shim into a texture of a `wgpu` device, and
-//! reads the pixels back with `wgpu` itself.
+//! Renders with Graphite into a texture of a `wgpu` device, and reads the pixels back with `wgpu`
+//! itself. Skia's Dawn backend runs on the `wgpu` device through `skia-wgpu` (ADR 0003).
 
-#![cfg(feature = "wgpu-30")]
+#![cfg(feature = "_wgpu")]
 
 use std::pin::pin;
 use std::task::{Context, Poll, Waker};
+use std::thread;
 
-use skia_safe::gpu::graphite::{self, dawn};
+use skia_safe::gpu::graphite;
 use skia_safe::gradient;
 use skia_safe::images;
+use skia_safe::wgpu;
 use skia_safe::{
     AlphaType, Canvas, Color, Color4f, ColorType, Data, Font, FontMgr, FontStyle, Image, ImageInfo,
     Paint, Rect, TileMode,
 };
-use skia_wgpu::{BackendHandles, TextureHandle};
-use wgpu30 as wgpu;
 
 const SIZE: u32 = 64;
 
@@ -22,7 +22,7 @@ const SIZE: u32 = 64;
 /// Skia uploads through a mapped buffer.
 #[test]
 fn skia_renders_antialiasing_gradients_text_and_images() {
-    let pixels = render(|canvas, recorder| {
+    let Some(pixels) = render(|canvas, recorder| {
         canvas.clear(Color::WHITE);
 
         let mut paint = Paint::default();
@@ -63,7 +63,10 @@ fn skia_renders_antialiasing_gradients_text_and_images() {
         let image = graphite::images::texture_from_image(recorder, &checkerboard())
             .expect("uploading the image failed");
         canvas.draw_image(&image, (48.0, 48.0), None);
-    });
+    }) else {
+        eprintln!("skipped: no wgpu adapter available");
+        return;
+    };
     // The gradient runs from red on the left to green on the right.
     let left = pixel(&pixels, 1, 8);
     let right = pixel(&pixels, SIZE - 2, 8);
@@ -93,12 +96,12 @@ fn skia_renders_antialiasing_gradients_text_and_images() {
     );
 }
 
-/// Draws with Skia's Graphite Dawn backend into a texture of a new `wgpu` device and returns its
-/// RGBA pixels.
-fn render(draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Vec<u8> {
+/// Draws with Graphite into a texture of a new `wgpu` device and returns its RGBA pixels, or
+/// `None` on a machine without a `wgpu` adapter, such as a CI runner without a GPU.
+fn render(draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Option<Vec<u8>> {
     let instance = wgpu::Instance::default();
-    let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
-        .expect("no wgpu adapter");
+    let adapter =
+        block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default())).ok()?;
     let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))
         .expect("no wgpu device");
     let texture = device.create_texture(&wgpu::TextureDescriptor {
@@ -119,18 +122,12 @@ fn render(draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Vec<u8> {
         view_formats: &[],
     });
 
-    let handles = BackendHandles::new(&device, &queue);
-    let backend_context =
-        unsafe { dawn::BackendContext::new(handles.instance(), handles.device(), handles.queue()) };
-    let mut context =
-        dawn::context_factory::make_dawn(&backend_context, None).expect("no Graphite Dawn context");
+    let mut context = graphite::wgpu::context_factory::make_wgpu(&device, &queue, None)
+        .expect("no Graphite context for the wgpu device");
     let mut recorder = context.make_recorder(None).expect("no recorder");
-
-    let texture_handle = TextureHandle::new(&texture).expect("the texture format is supported");
-    let backend_texture = unsafe { dawn::backend_textures::make_dawn(texture_handle.handle()) };
-    let mut surface = graphite::surfaces::wrap_backend_texture(
+    let mut surface = graphite::wgpu::surfaces::wrap_texture(
         &mut recorder,
-        &backend_texture,
+        &texture,
         ColorType::RGBA8888,
         None,
         None,
@@ -143,7 +140,7 @@ fn render(draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Vec<u8> {
     context.insert_recording(&graphite::InsertRecordingInfo::new(&mut recording));
     assert!(context.submit_and_wait(), "submitting to Graphite failed");
 
-    read_texture(&device, &queue, &texture)
+    Some(read_texture(&device, &queue, &texture))
 }
 
 fn pixel(pixels: &[u8], x: u32, y: u32) -> [u8; 4] {
@@ -212,6 +209,6 @@ fn block_on<F: Future>(future: F) -> F::Output {
         if let Poll::Ready(output) = future.as_mut().poll(&mut context) {
             return output;
         }
-        std::thread::yield_now();
+        thread::yield_now();
     }
 }

@@ -60,12 +60,22 @@ save-svg-images = []
 gpu = []
 ganesh = ["skia-bindings/ganesh"]
 graphite = ["skia-bindings/graphite"]
-# Graphite's Dawn backend, which `skia-wgpu` runs on the `wgpu` crate (ADR 0003).
-wgpu = ["graphite", "skia-bindings/wgpu"]
+# Graphite on an application's `wgpu` device, through Skia's Dawn backend that `skia-wgpu` runs on
+# `wgpu` (ADR 0003), with the `wgpu` version that this release recommends. It moves to a newer
+# version only with a milestone version bump, because applications that use their own `wgpu`
+# dependency break.
+wgpu = ["wgpu-30"]
+# Graphite on an application's `wgpu` 30 device.
+wgpu-30 = ["_wgpu", "skia-wgpu/wgpu-30"]
+# What every `wgpu-NN` feature enables, without selecting a `wgpu` version. Applications enable a
+# `wgpu-NN` feature instead. The code of the `wgpu` backend depends only on this feature, so a new
+# `wgpu-NN` feature changes no code in `skia-safe`.
+_wgpu = ["graphite", "dep:skia-wgpu"]
 
 [dependencies]
 bitflags = "2.0"
 skia-bindings = { version = "=0.157.0", path = "../skia-bindings", default-features = false }
+skia-wgpu = { version = "=0.157.0", path = "../skia-wgpu", optional = true }
 
 
 # D3D types & ComPtr

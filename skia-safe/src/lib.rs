@@ -156,6 +156,10 @@ pub use encode_::*;
 #[allow(unused_imports)]
 pub use modules::*;
 pub use pathops::*;
+/// The `wgpu` crate that [`gpu::graphite::wgpu`] takes, so that an application can use the same
+/// version.
+#[cfg(feature = "_wgpu")]
+pub use skia_wgpu::wgpu;
 
 #[cfg(test)]
 mod transmutation_tests {
