@@ -188,7 +188,9 @@ fn native_resource_provider<P: ResourceProvider + ?Sized + 'static>(
         unsafe { &*provider.cast::<Box<P>>() }
     }
 
-    unsafe fn uncstr(ptr: *const raw::c_char) -> Cow<'static, str> {
+    /// The string borrows from `ptr`, so the caller must not let `'a` outlive the C++ call that
+    /// passed it.
+    unsafe fn uncstr<'a>(ptr: *const raw::c_char) -> Cow<'a, str> {
         if !ptr.is_null() {
             return unsafe { CStr::from_ptr(ptr).to_string_lossy() };
         }
