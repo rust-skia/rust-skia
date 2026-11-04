@@ -38,6 +38,11 @@ Recommended pattern:
 - Exclude repository maintenance and release-process changes, such as CI,
   verification, publishing, documentation-generation, or contributor tooling,
   unless they directly change the final crates or binaries received by users.
+- Order bullets by their impact on users of rust-skia, highest first. Impact
+  means how many users a change reaches and how much it changes their code,
+  builds, or results. A breaking API change or a fix for a common platform
+  ranks above a niche addition. The same ranking decides which changes take
+  the limited slots.
 - Group related work when possible (for example Vulkan fixes across 2 PRs).
 - Do not repeat milestone entries here if already covered in the intro paragraph.
 - Use plain GitHub references only: `#1234`, `@user`.
@@ -81,6 +86,7 @@ Before finalizing notes:
 ## Quality Checklist
 
 - Milestones are mentioned once (intro only).
+- Notable Changes are ordered by impact on users, highest first.
 - No Markdown links for PRs/users/issues.
 - `reported by` wording is used consistently.
 - Section order matches this document.
