@@ -208,10 +208,12 @@ impl BackendContext<'_> {
     // TODO: This is a mess, highly unsafe, and needs to be simplified / rewritten
     //       by someone who understands Rust better.
     unsafe fn begin_resolving_proc(get_proc_trait_object: &dyn GetProc) -> impl Drop {
-        THREAD_LOCAL_GET_PROC.with(|get_proc| {
-            *get_proc.borrow_mut() =
-                Some(unsafe { mem::transmute::<&dyn GetProc, TraitObject>(get_proc_trait_object) })
-        });
+        // The pointer erases the lifetime of the reference. The returned guard captures that
+        // lifetime and clears the pointer on drop, so callers must drop it and never leak it.
+        let get_proc_ptr = unsafe {
+            mem::transmute::<&dyn GetProc, *const (dyn GetProc + 'static)>(get_proc_trait_object)
+        };
+        THREAD_LOCAL_GET_PROC.with(|get_proc| *get_proc.borrow_mut() = Some(get_proc_ptr));
 
         EndResolving {}
     }
@@ -226,17 +228,7 @@ impl Drop for EndResolving {
 }
 
 thread_local! {
-    static THREAD_LOCAL_GET_PROC: RefCell<Option<TraitObject>> = const { RefCell::new(None) };
-}
-
-// https://doc.rust-lang.org/1.19.0/std/raw/struct.TraitObject.html
-#[repr(C)]
-// Copy & Clone are required for the *get_proc.borrow() below. And std::raw::TraitObject
-// can not be used, because it's unstable (last checked 1.36).
-#[derive(Copy, Clone)]
-struct TraitObject {
-    pub data: *mut (),
-    pub vtable: *mut (),
+    static THREAD_LOCAL_GET_PROC: RefCell<Option<*const dyn GetProc>> = const { RefCell::new(None) };
 }
 
 // The global resolvement function passed to Skia.
@@ -248,7 +240,7 @@ unsafe extern "C" fn global_get_proc(
     THREAD_LOCAL_GET_PROC.with(|get_proc| {
         match *get_proc.borrow() {
             Some(get_proc) => {
-                let get_proc_trait_object: &dyn GetProc = unsafe { mem::transmute(get_proc) };
+                let get_proc_trait_object: &dyn GetProc = unsafe { &*get_proc };
                 if !device.is_null() {
                     get_proc_trait_object(GetProcOf::Device(device, name))
                 } else {

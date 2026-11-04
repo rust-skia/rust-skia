@@ -2,7 +2,7 @@
 //! container for pixel data.
 
 use std::ffi::c_void;
-use std::{fmt, panic, process, ptr};
+use std::{fmt, ptr};
 
 use skia_bindings::{self as sb, SkImage, SkImage_AsyncReadResult, SkRefCntBase};
 
@@ -327,10 +327,7 @@ pub(crate) fn read_pixels_callback<F: FnOnce(Option<AsyncReadResult>) + 'static>
         // Skia calls back exactly once, so the closure is reclaimed here.
         let callback = unsafe { Box::from_raw(context as *mut F) };
         let result = AsyncReadResult::from_ptr(result as *mut _);
-        if panic::catch_unwind(panic::AssertUnwindSafe(|| callback(result))).is_err() {
-            println!("Panic in FFI callback for `SkImage::ReadPixelsCallback`");
-            process::abort();
-        }
+        callback(result);
     }
 
     (Some(call::<F>), Box::into_raw(Box::new(callback)) as _)

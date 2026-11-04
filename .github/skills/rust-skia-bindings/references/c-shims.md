@@ -205,28 +205,29 @@ accept that the containing type must be heap-allocated (see
 
 ## Callbacks
 
-`std::function` is opaque. Two mechanisms replace it.
+`std::function` is opaque. Two mechanisms replace it, and both hand C++ the Rust object
+as a thin `void* data` next to `extern "C"` callbacks. Each callback is generic over the
+Rust type (`set_fn::<F>`, `load::<P>`), so it casts `data` back to exactly the type the
+constructor erased. When that type can be a trait object, such as `dyn ResourceProvider`,
+`data` points to its `Box<P>`, because a fat pointer does not fit into `void*`.
 
 **`Sink`/`VecSink`** for a Rust closure that C++ calls synchronously. `bindings.h`
-declares a `TraitObject { void* data; void* vtable; }` plus a `set_fn` pointer; Rust
-transmutes a `&mut dyn FnMut(..)` into that pair in `skia-safe/src/interop/cpp.rs`.
-The `PhantomData<&'a mut …>` ties the sink to the borrow, so the callback cannot
-escape the call.
+declares `void* data` plus a `set_fn` pointer, and `skia-safe/src/interop/cpp.rs`
+fills them from a `&'a mut F`. The `PhantomData<&'a mut …>` ties the sink to the
+borrow, so the callback cannot escape the call.
 
 **A C++ adapter class** overriding a virtual interface, driven by an
 `extern "C"` function-pointer table — `rust_resource_provider.h`,
 `shaper.cpp` (`RustRunHandler`), and the `RustStream`/`RustWStream` shims in
-`bindings.cpp`. A Rust panic must not unwind into C++; catch it and abort:
+`bindings.cpp`. A provider that C++ keeps alive owns `data`, which is a
+`Box::into_raw` reclaimed in a `drop` callback. A handler used only during a call
+borrows it.
 
-```rust
-match std::panic::catch_unwind(reader) {
-    Ok(res) => res,
-    Err(_) => {
-        println!("Panic in FFI callback for `SkStream::read`");
-        std::process::abort();
-    }
-}
-```
+A Rust panic must not unwind into C++, and an `extern "C"` callback needs no code
+for that. Since Rust 1.81, which the workspace `rust-version` exceeds, a panic that
+reaches an `extern "C"` function prints its message and aborts the process. Wrap a
+callback in `std::panic::catch_unwind` only when it turns the panic into a value
+that C++ handles, such as a failed read.
 
 ## Compiler flags
 

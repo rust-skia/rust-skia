@@ -1,18 +1,17 @@
 //! Script-aware text shaping via Skia's `SkShaper`, producing [`crate::TextBlob`]s (see [`crate::Shaper`]).
-use std::{
-    ffi::{CStr, CString},
-    fmt,
-    marker::PhantomData,
-    os::raw,
-};
+use std::ffi::{CStr, CString};
+use std::fmt;
+use std::marker::PhantomData;
+use std::os::raw;
 
 use skia_bindings::{
-    self as sb, RustRunHandler, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
+    self as sb, SkShaper, SkShaper_BiDiRunIterator, SkShaper_FontRunIterator,
     SkShaper_LanguageRunIterator, SkShaper_RunHandler, SkShaper_RunIterator,
     SkShaper_ScriptRunIterator, SkTextBlobBuilderRunHandler,
 };
 
-use crate::{Font, FontMgr, FourByteTag, Point, TextBlob, prelude::*, scalar};
+use crate::prelude::*;
+use crate::{Font, FontMgr, FourByteTag, Point, TextBlob, scalar};
 
 // The following three are re-exported in `modules.rs` via `mod shapers {}`.
 #[cfg(any(target_os = "macos", target_os = "ios", target_os = "visionos"))]
@@ -475,43 +474,52 @@ pub mod run_handler {
     }
 }
 
-pub trait AsRunHandler<'a> {
-    type RunHandler: AsNativeRunHandler + 'a;
-    fn as_run_handler<'b>(&'b mut self) -> Self::RunHandler
-    where
-        'b: 'a;
+/// A run handler that the `shape*` functions of [`Shaper`] accept: any Rust [`RunHandler`], or a
+/// [`TextBlobBuilderRunHandler`].
+///
+/// The trait is sealed, so code outside this crate cannot implement it. A forged implementation
+/// could hand C++ a native handler with the wrong vtable without `unsafe`.
+pub trait AsRunHandler: sealed::AsRunHandler {}
+
+impl<T: sealed::AsRunHandler> AsRunHandler for T {}
+
+/// The trait behind [`AsRunHandler`]. Code outside this crate can still reach its method through a
+/// bound on [`AsRunHandler`], so the method also demands a [`Token`](sealed::Token) that only the
+/// shaper module can create.
+mod sealed {
+    use skia_bindings::SkShaper_RunHandler;
+
+    pub trait AsRunHandler {
+        /// Calls `f` with the native run handler that C++ dispatches through. The handler only
+        /// lives for the duration of the call, so it cannot outlive the borrow of `self`.
+        fn with_native<F: FnOnce(&mut SkShaper_RunHandler)>(&mut self, token: Token, f: F);
+    }
+
+    /// Proves that the caller is the shaper module. Without it, outside code could nest two
+    /// `with_native` calls and copy one native handler over the other.
+    #[derive(Debug)]
+    pub struct Token(pub(super) ());
 }
 
-/// A trait for accessing the native run handler instance used in the shape_native* functions.
-pub trait AsNativeRunHandler {
-    fn as_native_run_handler(&mut self) -> &mut SkShaper_RunHandler;
-}
-
-impl<'a, T: RunHandler> AsRunHandler<'a> for T {
-    type RunHandler = RustRunHandler;
-
-    fn as_run_handler<'b>(&'b mut self) -> Self::RunHandler
-    where
-        'b: 'a,
-    {
+impl<T: RunHandler> sealed::AsRunHandler for T {
+    fn with_native<F: FnOnce(&mut SkShaper_RunHandler)>(&mut self, _: sealed::Token, f: F) {
         let param = unsafe { rust_run_handler::new_param(self) };
-        rust_run_handler::from_param(&param)
+        let mut native = rust_run_handler::from_param(&param);
+        f(native.base_mut())
     }
 }
 
 impl Shaper {
-    pub fn shape<'a, 'b: 'a>(
+    pub fn shape(
         &self,
         utf8: &str,
         font: &Font,
         left_to_right: bool,
         width: scalar,
-        run_handler: &'b mut impl AsRunHandler<'a>,
+        run_handler: &mut impl AsRunHandler,
     ) {
         let bytes = utf8.as_bytes();
-        let mut run_handler = run_handler.as_run_handler();
-
-        unsafe {
+        run_handler.with_native(sealed::Token(()), |run_handler| unsafe {
             sb::C_SkShaper_shape(
                 self.native(),
                 bytes.as_ptr() as _,
@@ -519,13 +527,13 @@ impl Shaper {
                 font.native(),
                 left_to_right,
                 width,
-                run_handler.as_native_run_handler(),
+                run_handler,
             )
-        }
+        })
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn shape_with_iterators<'a, 'b: 'a>(
+    pub fn shape_with_iterators(
         &self,
         utf8: &str,
         font_run_iterator: &mut FontRunIterator,
@@ -533,12 +541,10 @@ impl Shaper {
         script_run_iterator: &mut ScriptRunIterator,
         language_run_iterator: &mut LanguageRunIterator,
         width: scalar,
-        run_handler: &'b mut impl AsRunHandler<'a>,
+        run_handler: &mut impl AsRunHandler,
     ) {
-        let mut run_handler = run_handler.as_run_handler();
-
         let bytes = utf8.as_bytes();
-        unsafe {
+        run_handler.with_native(sealed::Token(()), |run_handler| unsafe {
             sb::C_SkShaper_shape2(
                 self.native(),
                 bytes.as_ptr() as _,
@@ -548,13 +554,13 @@ impl Shaper {
                 script_run_iterator.native_ptr(),
                 language_run_iterator.native_ptr(),
                 width,
-                run_handler.as_native_run_handler(),
+                run_handler,
             )
-        }
+        })
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn shape_with_iterators_and_features<'a, 'b: 'a>(
+    pub fn shape_with_iterators_and_features(
         &self,
         utf8: &str,
         font_run_iterator: &mut FontRunIterator,
@@ -563,12 +569,10 @@ impl Shaper {
         language_run_iterator: &mut LanguageRunIterator,
         features: &[Feature],
         width: scalar,
-        run_handler: &'b mut impl AsRunHandler<'a>,
+        run_handler: &mut impl AsRunHandler,
     ) {
-        let mut run_handler = run_handler.as_run_handler();
-
         let bytes = utf8.as_bytes();
-        unsafe {
+        run_handler.with_native(sealed::Token(()), |run_handler| unsafe {
             sb::C_SkShaper_shape3(
                 self.native(),
                 bytes.as_ptr() as _,
@@ -580,16 +584,16 @@ impl Shaper {
                 features.as_ptr(),
                 features.len(),
                 width,
-                run_handler.as_native_run_handler(),
+                run_handler,
             )
-        }
+        })
     }
 
     /// Shapes text using the new `SkShaper::Options`-based API, which supports
     /// glyph tracking (letter spacing) in addition to the width available for
     /// horizontal layout.
     #[allow(clippy::too_many_arguments)]
-    pub fn shape_with_iterators_and_features_and_options<'a, 'b: 'a>(
+    pub fn shape_with_iterators_and_features_and_options(
         &self,
         utf8: &str,
         font_run_iterator: &mut FontRunIterator,
@@ -599,12 +603,10 @@ impl Shaper {
         features: &[Feature],
         width: scalar,
         tracking: scalar,
-        run_handler: &'b mut impl AsRunHandler<'a>,
+        run_handler: &mut impl AsRunHandler,
     ) {
-        let mut run_handler = run_handler.as_run_handler();
-
         let bytes = utf8.as_bytes();
-        unsafe {
+        run_handler.with_native(sealed::Token(()), |run_handler| unsafe {
             sb::C_SkShaper_shape4(
                 self.native(),
                 bytes.as_ptr() as _,
@@ -617,43 +619,36 @@ impl Shaper {
                 features.len(),
                 width,
                 tracking,
-                run_handler.as_native_run_handler(),
+                run_handler,
             )
-        }
+        })
     }
 }
 
 mod rust_run_handler {
-    use std::mem;
+    use std::ffi::c_void;
 
     use skia_bindings as sb;
     use skia_bindings::{
         RustRunHandler, RustRunHandler_Param, SkShaper_RunHandler, SkShaper_RunHandler_Buffer,
-        SkShaper_RunHandler_RunInfo, TraitObject,
+        SkShaper_RunHandler_RunInfo,
     };
 
-    use crate::{
-        prelude::*,
-        shaper::{AsNativeRunHandler, RunHandler, run_handler::RunInfo},
-    };
+    use crate::prelude::*;
+    use crate::shaper::RunHandler;
+    use crate::shaper::run_handler::RunInfo;
 
     impl NativeBase<SkShaper_RunHandler> for RustRunHandler {}
 
-    impl AsNativeRunHandler for RustRunHandler {
-        fn as_native_run_handler(&mut self) -> &mut SkShaper_RunHandler {
-            self.base_mut()
-        }
-    }
-
-    pub unsafe fn new_param(run_handler: &mut dyn RunHandler) -> RustRunHandler_Param {
+    pub unsafe fn new_param<T: RunHandler>(run_handler: &mut T) -> RustRunHandler_Param {
         RustRunHandler_Param {
-            trait_: unsafe { mem::transmute::<&mut dyn RunHandler, TraitObject>(run_handler) },
-            beginLine: Some(begin_line),
-            runInfo: Some(run_info),
-            commitRunInfo: Some(commit_run_info),
-            runBuffer: Some(run_buffer),
-            commitRunBuffer: Some(commit_run_buffer),
-            commitLine: Some(commit_line),
+            data: (run_handler as *mut T).cast(),
+            beginLine: Some(begin_line::<T>),
+            runInfo: Some(run_info::<T>),
+            commitRunInfo: Some(commit_run_info::<T>),
+            runBuffer: Some(run_buffer::<T>),
+            commitRunBuffer: Some(commit_run_buffer::<T>),
+            commitLine: Some(commit_line::<T>),
         }
     }
 
@@ -661,38 +656,46 @@ mod rust_run_handler {
         construct(|rh| unsafe { sb::C_RustRunHandler_construct(rh, param) })
     }
 
-    extern "C" fn begin_line(to: TraitObject) {
-        to_run_handler(to).begin_line()
+    unsafe extern "C" fn begin_line<T: RunHandler>(data: *mut c_void) {
+        unsafe { to_run_handler::<T>(data) }.begin_line()
     }
 
-    extern "C" fn run_info(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
-        to_run_handler(to).run_info(&RunInfo::from_native(unsafe { &*ri }));
+    unsafe extern "C" fn run_info<T: RunHandler>(
+        data: *mut c_void,
+        ri: *const SkShaper_RunHandler_RunInfo,
+    ) {
+        unsafe { to_run_handler::<T>(data).run_info(&RunInfo::from_native(&*ri)) }
     }
 
-    extern "C" fn commit_run_info(to: TraitObject) {
-        to_run_handler(to).commit_run_info()
+    unsafe extern "C" fn commit_run_info<T: RunHandler>(data: *mut c_void) {
+        unsafe { to_run_handler::<T>(data) }.commit_run_info()
     }
 
-    extern "C" fn run_buffer(
-        to: TraitObject,
+    unsafe extern "C" fn run_buffer<T: RunHandler>(
+        data: *mut c_void,
         ri: *const SkShaper_RunHandler_RunInfo,
     ) -> SkShaper_RunHandler_Buffer {
         let ri = unsafe { &*ri };
-        to_run_handler(to)
+        unsafe { to_run_handler::<T>(data) }
             .run_buffer(&RunInfo::from_native(ri))
             .native_buffer_mut(ri.glyphCount)
     }
 
-    extern "C" fn commit_run_buffer(to: TraitObject, ri: *const SkShaper_RunHandler_RunInfo) {
-        to_run_handler(to).commit_run_buffer(&RunInfo::from_native(unsafe { &*ri }))
+    unsafe extern "C" fn commit_run_buffer<T: RunHandler>(
+        data: *mut c_void,
+        ri: *const SkShaper_RunHandler_RunInfo,
+    ) {
+        unsafe { to_run_handler::<T>(data).commit_run_buffer(&RunInfo::from_native(&*ri)) }
     }
 
-    extern "C" fn commit_line(to: TraitObject) {
-        to_run_handler(to).commit_line()
+    unsafe extern "C" fn commit_line<T: RunHandler>(data: *mut c_void) {
+        unsafe { to_run_handler::<T>(data) }.commit_line()
     }
 
-    fn to_run_handler<'a>(to: TraitObject) -> &'a mut dyn RunHandler {
-        unsafe { mem::transmute(to) }
+    /// `data` is the `&mut T` erased in `new_param`, the only place that pairs it with the
+    /// callbacks above.
+    unsafe fn to_run_handler<'a, T>(data: *mut c_void) -> &'a mut T {
+        unsafe { &mut *data.cast::<T>() }
     }
 }
 
@@ -744,26 +747,9 @@ impl TextBlobBuilderRunHandler<'_> {
     }
 }
 
-impl<'a> AsRunHandler<'a> for TextBlobBuilderRunHandler<'_> {
-    type RunHandler = &'a mut SkShaper_RunHandler;
-
-    fn as_run_handler<'b>(&'b mut self) -> Self::RunHandler
-    where
-        'b: 'a,
-    {
-        (*self).as_native_run_handler()
-    }
-}
-
-impl AsNativeRunHandler for &mut SkShaper_RunHandler {
-    fn as_native_run_handler(&mut self) -> &mut SkShaper_RunHandler {
-        self
-    }
-}
-
-impl AsNativeRunHandler for TextBlobBuilderRunHandler<'_> {
-    fn as_native_run_handler(&mut self) -> &mut SkShaper_RunHandler {
-        self.0.base_mut()
+impl sealed::AsRunHandler for TextBlobBuilderRunHandler<'_> {
+    fn with_native<F: FnOnce(&mut SkShaper_RunHandler)>(&mut self, _: sealed::Token, f: F) {
+        f(self.0.base_mut())
     }
 }
 
