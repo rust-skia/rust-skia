@@ -19,6 +19,7 @@ use crate::build_support::cargo;
 pub const SOURCE_DIR_ENV: &str = "SKIA_DAWN_SOURCE_DIR";
 
 /// The paths of a Dawn checkout that generation reads. The download extracts only these.
+#[cfg(feature = "binary-cache")]
 pub const SOURCE_PATHS: &[&str] = &[
     "generator",
     "src/dawn/dawn.json",
