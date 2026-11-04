@@ -1,143 +1,172 @@
 # Skia on `wgpu`: architecture
 
 This document shows how Skia runs inside a `wgpu` application. The decisions behind it are recorded
-in ADR 0003 (Skia runs on the `wgpu` crate through a shim behind Dawn's function table).
+in ADR 0003 (`docs/adr/0003-skia-runs-on-wgpu-through-a-webgpu-shim.md`) and in ADR 0004
+(`docs/adr/0004-the-shim-exports-the-webgpu-functions-from-rust.md`), which decides how Skia's
+calls reach the shim.
+
+The document shows the design of the ADRs, which the code does not fully reach yet. The code still
+forwards Skia's calls through Dawn's function table, a C struct with one function pointer per
+WebGPU function. The conversion to exported `wgpu*` functions removes the table and adds the
+`compile_error!` and the `links` key. A per-version `compat` module appears with the second
+supported `wgpu` major version.
 
 Terms used below:
 
 - **Dawn backend**: Skia's Graphite backend for WebGPU. Skia names it after Dawn, Google's C++
   WebGPU implementation, but rust-skia links none of Dawn's implementation.
-- **Dawn headers**: the C header `webgpu.h`, the C++ wrapper `webgpu_cpp.h`, and the `dawn_proc`
-  files. Dawn's generator produces them during source builds with the `wgpu` feature, from the
-  Dawn revision in `[package.metadata].dawn` of `skia-bindings`.
-- **Function table**: Dawn's `DawnProcTable`, a C struct with one function pointer per WebGPU
-  function. `dawnProcSetProcs` installs it for the whole process.
-- **Shim**: the Rust code in `skia-wgpu` that fills the function table with functions that call
-  `wgpu`.
+- **Dawn headers**: the C header `webgpu.h` and the C++ wrapper `webgpu_cpp.h`, together with the
+  headers that they include. Dawn's generator produces them during source builds with the `wgpu`
+  feature of `skia-bindings`, from the Dawn revision in `[package.metadata].dawn`.
+- **Shim**: the `wgpu*` functions of `webgpu.h` that the Dawn backend calls, defined in the crate
+  `skia-wgpu` as Rust functions with `#[no_mangle]`. Each of them converts its C arguments and
+  calls the `wgpu` crate.
 
 ## Crate dependencies
 
-An arrow points from a crate to a crate it depends on. `skia-safe` depends on `skia-wgpu`, which
-depends on `skia-bindings`.
+An arrow points from a crate to a crate it depends on. The dotted arrow is not a Cargo dependency.
+It shows that the linker resolves the `wgpu*` functions that Skia's library calls to the shim's
+definitions.
 
 ```mermaid
 flowchart TD
-    app["Application<br/>(uses wgpu 30)"]
-    safe["skia-safe<br/>feature wgpu-30"]
+    app["Application"]
+    safe["skia-safe<br/>feature wgpu = wgpu-30"]
     shim["skia-wgpu<br/>feature wgpu-30<br/>(shim)"]
     bindings["skia-bindings<br/>feature wgpu"]
-    libskia["libskia-bindings.a<br/>Dawn backend + dawn_proc<br/>libskia.a: Skia"]
+    libskia["libskia-bindings.a<br/>Dawn backend, calls wgpu*<br/>libskia.a: Skia"]
     wgpu["wgpu 30"]
 
     app --> safe
-    app --> wgpu
+    app -->|"directly, or through skia_safe::wgpu"| wgpu
     safe --> shim
     safe --> bindings
     shim --> bindings
     shim --> wgpu
     bindings --> libskia
+    libskia -. "wgpu* symbols" .-> shim
 ```
 
-The application and `skia-wgpu` must resolve to the same `wgpu` major version, so that a
-`wgpu::Device` of the application is the type the shim accepts.
+The application and `skia-wgpu` must use the same `wgpu` major version, so that a `wgpu::Device` of
+the application is the type that `skia-safe` accepts. An application that takes its `wgpu` crate
+from `skia_safe::wgpu` gets that version without naming it.
 
 ## Build inputs
 
-The generated Dawn headers feed both the compilation of Skia's Dawn backend and bindgen. Struct layouts, enum values,
-and function signatures therefore come from one source on both sides of the function table.
+The generated Dawn headers feed both the compilation of Skia's Dawn backend and bindgen. Struct
+layouts, enum values, and function signatures therefore come from one source on both sides of the
+`wgpu*` calls.
 
 ```mermaid
 flowchart LR
     dawn["Dawn archive at<br/>[package.metadata].dawn"]
     generator["Dawn generator"]
-    headers["Generated Dawn headers<br/>webgpu.h, webgpu_cpp.h,<br/>dawn_proc.cpp, dawn_proc_table.h"]
-    cc["cc build of skia-bindings<br/>Dawn backend + dawn_proc.cpp"]
+    headers["Generated Dawn headers<br/>webgpu.h, webgpu_cpp.h"]
+    cc["cc build of skia-bindings<br/>Dawn backend"]
     bindgen["bindgen run of<br/>skia-bindings"]
-    lib["libskia-bindings.a"]
-    rs["bindings.rs<br/>WGPU* types, DawnProcTable,<br/>dawnProcSetProcs"]
-    shim["skia-wgpu shim"]
+    lib["libskia-bindings.a<br/>undefined wgpu* symbols"]
+    rs["bindings.rs<br/>WGPU* types,<br/>WGPUProc* function types"]
+    shim["skia-wgpu shim<br/>wgpu* definitions"]
+    link["Link of the application"]
 
     dawn --> generator --> headers
     headers --> cc --> lib
     headers --> bindgen --> rs --> shim
+    lib --> link
+    shim --> link
 ```
+
+Next to each shim function, an assignment to its `WGPUProc*` type makes rustc check the function's
+signature against the header. A function that the Dawn backend calls and the shim lacks fails the
+link with an undefined symbol that names the function.
 
 ## Path of one WebGPU call
 
-When Skia creates a buffer, the call leaves Skia's C++ code through Dawn's C++ wrapper, passes the
-function table inside `libskia-bindings.a`, and arrives in the shim, which calls `wgpu`.
+When Skia creates a buffer, the call leaves Skia's C++ code through Dawn's inline C++ wrapper and
+arrives directly in the shim, which calls `wgpu`. No function table sits in between.
 
 ```mermaid
 sequenceDiagram
     participant Skia as Skia Dawn backend (C++)
     participant Cpp as webgpu_cpp.h (inline)
-    participant Proc as dawn_proc.cpp
-    participant Shim as skia-wgpu v30
+    participant Shim as skia-wgpu
     participant Wgpu as wgpu 30
 
     Skia->>Cpp: device.CreateBuffer(&desc)
-    Cpp->>Proc: wgpuDeviceCreateBuffer(device, &desc)
-    Proc->>Shim: procs.deviceCreateBuffer(device, &desc)
+    Cpp->>Shim: wgpuDeviceCreateBuffer(device, &desc)
     Shim->>Shim: convert WGPUBufferDescriptor
     Shim->>Wgpu: Device::create_buffer(&descriptor)
     Wgpu-->>Shim: wgpu::Buffer
-    Shim-->>Skia: WGPUBuffer (boxed wgpu::Buffer)
+    Shim-->>Skia: WGPUBuffer (shared wgpu::Buffer)
 ```
 
 `wgpu` then runs the work on whichever native API it uses: Metal, Vulkan, Direct3D 12, or
 OpenGL ES.
 
-## Creating a Graphite context
+## Creating a Graphite context and a surface
 
-The application passes its own `wgpu` objects to `skia-safe`. The shim installs its function table
-once, before Skia makes its first WebGPU call.
+The application passes its own `wgpu` objects to `skia-safe`'s module `gpu::graphite::wgpu`.
+`skia-wgpu` wraps clones of them in WebGPU handles, so Skia and the application share one device,
+its queue, and its textures.
 
 ```mermaid
 sequenceDiagram
     participant App as Application
     participant Safe as skia-safe
-    participant Shim as skia-wgpu v30
+    participant Shim as skia-wgpu
     participant Skia as Skia (libskia-bindings.a)
 
-    App->>Safe: make Graphite context from wgpu::Device, wgpu::Queue
-    Safe->>Shim: v30 handles from wgpu objects
-    Shim->>Shim: refuse if another wgpu version's table is active
-    Shim->>Skia: dawnProcSetProcs(&table) (first use only)
-    Shim-->>Safe: skia_wgpu::Instance, Device, Queue (version independent)
+    App->>Safe: context_factory::make_wgpu(&device, &queue)
+    Safe->>Shim: BackendHandles::new(&device, &queue)
+    Shim-->>Safe: WGPUInstance, WGPUDevice, WGPUQueue
     Safe->>Skia: ContextFactory::MakeDawn(DawnBackendContext)
     Skia-->>App: graphite::Context
+
+    App->>Safe: surfaces::wrap_texture(&mut recorder, &texture)
+    Safe->>Shim: TextureHandle::new(&texture)
+    Shim-->>Safe: WGPUTexture, or an error for a format without a WebGPU equivalent
+    Safe->>Skia: BackendTextures::MakeDawn, then WrapBackendTexture
+    Skia-->>App: Surface that renders into the texture
 ```
 
 ## Several `wgpu` major versions
 
-`skia-wgpu` compiles one shared shim source once per enabled `wgpu` major version. Each `vNN`
-module binds the name `wgpu` to its version's crate, and its `compat` module holds the few places
-where that version's API differs. All modules convert from the same generated C types, and all
-produce the same version-independent handle types that `skia-safe` accepts.
+`skia-wgpu` offers a feature `wgpu-NN` for each supported `wgpu` major version. Each feature
+enables the module `vNN`, which binds the name `wgpu` to that version's crate and compiles the one
+shared shim source. Its `compat` module holds the few places where that version's API differs.
+All modules convert from the same generated C types.
 
 ```mermaid
 flowchart TD
-    src["Shared shim source<br/>shim/mod.rs"]
     types["Generated C types<br/>(skia-bindings)"]
-    subgraph v29 ["module v29 (feature wgpu-29)"]
-        c29["compat"]
-        w29["wgpu = wgpu29"]
-    end
+    src["Shared shim source<br/>shim/mod.rs"]
     subgraph v30 ["module v30 (feature wgpu-30)"]
         c30["compat"]
         w30["wgpu = wgpu30"]
     end
-    handles["Version-independent handles<br/>skia_wgpu::Instance, Device, Queue, Texture"]
-    table["One process-wide function table"]
+    subgraph vNN ["module vNN (feature wgpu-NN)"]
+        cNN["compat"]
+        wNN["wgpu = wgpuNN"]
+    end
+    root["skia-wgpu crate root<br/>re-exports the enabled module"]
+    exports["wgpu* exports<br/>(one set per build)"]
 
     types --> src
-    src --> v29
     src --> v30
-    v29 --> handles
-    v30 --> handles
-    v29 -. "installs (one version at a time)" .-> table
-    v30 -. "installs (one version at a time)" .-> table
+    src --> vNN
+    v30 --> root
+    vNN --> root
+    v30 -. "exports, when enabled" .-> exports
+    vNN -. "exports, when enabled" .-> exports
 ```
 
+A build enables exactly one `wgpu-NN` feature, because each version would export the same `wgpu*`
+symbols. `skia-wgpu` stops the build with a `compile_error!` when more than one is enabled, and its
+`links` key keeps a second version of `skia-wgpu` out of the dependency graph. `skia-safe` forwards
+each `wgpu-NN` feature, and its feature `wgpu` enables the version that the release recommends.
+Every `wgpu-NN` feature of `skia-safe` also enables its hidden feature `_wgpu`, on which all of
+`skia-safe`'s `wgpu` code depends, so that code never names a version.
+
 A new Skia milestone changes the generated C types, and the shared source is updated once. A new
-`wgpu` major version adds a feature, a renamed dependency, and a `compat` module.
+`wgpu` major version adds a feature, a renamed dependency, and a `compat` module. `skia-bindings`
+does not depend on the `wgpu` version, so one prebuilt binary per feature set serves every version.

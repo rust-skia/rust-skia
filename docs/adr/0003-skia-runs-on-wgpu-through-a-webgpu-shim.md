@@ -2,7 +2,7 @@
 status: proposed
 ---
 
-# Skia runs on the `wgpu` crate through WebGPU C functions that Rust exports
+# Skia runs on the `wgpu` crate through a WebGPU shim
 
 Skia must run inside a `wgpu` application on every backend that `wgpu` supports, including
 Direct3D 12 and OpenGL ES, and share the application's device, queue, and textures. Graphite has
@@ -28,31 +28,14 @@ the same defines. Nothing in Skia's library outside the backend tests `SK_DAWN`,
 Graphite code handles `BackendApi::kDawn` without conditions. `libskia.a` is therefore the same
 with and without the `wgpu` feature.
 
-The crate `skia-wgpu` defines the `wgpu*` functions that the backend calls, as Rust functions
-with `#[no_mangle]` and the C calling convention. Each of these functions converts its C
-arguments and calls the `wgpu` crate. That set of functions is called the shim. The backend's
-calls reach the shim directly. No function table and no install step sit between them. A
-`WGPUDevice` handle wraps a clone of the application's `wgpu::Device`, so Skia and the
-application share one device.
-
-`skia-wgpu` depends on `skia-bindings`, so the linker sees the shim's library before
-`libskia-bindings.a`, the library that calls the shim. GNU ld scans each library once, in order,
-and loads from it only the members that define a symbol still undefined at that point. Library
-order nevertheless does not matter here. rustc passes a generated object file, `symbols.o`, to
-every link ahead of the libraries, and that file references each `#[no_mangle]` function of the
-linked crates. The linker therefore always loads the shim's functions. An experiment with a
-model of the three crates confirmed this. It linked and ran with GNU ld 2.44 on x86_64 Linux and
-with ld64 on macOS, in debug and release builds, with thin and with fat LTO, and with the C++
-library both bundled into the rlib (`static=`, as on Unix) and passed to the linker separately
-(as on Windows).
+The crate `skia-wgpu` implements the `wgpu*` functions that the backend calls, in Rust. Each of
+these functions converts its C arguments and calls the `wgpu` crate. That set of functions is
+called the shim. A `WGPUDevice` handle wraps a clone of the application's `wgpu::Device`, so Skia
+and the application share one device. ADR 0004 decides how the backend's calls reach the shim.
 
 `skia-bindings` generates the WebGPU types in its existing bindgen run, and the shim uses them.
-`webgpu.h` declares a function pointer type for every function, such as
-`WGPUProcDeviceCreateBuffer`. Next to each shim function, an assignment of the function to that
-type (`const _: WGPUProcDeviceCreateBuffer = Some(wgpuDeviceCreateBuffer);`) makes rustc check
-its signature against the header. A function that the backend calls and the shim lacks fails the
-link with an undefined symbol that names the function. The shim implements only the functions
-that the backend calls, 106 at m157, of the 276 functions in `webgpu.h`.
+The shim implements only the functions that the backend calls, 106 at m157, of the 276 functions
+in `webgpu.h`.
 
 ## Which headers
 
@@ -157,48 +140,54 @@ supported `wgpu` major version. Each feature enables an optional dependency rena
 where two `wgpu` majors differ go into a per-version `compat` module, so the shared source never
 names a version.
 
-A build enables exactly one `wgpu-NN` feature. Each enabled version would export the same
-`wgpu*` symbols, so `skia-wgpu` stops the build with a `compile_error!` when more than one is
-enabled. For the same reason, `skia-wgpu` declares a `links` key. Cargo then allows only one
-version of `skia-wgpu` in a dependency graph, and two semver-incompatible versions cannot both
-export the symbols. Because only one is enabled, the crate root re-exports the API of its `vNN`
-module, which stays private. Application code then names the `wgpu` version only in its
-`Cargo.toml`.
+A build enables exactly one `wgpu-NN` feature, because Skia's backend calls one set of `wgpu*`
+functions in the whole process. ADR 0004 describes how the build enforces this. Because only one
+is enabled, the crate root re-exports the API of its `vNN` module, which stays private.
+Application code then names the `wgpu` version only in its `Cargo.toml`.
 
 The two sides of the shim change at different rates. Dawn's headers change once per Skia
 milestone, and a rust-skia release has exactly one milestone, so every `vNN` module of a release
 converts from the same generated C types. A Dawn update is therefore made once, in the shared
 source. Only the `wgpu` side differs between `vNN` modules.
 
-`skia-wgpu` sits below `skia-safe`, so its API cannot return `skia-safe` types. The `vNN` module
-turns `wgpu` objects into version-independent handle types of `skia-wgpu`, for example
-`skia_wgpu::Device`, which owns one reference to a `WGPUDevice`. `skia-safe` takes only these
-handle types, so its Graphite API exists once, whatever `wgpu` version is enabled. `skia-safe`
-forwards each `wgpu-NN` feature to `skia-wgpu`, so an application adds only `skia-safe`.
+`skia-wgpu` sits below `skia-safe`, so its API cannot return `skia-safe` types. It turns `wgpu`
+objects into WebGPU handles, and `skia-safe` builds Graphite contexts and surfaces from these
+handles. `skia-safe`'s module `gpu::graphite::wgpu` takes the application's `wgpu::Device`,
+`wgpu::Queue`, and `wgpu::Texture`. These are types of the enabled version, which `skia-wgpu`
+re-exports as `skia_wgpu::wgpu`. A build enables exactly one version, so the module exists once,
+and its code never names a version. The module depends only on `skia-safe`'s hidden feature
+`_wgpu`, which every `wgpu-NN` feature enables, so a new `wgpu` version changes no code in
+`skia-safe`. `skia-safe` forwards each `wgpu-NN` feature to `skia-wgpu`, so an application adds
+only `skia-safe`.
+`skia-safe`'s feature `wgpu` enables one of them, the version that a release recommends, so an
+application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a version.
 `skia-bindings` has one `wgpu` feature, which builds the Dawn backend and does not depend on the
-`wgpu` version.
+`wgpu` version. One prebuilt binary per feature set therefore serves every `wgpu` version.
 
 ## Consequences
 
 - The shim implements 74 methods and the `AddRef` and `Release` functions of 19 object types, 106
-  functions in total at m157 (the undefined `wgpu*` symbols of `libskia-bindings.a`). The
-  functions change with each Skia milestone, and the link of a test binary names every function
-  that a new milestone adds. `cargo check` does not report a missing function.
+  functions in total at m157. The functions change with each Skia milestone.
 - Skia's SkSL compiler emits WGSL that Dawn's Tint compiler accepts. `wgpu` compiles WGSL with naga
   instead, and it is not yet verified that naga accepts Skia's output.
 - Everything the shim does passes through `wgpu`, so `wgpu` tracks resource state and
   synchronization between Skia's work and the application's work. `wgpu` validation adds CPU
   overhead compared with Graphite's native backends.
 - One `wgpu` version drives Skia per build. If two crates in one dependency graph enable different
-  `wgpu-NN` features of `skia-safe`, Cargo enables both, and the build fails.
-- The `wgpu*` symbols are global. An application that also links another WebGPU implementation
-  that exports them, such as Dawn or wgpu-native, fails to link with duplicate symbols.
-- The link experiment did not cover Windows with MSVC's `link.exe`. Whether rustc's `symbols.o`
-  also loads the shim's functions there is unverified.
+  `wgpu-NN` features of `skia-safe`, Cargo enables both, and the build fails (ADR 0004).
 - Adding a `wgpu` major version adds an optional feature, which is compatible under semver. It
   ships as a patch release of `skia-wgpu` and `skia-safe` within the current milestone. Removing a
   version breaks users, so it only happens with a milestone version bump. The first release
   supports only the newest `wgpu` major version.
+- Moving `skia-safe`'s feature `wgpu` to another `wgpu-NN` breaks applications that use their own
+  `wgpu` dependency of the previous version, so it also only happens with a milestone version bump.
+- A buffer map that is still pending when the application drops Skia's Graphite context keeps
+  itself alive. `wgpu` holds the map's closure, the closure holds Skia's callback, and the callback
+  holds Skia's buffer, which holds the `wgpu` buffer. Any later submission or poll on the device
+  completes the map and frees all of them. If the application never submits or polls on the
+  device again, they leak, together with the device. A final blocking poll when Skia releases the
+  device would end the cycle. It needs a check first that Skia's map callbacks may run while Skia
+  destroys its shared context.
 
 ## Considered Options
 
@@ -208,16 +197,6 @@ forwards each `wgpu-NN` feature to `skia-wgpu`, so an application adds only `ski
   `tools/git-sync-deps` syncs every `DEPS` entry, so every source build would fetch Dawn (about
   530 MB on disk), with or without the `wgpu` feature. Skia builds Dawn and Tint with CMake, which
   rust-skia's build cannot require.
-- **Rejected: forward the `wgpu*` functions through Dawn's function table.** Dawn's generated
-  `dawn_proc.cpp` defines every `wgpu*` function as a call through a `DawnProcTable`, a struct
-  with one function pointer per WebGPU function, and `dawnProcSetProcs` installs the table for the
-  whole process. Upstream Skia uses it to install real Dawn's table
-  (`tools/graphite/dawn/GraphiteDawnTestContext.cpp`). A table of shim functions would need no
-  symbols across crates. But the table has 276 entries, and a struct literal that names every
-  entry, the only way to have rustc report a new function, needs a stub for each of the 170
-  functions that Skia never calls. The table also needs `dawn_proc.cpp` and its replacement
-  headers for Dawn internals in the build, an install step before Skia's first WebGPU call, and a
-  check that only one `wgpu` version's table is installed.
 - **Rejected: share `wgpu`'s native handles with Graphite's Metal and Vulkan backends.** `wgpu`
   exposes its `MTLDevice`, `MTLCommandQueue`, `VkDevice`, and textures through `as_hal`. This needs
   far less code than the shim and runs at native speed, but it cannot reach Direct3D 12 or
@@ -226,15 +205,11 @@ forwards each `wgpu-NN` feature to `skia-wgpu`, so an application adds only `ski
 - **Rejected: use wgpu-native as the `webgpu.h` implementation.** wgpu-native implements the
   standard header on `wgpu-core` with its own instance. It does not create its handles from `wgpu`
   crate objects, so an application's `wgpu::Device` cannot be handed to Skia.
-- **Rejected: export the `wgpu*` functions from a Rust crate below `skia-bindings`.** That crate
-  could not use the WebGPU types of `skia-bindings`, so a second bindgen run or a shared `-sys`
-  crate would be needed. Link order gives no reason to place the shim below, because rustc's
-  `symbols.o` loads the shim's functions from a crate above `skia-bindings` too.
 - **Rejected: dispatch each `wgpu*` function through its handle, so that several `wgpu` majors
   can drive Skia in one build.** Every function that Skia calls takes a handle as its first
   argument. Each handle could start with a pointer to its version's operations, and one set of
-  exports would dispatch through it. This needs an operations struct per version and an
-  indirection in every export. One version per build is simpler, and the first release supports
+  `wgpu*` functions would dispatch through it. This needs an operations struct per version and an
+  indirection in every function. One version per build is simpler, and the first release supports
   only one version.
 - **Rejected: compile Skia's Emscripten code path natively against the standard header.** The
   shim would not need Dawn-only functions, but the fork would carry a patch across the 74
@@ -243,6 +218,10 @@ forwards each `wgpu-NN` feature to `skia-wgpu`, so an application adds only `ski
   range across majors (`wgpu = ">=29, <31"`) lets Cargo pick a version that differs from the
   application's, and the shim would have to compile against whichever version Cargo picks. A
   `wgpu-NN` feature states the version explicitly.
+- **Rejected: a `skia-safe` API that takes version-independent handle types of `skia-wgpu`.**
+  Applications would convert their `wgpu` objects into handles first, for example into a
+  `skia_wgpu::Device`. This pays off only if several `wgpu` versions drive Skia in one build,
+  which this ADR rejects.
 - **Rejected: `skia-wgpu` depending on `skia-safe`.** `skia-safe` would stay free of `wgpu`, but
   applications would have to add a second crate, and `wgpu` would be the only GPU backend that is
   not a `skia-safe` feature.
