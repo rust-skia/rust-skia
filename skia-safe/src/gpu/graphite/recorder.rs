@@ -241,12 +241,24 @@ impl<'a> BorrowedRecorder<'a> {
 // Ganesh `gpu::RecordingContext`, which is neither `Send` nor `Sync`.
 
 impl NativeDelete for sb::skgpu_graphite_Recorder {
-    /// Panics instead of deleting a recorder whose draw called an [`ImageProvider`] that is still
-    /// running, because that draw continues on the recorder after the provider returns.
+    /// Panics instead of deleting a recorder that is still in use, in two cases.
+    ///
+    /// - A draw on the recorder called an [`ImageProvider`] that is still running. The draw continues
+    ///   on the recorder after the provider returns.
+    /// - A surface still uses the recorder. Skia's draws on such a surface dereference the recorder,
+    ///   so the panic leaks the recorder to keep the surface usable. This check snaps the recorder
+    ///   first, which discards work that was not snapped yet, as deleting the recorder would.
+    ///
+    /// The draw check runs first, because snapping a recorder in the middle of a draw deletes its
+    /// deferred canvas and flushes the device that is drawing.
     unsafe fn delete(ptr: *mut Self) {
         assert!(
             !is_drawing(ptr),
             "a graphite::Recorder must not be dropped while an ImageProvider runs inside one of its draws"
+        );
+        assert!(
+            !unsafe { sb::C_Recorder_snapAndHasLiveDevices(ptr) },
+            "a graphite::Recorder was dropped while a surface created from it is still alive"
         );
         unsafe { sb::C_Recorder_delete(ptr) }
     }

@@ -330,6 +330,42 @@ extern "C" void C_Recorder_delete(skgpu::graphite::Recorder* self) {
     delete self;
 }
 
+namespace {
+
+// Reads a private member of a Skia class without patching Skia.
+//
+// C++ does not check access for names used in an explicit template instantiation
+// ([temp.explicit]), so `template struct PrivateMember<Tag, &Class::fPrivate>;` may name a private
+// member. The instantiation defines the friend function `memberPointer(Tag)`, which returns the
+// pointer to that member, and code outside the class reaches it through the tag. A renamed member
+// or a changed member type fails to compile here.
+template <typename Tag, typename Tag::Type Member>
+struct PrivateMember {
+    friend typename Tag::Type memberPointer(Tag) { return Member; }
+};
+
+// `Recorder::fTrackedDevices`: every Device connected to the Recorder, including those of live
+// SkSurfaces.
+struct RecorderTrackedDevices {
+    using Type =
+        skia_private::TArray<sk_sp<skgpu::graphite::Device>> skgpu::graphite::Recorder::*;
+    friend Type memberPointer(RecorderTrackedDevices);
+};
+template struct PrivateMember<RecorderTrackedDevices,
+                              &skgpu::graphite::Recorder::fTrackedDevices>;
+
+}  // namespace
+
+// Snaps the Recorder, discards the Recording, and returns true if a Device connected to the
+// Recorder is still used outside of it, for example by a live SkSurface. Deleting the Recorder
+// then leaves that Device without a Recorder, and the next draw on it dereferences a null
+// Recorder. snap() removes every tracked Device that only the Recorder still holds, and the
+// deferred canvas device with it, so every Device left in the list is used elsewhere.
+extern "C" bool C_Recorder_snapAndHasLiveDevices(skgpu::graphite::Recorder* self) {
+    self->snap();
+    return !(self->*memberPointer(RecorderTrackedDevices())).empty();
+}
+
 //
 // gpu/graphite/Recording.h
 //
