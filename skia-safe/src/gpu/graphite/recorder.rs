@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::ffi::c_void;
 use std::fmt;
 use std::marker::PhantomData;
@@ -139,6 +140,7 @@ unsafe extern "C" fn find_or_create<T: ImageProvider>(
     required: *const sb::SkImage_RequiredProperties,
 ) -> *mut sb::SkImage {
     let provider = unsafe { &*provider.cast::<T>() };
+    let _drawing = DrawingScope::enter(recorder);
     let recorder = BorrowedRecorder {
         recorder: ManuallyDrop::new(
             Recorder::from_ptr(recorder).expect("Graphite passes the drawing recorder"),
@@ -156,6 +158,39 @@ unsafe extern "C" fn find_or_create<T: ImageProvider>(
         .unwrap_or(ptr::null_mut())
 }
 
+/// Lists a recorder in [`DRAWING_RECORDERS`] for as long as the scope lives, so that
+/// [`Recorder::snap`] and dropping the recorder refuse to run on it during the provider call.
+struct DrawingScope;
+
+impl DrawingScope {
+    fn enter(recorder: *const sb::skgpu_graphite_Recorder) -> Self {
+        DRAWING_RECORDERS.with_borrow_mut(|drawing_recorders| drawing_recorders.push(recorder));
+        Self
+    }
+}
+
+impl Drop for DrawingScope {
+    fn drop(&mut self) {
+        DRAWING_RECORDERS.with_borrow_mut(|drawing_recorders| drawing_recorders.pop());
+    }
+}
+
+thread_local! {
+    /// The recorders on this thread that are in the middle of a draw because Graphite called an
+    /// [`ImageProvider`] from it. [`Recorder::snap`] must not run on one of them, because it
+    /// deletes the deferred canvas and flushes the device that is drawing, and neither must
+    /// deleting the recorder, which the draw still uses. A recorder is used on one thread only, so
+    /// the list on that thread holds all of its draws. A recorder appears once per nested provider
+    /// call, so the list is a stack.
+    static DRAWING_RECORDERS: RefCell<Vec<*const sb::skgpu_graphite_Recorder>> =
+        const { RefCell::new(Vec::new()) };
+}
+
+/// Returns whether `recorder` is in the middle of a draw that called an [`ImageProvider`].
+fn is_drawing(recorder: *const sb::skgpu_graphite_Recorder) -> bool {
+    DRAWING_RECORDERS.with_borrow(|drawing_recorders| drawing_recorders.contains(&recorder))
+}
+
 // `skgpu::graphite::Recorder` is handed out as `std::unique_ptr<Recorder>`
 // (Context::makeRecorder) and derives from `SkRecorder`, not `SkRefCnt`. It is
 // NOT ref-counted, so it must be a `RefHandle` whose drop `delete`s it.
@@ -168,11 +203,15 @@ pub type Recorder = RefHandle<sb::skgpu_graphite_Recorder>;
 /// the owner keeps that responsibility — and the lifetime ties the borrow to the
 /// object it was obtained from, so it cannot dangle.
 ///
-/// Only shared access to the underlying [`Recorder`] is exposed (via `Deref`);
-/// the mutating operations are forwarded as inherent methods. Handing out
-/// `&mut Recorder` would be unsound: safe code could `mem::replace` a recorder
-/// created by `Context::make_recorder` into it and end up owning (and later
-/// dropping, i.e. `delete`ing) a recorder the surface still owns.
+/// Only shared access to the underlying [`Recorder`] is exposed (via `Deref`).
+/// Handing out `&mut Recorder` would be unsound: safe code could `mem::replace` a
+/// recorder created by `Context::make_recorder` into it and end up owning (and
+/// later dropping, i.e. `delete`ing) a recorder the surface still owns.
+///
+/// [`Recorder::snap`] and [`Recorder::make_deferred_canvas`] stay on the owned
+/// [`Recorder`]. A canvas can be the recorder's deferred canvas, which `snap`
+/// deletes, so snapping through a recorder reached from a canvas could delete
+/// that canvas while it is still in use.
 #[derive(Debug)]
 pub struct BorrowedRecorder<'a> {
     recorder: ManuallyDrop<Recorder>,
@@ -194,20 +233,6 @@ impl<'a> BorrowedRecorder<'a> {
             _owner: PhantomData,
         }
     }
-
-    /// See [`Recorder::snap`].
-    pub fn snap(&mut self) -> Option<Recording> {
-        self.recorder.snap()
-    }
-
-    /// See [`Recorder::make_deferred_canvas`].
-    pub fn make_deferred_canvas(
-        &mut self,
-        image_info: &ImageInfo,
-        texture_info: &TextureInfo,
-    ) -> Option<&Canvas> {
-        self.recorder.make_deferred_canvas(image_info, texture_info)
-    }
 }
 
 // Deliberately NOT `Send`/`Sync`: Skia documents a Graphite `Recorder` as
@@ -216,7 +241,13 @@ impl<'a> BorrowedRecorder<'a> {
 // Ganesh `gpu::RecordingContext`, which is neither `Send` nor `Sync`.
 
 impl NativeDelete for sb::skgpu_graphite_Recorder {
+    /// Panics instead of deleting a recorder whose draw called an [`ImageProvider`] that is still
+    /// running, because that draw continues on the recorder after the provider returns.
     unsafe fn delete(ptr: *mut Self) {
+        assert!(
+            !is_drawing(ptr),
+            "a graphite::Recorder must not be dropped while an ImageProvider runs inside one of its draws"
+        );
         unsafe { sb::C_Recorder_delete(ptr) }
     }
 }
@@ -237,7 +268,16 @@ impl Recorder {
     ///
     /// # Returns
     /// A `Recording` containing the recorded operations, or `None` if recording failed
+    ///
+    /// # Panics
+    /// Panics when an [`ImageProvider`] calls it on a recorder whose draw called that provider,
+    /// because Graphite is then in the middle of a draw that `snap` would delete or flush. Snapping
+    /// a different recorder from inside a provider is allowed.
     pub fn snap(&mut self) -> Option<Recording> {
+        assert!(
+            !is_drawing(self.native()),
+            "Recorder::snap must not be called while an ImageProvider runs inside one of its draws"
+        );
         Recording::from_ptr(unsafe { sb::C_Recorder_snap(self.native_ptr()) })
     }
 
