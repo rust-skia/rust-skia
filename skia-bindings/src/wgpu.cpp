@@ -1,4 +1,5 @@
-// Bindings for Graphite's Dawn backend, built against the checked-in Dawn headers in `dawn/`.
+// Bindings for Graphite's Dawn backend, built against the Dawn headers that
+// `build_support/dawn.rs` generates.
 //
 // Skia's Dawn backend calls the WebGPU C functions of `webgpu.h`. rust-skia links no WebGPU
 // implementation for them. They forward through Dawn's function table (`dawn_proc`), and the
@@ -46,7 +47,8 @@ extern "C" skgpu::graphite::Context* C_ContextFactory_MakeDawn(
 // gpu/graphite/dawn/DawnGraphiteTypes.h
 //
 
-// The backend texture references `texture` and takes its dimensions and format from it.
+// The backend texture takes its dimensions and format from `texture`, but no reference to it.
+// The caller keeps `texture` alive while the backend texture is in use.
 extern "C" void C_BackendTextures_MakeDawn(
     skgpu::graphite::BackendTexture* uninitialized,
     WGPUTexture texture) {

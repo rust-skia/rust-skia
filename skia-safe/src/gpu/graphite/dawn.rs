@@ -49,6 +49,8 @@ pub mod context_factory {
     use super::{BackendContext, Context, ContextOptions};
     use crate::prelude::*;
 
+    /// Creates a Graphite context that renders with the backend context's device and queue.
+    /// Returns `None` if Skia cannot use the device.
     pub fn make_dawn<'a>(
         backend_context: &BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
@@ -78,7 +80,9 @@ pub mod backend_textures {
     ///
     /// # Safety
     ///
-    /// `texture` must be a valid WebGPU texture handle. The backend texture takes a reference to it.
+    /// `texture` must be a valid WebGPU texture handle, and stay valid for as long as the backend
+    /// texture is in use. The backend texture takes no reference to it, but a surface or image that
+    /// wraps the backend texture does.
     pub unsafe fn make_dawn(texture: WGPUTexture) -> BackendTexture {
         BackendTexture::construct(|backend_texture| unsafe {
             sb::C_BackendTextures_MakeDawn(backend_texture, texture)
