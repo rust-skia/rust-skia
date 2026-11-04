@@ -311,8 +311,7 @@ mod tests {
     use skia_bindings as sb;
 
     use super::super::api::BackendHandles;
-    use super::super::future::block_on;
-    use super::super::wgpu;
+    use super::super::testing;
     use super::{device_pop_error_scope, device_push_error_scope};
 
     /// `wgpu` keeps error scopes per thread and panics when a thread pops a scope that another
@@ -321,11 +320,9 @@ mod tests {
     /// scope of its own thread, also while another thread has scopes open at another depth.
     #[test]
     fn a_pop_closes_the_scope_of_its_own_thread() {
-        let instance = wgpu::Instance::default();
-        let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
-            .expect("no wgpu adapter");
-        let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))
-            .expect("no wgpu device");
+        let Some((device, queue)) = testing::device() else {
+            return;
+        };
         let handles = BackendHandles::new(&device, &queue);
         // Raw pointers are not `Send`. The handle stays valid while `handles` lives.
         let device = handles.device() as usize;

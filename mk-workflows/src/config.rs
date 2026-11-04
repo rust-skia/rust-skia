@@ -75,7 +75,7 @@ pub fn qa_jobs(workflow: &Workflow) -> Vec<Job> {
         }
         _ => {
             const QA_ALL_FEATURES: &str =
-                "ganesh,gl,graphite,skottie,svg,textlayout,ureq,vulkan,webp";
+                "ganesh,gl,graphite,skottie,svg,textlayout,ureq,vulkan,webp,wgpu";
             vec![Job {
                 name: JobName::Named("stable-all-features".into()),
                 toolchain: "stable",

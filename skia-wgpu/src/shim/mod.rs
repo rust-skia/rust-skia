@@ -21,4 +21,6 @@ mod instance;
 mod pipeline;
 mod queue;
 mod table;
+#[cfg(test)]
+mod testing;
 mod texture;
