@@ -159,7 +159,7 @@ unsafe extern "C" fn find_or_create<T: ImageProvider>(
 }
 
 /// Lists a recorder in [`DRAWING_RECORDERS`] for as long as the scope lives, so that
-/// [`Recorder::snap`] refuses to run on it during the provider call.
+/// [`Recorder::snap`] and dropping the recorder refuse to run on it during the provider call.
 struct DrawingScope;
 
 impl DrawingScope {
@@ -178,11 +178,17 @@ impl Drop for DrawingScope {
 thread_local! {
     /// The recorders on this thread that are in the middle of a draw because Graphite called an
     /// [`ImageProvider`] from it. [`Recorder::snap`] must not run on one of them, because it
-    /// deletes the deferred canvas and flushes the device that is drawing. A recorder is used on
-    /// one thread only, so the list on that thread holds all of its draws. A recorder appears once
-    /// per nested provider call, so the list is a stack.
+    /// deletes the deferred canvas and flushes the device that is drawing, and neither must
+    /// deleting the recorder, which the draw still uses. A recorder is used on one thread only, so
+    /// the list on that thread holds all of its draws. A recorder appears once per nested provider
+    /// call, so the list is a stack.
     static DRAWING_RECORDERS: RefCell<Vec<*const sb::skgpu_graphite_Recorder>> =
         const { RefCell::new(Vec::new()) };
+}
+
+/// Returns whether `recorder` is in the middle of a draw that called an [`ImageProvider`].
+fn is_drawing(recorder: *const sb::skgpu_graphite_Recorder) -> bool {
+    DRAWING_RECORDERS.with_borrow(|drawing_recorders| drawing_recorders.contains(&recorder))
 }
 
 // `skgpu::graphite::Recorder` is handed out as `std::unique_ptr<Recorder>`
@@ -235,7 +241,13 @@ impl<'a> BorrowedRecorder<'a> {
 // Ganesh `gpu::RecordingContext`, which is neither `Send` nor `Sync`.
 
 impl NativeDelete for sb::skgpu_graphite_Recorder {
+    /// Panics instead of deleting a recorder whose draw called an [`ImageProvider`] that is still
+    /// running, because that draw continues on the recorder after the provider returns.
     unsafe fn delete(ptr: *mut Self) {
+        assert!(
+            !is_drawing(ptr),
+            "a graphite::Recorder must not be dropped while an ImageProvider runs inside one of its draws"
+        );
         unsafe { sb::C_Recorder_delete(ptr) }
     }
 }
@@ -262,9 +274,8 @@ impl Recorder {
     /// because Graphite is then in the middle of a draw that `snap` would delete or flush. Snapping
     /// a different recorder from inside a provider is allowed.
     pub fn snap(&mut self) -> Option<Recording> {
-        let this = self.native() as *const sb::skgpu_graphite_Recorder;
         assert!(
-            !DRAWING_RECORDERS.with_borrow(|drawing_recorders| drawing_recorders.contains(&this)),
+            !is_drawing(self.native()),
             "Recorder::snap must not be called while an ImageProvider runs inside one of its draws"
         );
         Recording::from_ptr(unsafe { sb::C_Recorder_snap(self.native_ptr()) })
