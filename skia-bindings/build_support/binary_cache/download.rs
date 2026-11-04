@@ -211,6 +211,15 @@ pub fn download_dawn(revision: &str, paths: &[&str], target: &Path) {
             continue;
         };
         if paths.iter().any(|p| relative.starts_with(p)) {
+            // `starts_with` compares only the leading components, so a `..` further on could
+            // escape `target`.
+            assert!(
+                relative
+                    .components()
+                    .all(|c| matches!(c, Component::Normal(_))),
+                "Dawn archive entry {} leaves the unpack directory",
+                path.display()
+            );
             let destination = target.join(relative);
             fs::create_dir_all(destination.parent().unwrap()).unwrap();
             entry.unpack(&destination).unwrap();

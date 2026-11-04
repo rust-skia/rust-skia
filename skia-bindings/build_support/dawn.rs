@@ -73,9 +73,12 @@ pub fn add_backend_sources(cc_build: &mut cc::Build, skia_source_dir: &Path) {
         cc_build.file(source);
     }
     cc_build.file(dir().join("src/dawn_proc.cpp"));
-    // Only `dawn_proc.cpp` includes these headers. Their paths (`src/utils/assert.h`, ...) exist
-    // nowhere in Skia, so they cannot shadow a Skia header.
-    cc_build.include(dir().join("compat"));
+    // The replacements for the Dawn internals that `dawn_proc.cpp` includes. Only that file
+    // includes them, and their paths (`src/utils/assert.h`, ...) exist nowhere in Skia, so they
+    // cannot shadow a Skia header. Cargo runs build scripts in the package's root directory.
+    let compat_dir = std::env::current_dir().unwrap().join("dawn/compat");
+    cargo::rerun_if_file_changed(&compat_dir);
+    cc_build.include(compat_dir);
     // Skia's internal headers leave many parameters unused, and Skia's own build turns this
     // warning off. `cc` enables it with `-Wall -Wextra` (`/W4` on MSVC) for the whole build.
     cc_build.flag_if_supported("-Wno-unused-parameter");
@@ -87,7 +90,7 @@ pub fn include_dir() -> PathBuf {
     dir().join("include")
 }
 
-/// The directory that [`prepare`] fills: `include/`, `src/dawn_proc.cpp`, and `compat/`.
+/// The directory that [`prepare`] fills: `include/` and `src/dawn_proc.cpp`.
 pub fn dir() -> PathBuf {
     cargo::output_directory().join("dawn")
 }
@@ -203,13 +206,10 @@ fn run_python(python: &Path, script: &Path, common_args: &[OsString], args: &[Os
     assert!(status.success(), "{} failed", script.display());
 }
 
-/// Where each file of [`dir`] comes from: the Dawn source, the generator output, or the
-/// replacements in `skia-bindings/dawn/compat` for the Dawn internals that `dawn_proc.cpp`
-/// includes.
+/// Where each file of [`dir`] comes from: the Dawn source or the generator output.
 enum Origin {
     Source,
     Generated,
-    Compat,
 }
 
 /// The files of [`dir`], as origin, path in the origin, and path in [`dir`].
@@ -267,22 +267,9 @@ const FILES: &[(Origin, &str, &str)] = &[
         "src/dawn/dawn_proc.cpp",
         "src/dawn_proc.cpp",
     ),
-    (
-        Origin::Compat,
-        "src/dawn/common/Compiler.h",
-        "compat/src/dawn/common/Compiler.h",
-    ),
-    (
-        Origin::Compat,
-        "src/utils/assert.h",
-        "compat/src/utils/assert.h",
-    ),
-    (Origin::Compat, "src/utils/log.h", "compat/src/utils/log.h"),
 ];
 
 fn assemble(source_dir: &Path, generated: &Path, target: &Path) {
-    // Cargo runs build scripts in the package's root directory.
-    let compat_dir = std::env::current_dir().unwrap().join("dawn/compat");
     if target.exists() {
         fs::remove_dir_all(target).unwrap();
     }
@@ -290,7 +277,6 @@ fn assemble(source_dir: &Path, generated: &Path, target: &Path) {
         let from_dir = match origin {
             Origin::Source => source_dir,
             Origin::Generated => generated,
-            Origin::Compat => &compat_dir,
         };
         let to = target.join(to);
         fs::create_dir_all(to.parent().unwrap()).unwrap();
