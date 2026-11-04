@@ -1,6 +1,6 @@
 ---
 name: skia-milestone-update
-description: Perform a Skia milestone update for rust-skia or refresh the current milestone from its upstream chrome/mXX branch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, the Dawn revision and its generated headers, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
+description: Perform a Skia milestone update for rust-skia or refresh the current milestone from its upstream chrome/mXX branch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, the Dawn revision and its generated headers, the newest `wgpu` version, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
 ---
 
 # Skia Milestone Update
@@ -216,7 +216,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   unrelated to the crate version — see the note under Inputs for its scheme.
   Update all of these together:
   - `skia-bindings/Cargo.toml` package version;
-  - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
+  - `skia-safe/Cargo.toml` package version and exact `skia-bindings` and `skia-wgpu`
+    dependencies;
+  - `skia-wgpu/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
     exactly;
   - `skia-bindings/Cargo.toml` `[package.metadata].dawn`, `.jinja2`, and `.markupsafe`,
@@ -366,6 +368,38 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     build organization diff changes what `skia_use_dawn` adds in `BUILD.gn` (sources, defines,
     include directories, dependencies), mirror the change in
     `skia-bindings/build_support/dawn.rs`.
+- **`wgpu` versions:** `skia-wgpu` offers a feature `wgpu-NN` for each supported `wgpu` major
+  version, and `skia-safe`'s feature `wgpu` enables the one a release recommends
+  (`docs/adr/0003`). Removing a `wgpu-NN` feature or moving `skia-safe`'s `wgpu` to another one
+  breaks applications, so both only happen with a milestone version bump, and this update is the
+  place to propose them.
+  - Look up the newest `wgpu` version on crates.io, and compare its major version with the newest
+    `wgpu-NN` feature in `skia-wgpu/Cargo.toml`:
+
+    ```sh
+    cargo info wgpu
+    ```
+
+    A `wgpu` minor or patch release needs no change, because `wgpuNN = { package = "wgpu",
+    version = "NN" }` already accepts it.
+  - When a newer major exists, propose the shim update to the user and implement it only after
+    their decision. The proposal names the new feature `wgpu-NN` with its optional dependency
+    `wgpuNN` and module `skia-wgpu/src/vNN.rs`, the `wgpu` API changes that the shim's source
+    meets (from the `wgpu` changelog, and from `cargo check -p skia-wgpu --features wgpu-NN`),
+    and which of them go into the per-version `compat` module. It also asks whether `skia-safe`'s
+    feature `wgpu` moves to the new version, and whether an old `wgpu-NN` feature is removed.
+  - A new `wgpu-NN` feature also needs its forwarding feature in `skia-safe/Cargo.toml`,
+    `wgpu-NN = ["_wgpu", "skia-wgpu/wgpu-NN"]`. `skia-safe`'s `wgpu` code, its test
+    `skia-safe/tests/wgpu.rs`, and the example `wgpu-window` depend only on the hidden feature
+    `_wgpu`, so they change only where the new `wgpu` version changes an API that they use. Build
+    them with the new version to find these places:
+
+    ```sh
+    cargo clippy -p skia-safe --features wgpu-NN --tests --examples
+    ```
+
+    Prebuilt binaries need no change, because `skia-bindings`' feature `wgpu` does not depend on
+    the `wgpu` version.
 - **Toolchain requirements:** list the upstream commits that may raise a compiler,
   C++ library, or OS minimum, and read each commit message:
 
