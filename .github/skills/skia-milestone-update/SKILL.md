@@ -363,6 +363,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     build organization diff changes what `skia_use_dawn` adds in `BUILD.gn` (sources, defines,
     include directories, dependencies), mirror the change in
     `skia-bindings/build_support/dawn.rs`.
+- **Toolchain requirements:** list the upstream commits that may raise a compiler,
   C++ library, or OS minimum, and read each commit message:
 
   ```sh
