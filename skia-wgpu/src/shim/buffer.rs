@@ -77,9 +77,17 @@ pub unsafe extern "C" fn buffer_map_async(
     } else {
         size as u64
     };
-    let (future, completion) = buffer.instance.futures.register(callback_info.mode);
     let callback = callback_info.callback.expect("null WGPUBufferMapCallback");
     let userdata = Userdata(callback_info.userdata1, callback_info.userdata2);
+    let (future, completion) =
+        buffer
+            .instance
+            .futures
+            .register(callback_info.mode, move |status: Option<S>| {
+                let userdata = userdata;
+                let status = status.unwrap_or(S::WGPUMapAsyncStatus_CallbackCancelled);
+                unsafe { callback(status, convert::empty_string(), userdata.0, userdata.1) };
+            });
     *buffer.mapping.lock().unwrap() = Mapping::Pending;
     let mapped = buffer.clone();
     buffer
@@ -100,10 +108,7 @@ pub unsafe extern "C" fn buffer_map_async(
                     S::WGPUMapAsyncStatus_Aborted
                 }
             };
-            completion.complete(move || {
-                let userdata = userdata;
-                unsafe { callback(status, convert::empty_string(), userdata.0, userdata.1) };
-            });
+            completion.complete(status);
         });
     future
 }

@@ -243,10 +243,26 @@ pub unsafe extern "C" fn device_pop_error_scope(
     use sb::WGPUErrorType as E;
     use sb::WGPUPopErrorScopeStatus as S;
     unsafe { convert::no_chain(callback_info.nextInChain, "WGPUPopErrorScopeCallbackInfo") };
+    let callback = callback_info
+        .callback
+        .expect("null WGPUPopErrorScopeCallback");
+    let userdata = Userdata(callback_info.userdata1, callback_info.userdata2);
+    let call = move |result: Option<(S, E, Option<CallbackString>)>| {
+        let userdata = userdata;
+        let (status, error_type, message) = result.unwrap_or((
+            S::WGPUPopErrorScopeStatus_CallbackCancelled,
+            E::WGPUErrorType_NoError,
+            None,
+        ));
+        let message = message
+            .as_ref()
+            .map_or_else(convert::empty_string, CallbackString::view);
+        unsafe { callback(status, error_type, message, userdata.0, userdata.1) };
+    };
     let (future, completion) = unsafe { Device::get(device) }
         .instance
         .futures
-        .register(callback_info.mode);
+        .register(callback_info.mode, call);
     let scope = ERROR_SCOPES.with_borrow_mut(|scopes| {
         let stack = scopes.get_mut(&(device as usize))?;
         let scope = stack.pop();
@@ -282,17 +298,7 @@ pub unsafe extern "C" fn device_pop_error_scope(
             }
         },
     };
-    let callback = callback_info
-        .callback
-        .expect("null WGPUPopErrorScopeCallback");
-    let userdata = Userdata(callback_info.userdata1, callback_info.userdata2);
-    completion.complete(move || {
-        let userdata = userdata;
-        let message = message
-            .as_ref()
-            .map_or_else(convert::empty_string, CallbackString::view);
-        unsafe { callback(status, error_type, message, userdata.0, userdata.1) };
-    });
+    completion.complete((status, error_type, message));
     future
 }
 

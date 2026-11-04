@@ -168,3 +168,68 @@ fn adapter_type(device_type: wgpu::DeviceType) -> sb::WGPUAdapterType {
         wgpu::DeviceType::Other | wgpu::DeviceType::VirtualGpu => A::WGPUAdapterType_Unknown,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::c_void;
+    use std::ptr;
+
+    use skia_bindings as sb;
+
+    use super::super::api::BackendHandles;
+    use super::super::buffer::{buffer_map_async, buffer_release, device_create_buffer};
+    use super::super::{convert, testing, wgpu};
+
+    /// WebGPU calls every callback exactly once. A callback that has not fired when its instance
+    /// is released fires with `CallbackCancelled`, so that the caller can free what the callback
+    /// owns, such as the lambda that Dawn's C++ wrapper allocates for each callback.
+    #[test]
+    fn releasing_the_instance_cancels_a_callback_that_has_not_fired() {
+        let Some((device, queue)) = testing::device() else {
+            return;
+        };
+        let handles = BackendHandles::new(&device, &queue);
+        let descriptor = sb::WGPUBufferDescriptor {
+            nextInChain: ptr::null_mut(),
+            label: convert::empty_string(),
+            usage: sb::WGPUBufferUsage_MapRead,
+            size: 256,
+            mappedAtCreation: 0,
+        };
+        let buffer = unsafe { device_create_buffer(handles.device(), &descriptor) };
+        let mut statuses: Vec<sb::WGPUMapAsyncStatus> = Vec::new();
+        let callback_info = sb::WGPUBufferMapCallbackInfo {
+            nextInChain: ptr::null_mut(),
+            mode: sb::WGPUCallbackMode::WGPUCallbackMode_WaitAnyOnly,
+            callback: Some(record),
+            userdata1: (&raw mut statuses).cast(),
+            userdata2: ptr::null_mut(),
+        };
+        unsafe { buffer_map_async(buffer, sb::WGPUMapMode_Read, 0, usize::MAX, callback_info) };
+        // The map completes, but its callback may fire only inside `wgpuInstanceWaitAny`, which
+        // nobody calls.
+        device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("polling the device failed");
+
+        unsafe { buffer_release(buffer) };
+        drop(handles);
+
+        assert_eq!(
+            statuses,
+            [sb::WGPUMapAsyncStatus::WGPUMapAsyncStatus_CallbackCancelled]
+        );
+    }
+
+    unsafe extern "C" fn record(
+        status: sb::WGPUMapAsyncStatus,
+        _: sb::WGPUStringView,
+        statuses: *mut c_void,
+        _: *mut c_void,
+    ) {
+        unsafe { (*statuses.cast::<Vec<sb::WGPUMapAsyncStatus>>()).push(status) };
+    }
+}

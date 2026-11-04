@@ -1,6 +1,7 @@
 //! Shader modules and render and compute pipelines.
 
 use std::borrow::Cow;
+use std::ffi::c_void;
 use std::ptr;
 use std::sync::Arc;
 
@@ -100,30 +101,48 @@ pub unsafe extern "C" fn shader_module_get_compilation_info(
     if let (Some(error), false) = (&module.creation_error, has_error) {
         messages.push(Message::error(error));
     }
-    let (future, completion) = module.instance.futures.register(callback_info.mode);
     let callback = callback_info
         .callback
         .expect("null WGPUCompilationInfoCallback");
     let userdata = Userdata(callback_info.userdata1, callback_info.userdata2);
-    completion.complete(move || {
-        let userdata = userdata;
-        let c_messages: Vec<sb::WGPUCompilationMessage> =
-            messages.iter().map(Message::to_c).collect();
-        let info = sb::WGPUCompilationInfo {
-            nextInChain: ptr::null_mut(),
-            messageCount: c_messages.len(),
-            messages: c_messages.as_ptr(),
-        };
-        unsafe {
-            callback(
-                sb::WGPUCompilationInfoRequestStatus::WGPUCompilationInfoRequestStatus_Success,
-                &info,
-                userdata.0,
-                userdata.1,
-            )
-        };
-    });
+    let (future, completion) = module
+        .instance
+        .futures
+        .register(callback_info.mode, move |messages| unsafe {
+            call_compilation_info_callback(callback, messages, userdata)
+        });
+    completion.complete(messages);
     future
+}
+
+/// The C callback of `wgpuShaderModuleGetCompilationInfo`.
+type CompilationInfoCallback = unsafe extern "C" fn(
+    sb::WGPUCompilationInfoRequestStatus,
+    *const sb::WGPUCompilationInfo,
+    *mut c_void,
+    *mut c_void,
+);
+
+/// Calls `callback` with `messages`, or with the status `CallbackCancelled` for `None`.
+unsafe fn call_compilation_info_callback(
+    callback: CompilationInfoCallback,
+    messages: Option<Vec<Message>>,
+    userdata: Userdata,
+) {
+    use sb::WGPUCompilationInfoRequestStatus as S;
+    let Some(messages) = messages else {
+        let status = S::WGPUCompilationInfoRequestStatus_CallbackCancelled;
+        unsafe { callback(status, ptr::null(), userdata.0, userdata.1) };
+        return;
+    };
+    let c_messages: Vec<sb::WGPUCompilationMessage> = messages.iter().map(Message::to_c).collect();
+    let info = sb::WGPUCompilationInfo {
+        nextInChain: ptr::null_mut(),
+        messageCount: c_messages.len(),
+        messages: c_messages.as_ptr(),
+    };
+    let status = S::WGPUCompilationInfoRequestStatus_Success;
+    unsafe { callback(status, &info, userdata.0, userdata.1) };
 }
 
 pub unsafe extern "C" fn device_create_render_pipeline(
@@ -142,7 +161,6 @@ pub unsafe extern "C" fn device_create_render_pipeline_async(
     descriptor: *const sb::WGPURenderPipelineDescriptor,
     callback_info: sb::WGPUCreateRenderPipelineAsyncCallbackInfo,
 ) -> sb::WGPUFuture {
-    use sb::WGPUCreatePipelineAsyncStatus as S;
     unsafe {
         convert::no_chain(
             callback_info.nextInChain,
@@ -152,31 +170,63 @@ pub unsafe extern "C" fn device_create_render_pipeline_async(
     let device = unsafe { Device::get(device) };
     let (pipeline, error) =
         device.capture_validation(|| unsafe { create_render_pipeline(device, &*descriptor) });
-    let (status, pipeline, message) = match error {
-        None => (
-            S::WGPUCreatePipelineAsyncStatus_Success,
-            SendHandle(RenderPipeline { pipeline }.into_handle()),
-            None,
-        ),
-        Some(error) => (
-            S::WGPUCreatePipelineAsyncStatus_ValidationError,
-            SendHandle(ptr::null_mut()),
-            Some(CallbackString::new(&error)),
-        ),
+    let result = match error {
+        None => Ok(RenderPipeline { pipeline }),
+        Some(error) => Err(CallbackString::new(&error)),
     };
-    let (future, completion) = device.instance.futures.register(callback_info.mode);
     let callback = callback_info
         .callback
         .expect("null WGPUCreateRenderPipelineAsyncCallback");
     let userdata = Userdata(callback_info.userdata1, callback_info.userdata2);
-    completion.complete(move || {
-        let (pipeline, userdata) = (pipeline, userdata);
-        let message = message
-            .as_ref()
-            .map_or_else(convert::empty_string, CallbackString::view);
-        unsafe { callback(status, pipeline.0, message, userdata.0, userdata.1) };
-    });
+    let (future, completion) = device
+        .instance
+        .futures
+        .register(callback_info.mode, move |result| unsafe {
+            call_render_pipeline_callback(callback, result, userdata)
+        });
+    completion.complete(result);
     future
+}
+
+/// The C callback of `wgpuDeviceCreateRenderPipelineAsync`.
+type RenderPipelineCallback = unsafe extern "C" fn(
+    sb::WGPUCreatePipelineAsyncStatus,
+    sb::WGPURenderPipeline,
+    sb::WGPUStringView,
+    *mut c_void,
+    *mut c_void,
+);
+
+/// Calls `callback` with the pipeline or the validation error, or with the status
+/// `CallbackCancelled` for `None`. The pipeline becomes a handle only here, so a cancelled callback
+/// leaks no handle.
+unsafe fn call_render_pipeline_callback(
+    callback: RenderPipelineCallback,
+    result: Option<Result<RenderPipeline, CallbackString>>,
+    userdata: Userdata,
+) {
+    use sb::WGPUCreatePipelineAsyncStatus as S;
+    let (status, pipeline, message) = match result {
+        Some(Ok(pipeline)) => (
+            S::WGPUCreatePipelineAsyncStatus_Success,
+            pipeline.into_handle(),
+            None,
+        ),
+        Some(Err(message)) => (
+            S::WGPUCreatePipelineAsyncStatus_ValidationError,
+            ptr::null_mut(),
+            Some(message),
+        ),
+        None => (
+            S::WGPUCreatePipelineAsyncStatus_CallbackCancelled,
+            ptr::null_mut(),
+            None,
+        ),
+    };
+    let message = message
+        .as_ref()
+        .map_or_else(convert::empty_string, CallbackString::view);
+    unsafe { callback(status, pipeline, message, userdata.0, userdata.1) };
 }
 
 pub unsafe extern "C" fn device_create_compute_pipeline(
@@ -264,13 +314,6 @@ impl Message {
         }
     }
 }
-
-/// A pipeline handle on its way to the callback, which takes over its reference.
-#[derive(Debug)]
-struct SendHandle(sb::WGPURenderPipeline);
-
-// The handle is null or points to a `RenderPipeline`, which the shim asserts to be `Send`.
-unsafe impl Send for SendHandle {}
 
 unsafe fn create_render_pipeline(
     device: &Device,

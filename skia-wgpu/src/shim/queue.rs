@@ -58,23 +58,25 @@ pub unsafe extern "C" fn queue_on_submitted_work_done(
 ) -> sb::WGPUFuture {
     unsafe { convert::no_chain(callback_info.nextInChain, "WGPUQueueWorkDoneCallbackInfo") };
     let queue = unsafe { Queue::get(queue) };
-    let (future, completion) = queue.instance.futures.register(callback_info.mode);
+    use sb::WGPUQueueWorkDoneStatus as S;
     let callback = callback_info
         .callback
         .expect("null WGPUQueueWorkDoneCallback");
     let userdata = Userdata(callback_info.userdata1, callback_info.userdata2);
-    queue.queue.on_submitted_work_done(move || {
-        completion.complete(move || {
-            let userdata = userdata;
-            unsafe {
-                callback(
-                    sb::WGPUQueueWorkDoneStatus::WGPUQueueWorkDoneStatus_Success,
-                    convert::empty_string(),
-                    userdata.0,
-                    userdata.1,
-                )
-            };
-        });
-    });
+    let (future, completion) =
+        queue
+            .instance
+            .futures
+            .register(callback_info.mode, move |done: Option<()>| {
+                let userdata = userdata;
+                let status = match done {
+                    Some(()) => S::WGPUQueueWorkDoneStatus_Success,
+                    None => S::WGPUQueueWorkDoneStatus_CallbackCancelled,
+                };
+                unsafe { callback(status, convert::empty_string(), userdata.0, userdata.1) };
+            });
+    queue
+        .queue
+        .on_submitted_work_done(move || completion.complete(()));
     future
 }
