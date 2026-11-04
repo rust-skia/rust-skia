@@ -13,6 +13,7 @@ pub struct Vulkan {
     pub device: ash::Device,
     queue: vk::Queue,
     queue_family_index: u32,
+    #[allow(dead_code)]
     sampler_ycbcr_conversion: bool,
 }
 
@@ -77,6 +78,7 @@ impl Vulkan {
     }
 
     #[cfg(feature = "ganesh")]
+    #[allow(dead_code)]
     pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.with_backend_context(None, |backend_context| {
             gpu::direct_contexts::make_vulkan(backend_context, None)
