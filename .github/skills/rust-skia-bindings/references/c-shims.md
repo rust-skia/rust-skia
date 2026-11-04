@@ -221,17 +221,13 @@ borrow, so the callback cannot escape the call.
 `shaper.cpp` (`RustRunHandler`), and the `RustStream`/`RustWStream` shims in
 `bindings.cpp`. A provider that C++ keeps alive owns `data`, which is a
 `Box::into_raw` reclaimed in a `drop` callback. A handler used only during a call
-borrows it. A Rust panic must not unwind into C++; catch it and abort:
+borrows it.
 
-```rust
-match std::panic::catch_unwind(reader) {
-    Ok(res) => res,
-    Err(_) => {
-        println!("Panic in FFI callback for `SkStream::read`");
-        std::process::abort();
-    }
-}
-```
+A Rust panic must not unwind into C++, and an `extern "C"` callback needs no code
+for that. Since Rust 1.81, which the workspace `rust-version` exceeds, a panic that
+reaches an `extern "C"` function prints its message and aborts the process. Wrap a
+callback in `std::panic::catch_unwind` only when it turns the panic into a value
+that C++ handles, such as a failed read.
 
 ## Compiler flags
 
