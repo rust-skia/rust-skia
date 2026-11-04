@@ -115,7 +115,7 @@ vulkano = { version = "0.35" }
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dev-dependencies]
 objc2 = { version = "0.6.3", default-features = false }
 objc2-core-foundation = { version = "0.3.2", default-features = false }
-objc2-metal = { version = "0.3.2", default-features = false, features = ["MTLDevice", "MTLCommandBuffer", "MTLCommandQueue", "MTLDrawable", "MTLPixelFormat"] }
+objc2-metal = { version = "0.3.2", default-features = false, features = ["MTLDevice", "MTLCommandBuffer", "MTLCommandQueue", "MTLDrawable", "MTLPixelFormat", "MTLAllocation", "MTLResource", "MTLTexture"] }
 objc2-quartz-core = { version = "0.3.2", default-features = false, features = ["objc2-core-foundation", "objc2-metal", "CAMetalLayer"] }
 raw-window-handle = "0.6.0"
 
