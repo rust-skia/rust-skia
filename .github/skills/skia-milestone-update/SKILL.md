@@ -1,6 +1,6 @@
 ---
 name: skia-milestone-update
-description: Perform a Skia milestone update for rust-skia or refresh the current milestone from its upstream chrome/mXX branch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
+description: Perform a Skia milestone update for rust-skia or refresh the current milestone from its upstream chrome/mXX branch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, the Dawn revision and its generated headers, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
 ---
 
 # Skia Milestone Update
@@ -219,6 +219,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   - `skia-safe/Cargo.toml` package version and exact `skia-bindings` dependency;
   - `skia-bindings/Cargo.toml` `[package.metadata].skia`, matching `NEW_TAG`
     exactly;
+  - `skia-bindings/Cargo.toml` `[package.metadata].dawn`, see the Dawn note below;
   - `skia-safe/src/core/milestone.rs` `MILESTONE` constant, matching `SK_MILESTONE`
     in `include/core/SkMilestone.h`.
   `Cargo.lock` is gitignored and untracked, so it is not part of the commit. Delete it
@@ -318,7 +319,50 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     `just check-third-party-sources` must pass. It checks every path the
     `third_party` build files list against the checkouts of the pinned libraries. It fails
     and names the libraries it skipped when their checkout is not at the pin.
-- **Toolchain requirements:** list the upstream commits that may raise a compiler,
+- **Dawn headers (`wgpu` feature):** source builds with `wgpu` generate Skia's WebGPU
+  headers and `dawn_proc.cpp` from the Dawn revision in `[package.metadata].dawn`
+  (`docs/adr/0003`). No file in the repository shows how they change, so every tag cut
+  diffs them.
+  - The fork's `DEPS` has no Dawn entry, so take the revision from upstream:
+
+    ```sh
+    git -C skia-bindings/skia show upstream/chrome/mNEW:DEPS | grep 'dawn.git@'
+    ```
+
+  - Before bumping, build with the old revision and keep its output. The generated files
+    are in `out/dawn` of the `skia-bindings` build directory, next to `out/skia/bindings.rs`:
+
+    ```sh
+    cargo build -p skia-bindings --features wgpu
+    cp -R target/debug/build/skia-bindings-*/out/dawn "$TMPDIR/dawn-old"
+    ```
+
+    When several `skia-bindings-*` build directories exist, take the newest one, as for
+    `bindings.rs`.
+  - Bump `[package.metadata].dawn`, build again, and diff:
+
+    ```sh
+    cargo build -p skia-bindings --features wgpu
+    diff -ru "$TMPDIR/dawn-old" target/debug/build/skia-bindings-*/out/dawn
+    ```
+
+  - Read the whole diff of `include/dawn/webgpu.h` and `include/dawn/dawn_proc_table.h`,
+    and diff Skia's Dawn backend between the tags for new WebGPU calls:
+
+    ```sh
+    git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- src/gpu/graphite/dawn include/gpu/graphite/dawn
+    ```
+
+    Record in the accounting every changed function, struct, enum value, and feature name
+    that Skia's Dawn backend uses, and every function table entry that was added, removed,
+    or changed. Each of them needs a matching change in the `skia-wgpu` shim. A new
+    `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
+    feature. Surface these changes to the user, as for the build organization diff above.
+  - `skia-bindings` compiles Skia's Dawn backend itself, from the `.cpp` files of
+    `skia_graphite_dawn_sources` in `gn/graphite.gni`, and leaves `skia_use_dawn` off. When the
+    build organization diff changes what `skia_use_dawn` adds in `BUILD.gn` (sources, defines,
+    include directories, dependencies), mirror the change in
+    `skia-bindings/build_support/dawn.rs`.
   C++ library, or OS minimum, and read each commit message:
 
   ```sh
