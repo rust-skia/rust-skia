@@ -261,10 +261,11 @@ where
             let mut count = count;
 
             while count > 0 {
+                // A read error ends the skip like the end of the stream, because retrying an
+                // error that persists never returns (`skip_stops_at_read_error`).
                 let bytes = match val.read(&mut buf[..count.min(BUF_SIZE)]) {
-                    Ok(0) => break,
+                    Ok(0) | Err(_) => break,
                     Ok(bytes) => bytes,
-                    Err(_) => 0,
                 };
 
                 count -= bytes;
@@ -390,6 +391,10 @@ impl<'a> RustWStream<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::{io, ptr};
+
+    use skia_bindings as sb;
+
     use super::{MemoryStream, RustStream};
     use crate::interop::DynamicMemoryWStream;
 
@@ -416,5 +421,34 @@ mod tests {
             skia_bindings::SkStream_readS8(stream.stream_ptr(), &mut first_byte);
         }
         assert_eq!(first_byte, 12i8)
+    }
+
+    /// Skipping reads into a null buffer. A read error must end the skip, because retrying an
+    /// error that persists never returns.
+    #[test]
+    fn skip_stops_at_read_error() {
+        let mut reader = FailingReader { reads: 0 };
+        let mut stream = RustStream::new(&mut reader);
+        let skipped = unsafe { sb::C_SkStream_read(stream.stream_ptr(), ptr::null_mut(), 10) };
+        drop(stream);
+        assert_eq!(skipped, 0);
+        assert_eq!(reader.reads, 1);
+    }
+
+    /// Fails its first read and reports the end of the stream afterwards, so that a skip that
+    /// retries after the error still returns and the test fails instead of hanging.
+    struct FailingReader {
+        reads: usize,
+    }
+
+    impl io::Read for FailingReader {
+        fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
+            self.reads += 1;
+            if self.reads == 1 {
+                Err(io::Error::other("read failed"))
+            } else {
+                Ok(0)
+            }
+        }
     }
 }
