@@ -23,7 +23,8 @@ include = [
 	"build_support/**/*.rs",
 	"src/**/*.h",
 	"src/**/*.cpp",
-	"src/*.rs" ]
+	"src/*.rs",
+	"dawn/compat/**/*.h" ]
 
 [lib]
 doctest = false
@@ -34,6 +35,9 @@ doctest = false
 # filesystem path sizes are restricted.
 [package.metadata]
 skia = "m157.3"
+# The Dawn revision that Skia's upstream `DEPS` pins for this milestone. The `wgpu` feature
+# generates Skia's WebGPU headers from it (ADR 0003).
+dawn = "ada567700e13aecf7989d78b21f7d330b522ea80"
 
 [features]
 default = ["binary-cache", "embed-icudtl", "pdf"]
@@ -52,6 +56,9 @@ webp-encode = []
 webp-decode = []
 pdf = ["jpeg"]
 graphite = []
+# Graphite's Dawn backend and Dawn's function table, but no WebGPU implementation (ADR 0003).
+# `skia-wgpu` installs a table that calls the `wgpu` crate.
+wgpu = ["graphite"]
 # sys libraries
 use-system-jpeg-turbo = ["dep:mozjpeg-sys"]
 # `textlayout` because `SkSVGTextContext::SkSVGTextContext()` invokes `SkShaper::Make`.

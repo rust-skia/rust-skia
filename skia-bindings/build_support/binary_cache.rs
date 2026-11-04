@@ -12,5 +12,7 @@ mod utils;
 const SKIA_LICENSE: &str = "skia/LICENSE";
 
 pub use binaries::should_export;
+#[cfg(feature = "wgpu")]
+pub use download::download_dawn;
 pub use download::{resolve_dependencies, try_prepare_download};
 pub use export::publish;

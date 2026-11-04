@@ -185,6 +185,39 @@ fn download_dependencies() {
     }
 }
 
+/// Downloads Dawn at `revision` from GitHub's mirror and unpacks the `paths` of it into `target`.
+///
+/// The `wgpu` feature generates Skia's WebGPU headers from these files (see `build_support/dawn.rs`).
+/// The archive holds all of Dawn, about 26 MB, but only the generator inputs are unpacked.
+#[cfg(feature = "wgpu")]
+pub fn download_dawn(revision: &str, paths: &[&str], target: &Path) {
+    let archive_url = format!("https://codeload.github.com/google/dawn/tar.gz/{revision}");
+    println!("DOWNLOADING: {archive_url}");
+    // Codeload does not support resuming downloads.
+    let archive = utils::download(&archive_url, false)
+        .unwrap_or_else(|err| panic!("Failed to download {archive_url} ({err})"));
+
+    if target.exists() {
+        fs::remove_dir_all(target).unwrap();
+    }
+    // GitHub names the root directory of the archive `<repository>-<revision>`.
+    let root = format!("dawn-{revision}");
+    let mut archive = tar::Archive::new(GzDecoder::new(Cursor::new(archive)));
+    for entry in archive.entries().expect("failed to iterate over archive") {
+        let mut entry = entry.unwrap();
+        let path = entry.path().unwrap().into_owned();
+        // Entries outside the root directory are pax headers.
+        let Ok(relative) = path.strip_prefix(&root) else {
+            continue;
+        };
+        if paths.iter().any(|p| relative.starts_with(p)) {
+            let destination = target.join(relative);
+            fs::create_dir_all(destination.parent().unwrap()).unwrap();
+            entry.unpack(&destination).unwrap();
+        }
+    }
+}
+
 fn dir_not_empty(dir_path: &Path) -> bool {
     dir_path
         .read_dir()

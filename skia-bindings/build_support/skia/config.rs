@@ -317,6 +317,10 @@ pub fn build(
         );
     }
 
+    // `skia-bindings` compiles Skia's Dawn backend against the generated Dawn headers.
+    #[cfg(feature = "wgpu")]
+    crate::build_support::dawn::prepare(&build.skia_source_dir, python, offline);
+
     configure_skia(build, config, python, gn_command.as_deref());
     build_skia(config, &ninja);
 }
