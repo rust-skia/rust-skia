@@ -4,6 +4,7 @@ members = [
     "skia-safe",
     "skia-svg-macros",
     "skia-bindings",
+    "skia-wgpu",
     "skia-org",
     "skia-icon",
     "mk-workflows",
