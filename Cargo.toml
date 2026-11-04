@@ -14,6 +14,6 @@ edition = "2024"
 rust-version = "1.87"
 
 [profile.release]
-# We want to build skia-org with with lto="thin"
+# Catch LTO-only regressions in CI, like the dropped ICU data in
 # https://github.com/rust-skia/rust-skia/issues/565
 lto = "thin"
