@@ -10,7 +10,7 @@ use super::handle::Handle;
 use super::instance::{self, Instance};
 use super::queue::Queue;
 use super::texture::Texture;
-use super::{table, wgpu};
+use super::{convert, table, wgpu};
 
 /// The WebGPU handles of an application's `wgpu` device and queue, which Skia's
 /// `DawnBackendContext` takes. Each handle owns one reference, which `Drop` releases.
@@ -37,14 +37,17 @@ impl BackendHandles {
         }
     }
 
+    /// The instance handle, borrowed from `self`. Skia's backend context takes its own reference.
     pub fn instance(&self) -> sb::WGPUInstance {
         self.instance
     }
 
+    /// The device handle, borrowed from `self`. Skia's backend context takes its own reference.
     pub fn device(&self) -> sb::WGPUDevice {
         self.device
     }
 
+    /// The queue handle, borrowed from `self`. Skia's backend context takes its own reference.
     pub fn queue(&self) -> sb::WGPUQueue {
         self.queue
     }
@@ -71,15 +74,22 @@ impl fmt::Debug for BackendHandles {
 pub struct TextureHandle(sb::WGPUTexture);
 
 impl TextureHandle {
-    pub fn new(texture: &wgpu::Texture) -> Self {
-        Self(
+    /// Wraps the texture. Fails for a format that has no WebGPU equivalent, which Skia could not
+    /// query.
+    pub fn new(texture: &wgpu::Texture) -> Result<Self, UnsupportedTextureFormat> {
+        let format = convert::c_texture_format(texture.format())
+            .ok_or(UnsupportedTextureFormat(texture.format()))?;
+        Ok(Self(
             Texture {
                 texture: texture.clone(),
+                format,
             }
             .into_handle(),
-        )
+        ))
     }
 
+    /// The texture handle, borrowed from `self`. Skia's backend texture takes no reference, so
+    /// `self` must outlive it. Surfaces and images that wrap the backend texture take their own.
     pub fn handle(&self) -> sb::WGPUTexture {
         self.0
     }
@@ -96,3 +106,19 @@ impl fmt::Debug for TextureHandle {
         f.debug_tuple("TextureHandle").finish_non_exhaustive()
     }
 }
+
+/// The error of [`TextureHandle::new`] for a texture whose format has no WebGPU equivalent.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UnsupportedTextureFormat(pub wgpu::TextureFormat);
+
+impl fmt::Display for UnsupportedTextureFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "the texture format {:?} has no WebGPU equivalent",
+            self.0
+        )
+    }
+}
+
+impl std::error::Error for UnsupportedTextureFormat {}

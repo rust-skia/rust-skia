@@ -40,6 +40,7 @@ pub unsafe fn str<'a>(view: sb::WGPUStringView) -> Option<&'a str> {
 }
 
 /// A string that the shim passes to a C callback, which may only read it during the call.
+#[derive(Debug)]
 pub struct CallbackString(CString);
 
 impl CallbackString {
@@ -193,23 +194,26 @@ pub fn map_mode(c: sb::WGPUMapMode) -> wgpu::MapMode {
 /// Generates both directions of the texture format conversion from one table.
 macro_rules! texture_formats {
     ($($c:ident => $w:expr,)* ; unsupported: $($unsupported:ident),* $(,)?) => {
-        /// Converts a texture format. `None` stands for `Undefined` and for the formats that
-        /// `wgpu` lacks. Listing every variant makes a format added to Dawn's header a compile
-        /// error.
+        /// Converts a texture format. `None` stands for `Undefined`, which WebGPU uses for "the
+        /// format of the texture" or "no attachment". A format that `wgpu` lacks panics. Listing
+        /// every variant makes a format added to Dawn's header a compile error.
         pub fn texture_format(c: sb::WGPUTextureFormat) -> Option<wgpu::TextureFormat> {
             use sb::WGPUTextureFormat as F;
             match c {
                 $(F::$c => Some($w),)*
-                $(F::$unsupported)|* => None,
+                F::WGPUTextureFormat_Undefined => None,
+                $(F::$unsupported)|* => panic!("unsupported texture format {c:?}"),
             }
         }
 
-        pub fn c_texture_format(w: wgpu::TextureFormat) -> sb::WGPUTextureFormat {
+        /// Converts a `wgpu` texture format. `None` stands for the formats that have no WebGPU
+        /// equivalent, such as `wgpu`'s native-only formats.
+        pub fn c_texture_format(w: wgpu::TextureFormat) -> Option<sb::WGPUTextureFormat> {
             use sb::WGPUTextureFormat as F;
             $(if w == $w {
-                return F::$c;
+                return Some(F::$c);
             })*
-            panic!("texture format {w:?} has no WebGPU equivalent")
+            None
         }
     };
 }
@@ -328,9 +332,8 @@ texture_formats! {
     WGPUTextureFormat_ASTC12x12Unorm => astc!(B12x12, Unorm),
     WGPUTextureFormat_ASTC12x12UnormSrgb => astc!(B12x12, UnormSrgb),
     ;
-    // `Undefined`, Dawn's multi-planar formats, and bindgen's sentinel `Force32`.
-    unsupported: WGPUTextureFormat_Undefined,
-    WGPUTextureFormat_R8BG8Biplanar420Unorm,
+    // Dawn's multi-planar formats and bindgen's sentinel `Force32`.
+    unsupported: WGPUTextureFormat_R8BG8Biplanar420Unorm,
     WGPUTextureFormat_R10X6BG10X6Biplanar420Unorm,
     WGPUTextureFormat_R8BG8A8Triplanar420Unorm,
     WGPUTextureFormat_R8BG8Biplanar422Unorm,
@@ -343,7 +346,7 @@ texture_formats! {
 
 /// Converts a texture format that must be defined.
 pub fn required_texture_format(c: sb::WGPUTextureFormat) -> wgpu::TextureFormat {
-    texture_format(c).unwrap_or_else(|| panic!("unsupported texture format {c:?}"))
+    texture_format(c).expect("undefined texture format")
 }
 
 //

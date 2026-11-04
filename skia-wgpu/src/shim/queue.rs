@@ -12,6 +12,8 @@ use super::handle::{Handle, handles};
 use super::instance::Instance;
 use super::{convert, wgpu};
 
+/// Behind a `WGPUQueue`: the application's `wgpu` queue, which Skia and the application share.
+#[derive(Debug)]
 pub struct Queue {
     pub queue: wgpu::Queue,
     pub instance: Arc<Instance>,

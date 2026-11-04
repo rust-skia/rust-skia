@@ -34,11 +34,19 @@ pub trait Handle: Sized {
 /// Implements [`Handle`] for each shim type and generates the `AddRef` and `Release` functions of
 /// the function table for it.
 ///
+/// Skia shares its handles between threads, and the compiler cannot see that through the raw
+/// pointers. The macro therefore asserts that each shim type is `Send` and `Sync`.
+///
 /// The macro is invoked in the modules next to this one, so it names this module as
 /// `super::handle`. The shim source exists once per `wgpu` version, so `$crate` cannot name it.
 macro_rules! handles {
     ($($shim:ty => $c:ident: $add_ref:ident, $release:ident;)*) => {
         $(
+            const _: () = {
+                const fn shared_between_threads<T: Send + Sync>() {}
+                shared_between_threads::<$shim>()
+            };
+
             impl super::handle::Handle for $shim {
                 type C = skia_bindings::$c;
 

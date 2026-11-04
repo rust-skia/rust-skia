@@ -188,7 +188,7 @@ impl SkiaLayer {
             .expect("no Graphite Dawn context");
         let mut recorder = context.make_recorder(None).expect("no recorder");
 
-        let texture = TextureHandle::new(texture);
+        let texture = TextureHandle::new(texture).expect("the texture format is supported");
         let backend_texture = unsafe { dawn::backend_textures::make_dawn(texture.handle()) };
         let surface = graphite::surfaces::wrap_backend_texture(
             &mut recorder,

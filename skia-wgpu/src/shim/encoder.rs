@@ -19,22 +19,32 @@ use super::{convert, wgpu};
 // Each `Option` turns `None` when Finish, End, or Submit consumes the `wgpu` object, while the
 // WebGPU handle lives on until Release.
 
+/// Behind a `WGPUCommandEncoder`: the encoder until `wgpuCommandEncoderFinish` takes it.
+#[derive(Debug)]
 pub struct CommandEncoder {
     encoder: Mutex<Option<wgpu::CommandEncoder>>,
 }
 
+/// Behind a `WGPUCommandBuffer`: the command buffer until `wgpuQueueSubmit` takes it.
+#[derive(Debug)]
 pub struct CommandBuffer {
     buffer: Mutex<Option<wgpu::CommandBuffer>>,
 }
 
+/// Behind a `WGPURenderPassEncoder`: the pass until `wgpuRenderPassEncoderEnd` ends it.
+#[derive(Debug)]
 pub struct RenderPassEncoder {
     pass: Mutex<Option<wgpu::RenderPass<'static>>>,
 }
 
+/// Behind a `WGPUComputePassEncoder`: the pass until `wgpuComputePassEncoderEnd` ends it.
+#[derive(Debug)]
 pub struct ComputePassEncoder {
     pass: Mutex<Option<wgpu::ComputePass<'static>>>,
 }
 
+/// Behind a `WGPUQuerySet`.
+#[derive(Debug)]
 pub struct QuerySet {
     set: wgpu::QuerySet,
 }

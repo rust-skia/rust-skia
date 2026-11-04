@@ -10,14 +10,20 @@ use super::handle::{Handle, handles};
 use super::texture::{Sampler, TextureView};
 use super::{convert, wgpu};
 
+/// Behind a `WGPUBindGroupLayout`.
+#[derive(Debug)]
 pub struct BindGroupLayout {
     pub layout: wgpu::BindGroupLayout,
 }
 
+/// Behind a `WGPUBindGroup`.
+#[derive(Debug)]
 pub struct BindGroup {
     pub group: wgpu::BindGroup,
 }
 
+/// Behind a `WGPUPipelineLayout`.
+#[derive(Debug)]
 pub struct PipelineLayout {
     pub layout: wgpu::PipelineLayout,
 }

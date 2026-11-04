@@ -14,16 +14,25 @@ use super::handle::{Handle, get_optional, handles};
 use super::instance::Instance;
 use super::wgpu;
 
+/// Behind a `WGPUShaderModule`.
+#[derive(Debug)]
 pub struct ShaderModule {
     pub module: wgpu::ShaderModule,
+    /// The validation error of the module's creation. Skia learns about invalid WGSL only through
+    /// the compilation info, while `wgpu` reports it as an error of the creation.
+    creation_error: Option<String>,
     /// The instance that owns the futures of `wgpuShaderModuleGetCompilationInfo`.
     instance: Arc<Instance>,
 }
 
+/// Behind a `WGPURenderPipeline`.
+#[derive(Debug)]
 pub struct RenderPipeline {
     pub pipeline: wgpu::RenderPipeline,
 }
 
+/// Behind a `WGPUComputePipeline`.
+#[derive(Debug)]
 pub struct ComputePipeline {
     pub pipeline: wgpu::ComputePipeline,
 }
@@ -56,14 +65,19 @@ pub unsafe extern "C" fn device_create_shader_module(
         chain = chained.next;
     }
     let code = code.expect("WGPUShaderModuleDescriptor without WGSL source");
-    let module = device
-        .device
-        .create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: unsafe { convert::label(d.label) },
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(code)),
-        });
+    // Skia does not open an error scope around the creation, so without this one, `wgpu` would
+    // pass a WGSL error to its default handler, which panics.
+    let (module, creation_error) = device.capture_validation(|| {
+        device
+            .device
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: unsafe { convert::label(d.label) },
+                source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(code)),
+            })
+    });
     ShaderModule {
         module,
+        creation_error,
         instance: device.instance.clone(),
     }
     .into_handle()
@@ -75,11 +89,17 @@ pub unsafe extern "C" fn shader_module_get_compilation_info(
 ) -> sb::WGPUFuture {
     unsafe { convert::no_chain(callback_info.nextInChain, "WGPUCompilationInfoCallbackInfo") };
     let module = unsafe { ShaderModule::get(shader_module) };
-    let messages: Vec<Message> = block_on(module.module.get_compilation_info())
+    let mut messages: Vec<Message> = block_on(module.module.get_compilation_info())
         .messages
         .iter()
         .map(Message::new)
         .collect();
+    let has_error = messages.iter().any(|m| {
+        m.message_type == sb::WGPUCompilationMessageType::WGPUCompilationMessageType_Error
+    });
+    if let (Some(error), false) = (&module.creation_error, has_error) {
+        messages.push(Message::error(error));
+    }
     let (future, completion) = module.instance.futures.register(callback_info.mode);
     let callback = callback_info
         .callback
@@ -194,6 +214,7 @@ pub unsafe extern "C" fn render_pipeline_get_bind_group_layout(
 }
 
 /// A compilation message that the callback can read during its call.
+#[derive(Debug)]
 struct Message {
     text: CallbackString,
     message_type: sb::WGPUCompilationMessageType,
@@ -201,6 +222,14 @@ struct Message {
 }
 
 impl Message {
+    /// The location of a message that refers to no part of the source.
+    const NO_LOCATION: wgpu::SourceLocation = wgpu::SourceLocation {
+        line_number: 0,
+        line_position: 0,
+        offset: 0,
+        length: 0,
+    };
+
     fn new(message: &wgpu::CompilationMessage) -> Self {
         use sb::WGPUCompilationMessageType as T;
         Self {
@@ -210,12 +239,16 @@ impl Message {
                 wgpu::CompilationMessageType::Warning => T::WGPUCompilationMessageType_Warning,
                 wgpu::CompilationMessageType::Info => T::WGPUCompilationMessageType_Info,
             },
-            location: message.location.unwrap_or(wgpu::SourceLocation {
-                line_number: 0,
-                line_position: 0,
-                offset: 0,
-                length: 0,
-            }),
+            location: message.location.unwrap_or(Self::NO_LOCATION),
+        }
+    }
+
+    /// An error without a source location.
+    fn error(text: &str) -> Self {
+        Self {
+            text: CallbackString::new(text),
+            message_type: sb::WGPUCompilationMessageType::WGPUCompilationMessageType_Error,
+            location: Self::NO_LOCATION,
         }
     }
 
@@ -233,9 +266,10 @@ impl Message {
 }
 
 /// A pipeline handle on its way to the callback, which takes over its reference.
+#[derive(Debug)]
 struct SendHandle(sb::WGPURenderPipeline);
 
-// The handle points to a `RenderPipeline`, which `wgpu` makes safe to send.
+// The handle is null or points to a `RenderPipeline`, which the shim asserts to be `Send`.
 unsafe impl Send for SendHandle {}
 
 unsafe fn create_render_pipeline(

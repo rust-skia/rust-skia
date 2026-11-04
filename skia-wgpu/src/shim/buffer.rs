@@ -16,6 +16,8 @@ use super::handle::{Handle, handles};
 use super::instance::Instance;
 use super::{convert, wgpu};
 
+/// Behind a `WGPUBuffer`: the `wgpu` buffer and its mapping, whose futures the instance owns.
+#[derive(Debug)]
 pub struct Buffer {
     pub buffer: wgpu::Buffer,
     instance: Arc<Instance>,
@@ -158,6 +160,7 @@ pub unsafe extern "C" fn buffer_destroy(buffer: sb::WGPUBuffer) {
 /// ignores the new label.
 pub unsafe extern "C" fn buffer_set_label(_buffer: sb::WGPUBuffer, _label: sb::WGPUStringView) {}
 
+#[derive(Debug)]
 enum Mapping {
     Unmapped,
     Pending,
@@ -170,6 +173,7 @@ enum Mapping {
     },
 }
 
+#[derive(Debug)]
 enum View {
     Read(wgpu::BufferView),
     Write(wgpu::BufferViewMut),

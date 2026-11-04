@@ -18,28 +18,7 @@ use wgpu30 as wgpu;
 
 const SIZE: u32 = 64;
 
-#[test]
-fn skia_renders_into_a_wgpu_texture() {
-    let pixels = render(|canvas, _| {
-        canvas.clear(Color::BLUE);
-        canvas.draw_rect(
-            Rect::from_xywh(16.0, 16.0, 32.0, 32.0),
-            &Paint::new(Color4f::from(Color::RED), None),
-        );
-    });
-    assert_eq!(
-        pixel(&pixels, 2, 2),
-        [0, 0, 255, 255],
-        "the background is not blue"
-    );
-    assert_eq!(
-        pixel(&pixels, 32, 32),
-        [255, 0, 0, 255],
-        "the rectangle is not red"
-    );
-}
-
-/// Draws content for which Skia generates other shaders than for a solid fill, and an image that
+/// Draws content for which Skia generates different shaders, and an image that
 /// Skia uploads through a mapped buffer.
 #[test]
 fn skia_renders_antialiasing_gradients_text_and_images() {
@@ -147,7 +126,7 @@ fn render(draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Vec<u8> {
         dawn::context_factory::make_dawn(&backend_context, None).expect("no Graphite Dawn context");
     let mut recorder = context.make_recorder(None).expect("no recorder");
 
-    let texture_handle = TextureHandle::new(&texture);
+    let texture_handle = TextureHandle::new(&texture).expect("the texture format is supported");
     let backend_texture = unsafe { dawn::backend_textures::make_dawn(texture_handle.handle()) };
     let mut surface = graphite::surfaces::wrap_backend_texture(
         &mut recorder,

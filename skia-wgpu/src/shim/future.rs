@@ -9,6 +9,7 @@
 
 use std::collections::HashMap;
 use std::ffi::c_void;
+use std::fmt;
 use std::pin;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -18,7 +19,7 @@ use std::task;
 use skia_bindings as sb;
 
 /// The futures of one instance, by id.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Futures {
     next_id: AtomicU64,
     entries: Mutex<HashMap<u64, Entry>>,
@@ -32,6 +33,19 @@ enum Entry {
         mode: sb::WGPUCallbackMode,
         fire: Box<dyn FnOnce() + Send>,
     },
+}
+
+/// Shows the state and the mode. A callback has no `Debug` representation.
+impl fmt::Debug for Entry {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Entry::Pending => f.write_str("Pending"),
+            Entry::Ready { mode, .. } => f
+                .debug_struct("Ready")
+                .field("mode", mode)
+                .finish_non_exhaustive(),
+        }
+    }
 }
 
 impl Futures {
@@ -100,6 +114,7 @@ impl Futures {
 }
 
 /// Completes one registered future.
+#[derive(Debug)]
 pub struct Completion {
     futures: Arc<Futures>,
     id: u64,
@@ -127,22 +142,20 @@ impl Completion {
 }
 
 /// The two userdata pointers of a C callback, which Skia owns and passes back unchanged.
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Userdata(pub *mut c_void, pub *mut c_void);
 
 // Skia passes the userdata pointers back to its own callback, on whatever thread the callback
 // fires. Dawn does the same, so Skia's callbacks already expect it.
 unsafe impl Send for Userdata {}
 
-/// Blocks on a `wgpu` future. `wgpu`'s native backends resolve the futures the shim waits on
-/// (error scopes and compilation info) without polling, so this returns at the first poll.
+/// Resolves a `wgpu` future that is ready at once. `wgpu`'s native backends resolve the futures
+/// that the shim waits on (adapters, devices, error scopes, and compilation info) when they are
+/// created, so nothing would ever wake a pending one.
 pub fn block_on<F: Future>(future: F) -> F::Output {
-    let mut future = pin::pin!(future);
     let mut context = task::Context::from_waker(task::Waker::noop());
-    loop {
-        if let task::Poll::Ready(output) = future.as_mut().poll(&mut context) {
-            return output;
-        }
-        std::thread::yield_now();
+    match pin::pin!(future).poll(&mut context) {
+        task::Poll::Ready(output) => output,
+        task::Poll::Pending => panic!("a wgpu future that the shim waits on is not ready"),
     }
 }

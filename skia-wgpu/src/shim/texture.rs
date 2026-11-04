@@ -6,14 +6,23 @@ use super::device::Device;
 use super::handle::{Handle, handles};
 use super::{convert, wgpu};
 
+/// Behind a `WGPUTexture`: a texture that Skia created or that the application handed to Skia.
+#[derive(Debug)]
 pub struct Texture {
     pub texture: wgpu::Texture,
+    /// The texture's format as WebGPU names it, which `wgpuTextureGetFormat` returns. Some `wgpu`
+    /// formats have no WebGPU equivalent, so the conversion happens once, where the texture enters.
+    pub format: sb::WGPUTextureFormat,
 }
 
+/// Behind a `WGPUTextureView`.
+#[derive(Debug)]
 pub struct TextureView {
     pub view: wgpu::TextureView,
 }
 
+/// Behind a `WGPUSampler`.
+#[derive(Debug)]
 pub struct Sampler {
     pub sampler: wgpu::Sampler,
 }
@@ -46,7 +55,11 @@ pub unsafe extern "C" fn device_create_texture(
         usage: convert::texture_usages(d.usage),
         view_formats: &view_formats,
     });
-    Texture { texture }.into_handle()
+    Texture {
+        texture,
+        format: d.format,
+    }
+    .into_handle()
 }
 
 pub unsafe extern "C" fn texture_create_view(
@@ -77,7 +90,7 @@ pub unsafe extern "C" fn texture_create_view(
 }
 
 pub unsafe extern "C" fn texture_get_format(texture: sb::WGPUTexture) -> sb::WGPUTextureFormat {
-    convert::c_texture_format(unsafe { Texture::get(texture) }.texture.format())
+    unsafe { Texture::get(texture) }.format
 }
 
 pub unsafe extern "C" fn texture_get_width(texture: sb::WGPUTexture) -> u32 {

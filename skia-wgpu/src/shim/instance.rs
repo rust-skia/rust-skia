@@ -1,7 +1,7 @@
 //! The instance, which owns the futures and polls the devices while Skia waits, and the adapter.
 
 use std::ffi::CString;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use skia_bindings as sb;
 
@@ -9,15 +9,18 @@ use super::future::Futures;
 use super::handle::{Handle, handles};
 use super::{convert, wgpu};
 
+/// Behind a `WGPUInstance`: the futures of a device, which `wgpuInstanceWaitAny` completes.
+#[derive(Debug)]
 pub struct Instance {
     pub futures: Arc<Futures>,
-    /// The devices whose work completes the futures. `wgpu` reports completions only while a
-    /// device is polled.
-    devices: Mutex<Vec<wgpu::Device>>,
+    /// The device whose work completes the futures. `wgpu` reports completions only while the
+    /// device is polled, and it runs the callbacks inside the poll, so no lock may be held then.
+    device: wgpu::Device,
 }
 
 /// The adapter of a device. `wgpu` 30 reports the adapter information through the device, so the
 /// shim needs no `wgpu::Adapter`.
+#[derive(Debug)]
 pub struct Adapter {
     info: wgpu::AdapterInfo,
 }
@@ -31,7 +34,7 @@ impl Instance {
     pub fn new(device: &wgpu::Device) -> Self {
         Self {
             futures: Arc::default(),
-            devices: Mutex::new(vec![device.clone()]),
+            device: device.clone(),
         }
     }
 
@@ -45,11 +48,9 @@ impl Instance {
         } else {
             wgpu::PollType::Poll
         };
-        for device in self.devices.lock().unwrap().iter() {
-            device
-                .poll(poll_type.clone())
-                .expect("polling the wgpu device failed");
-        }
+        self.device
+            .poll(poll_type)
+            .expect("polling the wgpu device failed");
     }
 }
 
@@ -67,11 +68,8 @@ pub unsafe extern "C" fn instance_wait_any(
 ) -> sb::WGPUWaitStatus {
     use sb::WGPUWaitStatus as S;
     let instance = unsafe { Instance::get(instance) };
-    let infos = if future_count == 0 {
-        &mut []
-    } else {
-        unsafe { std::slice::from_raw_parts_mut(futures, future_count) }
-    };
+    assert!(future_count > 0, "wgpuInstanceWaitAny without futures");
+    let infos = unsafe { std::slice::from_raw_parts_mut(futures, future_count) };
     if instance.futures.fire_waited(infos) {
         return S::WGPUWaitStatus_Success;
     }
@@ -83,14 +81,15 @@ pub unsafe extern "C" fn instance_wait_any(
             S::WGPUWaitStatus_TimedOut
         };
     }
-    // Skia waits without a timeout or not at all, so any other timeout waits without one.
-    loop {
-        instance.poll(true);
-        if instance.futures.fire_waited(infos) {
-            return S::WGPUWaitStatus_Success;
-        }
-        std::thread::yield_now();
-    }
+    // Skia waits without a timeout or not at all, so any other timeout waits without one. The
+    // wait returns once all submitted work is done, and `wgpu` has then reported every completion
+    // it will report, so a future that is still pending would never complete.
+    instance.poll(true);
+    assert!(
+        instance.futures.fire_waited(infos),
+        "wgpuInstanceWaitAny waits for futures that cannot complete"
+    );
+    S::WGPUWaitStatus_Success
 }
 
 pub unsafe extern "C" fn instance_process_events(instance: sb::WGPUInstance) {
