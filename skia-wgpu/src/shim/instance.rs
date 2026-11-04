@@ -67,7 +67,8 @@ pub unsafe extern "C" fn instance_wait_any(
     timeout_ns: u64,
 ) -> sb::WGPUWaitStatus {
     use sb::WGPUWaitStatus as S;
-    let instance = unsafe { Instance::get(instance) };
+    // The wait owns a reference, because a callback may release the last handle to the instance.
+    let instance = unsafe { Instance::arc(instance) };
     assert!(future_count > 0, "wgpuInstanceWaitAny without futures");
     let infos = unsafe { std::slice::from_raw_parts_mut(futures, future_count) };
     if instance.futures.fire_waited(infos) {
@@ -93,7 +94,8 @@ pub unsafe extern "C" fn instance_wait_any(
 }
 
 pub unsafe extern "C" fn instance_process_events(instance: sb::WGPUInstance) {
-    let instance = unsafe { Instance::get(instance) };
+    // Owns a reference, because a callback may release the last handle to the instance.
+    let instance = unsafe { Instance::arc(instance) };
     instance.poll(false);
     instance.futures.fire_process_events();
 }
