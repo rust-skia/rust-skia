@@ -50,15 +50,7 @@ pub fn wrap_texture(
 /// # Returns
 /// A new texture-backed `Image`, or `None` if creation failed
 pub fn texture_from_image(recorder: &mut Recorder, image: &Image) -> Option<Image> {
-    let image_ptr = unsafe {
-        sb::C_SkImages_TextureFromImageGraphite(
-            recorder.native_ptr(),
-            image.native(),
-            RequiredProperties::default().native(),
-        )
-    };
-
-    Image::from_ptr(image_ptr)
+    recorder.texture_from_image(image, RequiredProperties::default())
 }
 
 /// Create a subset texture from an existing image using Graphite

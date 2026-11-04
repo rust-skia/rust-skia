@@ -46,6 +46,10 @@ impl RecorderOptions {
     /// Graphite-backed version of every image that is not Graphite-backed.
     ///
     /// Without a provider, Graphite drops draws of raster and other non-Graphite images.
+    ///
+    /// Recorders created from these options share the provider and keep it alive. A later call
+    /// replaces and drops it. `T` needs no `Send` because recorders and their options stay on one
+    /// thread.
     pub fn set_image_provider<T: ImageProvider + 'static>(
         &mut self,
         image_provider: T,
@@ -66,12 +70,14 @@ impl RecorderOptions {
 /// Lets clients cache the Graphite-backed versions of images that are not Graphite-backed.
 ///
 /// Whenever Graphite draws an [`Image`] that is not Graphite-backed (a raster image, for example),
-/// it calls [`find_or_create`](Self::find_or_create). The returned image must be Graphite-backed
-/// and preserve the dimensions and alpha type of the original. If it is `None` or does not meet the
-/// requirements, Graphite drops the draw.
+/// it calls [`find_or_create`](Self::find_or_create). The returned image must be Graphite-backed,
+/// preserve the dimensions, alpha type and color channels of the original, and have a top-left
+/// origin. If it is `None` or does not meet these requirements, Graphite drops the draw.
 ///
 /// Graphite does not cache these images itself. A provider that caches them by
-/// [`Image::unique_id`], as Chrome does, avoids uploading the same image on every draw:
+/// [`Image::unique_id`], as Chrome does, avoids uploading the same image on every draw. The example
+/// below never evicts an entry, so every image it has seen keeps its texture alive. A real provider
+/// bounds its cache, for example with a least-recently-used limit like Skia's own test provider.
 ///
 /// ```no_run
 /// use std::{cell::RefCell, collections::HashMap};
@@ -118,6 +124,8 @@ pub trait ImageProvider {
     ) -> Option<Image>;
 }
 
+/// Releases the `Box<T>` leaked by [`RecorderOptions::set_image_provider`]. The C++
+/// `RustImageProvider` destructor calls it once the last reference to the provider is gone.
 unsafe extern "C" fn drop_provider<T>(provider: *mut c_void) {
     mem::drop(unsafe { Box::from_raw(provider.cast::<T>()) });
 }
@@ -131,20 +139,17 @@ unsafe extern "C" fn find_or_create<T: ImageProvider>(
     required: *const sb::SkImage_RequiredProperties,
 ) -> *mut sb::SkImage {
     let provider = unsafe { &*provider.cast::<T>() };
-    let Some(recorder) = Recorder::from_ptr(recorder) else {
-        return ptr::null_mut();
-    };
     let recorder = BorrowedRecorder {
-        recorder: ManuallyDrop::new(recorder),
+        recorder: ManuallyDrop::new(
+            Recorder::from_ptr(recorder).expect("Graphite passes the drawing recorder"),
+        ),
         _owner: PhantomData,
     };
     let image_ptr = image as *mut sb::SkImage;
-    let Some(image) = Image::from_unshared_ptr_ref(&image_ptr) else {
-        return ptr::null_mut();
-    };
-    let required = RequiredProperties {
-        mipmapped: unsafe { (*required).fMipmapped },
-    };
+    let image = Image::from_unshared_ptr_ref(&image_ptr)
+        .as_ref()
+        .expect("Graphite passes the image it draws");
+    let required = RequiredProperties::from_native_c(unsafe { *required });
     provider
         .find_or_create(&recorder, image, required)
         .map(|image| image.into_ptr())
@@ -193,18 +198,6 @@ impl<'a> BorrowedRecorder<'a> {
     /// See [`Recorder::snap`].
     pub fn snap(&mut self) -> Option<Recording> {
         self.recorder.snap()
-    }
-
-    /// Uploads `image` and returns a Graphite-backed version of it with the `required`
-    /// properties. See [`super::images::texture_from_image`].
-    pub fn texture_from_image(&self, image: &Image, required: RequiredProperties) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImages_TextureFromImageGraphite(
-                self.recorder.native_mut_force(),
-                image.native(),
-                required.native(),
-            )
-        })
     }
 
     /// See [`Recorder::make_deferred_canvas`].
@@ -277,6 +270,21 @@ impl Recorder {
         } else {
             Some(unsafe { Canvas::borrow_from_native(canvas_ptr) })
         }
+    }
+
+    /// Uploads `image` and returns a Graphite-backed version of it with the `required`
+    /// properties, or `None` if the upload fails.
+    ///
+    /// Takes `&self` because an [`ImageProvider`] receives only a shared recorder, and it uploads
+    /// while Graphite may already be inside another call to the same provider.
+    pub fn texture_from_image(&self, image: &Image, required: RequiredProperties) -> Option<Image> {
+        Image::from_ptr(unsafe {
+            sb::C_SkImages_TextureFromImageGraphite(
+                self.native_mut_force(),
+                image.native(),
+                required.native(),
+            )
+        })
     }
 
     /// Get the backend API used by this recorder

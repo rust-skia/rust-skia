@@ -270,6 +270,8 @@ namespace ImageProvider {
     }
 }
 
+// Forwards Graphite's findOrCreate to a Rust ImageProvider, and owns that provider for its own
+// ref-counted lifetime.
 class RustImageProvider final : public skgpu::graphite::ImageProvider {
 public:
     struct Param {
