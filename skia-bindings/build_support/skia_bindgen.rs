@@ -69,6 +69,9 @@ impl Configuration {
             if features.graphite() {
                 sources.push("src/graphite.cpp".into());
             }
+            if features[feature::WGPU] {
+                sources.push("src/wgpu.cpp".into());
+            }
             if features[feature::TEXTLAYOUT] {
                 sources.extend(vec!["src/shaper.cpp".into(), "src/paragraph.cpp".into()]);
             }
@@ -217,6 +220,29 @@ pub fn generate_bindings(
 
     bindgen_args.push(format!("-I{}", include_path.display()));
     cc_build.include(include_path);
+
+    #[cfg(feature = "wgpu")]
+    {
+        use crate::build_support::dawn;
+
+        let dawn_include_dir = dawn::include_dir();
+        cargo::rerun_if_file_changed(&dawn_include_dir);
+        bindgen_args.push(format!("-I{}", dawn_include_dir.display()));
+        cc_build.include(dawn_include_dir);
+        dawn::add_backend_sources(&mut cc_build, &build.skia_source_dir);
+
+        // The WebGPU C layer: handles, descriptors, enums, flag constants, and Dawn's function
+        // table that `skia-wgpu` fills. Dawn's C++ wrapper classes (`wgpu::*`) stay on the C++
+        // side.
+        builder = builder
+            .allowlist_type("WGPU.*")
+            .allowlist_var("WGPU.*")
+            .allowlist_type("DawnProcTable")
+            .allowlist_function("dawnProcSetProcs")
+            .allowlist_function("dawnProcGetVersion")
+            .blocklist_type("wgpu::.*")
+            .opaque_type("skgpu::graphite::DawnBackendContext");
+    }
 
     for (name, value) in &build.definitions {
         match value {

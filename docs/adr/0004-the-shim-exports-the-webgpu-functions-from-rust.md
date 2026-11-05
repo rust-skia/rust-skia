@@ -1,0 +1,71 @@
+---
+status: proposed
+---
+
+# The shim exports the WebGPU C functions from Rust
+
+ADR 0003 runs Skia's Graphite Dawn backend on the `wgpu` crate. The backend calls the C functions
+of `webgpu.h`, which all start with `wgpu`, and the crate `skia-wgpu` implements them on `wgpu`.
+That set of functions is called the shim. This ADR decides how the backend's calls reach the
+shim.
+
+## Decision
+
+The shim defines the `wgpu*` functions as Rust functions with `#[no_mangle]` and the C calling
+convention. The backend's calls reach the shim directly. No function table and no install step
+sit between them.
+
+`skia-wgpu` depends on `skia-bindings`, so the linker sees the shim's library before
+`libskia-bindings.a`, the library that calls the shim. GNU ld scans each library once, in order,
+and loads from it only the members that define a symbol still undefined at that point. Library
+order nevertheless does not matter here. rustc passes a generated object file, `symbols.o`, to
+every link ahead of the libraries, and that file references each `#[no_mangle]` function of the
+linked crates. The linker therefore always loads the shim's functions. An experiment with a
+model of the three crates confirmed this. It linked and ran with GNU ld 2.44 on x86_64 Linux and
+with ld64 on macOS, in debug and release builds, with thin and with fat LTO, and with the C++
+library both bundled into the rlib (`static=`, as on Unix) and passed to the linker separately
+(as on Windows).
+
+`webgpu.h` declares a function pointer type for every function, such as
+`WGPUProcDeviceCreateBuffer`, and `skia-bindings` generates these types with the other WebGPU
+types. Next to each shim function, an assignment of the function to that type
+(`const _: WGPUProcDeviceCreateBuffer = Some(wgpuDeviceCreateBuffer);`) makes rustc check its
+signature against the header. A function that the backend calls and the shim lacks fails the
+link with an undefined symbol that names the function.
+
+## One set of exports per build
+
+ADR 0003 lets a build enable exactly one `wgpu-NN` feature of `skia-wgpu`. Each enabled version
+would export the same `wgpu*` symbols, so `skia-wgpu` stops the build with a `compile_error!` when
+more than one is enabled. For the same reason, `skia-wgpu` declares a `links` key. Cargo then
+allows only one version of `skia-wgpu` in a dependency graph, and two semver-incompatible versions
+cannot both export the symbols.
+
+## Consequences
+
+- The undefined `wgpu*` symbols of `libskia-bindings.a` are the functions that the shim must
+  implement, 106 at m157. The link of a test binary names every function that a new milestone
+  adds. `cargo check` does not report a missing function.
+- If two crates in one dependency graph enable different `wgpu-NN` features of `skia-safe`, Cargo
+  enables both, and the `compile_error!` fails the build.
+- The `wgpu*` symbols are global. An application that also links another WebGPU implementation
+  that exports them, such as Dawn or wgpu-native, fails to link with duplicate symbols.
+- The link experiment did not cover Windows with MSVC's `link.exe`. Whether rustc's `symbols.o`
+  also loads the shim's functions there is unverified.
+
+## Considered Options
+
+- **Rejected: forward the `wgpu*` functions through Dawn's function table.** Dawn's generated
+  `dawn_proc.cpp` defines every `wgpu*` function as a call through a `DawnProcTable`, a struct
+  with one function pointer per WebGPU function, and `dawnProcSetProcs` installs the table for the
+  whole process. Upstream Skia uses it to install real Dawn's table
+  (`tools/graphite/dawn/GraphiteDawnTestContext.cpp`). A table of shim functions would need no
+  symbols across crates. But the table has 276 entries, and a struct literal that names every
+  entry, the only way to have rustc report a new function, needs a stub for each of the 170
+  functions that Skia never calls. The table also needs `dawn_proc.cpp` and its replacement
+  headers for Dawn internals in the build, an install step before Skia's first WebGPU call, and a
+  check that only one `wgpu` version's table is installed.
+- **Rejected: export the `wgpu*` functions from a Rust crate below `skia-bindings`.** That crate
+  could not use the WebGPU types of `skia-bindings`, so a second bindgen run or a shared `-sys`
+  crate would be needed. Link order gives no reason to place the shim below, because rustc's
+  `symbols.o` loads the shim's functions from a crate above `skia-bindings` too.

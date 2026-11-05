@@ -1,0 +1,16 @@
+[package]
+name = "skia-wgpu"
+description = "Runs Skia's Graphite Dawn backend on the wgpu crate"
+homepage = "https://github.com/rust-skia/rust-skia/tree/master/skia-wgpu"
+repository = "https://github.com/rust-skia/rust-skia"
+license = "MIT"
+version = "0.157.0"
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+wgpu-30 = ["dep:wgpu30", "skia-bindings/wgpu"]
+
+[dependencies]
+skia-bindings = { version = "=0.157.0", path = "../skia-bindings" }
+wgpu30 = { package = "wgpu", version = "30", optional = true }

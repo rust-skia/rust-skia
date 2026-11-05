@@ -185,6 +185,52 @@ fn download_dependencies() {
     }
 }
 
+/// Downloads the gzipped tar archive at `url` and unpacks the files that `include` selects into
+/// `target`.
+///
+/// The paths that `include` receives and that `target` receives the files at are relative to the
+/// archive's directory `root`. GitHub's archives put everything into a root directory named
+/// `<repository>-<revision>`. Gitiles archives have no root directory, and their `root` is empty.
+/// The `wgpu` feature downloads Dawn and the Python packages of Dawn's generator with this (see
+/// `build_support/dawn.rs`).
+#[cfg(feature = "wgpu")]
+pub fn download_archive(url: &str, root: &str, include: impl Fn(&Path) -> bool, target: &Path) {
+    println!("DOWNLOADING: {url}");
+    // Neither GitHub nor Gitiles supports resuming archive downloads.
+    let archive = utils::download(url, false)
+        .unwrap_or_else(|err| panic!("Failed to download {url} ({err})"));
+
+    if target.exists() {
+        fs::remove_dir_all(target).unwrap();
+    }
+    let mut archive = tar::Archive::new(GzDecoder::new(Cursor::new(archive)));
+    for entry in archive.entries().expect("failed to iterate over archive") {
+        let mut entry = entry.unwrap();
+        // Directories are created for the files they contain. Pax headers are no files.
+        if !entry.header().entry_type().is_file() {
+            continue;
+        }
+        let path = entry.path().unwrap().into_owned();
+        let Ok(relative) = path.strip_prefix(root) else {
+            continue;
+        };
+        if include(relative) {
+            // `include` may select by leading components only, so a `..` further on could escape
+            // `target`.
+            assert!(
+                relative
+                    .components()
+                    .all(|c| matches!(c, Component::Normal(_))),
+                "Archive entry {} leaves the unpack directory",
+                path.display()
+            );
+            let destination = target.join(relative);
+            fs::create_dir_all(destination.parent().unwrap()).unwrap();
+            entry.unpack(&destination).unwrap();
+        }
+    }
+}
+
 fn dir_not_empty(dir_path: &Path) -> bool {
     dir_path
         .read_dir()

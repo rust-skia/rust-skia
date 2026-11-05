@@ -1,0 +1,64 @@
+//! Graphite on an application's `wgpu` device.
+//!
+//! Skia renders with its Dawn backend, and `skia-wgpu` runs that backend on the `wgpu` crate
+//! (ADR 0003), so Skia and the application share one device, its queue, and its textures. The
+//! `wgpu` crate of the matching version is [`crate::wgpu`].
+
+use super::{Context, ContextOptions, Recorder, dawn};
+use crate::{ColorSpace, ColorType, Surface, SurfaceProps, wgpu};
+
+pub mod context_factory {
+    //! Factory functions to create a Graphite [`Context`] on a `wgpu` device.
+
+    use super::{Context, ContextOptions, dawn, wgpu};
+
+    /// Creates a Graphite context that renders with `device` and submits to `queue`.
+    ///
+    /// Skia submits its work to the same queue as the application, so a texture that Skia draws
+    /// into is ready for every command the application submits after the Graphite submission.
+    /// Returns `None` if Skia cannot use the device.
+    pub fn make_wgpu<'a>(
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        options: impl Into<Option<&'a ContextOptions>>,
+    ) -> Option<Context> {
+        let handles = skia_wgpu::BackendHandles::new(device, queue);
+        // The context takes its own references to the handles, so they can go after creation.
+        let backend_context = unsafe {
+            dawn::BackendContext::new(handles.instance(), handles.device(), handles.queue())
+        };
+        dawn::context_factory::make_dawn(&backend_context, options)
+    }
+}
+
+pub mod surfaces {
+    //! Functions to create Graphite [`Surface`]s on `wgpu` textures.
+
+    use super::{ColorSpace, ColorType, Recorder, Surface, SurfaceProps, dawn, wgpu};
+    use crate::gpu::graphite;
+
+    /// Wraps `texture` as a surface, so that drawing to its canvas renders into the texture.
+    ///
+    /// `color_type` describes how Skia interprets the texture's format. Returns `None` if the
+    /// format has no WebGPU equivalent, or if Skia cannot render to the texture with `color_type`.
+    /// The surface keeps the texture alive.
+    pub fn wrap_texture(
+        recorder: &mut Recorder,
+        texture: &wgpu::Texture,
+        color_type: ColorType,
+        color_space: impl Into<Option<ColorSpace>>,
+        surface_props: Option<&SurfaceProps>,
+    ) -> Option<Surface> {
+        let handle = skia_wgpu::TextureHandle::new(texture).ok()?;
+        // The backend texture takes no reference to the texture, but the surface that wraps it
+        // does, so the handle can go once the surface exists.
+        let backend_texture = unsafe { dawn::backend_textures::make_dawn(handle.handle()) };
+        graphite::surfaces::wrap_backend_texture(
+            recorder,
+            &backend_texture,
+            color_type,
+            color_space,
+            surface_props,
+        )
+    }
+}

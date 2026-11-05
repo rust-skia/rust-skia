@@ -75,6 +75,13 @@ pub mod mtl;
 #[cfg(feature = "vulkan")]
 pub mod vk;
 
+// The Dawn backend is reachable only through `wgpu`, because rust-skia runs it on no other WebGPU
+// implementation (ADR 0003).
+#[cfg(feature = "_wgpu")]
+mod dawn;
+#[cfg(feature = "_wgpu")]
+pub mod wgpu;
+
 pub use implementation::*;
 
 #[cfg(test)]
