@@ -375,6 +375,20 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     shim's `WGPUProc*` check at compile time. A new
     `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
     feature. Surface these changes to the user, as for the build organization diff above.
+  - Re-check the release poll. When Skia releases its last device handle, the shim polls the
+    device, and the poll fires Skia's callbacks with `CallbackMode::AllowSpontaneous` while the
+    shim's device and Skia's shared context are being torn down. ADR 0003 argues that this is
+    safe, because maps are Skia's only such callbacks and a map callback uses only its buffer
+    (the consequence on the release poll). List the spontaneous callbacks at the new tag:
+
+    ```sh
+    git -C skia-bindings/skia grep -n 'CallbackMode::AllowSpontaneous' refs/tags/NEW_TAG -- src/gpu/graphite/dawn
+    ```
+
+    The step is done when every listed callback is read and confirmed to use only its own
+    buffer, or state that outlives the device and the shared context. A new callback, or one
+    that reaches the device or the shared context, invalidates the ADR's argument: surface it
+    to the user, because the release poll needs a change before the update ships.
   - `skia-bindings` compiles Skia's Dawn backend itself, from the `.cpp` files of
     `skia_graphite_dawn_sources` in `gn/graphite.gni`, and leaves `skia_use_dawn` off. When the
     build organization diff changes what `skia_use_dawn` adds in `BUILD.gn` (sources, defines,

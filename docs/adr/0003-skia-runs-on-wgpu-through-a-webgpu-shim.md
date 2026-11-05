@@ -233,9 +233,10 @@ application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a v
   holds Skia's buffer, which holds the `wgpu` buffer. The poll fires Skia's map callbacks while
   Skia destroys its shared context. This is safe, because maps are Skia's only callbacks with
   `AllowSpontaneous`, and a map callback uses only its buffer, whose resource cache the buffer
-  keeps alive (`DawnBuffer.cpp`, `Resource.cpp`). The poll also waits for the application's work
-  on the device. The test `releasing_the_device_frees_a_buffer_with_a_pending_map` in `skia-wgpu`
-  pins this. On WebGL, the poll does not wait at all, so a map whose work is still running stays
+  keeps alive (`DawnBuffer.cpp`, `Resource.cpp`). Nothing in the build checks this, so the
+  milestone update re-reads Skia's spontaneous callbacks at every tag cut. The poll also waits for
+  the application's work on the device. The test
+  `releasing_the_device_frees_a_buffer_with_a_pending_map` in `skia-wgpu` pins this. On WebGL, the poll does not wait at all, so a map whose work is still running stays
   pending, and its buffers leak.
 - Every blocking poll of the shim, in `wgpuInstanceWaitAny` and when Skia releases its last device
   handle, waits until all submitted work is done. `wgpu`'s GL backend gives up a wait after about
