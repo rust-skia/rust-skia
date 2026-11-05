@@ -1438,6 +1438,11 @@ extern "C" SkColorSpace* C_SkColorSpace_MakeSRGBLinear() {
     return SkColorSpace::MakeSRGBLinear().release();
 }
 
+extern "C" SkColorSpace* C_SkColorSpace_MakeRGB(
+    const skcms_TransferFunction* transferFn, const skcms_Matrix3x3* toXYZ) {
+    return SkColorSpace::MakeRGB(*transferFn, *toXYZ).release();
+}
+
 extern "C" SkColorSpace* C_SkColorSpace_MakeCICP(
     SkNamedPrimaries::CicpId colorPrimaries,
     SkNamedTransferFn::CicpId transferCharacteristics) {
