@@ -1,7 +1,6 @@
 //! The instance, which owns the futures and polls the devices while Skia waits, and the adapter.
 
 use std::ffi::CString;
-use std::panic::{self, AssertUnwindSafe};
 use std::sync::Arc;
 
 use skia_bindings as sb;
@@ -47,6 +46,12 @@ impl Instance {
     ///
     /// Callers that do not wait need not look at the result, because a callback that the poll
     /// does not fire keeps waiting until its instance is released.
+    ///
+    /// On a lost device, `wgpu` panics in the poll, which aborts the process inside the WebGPU
+    /// function that polls. `wgpu` treats the loss as fatal, so the shim does too (ADR 0003).
+    /// The poll does not catch the panic, because `wgpu` fires every pending callback inside the
+    /// poll: the shim's, Skia's, and the application's. A catch would also swallow a panic of
+    /// those callbacks, mistake it for a lost device, and continue with half-updated state.
     pub fn poll(&self, wait: bool) -> Polled {
         loop {
             let poll_type = if wait {
@@ -57,13 +62,7 @@ impl Instance {
             } else {
                 wgpu::PollType::Poll
             };
-            // On a lost device, `wgpu` panics in the poll instead of returning an error. The panic
-            // would abort the process inside the WebGPU function that polls, so it is caught here.
-            let poll = || self.device.poll(poll_type);
-            let Ok(result) = panic::catch_unwind(AssertUnwindSafe(poll)) else {
-                return Polled::Incomplete;
-            };
-            match result {
+            match self.device.poll(poll_type) {
                 Ok(_) => return Polled::Complete,
                 // `wgpu`'s GL backend gives up a wait after about 2 s, so the wait starts again.
                 // On WebGL, a wait gives up at once, and the work cannot progress while it repeats.
@@ -83,8 +82,7 @@ pub enum Polled {
     /// `wgpu` reported every completion that the poll covers: the work that is already done, or
     /// for a wait, all submitted work.
     Complete,
-    /// Some of that work did not complete, because the device is lost, or because a wait on
-    /// WebGL gave up.
+    /// A wait on WebGL gave up before the submitted work was done.
     Incomplete,
 }
 

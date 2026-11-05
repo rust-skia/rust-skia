@@ -59,8 +59,7 @@ impl Device {
 /// work submitted to the device, also the application's (ADR 0003).
 impl Drop for Device {
     fn drop(&mut self) {
-        // An incomplete wait, on a lost device or on WebGL, leaves the maps pending and leaks
-        // them (ADR 0003).
+        // An incomplete wait on WebGL leaves the maps pending and leaks them (ADR 0003).
         let _ = self.instance.poll(true);
     }
 }

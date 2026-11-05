@@ -240,11 +240,15 @@ application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a v
   pending, and its buffers leak.
 - Every blocking poll of the shim, in `wgpuInstanceWaitAny` and when Skia releases its last device
   handle, waits until all submitted work is done. `wgpu`'s GL backend gives up a wait after about
-  2 seconds, so the shim starts the wait again. On a lost device, `wgpu` panics in the poll instead
-  of returning an error. The panic would abort the process inside the WebGPU function, so the shim
-  catches it. `wgpuInstanceWaitAny` then returns `WGPUWaitStatus_Error` for futures that can no
-  longer complete, and the release leaves the pending maps to leak. An application that builds
-  with `panic = "abort"` still aborts on a lost device.
+  2 seconds, so the shim starts the wait again. On WebGL, a wait gives up at once, and
+  `wgpuInstanceWaitAny` returns `WGPUWaitStatus_Error` for futures that cannot complete.
+- A lost device aborts the process. `wgpu` treats the loss as fatal: its poll panics instead of
+  returning an error, and the panic cannot unwind out of the WebGPU function that polls. An
+  application that uses `wgpu` directly fails the same way, unless it catches the panic around
+  its own calls. Catching it in the shim would also catch every other panic that the poll's
+  callbacks raise, because `wgpu` fires them inside the poll. A device lost after a driver reset,
+  a driver update, or, on Linux with NVIDIA's driver, a system suspend, therefore ends the
+  application.
 - The `wgpu` backend is experimental. Until it stabilizes, no prebuilt binaries contain it, so the
   `wgpu` feature builds Skia from source.
 
