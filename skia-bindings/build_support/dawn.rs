@@ -28,7 +28,8 @@ const SOURCE_PATHS: &[&str] = &[
 /// argument `--<name>-path`.
 const PYTHON_PACKAGES: &[&str] = &["jinja2", "markupsafe"];
 
-/// Generates the Dawn files into [`dir`], unless they are already there for these revisions.
+/// Generates the Dawn files into [`dir`], unless they are already there for these revisions and
+/// this generation setup.
 ///
 /// `offline` builds panic, because generation downloads Dawn and the generator's Python packages.
 pub fn prepare(python: &Path, offline: bool) {
@@ -39,7 +40,7 @@ pub fn prepare(python: &Path, offline: bool) {
     );
 
     let revisions = Revisions::from_metadata();
-    let stamp = revisions.stamp();
+    let stamp = generation_stamp(&revisions);
     let stamp_file = dir().join("REVISION");
     if fs::read_to_string(&stamp_file).is_ok_and(|s| s == stamp) {
         return;
@@ -76,6 +77,20 @@ pub fn prepare(python: &Path, offline: bool) {
     generate(&source_dir, &packages_dir, python, &generated);
     assemble(&source_dir, &generated, &dir());
     fs::write(stamp_file, stamp).unwrap();
+}
+
+/// The Dawn generator's targets that produce the files of [`FILES`].
+const GENERATOR_TARGETS: &str = "headers,cpp_headers";
+
+/// Identifies what [`prepare`] generates: the revisions, the generator's targets, and the files that
+/// it copies. A build directory from before a change to any of them is generated again.
+fn generation_stamp(revisions: &Revisions) -> String {
+    let files: Vec<&str> = FILES.iter().map(|(_, _, to)| *to).collect();
+    format!(
+        "{} targets={GENERATOR_TARGETS} files={}",
+        revisions.stamp(),
+        files.join(",")
+    )
 }
 
 /// Adds Skia's Dawn backend to the `cc` build of `skia-bindings`.
@@ -230,7 +245,7 @@ fn generate(source_dir: &Path, packages_dir: &Path, python: &Path, out: &Path) {
             "--dawn-json".into(),
             source_dir.join("src/dawn/dawn.json").into(),
             "--targets".into(),
-            "headers,cpp_headers".into(),
+            GENERATOR_TARGETS.into(),
         ],
     );
 }
