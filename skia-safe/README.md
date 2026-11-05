@@ -104,6 +104,8 @@ To render the examples with Graphite on `wgpu`, use
 (cd skia-org && cargo run --features wgpu -- [OUTPUT_DIR] --driver wgpu)
 ```
 
+### `textlayout`
+
 The Cargo feature `textlayout` enables text shaping with Harfbuzz and ICU by providing bindings to the Skia modules skshaper and skparagraph. 
 
 The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bindings for skparagraph are in the `skia_safe::textlayout` module. 
