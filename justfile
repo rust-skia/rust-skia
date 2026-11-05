@@ -248,6 +248,11 @@ locate-bindings:
 open-bindings:
     code "$({{ bindings_latest }})"
 
+# Print the skia.org pages with fiddles that `skia-org/README.md` lists neither as ported nor as
+# skipped, and fail when there are any.
+org-unlisted-pages:
+    bash .github/scripts/org-unlisted-pages.sh
+
 # Render the skia-org examples with two raster drivers and list the images that differ, see
 # `.github/scripts/compare-org.sh`.
 compare-org a="cpu" b="wgpu" features="wgpu" fuzz="2%":
