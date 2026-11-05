@@ -56,7 +56,8 @@ impl PlatformDetails for Ios {
     }
 
     fn link_libraries(&self, features: &Features) -> Vec<String> {
-        let abi = cargo::target().abi;
+        let target = cargo::target();
+        let abi = target.abi.as_deref();
         let mut libs = vec![
             "c++",
             "framework=CoreFoundation",
@@ -65,7 +66,7 @@ impl PlatformDetails for Ios {
             "framework=ImageIO",
         ];
 
-        if abi.as_deref() != Some("macabi") {
+        if abi != Some("macabi") {
             libs.extend(vec!["framework=MobileCoreServices", "framework=UIKit"]);
         }
 
@@ -73,7 +74,11 @@ impl PlatformDetails for Ios {
             libs.push("framework=Metal");
         }
 
-        libs.iter().map(|s| s.to_string()).collect()
+        let mut libs: Vec<String> = libs.iter().map(|s| s.to_string()).collect();
+        libs.extend(apple::clang_runtime_library(
+            IosPlatform::new(&target.architecture, abi).clang_runtime(),
+        ));
+        libs
     }
 }
 
@@ -156,6 +161,16 @@ impl IosPlatform {
             IosPlatform::Simulator => true,
             IosPlatform::M1Simulator => true,
             IosPlatform::Catalyst => false,
+        }
+    }
+
+    /// The platform name of the clang runtime library, see [`apple::clang_runtime_library`].
+    fn clang_runtime(self) -> &'static str {
+        use IosPlatform::*;
+        match self {
+            Device => "ios",
+            Simulator | M1Simulator => "iossim",
+            Catalyst => "osx",
         }
     }
 

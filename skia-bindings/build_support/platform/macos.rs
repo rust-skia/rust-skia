@@ -58,7 +58,9 @@ impl PlatformDetails for MacOs {
             libs.push("framework=Foundation");
         }
 
-        libs.iter().map(|l| l.to_string()).collect()
+        let mut libs: Vec<String> = libs.iter().map(|l| l.to_string()).collect();
+        libs.extend(apple::clang_runtime_library("osx"));
+        libs
     }
 }
 
