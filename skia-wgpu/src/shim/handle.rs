@@ -31,8 +31,8 @@ pub trait Handle: Sized {
     unsafe fn arc(handle: Self::C) -> Arc<Self>;
 }
 
-/// Implements [`Handle`] for each shim type and generates the `AddRef` and `Release` functions of
-/// the function table for it.
+/// Implements [`Handle`] for each shim type and exports its WebGPU `AddRef` and `Release`
+/// functions, each checked against its function pointer type in `webgpu.h` (`WGPUProc*`).
 ///
 /// Skia shares its handles between threads, and the compiler cannot see that through the raw
 /// pointers. The macro therefore asserts that each shim type is `Send` and `Sync`.
@@ -40,7 +40,7 @@ pub trait Handle: Sized {
 /// The macro is invoked in the modules next to this one, so it names this module as
 /// `super::handle`. The shim source exists once per `wgpu` version, so `$crate` cannot name it.
 macro_rules! handles {
-    ($($shim:ty => $c:ident: $add_ref:ident, $release:ident;)*) => {
+    ($($shim:ty => $c:ident: $add_ref:ident: $add_ref_proc:ident, $release:ident: $release_proc:ident;)*) => {
         $(
             const _: () = {
                 const fn shared_between_threads<T: Send + Sync>() {}
@@ -73,13 +73,17 @@ macro_rules! handles {
                 }
             }
 
+            #[unsafe(no_mangle)]
             pub unsafe extern "C" fn $add_ref(handle: skia_bindings::$c) {
                 unsafe { std::sync::Arc::increment_strong_count(handle as *const $shim) }
             }
+            const _: skia_bindings::$add_ref_proc = Some($add_ref);
 
+            #[unsafe(no_mangle)]
             pub unsafe extern "C" fn $release(handle: skia_bindings::$c) {
                 unsafe { std::sync::Arc::decrement_strong_count(handle as *const $shim) }
             }
+            const _: skia_bindings::$release_proc = Some($release);
         )*
     };
 }

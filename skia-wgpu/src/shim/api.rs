@@ -10,7 +10,7 @@ use super::handle::Handle;
 use super::instance::{self, Instance};
 use super::queue::Queue;
 use super::texture::Texture;
-use super::{convert, table, wgpu};
+use super::{convert, wgpu};
 
 /// The WebGPU handles of an application's `wgpu` device and queue, which Skia's
 /// `DawnBackendContext` takes. Each handle owns one reference, which `Drop` releases.
@@ -21,10 +21,8 @@ pub struct BackendHandles {
 }
 
 impl BackendHandles {
-    /// Wraps the device and the queue and installs the shim's function table, so that Skia's
-    /// WebGPU calls reach them.
+    /// Wraps the device and the queue, so that Skia's WebGPU calls reach them.
     pub fn new(device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
-        table::install();
         let instance = Arc::new(Instance::new(device));
         Self {
             device: Device::new(device.clone(), instance.clone()).into_handle(),
@@ -56,9 +54,9 @@ impl BackendHandles {
 impl Drop for BackendHandles {
     fn drop(&mut self) {
         unsafe {
-            super::queue::queue_release(self.queue);
-            super::device::device_release(self.device);
-            instance::instance_release(self.instance);
+            super::queue::wgpuQueueRelease(self.queue);
+            super::device::wgpuDeviceRelease(self.device);
+            instance::wgpuInstanceRelease(self.instance);
         }
     }
 }
@@ -97,7 +95,7 @@ impl TextureHandle {
 
 impl Drop for TextureHandle {
     fn drop(&mut self) {
-        unsafe { super::texture::texture_release(self.0) }
+        unsafe { super::texture::wgpuTextureRelease(self.0) }
     }
 }
 

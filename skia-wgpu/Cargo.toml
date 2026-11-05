@@ -7,6 +7,11 @@ license = "MIT"
 version = "0.157.0"
 edition.workspace = true
 rust-version.workspace = true
+# The shim exports the `wgpu*` functions of `webgpu.h`, so two versions of this crate in one build
+# would export the same symbols. Cargo allows only one package per `links` value in a dependency
+# graph and rejects such a graph before it builds anything (ADR 0004). `links` requires a build
+# script, which is empty.
+links = "skia-wgpu"
 
 [features]
 wgpu-30 = ["dep:wgpu30", "skia-bindings/wgpu"]

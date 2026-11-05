@@ -20,10 +20,13 @@ pub struct Queue {
 }
 
 handles! {
-    Queue => WGPUQueue: queue_add_ref, queue_release;
+    Queue => WGPUQueue:
+        wgpuQueueAddRef: WGPUProcQueueAddRef,
+        wgpuQueueRelease: WGPUProcQueueRelease;
 }
 
-pub unsafe extern "C" fn queue_submit(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuQueueSubmit(
     queue: sb::WGPUQueue,
     command_count: usize,
     commands: *const sb::WGPUCommandBuffer,
@@ -36,8 +39,10 @@ pub unsafe extern "C" fn queue_submit(
         .collect();
     queue.queue.submit(buffers);
 }
+const _: sb::WGPUProcQueueSubmit = Some(wgpuQueueSubmit);
 
-pub unsafe extern "C" fn queue_write_buffer(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuQueueWriteBuffer(
     queue: sb::WGPUQueue,
     buffer: sb::WGPUBuffer,
     buffer_offset: u64,
@@ -51,8 +56,10 @@ pub unsafe extern "C" fn queue_write_buffer(
         .queue
         .write_buffer(&buffer.buffer, buffer_offset, data);
 }
+const _: sb::WGPUProcQueueWriteBuffer = Some(wgpuQueueWriteBuffer);
 
-pub unsafe extern "C" fn queue_on_submitted_work_done(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuQueueOnSubmittedWorkDone(
     queue: sb::WGPUQueue,
     callback_info: sb::WGPUQueueWorkDoneCallbackInfo,
 ) -> sb::WGPUFuture {
@@ -80,3 +87,4 @@ pub unsafe extern "C" fn queue_on_submitted_work_done(
         .on_submitted_work_done(move || completion.complete(()));
     future
 }
+const _: sb::WGPUProcQueueOnSubmittedWorkDone = Some(wgpuQueueOnSubmittedWorkDone);

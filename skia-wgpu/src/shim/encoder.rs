@@ -50,11 +50,21 @@ pub struct QuerySet {
 }
 
 handles! {
-    CommandEncoder => WGPUCommandEncoder: command_encoder_add_ref, command_encoder_release;
-    CommandBuffer => WGPUCommandBuffer: command_buffer_add_ref, command_buffer_release;
-    RenderPassEncoder => WGPURenderPassEncoder: render_pass_encoder_add_ref, render_pass_encoder_release;
-    ComputePassEncoder => WGPUComputePassEncoder: compute_pass_encoder_add_ref, compute_pass_encoder_release;
-    QuerySet => WGPUQuerySet: query_set_add_ref, query_set_release;
+    CommandEncoder => WGPUCommandEncoder:
+        wgpuCommandEncoderAddRef: WGPUProcCommandEncoderAddRef,
+        wgpuCommandEncoderRelease: WGPUProcCommandEncoderRelease;
+    CommandBuffer => WGPUCommandBuffer:
+        wgpuCommandBufferAddRef: WGPUProcCommandBufferAddRef,
+        wgpuCommandBufferRelease: WGPUProcCommandBufferRelease;
+    RenderPassEncoder => WGPURenderPassEncoder:
+        wgpuRenderPassEncoderAddRef: WGPUProcRenderPassEncoderAddRef,
+        wgpuRenderPassEncoderRelease: WGPUProcRenderPassEncoderRelease;
+    ComputePassEncoder => WGPUComputePassEncoder:
+        wgpuComputePassEncoderAddRef: WGPUProcComputePassEncoderAddRef,
+        wgpuComputePassEncoderRelease: WGPUProcComputePassEncoderRelease;
+    QuerySet => WGPUQuerySet:
+        wgpuQuerySetAddRef: WGPUProcQuerySetAddRef,
+        wgpuQuerySetRelease: WGPUProcQuerySetRelease;
 }
 
 impl CommandBuffer {
@@ -68,7 +78,8 @@ impl CommandBuffer {
     }
 }
 
-pub unsafe extern "C" fn device_create_command_encoder(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateCommandEncoder(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUCommandEncoderDescriptor,
 ) -> sb::WGPUCommandEncoder {
@@ -85,8 +96,10 @@ pub unsafe extern "C" fn device_create_command_encoder(
     }
     .into_handle()
 }
+const _: sb::WGPUProcDeviceCreateCommandEncoder = Some(wgpuDeviceCreateCommandEncoder);
 
-pub unsafe extern "C" fn device_create_query_set(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateQuerySet(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUQuerySetDescriptor,
 ) -> sb::WGPUQuerySet {
@@ -100,8 +113,10 @@ pub unsafe extern "C" fn device_create_query_set(
     });
     QuerySet { set }.into_handle()
 }
+const _: sb::WGPUProcDeviceCreateQuerySet = Some(wgpuDeviceCreateQuerySet);
 
-pub unsafe extern "C" fn command_encoder_finish(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderFinish(
     encoder: sb::WGPUCommandEncoder,
     descriptor: *const sb::WGPUCommandBufferDescriptor,
 ) -> sb::WGPUCommandBuffer {
@@ -119,8 +134,10 @@ pub unsafe extern "C" fn command_encoder_finish(
     }
     .into_handle()
 }
+const _: sb::WGPUProcCommandEncoderFinish = Some(wgpuCommandEncoderFinish);
 
-pub unsafe extern "C" fn command_encoder_begin_render_pass(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderBeginRenderPass(
     encoder: sb::WGPUCommandEncoder,
     descriptor: *const sb::WGPURenderPassDescriptor,
 ) -> sb::WGPURenderPassEncoder {
@@ -160,8 +177,10 @@ pub unsafe extern "C" fn command_encoder_begin_render_pass(
     }
     .into_handle()
 }
+const _: sb::WGPUProcCommandEncoderBeginRenderPass = Some(wgpuCommandEncoderBeginRenderPass);
 
-pub unsafe extern "C" fn command_encoder_begin_compute_pass(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderBeginComputePass(
     encoder: sb::WGPUCommandEncoder,
     descriptor: *const sb::WGPUComputePassDescriptor,
 ) -> sb::WGPUComputePassEncoder {
@@ -193,8 +212,10 @@ pub unsafe extern "C" fn command_encoder_begin_compute_pass(
     }
     .into_handle()
 }
+const _: sb::WGPUProcCommandEncoderBeginComputePass = Some(wgpuCommandEncoderBeginComputePass);
 
-pub unsafe extern "C" fn command_encoder_clear_buffer(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderClearBuffer(
     encoder: sb::WGPUCommandEncoder,
     buffer: sb::WGPUBuffer,
     offset: u64,
@@ -204,8 +225,10 @@ pub unsafe extern "C" fn command_encoder_clear_buffer(
     unsafe { CommandEncoder::get(encoder) }
         .with(|encoder| encoder.clear_buffer(buffer, offset, convert::size(size)));
 }
+const _: sb::WGPUProcCommandEncoderClearBuffer = Some(wgpuCommandEncoderClearBuffer);
 
-pub unsafe extern "C" fn command_encoder_copy_buffer_to_buffer(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderCopyBufferToBuffer(
     encoder: sb::WGPUCommandEncoder,
     source: sb::WGPUBuffer,
     source_offset: u64,
@@ -225,8 +248,10 @@ pub unsafe extern "C" fn command_encoder_copy_buffer_to_buffer(
         )
     });
 }
+const _: sb::WGPUProcCommandEncoderCopyBufferToBuffer = Some(wgpuCommandEncoderCopyBufferToBuffer);
 
-pub unsafe extern "C" fn command_encoder_copy_buffer_to_texture(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderCopyBufferToTexture(
     encoder: sb::WGPUCommandEncoder,
     source: *const sb::WGPUTexelCopyBufferInfo,
     destination: *const sb::WGPUTexelCopyTextureInfo,
@@ -238,8 +263,11 @@ pub unsafe extern "C" fn command_encoder_copy_buffer_to_texture(
     unsafe { CommandEncoder::get(encoder) }
         .with(|encoder| encoder.copy_buffer_to_texture(source, destination, size));
 }
+const _: sb::WGPUProcCommandEncoderCopyBufferToTexture =
+    Some(wgpuCommandEncoderCopyBufferToTexture);
 
-pub unsafe extern "C" fn command_encoder_copy_texture_to_buffer(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderCopyTextureToBuffer(
     encoder: sb::WGPUCommandEncoder,
     source: *const sb::WGPUTexelCopyTextureInfo,
     destination: *const sb::WGPUTexelCopyBufferInfo,
@@ -251,8 +279,11 @@ pub unsafe extern "C" fn command_encoder_copy_texture_to_buffer(
     unsafe { CommandEncoder::get(encoder) }
         .with(|encoder| encoder.copy_texture_to_buffer(source, destination, size));
 }
+const _: sb::WGPUProcCommandEncoderCopyTextureToBuffer =
+    Some(wgpuCommandEncoderCopyTextureToBuffer);
 
-pub unsafe extern "C" fn command_encoder_copy_texture_to_texture(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderCopyTextureToTexture(
     encoder: sb::WGPUCommandEncoder,
     source: *const sb::WGPUTexelCopyTextureInfo,
     destination: *const sb::WGPUTexelCopyTextureInfo,
@@ -264,8 +295,11 @@ pub unsafe extern "C" fn command_encoder_copy_texture_to_texture(
     unsafe { CommandEncoder::get(encoder) }
         .with(|encoder| encoder.copy_texture_to_texture(source, destination, size));
 }
+const _: sb::WGPUProcCommandEncoderCopyTextureToTexture =
+    Some(wgpuCommandEncoderCopyTextureToTexture);
 
-pub unsafe extern "C" fn command_encoder_resolve_query_set(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderResolveQuerySet(
     encoder: sb::WGPUCommandEncoder,
     query_set: sb::WGPUQuerySet,
     first_query: u32,
@@ -284,8 +318,10 @@ pub unsafe extern "C" fn command_encoder_resolve_query_set(
         )
     });
 }
+const _: sb::WGPUProcCommandEncoderResolveQuerySet = Some(wgpuCommandEncoderResolveQuerySet);
 
-pub unsafe extern "C" fn command_encoder_write_timestamp(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuCommandEncoderWriteTimestamp(
     encoder: sb::WGPUCommandEncoder,
     query_set: sb::WGPUQuerySet,
     query_index: u32,
@@ -294,12 +330,14 @@ pub unsafe extern "C" fn command_encoder_write_timestamp(
     unsafe { CommandEncoder::get(encoder) }
         .with(|encoder| encoder.write_timestamp(query_set, query_index));
 }
+const _: sb::WGPUProcCommandEncoderWriteTimestamp = Some(wgpuCommandEncoderWriteTimestamp);
 
 //
 // Render passes
 //
 
-pub unsafe extern "C" fn render_pass_encoder_end(pass: sb::WGPURenderPassEncoder) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderEnd(pass: sb::WGPURenderPassEncoder) {
     // Dropping the `wgpu` pass ends it.
     let pass = unsafe { RenderPassEncoder::get(pass) }
         .pass
@@ -308,16 +346,20 @@ pub unsafe extern "C" fn render_pass_encoder_end(pass: sb::WGPURenderPassEncoder
         .take();
     drop(pass.expect("render pass ended twice"));
 }
+const _: sb::WGPUProcRenderPassEncoderEnd = Some(wgpuRenderPassEncoderEnd);
 
-pub unsafe extern "C" fn render_pass_encoder_set_pipeline(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetPipeline(
     pass: sb::WGPURenderPassEncoder,
     pipeline: sb::WGPURenderPipeline,
 ) {
     let pipeline = &unsafe { RenderPipeline::get(pipeline) }.pipeline;
     unsafe { RenderPassEncoder::get(pass) }.with(|pass| pass.set_pipeline(pipeline));
 }
+const _: sb::WGPUProcRenderPassEncoderSetPipeline = Some(wgpuRenderPassEncoderSetPipeline);
 
-pub unsafe extern "C" fn render_pass_encoder_set_bind_group(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetBindGroup(
     pass: sb::WGPURenderPassEncoder,
     group_index: u32,
     group: sb::WGPUBindGroup,
@@ -329,8 +371,10 @@ pub unsafe extern "C" fn render_pass_encoder_set_bind_group(
     unsafe { RenderPassEncoder::get(pass) }
         .with(|pass| pass.set_bind_group(group_index, group, offsets));
 }
+const _: sb::WGPUProcRenderPassEncoderSetBindGroup = Some(wgpuRenderPassEncoderSetBindGroup);
 
-pub unsafe extern "C" fn render_pass_encoder_set_vertex_buffer(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetVertexBuffer(
     pass: sb::WGPURenderPassEncoder,
     slot: u32,
     buffer: sb::WGPUBuffer,
@@ -342,8 +386,10 @@ pub unsafe extern "C" fn render_pass_encoder_set_vertex_buffer(
         pass.set_vertex_buffer(slot, buffer.map(|b| buffer_slice(&b.buffer, offset, size)))
     });
 }
+const _: sb::WGPUProcRenderPassEncoderSetVertexBuffer = Some(wgpuRenderPassEncoderSetVertexBuffer);
 
-pub unsafe extern "C" fn render_pass_encoder_set_index_buffer(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetIndexBuffer(
     pass: sb::WGPURenderPassEncoder,
     buffer: sb::WGPUBuffer,
     format: sb::WGPUIndexFormat,
@@ -355,8 +401,10 @@ pub unsafe extern "C" fn render_pass_encoder_set_index_buffer(
     unsafe { RenderPassEncoder::get(pass) }
         .with(|pass| pass.set_index_buffer(buffer_slice(buffer, offset, size), format));
 }
+const _: sb::WGPUProcRenderPassEncoderSetIndexBuffer = Some(wgpuRenderPassEncoderSetIndexBuffer);
 
-pub unsafe extern "C" fn render_pass_encoder_set_viewport(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetViewport(
     pass: sb::WGPURenderPassEncoder,
     x: f32,
     y: f32,
@@ -368,8 +416,10 @@ pub unsafe extern "C" fn render_pass_encoder_set_viewport(
     unsafe { RenderPassEncoder::get(pass) }
         .with(|pass| pass.set_viewport(x, y, width, height, min_depth, max_depth));
 }
+const _: sb::WGPUProcRenderPassEncoderSetViewport = Some(wgpuRenderPassEncoderSetViewport);
 
-pub unsafe extern "C" fn render_pass_encoder_set_scissor_rect(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetScissorRect(
     pass: sb::WGPURenderPassEncoder,
     x: u32,
     y: u32,
@@ -378,16 +428,21 @@ pub unsafe extern "C" fn render_pass_encoder_set_scissor_rect(
 ) {
     unsafe { RenderPassEncoder::get(pass) }.with(|pass| pass.set_scissor_rect(x, y, width, height));
 }
+const _: sb::WGPUProcRenderPassEncoderSetScissorRect = Some(wgpuRenderPassEncoderSetScissorRect);
 
-pub unsafe extern "C" fn render_pass_encoder_set_blend_constant(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetBlendConstant(
     pass: sb::WGPURenderPassEncoder,
     color: *const sb::WGPUColor,
 ) {
     let color = convert::color(unsafe { &*color });
     unsafe { RenderPassEncoder::get(pass) }.with(|pass| pass.set_blend_constant(color));
 }
+const _: sb::WGPUProcRenderPassEncoderSetBlendConstant =
+    Some(wgpuRenderPassEncoderSetBlendConstant);
 
-pub unsafe extern "C" fn render_pass_encoder_set_immediates(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderSetImmediates(
     pass: sb::WGPURenderPassEncoder,
     offset: u32,
     data: *const std::ffi::c_void,
@@ -396,8 +451,10 @@ pub unsafe extern "C" fn render_pass_encoder_set_immediates(
     let data = unsafe { convert::slice(data as *const u8, size) };
     unsafe { RenderPassEncoder::get(pass) }.with(|pass| pass.set_immediates(offset, data));
 }
+const _: sb::WGPUProcRenderPassEncoderSetImmediates = Some(wgpuRenderPassEncoderSetImmediates);
 
-pub unsafe extern "C" fn render_pass_encoder_draw(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderDraw(
     pass: sb::WGPURenderPassEncoder,
     vertex_count: u32,
     instance_count: u32,
@@ -411,8 +468,10 @@ pub unsafe extern "C" fn render_pass_encoder_draw(
         )
     });
 }
+const _: sb::WGPUProcRenderPassEncoderDraw = Some(wgpuRenderPassEncoderDraw);
 
-pub unsafe extern "C" fn render_pass_encoder_draw_indexed(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderDrawIndexed(
     pass: sb::WGPURenderPassEncoder,
     index_count: u32,
     instance_count: u32,
@@ -428,8 +487,10 @@ pub unsafe extern "C" fn render_pass_encoder_draw_indexed(
         )
     });
 }
+const _: sb::WGPUProcRenderPassEncoderDrawIndexed = Some(wgpuRenderPassEncoderDrawIndexed);
 
-pub unsafe extern "C" fn render_pass_encoder_draw_indirect(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderDrawIndirect(
     pass: sb::WGPURenderPassEncoder,
     indirect_buffer: sb::WGPUBuffer,
     indirect_offset: u64,
@@ -438,8 +499,10 @@ pub unsafe extern "C" fn render_pass_encoder_draw_indirect(
     unsafe { RenderPassEncoder::get(pass) }
         .with(|pass| pass.draw_indirect(buffer, indirect_offset));
 }
+const _: sb::WGPUProcRenderPassEncoderDrawIndirect = Some(wgpuRenderPassEncoderDrawIndirect);
 
-pub unsafe extern "C" fn render_pass_encoder_draw_indexed_indirect(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPassEncoderDrawIndexedIndirect(
     pass: sb::WGPURenderPassEncoder,
     indirect_buffer: sb::WGPUBuffer,
     indirect_offset: u64,
@@ -448,12 +511,15 @@ pub unsafe extern "C" fn render_pass_encoder_draw_indexed_indirect(
     unsafe { RenderPassEncoder::get(pass) }
         .with(|pass| pass.draw_indexed_indirect(buffer, indirect_offset));
 }
+const _: sb::WGPUProcRenderPassEncoderDrawIndexedIndirect =
+    Some(wgpuRenderPassEncoderDrawIndexedIndirect);
 
 //
 // Compute passes
 //
 
-pub unsafe extern "C" fn compute_pass_encoder_end(pass: sb::WGPUComputePassEncoder) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuComputePassEncoderEnd(pass: sb::WGPUComputePassEncoder) {
     let pass = unsafe { ComputePassEncoder::get(pass) }
         .pass
         .lock()
@@ -461,16 +527,20 @@ pub unsafe extern "C" fn compute_pass_encoder_end(pass: sb::WGPUComputePassEncod
         .take();
     drop(pass.expect("compute pass ended twice"));
 }
+const _: sb::WGPUProcComputePassEncoderEnd = Some(wgpuComputePassEncoderEnd);
 
-pub unsafe extern "C" fn compute_pass_encoder_set_pipeline(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuComputePassEncoderSetPipeline(
     pass: sb::WGPUComputePassEncoder,
     pipeline: sb::WGPUComputePipeline,
 ) {
     let pipeline = &unsafe { ComputePipeline::get(pipeline) }.pipeline;
     unsafe { ComputePassEncoder::get(pass) }.with(|pass| pass.set_pipeline(pipeline));
 }
+const _: sb::WGPUProcComputePassEncoderSetPipeline = Some(wgpuComputePassEncoderSetPipeline);
 
-pub unsafe extern "C" fn compute_pass_encoder_set_bind_group(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuComputePassEncoderSetBindGroup(
     pass: sb::WGPUComputePassEncoder,
     group_index: u32,
     group: sb::WGPUBindGroup,
@@ -482,8 +552,10 @@ pub unsafe extern "C" fn compute_pass_encoder_set_bind_group(
     unsafe { ComputePassEncoder::get(pass) }
         .with(|pass| pass.set_bind_group(group_index, group, offsets));
 }
+const _: sb::WGPUProcComputePassEncoderSetBindGroup = Some(wgpuComputePassEncoderSetBindGroup);
 
-pub unsafe extern "C" fn compute_pass_encoder_dispatch_workgroups(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuComputePassEncoderDispatchWorkgroups(
     pass: sb::WGPUComputePassEncoder,
     x: u32,
     y: u32,
@@ -491,8 +563,11 @@ pub unsafe extern "C" fn compute_pass_encoder_dispatch_workgroups(
 ) {
     unsafe { ComputePassEncoder::get(pass) }.with(|pass| pass.dispatch_workgroups(x, y, z));
 }
+const _: sb::WGPUProcComputePassEncoderDispatchWorkgroups =
+    Some(wgpuComputePassEncoderDispatchWorkgroups);
 
-pub unsafe extern "C" fn compute_pass_encoder_dispatch_workgroups_indirect(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuComputePassEncoderDispatchWorkgroupsIndirect(
     pass: sb::WGPUComputePassEncoder,
     indirect_buffer: sb::WGPUBuffer,
     indirect_offset: u64,
@@ -501,6 +576,8 @@ pub unsafe extern "C" fn compute_pass_encoder_dispatch_workgroups_indirect(
     unsafe { ComputePassEncoder::get(pass) }
         .with(|pass| pass.dispatch_workgroups_indirect(buffer, indirect_offset));
 }
+const _: sb::WGPUProcComputePassEncoderDispatchWorkgroupsIndirect =
+    Some(wgpuComputePassEncoderDispatchWorkgroupsIndirect);
 
 impl CommandEncoder {
     /// Runs `f` with the encoder, which exists until `wgpuCommandEncoderFinish`.

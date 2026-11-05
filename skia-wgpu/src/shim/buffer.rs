@@ -25,10 +25,13 @@ pub struct Buffer {
 }
 
 handles! {
-    Buffer => WGPUBuffer: buffer_add_ref, buffer_release;
+    Buffer => WGPUBuffer:
+        wgpuBufferAddRef: WGPUProcBufferAddRef,
+        wgpuBufferRelease: WGPUProcBufferRelease;
 }
 
-pub unsafe extern "C" fn device_create_buffer(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateBuffer(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUBufferDescriptor,
 ) -> sb::WGPUBuffer {
@@ -59,8 +62,10 @@ pub unsafe extern "C" fn device_create_buffer(
     }
     .into_handle()
 }
+const _: sb::WGPUProcDeviceCreateBuffer = Some(wgpuDeviceCreateBuffer);
 
-pub unsafe extern "C" fn buffer_map_async(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferMapAsync(
     buffer: sb::WGPUBuffer,
     mode: sb::WGPUMapMode,
     offset: usize,
@@ -112,8 +117,10 @@ pub unsafe extern "C" fn buffer_map_async(
         });
     future
 }
+const _: sb::WGPUProcBufferMapAsync = Some(wgpuBufferMapAsync);
 
-pub unsafe extern "C" fn buffer_get_mapped_range(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferGetMappedRange(
     buffer: sb::WGPUBuffer,
     offset: usize,
     size: usize,
@@ -122,8 +129,10 @@ pub unsafe extern "C" fn buffer_get_mapped_range(
     let mut mapping = buffer.mapping.lock().unwrap();
     mapping.address(&buffer.buffer, wgpu::MapMode::Write, offset, size) as *mut c_void
 }
+const _: sb::WGPUProcBufferGetMappedRange = Some(wgpuBufferGetMappedRange);
 
-pub unsafe extern "C" fn buffer_get_const_mapped_range(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferGetConstMappedRange(
     buffer: sb::WGPUBuffer,
     offset: usize,
     size: usize,
@@ -132,15 +141,19 @@ pub unsafe extern "C" fn buffer_get_const_mapped_range(
     let mut mapping = buffer.mapping.lock().unwrap();
     mapping.address(&buffer.buffer, wgpu::MapMode::Read, offset, size) as *const c_void
 }
+const _: sb::WGPUProcBufferGetConstMappedRange = Some(wgpuBufferGetConstMappedRange);
 
-pub unsafe extern "C" fn buffer_unmap(buffer: sb::WGPUBuffer) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferUnmap(buffer: sb::WGPUBuffer) {
     let buffer = unsafe { Buffer::get(buffer) };
     // The view must be dropped before `unmap`, which `wgpu` rejects while views exist.
     *buffer.mapping.lock().unwrap() = Mapping::Unmapped;
     buffer.buffer.unmap();
 }
+const _: sb::WGPUProcBufferUnmap = Some(wgpuBufferUnmap);
 
-pub unsafe extern "C" fn buffer_get_map_state(buffer: sb::WGPUBuffer) -> sb::WGPUBufferMapState {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferGetMapState(buffer: sb::WGPUBuffer) -> sb::WGPUBufferMapState {
     use sb::WGPUBufferMapState as S;
     match *unsafe { Buffer::get(buffer) }.mapping.lock().unwrap() {
         Mapping::Unmapped => S::WGPUBufferMapState_Unmapped,
@@ -148,22 +161,31 @@ pub unsafe extern "C" fn buffer_get_map_state(buffer: sb::WGPUBuffer) -> sb::WGP
         Mapping::Mapped { .. } => S::WGPUBufferMapState_Mapped,
     }
 }
+const _: sb::WGPUProcBufferGetMapState = Some(wgpuBufferGetMapState);
 
-pub unsafe extern "C" fn buffer_get_size(buffer: sb::WGPUBuffer) -> u64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferGetSize(buffer: sb::WGPUBuffer) -> u64 {
     unsafe { Buffer::get(buffer) }.buffer.size()
 }
+const _: sb::WGPUProcBufferGetSize = Some(wgpuBufferGetSize);
 
-pub unsafe extern "C" fn buffer_get_usage(buffer: sb::WGPUBuffer) -> sb::WGPUBufferUsage {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferGetUsage(buffer: sb::WGPUBuffer) -> sb::WGPUBufferUsage {
     convert::c_buffer_usage(unsafe { Buffer::get(buffer) }.buffer.usage())
 }
+const _: sb::WGPUProcBufferGetUsage = Some(wgpuBufferGetUsage);
 
-pub unsafe extern "C" fn buffer_destroy(buffer: sb::WGPUBuffer) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferDestroy(buffer: sb::WGPUBuffer) {
     unsafe { Buffer::get(buffer) }.buffer.destroy();
 }
+const _: sb::WGPUProcBufferDestroy = Some(wgpuBufferDestroy);
 
 /// `wgpu` cannot rename an object after its creation. Labels only help debugging, so the shim
 /// ignores the new label.
-pub unsafe extern "C" fn buffer_set_label(_buffer: sb::WGPUBuffer, _label: sb::WGPUStringView) {}
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuBufferSetLabel(_buffer: sb::WGPUBuffer, _label: sb::WGPUStringView) {}
+const _: sb::WGPUProcBufferSetLabel = Some(wgpuBufferSetLabel);
 
 #[derive(Debug)]
 enum Mapping {

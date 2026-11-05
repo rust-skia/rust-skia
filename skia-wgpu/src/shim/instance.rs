@@ -26,8 +26,12 @@ pub struct Adapter {
 }
 
 handles! {
-    Instance => WGPUInstance: instance_add_ref, instance_release;
-    Adapter => WGPUAdapter: adapter_add_ref, adapter_release;
+    Instance => WGPUInstance:
+        wgpuInstanceAddRef: WGPUProcInstanceAddRef,
+        wgpuInstanceRelease: WGPUProcInstanceRelease;
+    Adapter => WGPUAdapter:
+        wgpuAdapterAddRef: WGPUProcAdapterAddRef,
+        wgpuAdapterRelease: WGPUProcAdapterRelease;
 }
 
 impl Instance {
@@ -60,7 +64,8 @@ impl Adapter {
     }
 }
 
-pub unsafe extern "C" fn instance_wait_any(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuInstanceWaitAny(
     instance: sb::WGPUInstance,
     future_count: usize,
     futures: *mut sb::WGPUFutureWaitInfo,
@@ -92,15 +97,19 @@ pub unsafe extern "C" fn instance_wait_any(
     );
     S::WGPUWaitStatus_Success
 }
+const _: sb::WGPUProcInstanceWaitAny = Some(wgpuInstanceWaitAny);
 
-pub unsafe extern "C" fn instance_process_events(instance: sb::WGPUInstance) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuInstanceProcessEvents(instance: sb::WGPUInstance) {
     // Owns a reference, because a callback may release the last handle to the instance.
     let instance = unsafe { Instance::arc(instance) };
     instance.poll(false);
     instance.futures.fire_process_events();
 }
+const _: sb::WGPUProcInstanceProcessEvents = Some(wgpuInstanceProcessEvents);
 
-pub unsafe extern "C" fn adapter_get_info(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuAdapterGetInfo(
     adapter: sb::WGPUAdapter,
     info: *mut sb::WGPUAdapterInfo,
 ) -> sb::WGPUStatus {
@@ -120,9 +129,11 @@ pub unsafe extern "C" fn adapter_get_info(
     info.subgroupMaxSize = 0;
     sb::WGPUStatus::WGPUStatus_Success
 }
+const _: sb::WGPUProcAdapterGetInfo = Some(wgpuAdapterGetInfo);
 
-/// Frees the strings that [`adapter_get_info`] allocated.
-pub unsafe extern "C" fn adapter_info_free_members(info: sb::WGPUAdapterInfo) {
+/// Frees the strings that [`wgpuAdapterGetInfo`] allocated.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuAdapterInfoFreeMembers(info: sb::WGPUAdapterInfo) {
     for view in [
         info.vendor,
         info.architecture,
@@ -134,13 +145,14 @@ pub unsafe extern "C" fn adapter_info_free_members(info: sb::WGPUAdapterInfo) {
         }
     }
 }
+const _: sb::WGPUProcAdapterInfoFreeMembers = Some(wgpuAdapterInfoFreeMembers);
 
 /// Creates the handle of a new adapter for the device's adapter information.
 pub fn adapter_handle(device: &wgpu::Device) -> sb::WGPUAdapter {
     Adapter::new(device.adapter_info()).into_handle()
 }
 
-/// A string that the receiver frees with [`adapter_info_free_members`].
+/// A string that the receiver frees with [`wgpuAdapterInfoFreeMembers`].
 fn owned_string(s: &str) -> sb::WGPUStringView {
     let length = s.len();
     sb::WGPUStringView {
@@ -179,7 +191,7 @@ mod tests {
     use skia_bindings as sb;
 
     use super::super::api::BackendHandles;
-    use super::super::buffer::{buffer_map_async, buffer_release, device_create_buffer};
+    use super::super::buffer::{wgpuBufferMapAsync, wgpuBufferRelease, wgpuDeviceCreateBuffer};
     use super::super::{convert, testing, wgpu};
 
     /// WebGPU calls every callback exactly once. A callback that has not fired when its instance
@@ -198,7 +210,7 @@ mod tests {
             size: 256,
             mappedAtCreation: 0,
         };
-        let buffer = unsafe { device_create_buffer(handles.device(), &descriptor) };
+        let buffer = unsafe { wgpuDeviceCreateBuffer(handles.device(), &descriptor) };
         let mut statuses: Vec<sb::WGPUMapAsyncStatus> = Vec::new();
         let callback_info = sb::WGPUBufferMapCallbackInfo {
             nextInChain: ptr::null_mut(),
@@ -207,7 +219,7 @@ mod tests {
             userdata1: (&raw mut statuses).cast(),
             userdata2: ptr::null_mut(),
         };
-        unsafe { buffer_map_async(buffer, sb::WGPUMapMode_Read, 0, usize::MAX, callback_info) };
+        unsafe { wgpuBufferMapAsync(buffer, sb::WGPUMapMode_Read, 0, usize::MAX, callback_info) };
         // The map completes, but its callback may fire only inside `wgpuInstanceWaitAny`, which
         // nobody calls.
         device
@@ -217,7 +229,7 @@ mod tests {
             })
             .expect("polling the device failed");
 
-        unsafe { buffer_release(buffer) };
+        unsafe { wgpuBufferRelease(buffer) };
         drop(handles);
 
         assert_eq!(

@@ -21,7 +21,9 @@ pub struct Device {
 }
 
 handles! {
-    Device => WGPUDevice: device_add_ref, device_release;
+    Device => WGPUDevice:
+        wgpuDeviceAddRef: WGPUProcDeviceAddRef,
+        wgpuDeviceRelease: WGPUProcDeviceRelease;
 }
 
 impl Device {
@@ -39,15 +41,20 @@ impl Device {
     }
 }
 
-pub unsafe extern "C" fn device_get_adapter(device: sb::WGPUDevice) -> sb::WGPUAdapter {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceGetAdapter(device: sb::WGPUDevice) -> sb::WGPUAdapter {
     instance::adapter_handle(&unsafe { Device::get(device) }.device)
 }
+const _: sb::WGPUProcDeviceGetAdapter = Some(wgpuDeviceGetAdapter);
 
-pub unsafe extern "C" fn device_tick(device: sb::WGPUDevice) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceTick(device: sb::WGPUDevice) {
     unsafe { Device::get(device) }.instance.poll(false);
 }
+const _: sb::WGPUProcDeviceTick = Some(wgpuDeviceTick);
 
-pub unsafe extern "C" fn device_get_limits(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceGetLimits(
     device: sb::WGPUDevice,
     limits: *mut sb::WGPULimits,
 ) -> sb::WGPUStatus {
@@ -103,10 +110,12 @@ pub unsafe extern "C" fn device_get_limits(
     c.maxImmediateSize = w.max_immediate_size;
     sb::WGPUStatus::WGPUStatus_Success
 }
+const _: sb::WGPUProcDeviceGetLimits = Some(wgpuDeviceGetLimits);
 
 /// Reports a WebGPU feature as supported when the device has the `wgpu` feature that implements
 /// it. Dawn's own features have no `wgpu` equivalent, so Skia takes its fallback paths for them.
-pub unsafe extern "C" fn device_has_feature(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceHasFeature(
     device: sb::WGPUDevice,
     feature: sb::WGPUFeatureName,
 ) -> sb::WGPUBool {
@@ -218,8 +227,10 @@ pub unsafe extern "C" fn device_has_feature(
     };
     convert::c_bool(features.contains(required))
 }
+const _: sb::WGPUProcDeviceHasFeature = Some(wgpuDeviceHasFeature);
 
-pub unsafe extern "C" fn device_push_error_scope(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDevicePushErrorScope(
     device: sb::WGPUDevice,
     filter: sb::WGPUErrorFilter,
 ) {
@@ -235,8 +246,10 @@ pub unsafe extern "C" fn device_push_error_scope(
         .push_error_scope(filter);
     ERROR_SCOPES.with_borrow_mut(|scopes| scopes.entry(device as usize).or_default().push(scope));
 }
+const _: sb::WGPUProcDevicePushErrorScope = Some(wgpuDevicePushErrorScope);
 
-pub unsafe extern "C" fn device_pop_error_scope(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDevicePopErrorScope(
     device: sb::WGPUDevice,
     callback_info: sb::WGPUPopErrorScopeCallbackInfo,
 ) -> sb::WGPUFuture {
@@ -301,6 +314,7 @@ pub unsafe extern "C" fn device_pop_error_scope(
     completion.complete((status, error_type, message));
     future
 }
+const _: sb::WGPUProcDevicePopErrorScope = Some(wgpuDevicePopErrorScope);
 
 thread_local! {
     /// The scopes that `wgpuDevicePushErrorScope` opened on this thread, by device handle,
@@ -318,7 +332,7 @@ mod tests {
 
     use super::super::api::BackendHandles;
     use super::super::testing;
-    use super::{device_pop_error_scope, device_push_error_scope};
+    use super::{wgpuDevicePopErrorScope, wgpuDevicePushErrorScope};
 
     /// `wgpu` keeps error scopes per thread and panics when a thread pops a scope that another
     /// thread pushed, unless both scopes happen to have the same nesting depth. Skia's scoped error
@@ -352,7 +366,7 @@ mod tests {
 
     fn push(device: usize) {
         unsafe {
-            device_push_error_scope(
+            wgpuDevicePushErrorScope(
                 device as sb::WGPUDevice,
                 sb::WGPUErrorFilter::WGPUErrorFilter_Validation,
             )
@@ -375,6 +389,6 @@ mod tests {
             userdata1: std::ptr::null_mut(),
             userdata2: std::ptr::null_mut(),
         };
-        unsafe { device_pop_error_scope(device as sb::WGPUDevice, callback_info) };
+        unsafe { wgpuDevicePopErrorScope(device as sb::WGPUDevice, callback_info) };
     }
 }

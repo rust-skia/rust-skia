@@ -31,8 +31,8 @@ impl fmt::Debug for BackendContext {
 impl BackendContext {
     /// # Safety
     ///
-    /// The handles must be valid WebGPU handles of the WebGPU implementation whose function table
-    /// is installed. The backend context takes one reference to each and releases it when it is
+    /// The handles must be valid WebGPU handles of the WebGPU implementation that the build links,
+    /// which is `skia-wgpu`'s shim. The backend context takes one reference to each and releases it when it is
     /// dropped.
     pub unsafe fn new(instance: WGPUInstance, device: WGPUDevice, queue: WGPUQueue) -> Self {
         BackendContext::construct(|backend_context| unsafe {

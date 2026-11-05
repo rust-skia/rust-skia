@@ -39,12 +39,19 @@ pub struct ComputePipeline {
 }
 
 handles! {
-    ShaderModule => WGPUShaderModule: shader_module_add_ref, shader_module_release;
-    RenderPipeline => WGPURenderPipeline: render_pipeline_add_ref, render_pipeline_release;
-    ComputePipeline => WGPUComputePipeline: compute_pipeline_add_ref, compute_pipeline_release;
+    ShaderModule => WGPUShaderModule:
+        wgpuShaderModuleAddRef: WGPUProcShaderModuleAddRef,
+        wgpuShaderModuleRelease: WGPUProcShaderModuleRelease;
+    RenderPipeline => WGPURenderPipeline:
+        wgpuRenderPipelineAddRef: WGPUProcRenderPipelineAddRef,
+        wgpuRenderPipelineRelease: WGPUProcRenderPipelineRelease;
+    ComputePipeline => WGPUComputePipeline:
+        wgpuComputePipelineAddRef: WGPUProcComputePipelineAddRef,
+        wgpuComputePipelineRelease: WGPUProcComputePipelineRelease;
 }
 
-pub unsafe extern "C" fn device_create_shader_module(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateShaderModule(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUShaderModuleDescriptor,
 ) -> sb::WGPUShaderModule {
@@ -83,8 +90,10 @@ pub unsafe extern "C" fn device_create_shader_module(
     }
     .into_handle()
 }
+const _: sb::WGPUProcDeviceCreateShaderModule = Some(wgpuDeviceCreateShaderModule);
 
-pub unsafe extern "C" fn shader_module_get_compilation_info(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuShaderModuleGetCompilationInfo(
     shader_module: sb::WGPUShaderModule,
     callback_info: sb::WGPUCompilationInfoCallbackInfo,
 ) -> sb::WGPUFuture {
@@ -114,6 +123,7 @@ pub unsafe extern "C" fn shader_module_get_compilation_info(
     completion.complete(messages);
     future
 }
+const _: sb::WGPUProcShaderModuleGetCompilationInfo = Some(wgpuShaderModuleGetCompilationInfo);
 
 /// The C callback of `wgpuShaderModuleGetCompilationInfo`.
 type CompilationInfoCallback = unsafe extern "C" fn(
@@ -145,7 +155,8 @@ unsafe fn call_compilation_info_callback(
     unsafe { callback(status, &info, userdata.0, userdata.1) };
 }
 
-pub unsafe extern "C" fn device_create_render_pipeline(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateRenderPipeline(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPURenderPipelineDescriptor,
 ) -> sb::WGPURenderPipeline {
@@ -153,10 +164,12 @@ pub unsafe extern "C" fn device_create_render_pipeline(
     let pipeline = unsafe { create_render_pipeline(device, &*descriptor) };
     RenderPipeline { pipeline }.into_handle()
 }
+const _: sb::WGPUProcDeviceCreateRenderPipeline = Some(wgpuDeviceCreateRenderPipeline);
 
 /// Creates the pipeline at once and reports the result through the callback, with the pipeline's
 /// validation error if there is one.
-pub unsafe extern "C" fn device_create_render_pipeline_async(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateRenderPipelineAsync(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPURenderPipelineDescriptor,
     callback_info: sb::WGPUCreateRenderPipelineAsyncCallbackInfo,
@@ -187,6 +200,7 @@ pub unsafe extern "C" fn device_create_render_pipeline_async(
     completion.complete(result);
     future
 }
+const _: sb::WGPUProcDeviceCreateRenderPipelineAsync = Some(wgpuDeviceCreateRenderPipelineAsync);
 
 /// The C callback of `wgpuDeviceCreateRenderPipelineAsync`.
 type RenderPipelineCallback = unsafe extern "C" fn(
@@ -229,7 +243,8 @@ unsafe fn call_render_pipeline_callback(
     unsafe { callback(status, pipeline, message, userdata.0, userdata.1) };
 }
 
-pub unsafe extern "C" fn device_create_compute_pipeline(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateComputePipeline(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUComputePipelineDescriptor,
 ) -> sb::WGPUComputePipeline {
@@ -251,8 +266,10 @@ pub unsafe extern "C" fn device_create_compute_pipeline(
         });
     ComputePipeline { pipeline }.into_handle()
 }
+const _: sb::WGPUProcDeviceCreateComputePipeline = Some(wgpuDeviceCreateComputePipeline);
 
-pub unsafe extern "C" fn render_pipeline_get_bind_group_layout(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuRenderPipelineGetBindGroupLayout(
     pipeline: sb::WGPURenderPipeline,
     group_index: u32,
 ) -> sb::WGPUBindGroupLayout {
@@ -262,6 +279,7 @@ pub unsafe extern "C" fn render_pipeline_get_bind_group_layout(
     }
     .into_handle()
 }
+const _: sb::WGPUProcRenderPipelineGetBindGroupLayout = Some(wgpuRenderPipelineGetBindGroupLayout);
 
 /// A compilation message that the callback can read during its call.
 #[derive(Debug)]

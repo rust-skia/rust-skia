@@ -29,12 +29,19 @@ pub struct PipelineLayout {
 }
 
 handles! {
-    BindGroupLayout => WGPUBindGroupLayout: bind_group_layout_add_ref, bind_group_layout_release;
-    BindGroup => WGPUBindGroup: bind_group_add_ref, bind_group_release;
-    PipelineLayout => WGPUPipelineLayout: pipeline_layout_add_ref, pipeline_layout_release;
+    BindGroupLayout => WGPUBindGroupLayout:
+        wgpuBindGroupLayoutAddRef: WGPUProcBindGroupLayoutAddRef,
+        wgpuBindGroupLayoutRelease: WGPUProcBindGroupLayoutRelease;
+    BindGroup => WGPUBindGroup:
+        wgpuBindGroupAddRef: WGPUProcBindGroupAddRef,
+        wgpuBindGroupRelease: WGPUProcBindGroupRelease;
+    PipelineLayout => WGPUPipelineLayout:
+        wgpuPipelineLayoutAddRef: WGPUProcPipelineLayoutAddRef,
+        wgpuPipelineLayoutRelease: WGPUProcPipelineLayoutRelease;
 }
 
-pub unsafe extern "C" fn device_create_bind_group_layout(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateBindGroupLayout(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUBindGroupLayoutDescriptor,
 ) -> sb::WGPUBindGroupLayout {
@@ -54,8 +61,10 @@ pub unsafe extern "C" fn device_create_bind_group_layout(
         });
     BindGroupLayout { layout }.into_handle()
 }
+const _: sb::WGPUProcDeviceCreateBindGroupLayout = Some(wgpuDeviceCreateBindGroupLayout);
 
-pub unsafe extern "C" fn device_create_bind_group(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateBindGroup(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUBindGroupDescriptor,
 ) -> sb::WGPUBindGroup {
@@ -74,8 +83,10 @@ pub unsafe extern "C" fn device_create_bind_group(
     });
     BindGroup { group }.into_handle()
 }
+const _: sb::WGPUProcDeviceCreateBindGroup = Some(wgpuDeviceCreateBindGroup);
 
-pub unsafe extern "C" fn device_create_pipeline_layout(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreatePipelineLayout(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUPipelineLayoutDescriptor,
 ) -> sb::WGPUPipelineLayout {
@@ -99,6 +110,7 @@ pub unsafe extern "C" fn device_create_pipeline_layout(
         });
     PipelineLayout { layout }.into_handle()
 }
+const _: sb::WGPUProcDeviceCreatePipelineLayout = Some(wgpuDeviceCreatePipelineLayout);
 
 /// Converts a layout entry. Exactly one of its four binding layouts is in use. The others have the
 /// type `BindingNotUsed`, and `Undefined` in the one in use stands for WebGPU's default.
