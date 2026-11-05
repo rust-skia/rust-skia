@@ -87,9 +87,14 @@ pub unsafe extern "C" fn wgpuInstanceWaitAny(
             S::WGPUWaitStatus_TimedOut
         };
     }
-    // Skia waits without a timeout or not at all, so any other timeout waits without one. The
-    // wait returns once all submitted work is done, and `wgpu` has then reported every completion
-    // it will report, so a future that is still pending would never complete.
+    // Skia waits without a timeout or not at all, so the shim implements no other timeout.
+    assert_eq!(
+        timeout_ns,
+        u64::MAX,
+        "wgpuInstanceWaitAny with a finite timeout"
+    );
+    // The wait returns once all submitted work is done, and `wgpu` has then reported every
+    // completion it will report, so a future that is still pending would never complete.
     instance.poll(true);
     assert!(
         instance.futures.fire_waited(infos),
