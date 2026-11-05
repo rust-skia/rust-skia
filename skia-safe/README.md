@@ -90,6 +90,8 @@ The Direct3D backend can be enabled for Windows targets by adding the feature `d
 
 ### `wgpu`
 
+The `wgpu` backend is experimental.
+
 Skia renders with Graphite on the device and queue of a [`wgpu`](https://wgpu.rs) application, and into its textures. The module `skia_safe::gpu::graphite::wgpu` takes the application's `wgpu::Device`, `wgpu::Queue`, and `wgpu::Texture`.
 
 The feature `wgpu` selects the `wgpu` major version that this release recommends, which `skia_safe::wgpu` re-exports. An application that depends on `wgpu` itself enables the feature of its version instead, for example `wgpu-30`. A build enables exactly one of them.

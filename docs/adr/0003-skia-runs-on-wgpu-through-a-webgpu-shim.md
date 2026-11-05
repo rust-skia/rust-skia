@@ -94,7 +94,7 @@ Dawn defines. A reported feature is one for which the shim answers `true` when t
 | Feature | Kind | `wgpu` 30 counterpart | Status | What Skia does without it |
 |---|---|---|---|---|
 | `CoreFeaturesAndLimits` | standard | none needed | always reported | Skia limits itself to the formats of WebGPU's compatibility mode. `wgpu` devices are never in that mode. |
-| `TimestampQuery` | standard | `TIMESTAMP_QUERY` | reported | Skia reports no GPU timings. |
+| `TimestampQuery` | standard | `TIMESTAMP_QUERY` and `TIMESTAMP_QUERY_INSIDE_ENCODERS` | reported | Skia reports no GPU timings. |
 | `ShaderF16` | standard | `SHADER_F16` | reported | Shaders use 32-bit floats where Skia would use half precision. |
 | `DualSourceBlending` | standard | `DUAL_SOURCE_BLENDING` | reported | Some blend modes that combine coverage with the destination read the destination through a texture copy. |
 | `TextureCompressionBC`, `TextureCompressionETC2` | standard | `TEXTURE_COMPRESSION_BC`, `TEXTURE_COMPRESSION_ETC2` | reported | Skia cannot sample these compressed formats. |
@@ -120,11 +120,12 @@ can report them once it converts the corresponding values, the formats, the text
 load operation. `BufferMapExtendedUsages` has a counterpart only with a trade-off, because mapping
 these buffers helps only on GPUs that share memory with the CPU.
 
-`TimestampQuery` is reported, but one of Skia's uses is not covered yet. Unless `wgpu` runs on
-Metal, Skia writes its timestamps on the command encoder, outside any pass
-(`DawnCaps.cpp`, `fSupportsCommandBufferTimestamps`). `wgpu` allows such writes only with
-`TIMESTAMP_QUERY_INSIDE_ENCODERS`. When Skia collects GPU timings on a device that has
-`TIMESTAMP_QUERY` without that feature, the write fails `wgpu`'s validation.
+The shim reports `TimestampQuery` only for a device that has both `TIMESTAMP_QUERY` and
+`TIMESTAMP_QUERY_INSIDE_ENCODERS`. Unless `wgpu` runs on Metal, Skia writes its timestamps on the
+command encoder, outside any pass (`DawnCaps.cpp`, `fSupportsCommandBufferTimestamps`), and `wgpu`
+allows such writes only with the second feature. On Metal, Skia writes timestamps only inside
+passes, so `TIMESTAMP_QUERY` alone would suffice there. The shim does not distinguish the backend
+yet. The test `timestamp_query_alone_is_not_reported` in `skia-wgpu` pins this rule.
 
 ## Crates and `wgpu` versions
 
@@ -188,7 +189,11 @@ application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a v
   completes the map and frees all of them. If the application never submits or polls on the
   device again, they leak, together with the device. A final blocking poll when Skia releases the
   device would end the cycle. It needs a check first that Skia's map callbacks may run while Skia
-  destroys its shared context.
+  destroys its shared context. The ignored test `releasing_the_device_frees_a_buffer_with_a_pending_map`
+  in `skia-wgpu` reproduces the leak, and `cargo test -p skia-wgpu --features wgpu-30 -- --ignored`
+  runs it.
+- The `wgpu` backend is experimental. Until it stabilizes, no prebuilt binaries contain it, so the
+  `wgpu` feature builds Skia from source.
 
 ## Considered Options
 
