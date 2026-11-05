@@ -60,8 +60,9 @@ namespace).
 ## One set of exports per build
 
 ADR 0003 lets a build enable exactly one `wgpu-NN` feature of `skia-wgpu`. Each enabled version
-would export the same `wgpu*` symbols, so `skia-wgpu` stops the build with a `compile_error!` when
-more than one is enabled. For the same reason, `skia-wgpu` declares `links = "skia-wgpu"`, with
+would export the same `wgpu*` symbols. Once `skia-wgpu` supports a second `wgpu` major version, it
+stops the build with a `compile_error!` when more than one is enabled. With a single version, no
+build can enable two. For the same reason, `skia-wgpu` declares `links = "skia-wgpu"`, with
 the empty build script that Cargo requires for the key. Cargo then allows only one version of
 `skia-wgpu` in a dependency graph, and two semver-incompatible versions cannot both export the
 symbols. Cargo rejects such a graph when it resolves the dependencies, before anything is built.
@@ -79,7 +80,8 @@ on `skia-wgpu` keeps this guarantee on the crate that exports the symbols, so it
   implement, 106 at m157. The link of a test binary usually names a function that a new milestone
   adds, and `nm -u` lists all of them. `cargo check` does not report a missing function.
 - If two crates in one dependency graph enable different `wgpu-NN` features of `skia-safe`, Cargo
-  enables both, and the `compile_error!` fails the build.
+  enables both, and the `compile_error!` that comes with the second supported version fails the
+  build.
 - The `wgpu*` symbols keep their `webgpu.h` names. An application that statically links another
   WebGPU implementation that defines them, such as Dawn or wgpu-native, fails to link with
   duplicate symbols. Shared libraries do not export them on ELF targets. If such an application

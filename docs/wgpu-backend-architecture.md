@@ -162,8 +162,9 @@ flowchart TD
 ```
 
 A build enables exactly one `wgpu-NN` feature, because each version would export the same `wgpu*`
-symbols. `skia-wgpu` stops the build with a `compile_error!` when more than one is enabled, and its
-`links` key keeps a second version of `skia-wgpu` out of the dependency graph. `skia-safe` forwards
+symbols. With the second supported version, `skia-wgpu` stops the build with a `compile_error!`
+when more than one is enabled. Its `links` key keeps a second version of `skia-wgpu` out of the
+dependency graph. `skia-safe` forwards
 each `wgpu-NN` feature, and its feature `wgpu` enables the version that the release recommends.
 Every `wgpu-NN` feature of `skia-safe` also enables its hidden feature `_wgpu`, on which all of
 `skia-safe`'s `wgpu` code depends, so that code never names a version.
