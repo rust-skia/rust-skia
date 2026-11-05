@@ -4,6 +4,7 @@ description = "Runs Skia's Graphite Dawn backend on the wgpu crate"
 homepage = "https://github.com/rust-skia/rust-skia/tree/master/skia-wgpu"
 repository = "https://github.com/rust-skia/rust-skia"
 license = "MIT"
+readme = "README.md"
 version = "0.157.0"
 edition.workspace = true
 rust-version.workspace = true
