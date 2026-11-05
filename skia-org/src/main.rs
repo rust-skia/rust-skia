@@ -13,6 +13,7 @@ extern crate ash;
 mod artifact;
 mod drivers;
 mod helper;
+mod skblendmode_overview;
 mod skcanvas_overview;
 mod skpaint_overview;
 #[cfg(feature = "textlayout")]
@@ -140,6 +141,7 @@ fn main() {
         skcanvas_overview::draw(driver, &out_path);
         skpath_overview::draw(driver, &out_path);
         skpaint_overview::draw(driver, &out_path);
+        skblendmode_overview::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
         {
