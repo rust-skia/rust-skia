@@ -136,8 +136,8 @@ pub unsafe extern "C" fn wgpuDeviceGetLimits(
 const _: sb::WGPUProcDeviceGetLimits = Some(wgpuDeviceGetLimits);
 
 /// Reports a WebGPU feature as supported when the device has the `wgpu` feature that implements
-/// it. The shim reports the features that it does not convert yet as unsupported, so Skia takes
-/// its fallback paths for them (ADR 0003).
+/// it. The shim reports every other feature as unsupported, so Skia takes its fallback paths for
+/// them. ADR 0003 gives the reason for each.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuDeviceHasFeature(
     device: sb::WGPUDevice,
@@ -177,10 +177,10 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         // Mapping buffers that the GPU reads directly only pays off on GPUs that share memory with
         // the CPU, so the application decides by requesting the feature for its device (ADR 0003).
         F::WGPUFeatureName_BufferMapExtendedUsages => W::MAPPABLE_PRIMARY_BUFFERS,
-        // Dawn's own features, and the standard ones that the shim does not convert yet. Listing
-        // every variant makes a feature added to Dawn's header a compile error. ADR 0003 explains
-        // why `TransientAttachments`, `Unorm16TextureFormats`, and `DawnAllowUndefinedLoadStoreOp`
-        // stay unreported although `wgpu` has a counterpart.
+        // Features without a `wgpu` counterpart, and those that the shim leaves off on purpose.
+        // Listing every variant makes a feature added to Dawn's header a compile error. ADR 0003
+        // explains why `TransientAttachments`, `Unorm16TextureFormats`, and
+        // `DawnAllowUndefinedLoadStoreOp` stay unreported although `wgpu` has a counterpart.
         F::WGPUFeatureName_TextureCompressionBCSliced3D
         | F::WGPUFeatureName_TextureCompressionASTCSliced3D
         | F::WGPUFeatureName_Subgroups
