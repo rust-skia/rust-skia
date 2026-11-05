@@ -402,21 +402,24 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     shim's `WGPUProc*` check at compile time. A new
     `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
     feature. Surface these changes to the user, as for the build organization diff above.
-  - Re-check the release poll. When Skia releases its last device handle, the shim polls the
-    device, and the poll fires Skia's callbacks with `CallbackMode::AllowSpontaneous` while the
-    shim's device and Skia's shared context are being torn down. ADR 0003 argues that this is
-    safe, because maps are Skia's only such callbacks and a map callback uses only its buffer
-    (the consequence on the release poll). List the spontaneous callbacks at the new tag:
+  - Re-check the release poll. Two kinds of Skia callbacks run while the shim's device and
+    Skia's shared context are being torn down: the poll at the release of the last device
+    handle fires the callbacks with `AllowSpontaneous`, and the release of the instance fires
+    every callback that has not fired yet with `CallbackCancelled`, whatever its mode. ADR 0003
+    argues that both are safe (the consequence on the release poll). List every callback that
+    Skia registers at the new tag. The pattern matches the C++ spelling `CallbackMode::` and the
+    C spelling `WGPUCallbackMode_`, anywhere in Skia's sources:
 
     ```sh
-    git -C skia-bindings/skia grep -n 'CallbackMode::AllowSpontaneous' refs/tags/NEW_TAG -- src/gpu/graphite/dawn
+    git -C skia-bindings/skia grep -n 'CallbackMode' refs/tags/NEW_TAG -- src include
     ```
 
-    The step is done when every listed callback is read, confirmed to use only its own
-    buffer or state that outlives the device and the shared context, and recorded in the
-    PR's Release poll section. A new callback, or one that reaches the device or the shared context,
-    invalidates the ADR's argument: surface it to the user, because the release poll needs a
-    change before the update ships.
+    The step is done when every listed callback is read and recorded in the PR's Release poll
+    section, and each one is confirmed safe in one of three ways: it uses only its own buffer or state
+    that outlives the device and the shared context, Skia waits for it before that state
+    goes away, or its body is empty. A new callback, or one that reaches the device or the
+    shared context, invalidates the ADR's argument: surface it to the user, because the
+    release poll needs a change before the update ships.
   - `skia-bindings` compiles Skia's Dawn backend itself, from the `.cpp` files of
     `skia_graphite_dawn_sources` in `gn/graphite.gni`, and leaves `skia_use_dawn` off. When the
     build organization diff changes what `skia_use_dawn` adds in `BUILD.gn` (sources, defines,
