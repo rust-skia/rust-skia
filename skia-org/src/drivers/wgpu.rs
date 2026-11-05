@@ -7,7 +7,6 @@
 use std::path::Path;
 use std::pin::pin;
 use std::task::{Context, Poll, Waker};
-use std::thread;
 
 use skia_safe::gpu::graphite;
 use skia_safe::image::RequiredProperties;
@@ -184,14 +183,12 @@ fn read_texture(
     (pixels, bytes_per_row)
 }
 
-/// `wgpu`'s native backends resolve adapter and device requests without polling.
+/// Resolves a `wgpu` future that is ready at once. `wgpu`'s native backends resolve adapter and
+/// device requests when they are made, so nothing would ever wake a pending one.
 fn block_on<F: Future>(future: F) -> F::Output {
-    let mut future = pin!(future);
     let mut context = Context::from_waker(Waker::noop());
-    loop {
-        if let Poll::Ready(output) = future.as_mut().poll(&mut context) {
-            return output;
-        }
-        thread::yield_now();
+    match pin!(future).poll(&mut context) {
+        Poll::Ready(output) => output,
+        Poll::Pending => panic!("a wgpu request that the driver waits on is not ready"),
     }
 }
