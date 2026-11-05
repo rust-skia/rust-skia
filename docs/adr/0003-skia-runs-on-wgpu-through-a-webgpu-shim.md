@@ -193,7 +193,8 @@ application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a v
   `AllowSpontaneous`, and a map callback uses only its buffer, whose resource cache the buffer
   keeps alive (`DawnBuffer.cpp`, `Resource.cpp`). The poll also waits for the application's work
   on the device. The test `releasing_the_device_frees_a_buffer_with_a_pending_map` in `skia-wgpu`
-  pins this.
+  pins this. On `wgpu`'s GL backend, the poll gives up after about 4 seconds, and on WebGL it does
+  not wait at all. A map whose work is still running then stays pending, and its buffers leak.
 - The `wgpu` backend is experimental. Until it stabilizes, no prebuilt binaries contain it, so the
   `wgpu` feature builds Skia from source.
 

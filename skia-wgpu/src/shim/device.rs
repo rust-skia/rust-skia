@@ -47,10 +47,11 @@ impl Device {
 /// holds Skia's buffer, which holds the `wgpu` buffer. Without this poll, the buffers leak if the
 /// application never polls or submits on its device again (ADR 0003). Skia's map callbacks fire
 /// here, while Skia destroys its shared context, which they do not use. The poll waits for all
-/// work submitted to the device, also the application's.
+/// work submitted to the device, also the application's (ADR 0003).
 impl Drop for Device {
     fn drop(&mut self) {
-        // A failed poll leaves the maps pending, which only leaks them, as before.
+        // wgpu's GL backend caps the wait at about 4 s, and its WebGL backend does not wait at all,
+        // so a `Timeout` leaves the maps pending and leaks them (ADR 0003).
         let _ = self.device.poll(wgpu::PollType::Wait {
             submission_index: None,
             timeout: None,
