@@ -14,7 +14,7 @@ pub struct Graphite {
     _device: Device,
 }
 
-/// The Metal backend context retains the device and the queue, so nothing else needs to live on.
+/// The Graphite Metal context retains the device and the queue, so nothing else needs to live on.
 #[cfg(all(target_os = "macos", feature = "metal"))]
 type Device = ();
 

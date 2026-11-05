@@ -194,6 +194,19 @@ fn is_drawing(recorder: *const sb::skgpu_graphite_Recorder) -> bool {
 // `skgpu::graphite::Recorder` is handed out as `std::unique_ptr<Recorder>`
 // (Context::makeRecorder) and derives from `SkRecorder`, not `SkRefCnt`. It is
 // NOT ref-counted, so it must be a `RefHandle` whose drop `delete`s it.
+///
+/// Records draws on Graphite surfaces and canvases into [`Recording`]s, which a
+/// [`Context`](super::Context) then submits to the GPU.
+///
+/// # Panics
+///
+/// Dropping a recorder panics while a surface created from it is still alive, because Skia's
+/// draws on that surface use the recorder. Drop every such surface first. In a struct that owns
+/// both, declare the surface fields before the recorder field, because Rust drops fields in
+/// declaration order. The check snaps the recorder, which prepares GPU resources for the work
+/// that was not snapped yet and then discards that work.
+///
+/// Dropping a recorder also panics while an [`ImageProvider`] runs inside one of its draws.
 pub type Recorder = RefHandle<sb::skgpu_graphite_Recorder>;
 
 /// A non-owning, lifetime-bound view of a [`Recorder`] that is owned elsewhere
@@ -241,12 +254,26 @@ impl<'a> BorrowedRecorder<'a> {
 // Ganesh `gpu::RecordingContext`, which is neither `Send` nor `Sync`.
 
 impl NativeDelete for sb::skgpu_graphite_Recorder {
-    /// Panics instead of deleting a recorder whose draw called an [`ImageProvider`] that is still
-    /// running, because that draw continues on the recorder after the provider returns.
+    /// Panics instead of deleting a recorder that is still in use, in two cases.
+    ///
+    /// - A draw on the recorder called an [`ImageProvider`] that is still running. The draw
+    ///   continues on the recorder after the provider returns.
+    /// - A surface still uses the recorder. Skia's draws on such a surface dereference the
+    ///   recorder, so the panic leaks the recorder. Later draws on the surface then don't crash,
+    ///   but they are never submitted. This check snaps the recorder first, which prepares GPU
+    ///   resources for the work that was not snapped yet and then discards that work, as deleting
+    ///   the recorder would.
+    ///
+    /// The draw check runs first, because snapping a recorder in the middle of a draw deletes its
+    /// deferred canvas and flushes the device that is drawing.
     unsafe fn delete(ptr: *mut Self) {
         assert!(
             !is_drawing(ptr),
             "a graphite::Recorder must not be dropped while an ImageProvider runs inside one of its draws"
+        );
+        assert!(
+            !unsafe { sb::C_Recorder_snapAndHasLiveDevices(ptr) },
+            "a graphite::Recorder was dropped while a surface created from it is still alive"
         );
         unsafe { sb::C_Recorder_delete(ptr) }
     }
