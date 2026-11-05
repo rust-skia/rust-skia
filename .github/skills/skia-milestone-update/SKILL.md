@@ -323,7 +323,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     `third_party` build files list against the checkouts of the pinned libraries. It fails
     and names the libraries it skipped when their checkout is not at the pin.
 - **Dawn headers (`wgpu` feature):** source builds with `wgpu` generate Skia's WebGPU
-  headers and `dawn_proc.cpp` from the Dawn revision in `[package.metadata].dawn`
+  headers from the Dawn revision in `[package.metadata].dawn`
   (`docs/adr/0003`). No file in the repository shows how they change, so every tag cut
   diffs them.
   - The fork's `DEPS` has no entries for Dawn and for Jinja2 and MarkupSafe, the Python
@@ -351,16 +351,26 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     diff -ru "$TMPDIR/dawn-old" target/debug/build/skia-bindings-*/out/dawn
     ```
 
-  - Read the whole diff of `include/dawn/webgpu.h` and `include/dawn/dawn_proc_table.h`,
-    and diff Skia's Dawn backend between the tags for new WebGPU calls:
+  - Read the whole diff of `include/dawn/webgpu.h`, and diff Skia's Dawn backend between
+    the tags for new WebGPU calls:
 
     ```sh
     git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- src/gpu/graphite/dawn include/gpu/graphite/dawn
     ```
 
+  - The `wgpu*` functions that `libskia-bindings.a` leaves undefined are the ones the
+    `skia-wgpu` shim must export (`docs/adr/0004`). List them for the old and the new build,
+    from the newest `skia-bindings-*` build directory each time, and diff the lists:
+
+    ```sh
+    nm -u target/debug/build/skia-bindings-*/out/skia/libskia-bindings.a | grep -o 'wgpu[A-Za-z]*' | sort -u
+    ```
+
     Record in the accounting every changed function, struct, enum value, and feature name
-    that Skia's Dawn backend uses, and every function table entry that was added, removed,
-    or changed. Each of them needs a matching change in the `skia-wgpu` shim. A new
+    that Skia's Dawn backend uses, and every undefined `wgpu*` function that was added or
+    removed. Each of them needs a matching change in the `skia-wgpu` shim. A function the
+    shim lacks fails the link of the `wgpu` tests with an undefined symbol, and a changed
+    signature fails the shim's `WGPUProc*` check at compile time. A new
     `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
     feature. Surface these changes to the user, as for the build organization diff above.
   - `skia-bindings` compiles Skia's Dawn backend itself, from the `.cpp` files of
