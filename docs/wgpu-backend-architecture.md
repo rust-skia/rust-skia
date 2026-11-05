@@ -5,11 +5,10 @@ in ADR 0003 (`docs/adr/0003-skia-runs-on-wgpu-through-a-webgpu-shim.md`) and in 
 (`docs/adr/0004-the-shim-exports-the-webgpu-functions-from-rust.md`), which decides how Skia's
 calls reach the shim.
 
-The document shows the design of the ADRs, which the code does not fully reach yet. The code still
-forwards Skia's calls through Dawn's function table, a C struct with one function pointer per
-WebGPU function. The conversion to exported `wgpu*` functions removes the table and adds the
-`compile_error!` and the `links` key. A per-version `compat` module appears with the second
-supported `wgpu` major version.
+The document shows the design of the ADRs. Two parts of it appear only with the second supported
+`wgpu` major version: the per-version `compat` module, and the `compile_error!` that rejects more
+than one enabled `wgpu-NN` feature. With a single version, there is nothing for the
+`compile_error!` to compare.
 
 Terms used below:
 

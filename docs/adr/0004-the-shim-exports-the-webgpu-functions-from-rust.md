@@ -37,9 +37,17 @@ link with an undefined symbol that names the function.
 
 ADR 0003 lets a build enable exactly one `wgpu-NN` feature of `skia-wgpu`. Each enabled version
 would export the same `wgpu*` symbols, so `skia-wgpu` stops the build with a `compile_error!` when
-more than one is enabled. For the same reason, `skia-wgpu` declares a `links` key. Cargo then
-allows only one version of `skia-wgpu` in a dependency graph, and two semver-incompatible versions
-cannot both export the symbols.
+more than one is enabled. For the same reason, `skia-wgpu` declares `links = "skia-wgpu"`, with
+the empty build script that Cargo requires for the key. Cargo then allows only one version of
+`skia-wgpu` in a dependency graph, and two semver-incompatible versions cannot both export the
+symbols. Cargo rejects such a graph when it resolves the dependencies, before anything is built.
+Without the check, the linker might load only one version's exports and silently send the other
+version's handles to them.
+
+`skia-bindings` declares `links = "skia"`, and `skia-wgpu` pins its exact version. As long as all
+crates share one version per milestone, these two already keep a second `skia-wgpu` out. The key
+on `skia-wgpu` keeps this guarantee on the crate that exports the symbols, so it also holds if
+`skia-wgpu` ever gets a version line of its own.
 
 ## Consequences
 
