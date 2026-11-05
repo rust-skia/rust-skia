@@ -405,18 +405,31 @@ fn draw_path_1d_effect(canvas: &Canvas) {
     canvas.draw_circle((128.0, 128.0), 122.0, paint);
 }
 
-fn star() -> Path {
+/// Builds the star that the path effect examples stroke.
+///
+/// The path starts at a point on a circle and adds `line_count` lines, each turning by the same
+/// angle around the circle's center. When `close` is true, a closing line returns to the start
+/// point. The corner path effect example draws 6 lines and closes the star. The other examples draw
+/// 7 lines, which end at the start point, and leave the star open.
+fn star(line_count: i32, close: bool) -> Path {
     const R: scalar = 115.2;
     const C: scalar = 128.0;
     let mut path = PathBuilder::new();
     path.move_to((C + R, C));
-    for i in 1..8 {
+    for i in 1..=line_count {
         #[allow(clippy::excessive_precision)]
         let a = 2.692_793_7 * i as scalar;
         path.line_to((C + R * a.cos(), C + R * a.sin()));
     }
-    path.close();
+    if close {
+        path.close();
+    }
     path.detach()
+}
+
+/// The star that the dash, discrete, compose, and sum path effect examples stroke.
+fn open_star() -> Path {
+    star(7, false)
 }
 
 fn draw_corner_path_effect(canvas: &Canvas) {
@@ -426,7 +439,7 @@ fn draw_corner_path_effect(canvas: &Canvas) {
         .set_style(paint::Style::Stroke)
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
-    canvas.draw_path(&star(), paint);
+    canvas.draw_path(&star(6, true), paint);
 }
 
 fn draw_dash_path_effect(canvas: &Canvas) {
@@ -438,7 +451,7 @@ fn draw_dash_path_effect(canvas: &Canvas) {
         .set_stroke_width(2.0)
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
-    canvas.draw_path(&star(), paint);
+    canvas.draw_path(&open_star(), paint);
 }
 
 fn draw_discrete_path_effect(canvas: &Canvas) {
@@ -449,7 +462,7 @@ fn draw_discrete_path_effect(canvas: &Canvas) {
         .set_stroke_width(2.0)
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
-    canvas.draw_path(&star(), paint);
+    canvas.draw_path(&open_star(), paint);
 }
 
 fn draw_compose_path_effect(canvas: &Canvas) {
@@ -464,7 +477,7 @@ fn draw_compose_path_effect(canvas: &Canvas) {
         .set_stroke_width(2.0)
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
-    canvas.draw_path(&star(), paint);
+    canvas.draw_path(&open_star(), paint);
 }
 
 fn draw_sum_path_effect(canvas: &Canvas) {
@@ -478,5 +491,5 @@ fn draw_sum_path_effect(canvas: &Canvas) {
         .set_stroke_width(2.0)
         .set_anti_alias(true);
     canvas.clear(Color::WHITE);
-    canvas.draw_path(&star(), paint);
+    canvas.draw_path(&open_star(), paint);
 }
