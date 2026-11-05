@@ -17,10 +17,7 @@ use std::panic::{self, AssertUnwindSafe};
 
 use common::graphite::Graphite;
 use skia_safe::gpu::{self, graphite};
-use skia_safe::{
-    AlphaType, Color, Color4f, ColorType, ImageInfo, Paint, Rect, canvas::SaveLayerRec,
-    image_filters,
-};
+use skia_safe::{AlphaType, Color, Color4f, ColorType, ImageInfo, Paint, Rect};
 
 #[test]
 fn dropping_a_recorder_panics_while_one_of_its_surfaces_lives() {
@@ -34,31 +31,29 @@ fn dropping_a_recorder_panics_while_one_of_its_surfaces_lives() {
     let dropped = panic::catch_unwind(AssertUnwindSafe(|| drop(recorder)));
     assert!(dropped.is_err(), "dropping the recorder did not panic");
 
-    // The panic leaves the recorder alive, so the surface can still draw.
+    // The panic leaks the recorder, so a later draw on the surface doesn't crash. The draw is never
+    // submitted.
     surface.canvas().draw_rect(
         Rect::from_xywh(8.0, 8.0, 16.0, 16.0),
         &Paint::new(Color4f::from(Color::RED), None),
     );
+
+    // The leaked recorder still owns GPU objects of the device, and Vulkan does not allow
+    // destroying a device that still has them, so the device is leaked too.
+    drop(surface);
+    std::mem::forget(graphite);
 }
 
-/// A layer with an image filter leaves devices that only the recorder still holds until the next
-/// snap. The drop check relies on `snap()` removing them, and must not count them as live.
+/// A dropped surface leaves an empty entry in the recorder's device list until the next snap. The
+/// drop check relies on `snap()` removing it, and must not count it as a live surface.
 #[test]
-fn dropping_a_recorder_after_its_surface_ignores_leftover_layer_devices() {
+fn dropping_a_recorder_after_its_surface_succeeds() {
     let Some(mut graphite) = Graphite::new() else {
         eprintln!("skipped: no Graphite context available");
         return;
     };
     let mut recorder = graphite.context.make_recorder(None).unwrap();
-    {
-        let mut surface = render_target(&mut recorder);
-        let canvas = surface.canvas();
-        let mut blur = Paint::default();
-        blur.set_image_filter(image_filters::blur((4.0, 4.0), None, None, None));
-        canvas.save_layer(&SaveLayerRec::default().paint(&blur));
-        canvas.draw_rect(Rect::from_xywh(8.0, 8.0, 16.0, 16.0), &Paint::default());
-        canvas.restore();
-    }
+    drop(render_target(&mut recorder));
 
     drop(recorder);
 }

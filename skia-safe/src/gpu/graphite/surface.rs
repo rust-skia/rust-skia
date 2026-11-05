@@ -20,6 +20,11 @@ use crate::{ColorSpace, ColorType, IRect, ImageInfo, Surface, SurfaceProps};
 ///
 /// # Returns
 /// A new `Surface` backed by Graphite, or `None` if creation failed
+///
+/// # Panics
+///
+/// Drop the surface before `recorder`. Dropping the recorder while the surface is still alive
+/// panics, see [`Recorder`].
 pub fn render_target(
     recorder: &mut Recorder,
     image_info: &ImageInfo,
@@ -61,6 +66,11 @@ pub fn render_target(
 ///
 /// # Returns
 /// A new `Surface` wrapping the backend texture, or `None` if wrapping failed
+///
+/// # Panics
+///
+/// Drop the surface before `recorder`. Dropping the recorder while the surface is still alive
+/// panics, see [`Recorder`].
 pub fn wrap_backend_texture(
     recorder: &mut Recorder,
     backend_texture: &BackendTexture,

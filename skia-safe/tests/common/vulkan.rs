@@ -1,5 +1,8 @@
 //! A headless Vulkan device for GPU tests. Tests skip when no device is available.
 
+// Each test target compiles its own copy of this module, and not every one uses all of it.
+#![allow(dead_code)]
+
 use std::ffi::{CStr, c_void};
 use std::ptr;
 
@@ -13,19 +16,16 @@ pub struct Vulkan {
     pub device: ash::Device,
     queue: vk::Queue,
     queue_family_index: u32,
-    #[allow(dead_code)]
     sampler_ycbcr_conversion: bool,
 }
 
 impl Vulkan {
-    #[allow(dead_code)]
     pub fn new() -> Option<Self> {
         Self::create(false)
     }
 
     /// Creates a device with the `samplerYcbcrConversion` feature enabled, or returns `None` when no
     /// device supports it.
-    #[allow(dead_code)]
     pub fn with_sampler_ycbcr_conversion() -> Option<Self> {
         Self::create(true)
     }
@@ -78,7 +78,6 @@ impl Vulkan {
     }
 
     #[cfg(feature = "ganesh")]
-    #[allow(dead_code)]
     pub fn direct_context(&self) -> Option<gpu::DirectContext> {
         self.with_backend_context(None, |backend_context| {
             gpu::direct_contexts::make_vulkan(backend_context, None)
@@ -87,7 +86,6 @@ impl Vulkan {
 
     /// Creates a context that receives the features enabled on the device.
     #[cfg(feature = "ganesh")]
-    #[allow(dead_code)]
     pub fn direct_context_with_device_features(&self) -> Option<gpu::DirectContext> {
         let mut ycbcr_features = ycbcr_features(self.sampler_ycbcr_conversion);
         let features = vk::PhysicalDeviceFeatures2::default().push_next(&mut ycbcr_features);
@@ -99,8 +97,6 @@ impl Vulkan {
     }
 
     #[cfg(feature = "graphite")]
-    // Each test target compiles its own copy of this module, and not every one uses Graphite.
-    #[allow(dead_code)]
     pub fn graphite_context(&self) -> Option<gpu::graphite::Context> {
         self.with_backend_context(None, |backend_context| {
             gpu::graphite::vk::context_factory::make_vulkan(backend_context, None)

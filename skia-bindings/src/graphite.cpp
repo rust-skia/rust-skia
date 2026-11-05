@@ -359,8 +359,9 @@ template struct PrivateMember<RecorderTrackedDevices,
 // Snaps the Recorder, discards the Recording, and returns true if a Device connected to the
 // Recorder is still used outside of it, for example by a live SkSurface. Deleting the Recorder
 // then leaves that Device without a Recorder, and the next draw on it dereferences a null
-// Recorder. snap() removes every tracked Device that only the Recorder still holds, and the
-// deferred canvas device with it, so every Device left in the list is used elsewhere.
+// Recorder. snap() removes the entries that dropped surfaces and layers leave behind, every
+// tracked Device that only the Recorder still holds, and the deferred canvas device, so every
+// Device left in the list is used elsewhere.
 extern "C" bool C_Recorder_snapAndHasLiveDevices(skgpu::graphite::Recorder* self) {
     self->snap();
     return !(self->*memberPointer(RecorderTrackedDevices())).empty();
