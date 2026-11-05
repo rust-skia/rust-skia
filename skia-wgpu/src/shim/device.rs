@@ -138,7 +138,8 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
 ) -> sb::WGPUBool {
     use sb::WGPUFeatureName as F;
     use wgpu::Features as W;
-    let features = unsafe { Device::get(device) }.device.features();
+    let device = &unsafe { Device::get(device) }.device;
+    let features = device.features();
     let required = match feature {
         // `wgpu` devices are never in WebGPU's compatibility mode.
         F::WGPUFeatureName_CoreFeaturesAndLimits => W::empty(),
@@ -147,8 +148,14 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         F::WGPUFeatureName_TextureCompressionBC => W::TEXTURE_COMPRESSION_BC,
         F::WGPUFeatureName_TextureCompressionETC2 => W::TEXTURE_COMPRESSION_ETC2,
         F::WGPUFeatureName_TextureCompressionASTC => W::TEXTURE_COMPRESSION_ASTC,
-        // Skia writes timestamps from command encoders on every backend except Metal, which
-        // `wgpu` allows only with a native feature on top of WebGPU's timestamp queries.
+        // On Metal, Skia writes timestamps at the beginning and end of render passes, which
+        // WebGPU's timestamp queries cover. On every other backend, it writes them on the command
+        // encoder, which `wgpu` allows only with a native feature on top of them (ADR 0003).
+        F::WGPUFeatureName_TimestampQuery
+            if device.adapter_info().backend == wgpu::Backend::Metal =>
+        {
+            W::TIMESTAMP_QUERY
+        }
         F::WGPUFeatureName_TimestampQuery => {
             W::TIMESTAMP_QUERY | W::TIMESTAMP_QUERY_INSIDE_ENCODERS
         }
@@ -352,9 +359,9 @@ mod tests {
     use super::{wgpuDeviceHasFeature, wgpuDevicePopErrorScope, wgpuDevicePushErrorScope};
 
     /// `TimestampQuery` also requires `TIMESTAMP_QUERY_INSIDE_ENCODERS`, because Skia writes
-    /// timestamps outside passes (ADR 0003).
+    /// timestamps outside passes, except on Metal (ADR 0003).
     #[test]
-    fn timestamp_query_alone_is_not_reported() {
+    fn timestamp_query_alone_is_reported_only_on_metal() {
         let Some((device, queue)) = testing::device_with(wgpu::Features::TIMESTAMP_QUERY) else {
             return;
         };
@@ -367,7 +374,8 @@ mod tests {
             )
         };
 
-        assert_eq!(reported, 0);
+        let metal = device.adapter_info().backend == wgpu::Backend::Metal;
+        assert_eq!(reported != 0, metal);
     }
 
     /// `wgpu` keeps error scopes per thread and panics when a thread pops a scope that another

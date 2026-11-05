@@ -94,7 +94,7 @@ Dawn defines. A reported feature is one for which the shim answers `true` when t
 | Feature | Kind | `wgpu` 30 counterpart | Status | What Skia does without it |
 |---|---|---|---|---|
 | `CoreFeaturesAndLimits` | standard | none needed | always reported | Skia limits itself to the formats of WebGPU's compatibility mode. `wgpu` devices are never in that mode. |
-| `TimestampQuery` | standard | `TIMESTAMP_QUERY` and `TIMESTAMP_QUERY_INSIDE_ENCODERS` | reported | Skia reports no GPU timings. |
+| `TimestampQuery` | standard | `TIMESTAMP_QUERY`, and `TIMESTAMP_QUERY_INSIDE_ENCODERS` unless on Metal | reported | Skia reports no GPU timings. |
 | `ShaderF16` | standard | `SHADER_F16` | reported | Shaders use 32-bit floats where Skia would use half precision. |
 | `DualSourceBlending` | standard | `DUAL_SOURCE_BLENDING` | reported | Some blend modes that combine coverage with the destination read the destination through a texture copy. |
 | `TextureCompressionBC`, `TextureCompressionETC2` | standard | `TEXTURE_COMPRESSION_BC`, `TEXTURE_COMPRESSION_ETC2` | reported | Skia cannot sample these compressed formats. |
@@ -120,12 +120,14 @@ can report them once it converts the corresponding values, the formats, the text
 load operation. `BufferMapExtendedUsages` has a counterpart only with a trade-off, because mapping
 these buffers helps only on GPUs that share memory with the CPU.
 
-The shim reports `TimestampQuery` only for a device that has both `TIMESTAMP_QUERY` and
-`TIMESTAMP_QUERY_INSIDE_ENCODERS`. Unless `wgpu` runs on Metal, Skia writes its timestamps on the
-command encoder, outside any pass (`DawnCaps.cpp`, `fSupportsCommandBufferTimestamps`), and `wgpu`
-allows such writes only with the second feature. On Metal, Skia writes timestamps only inside
-passes, so `TIMESTAMP_QUERY` alone would suffice there. The shim does not distinguish the backend
-yet. The test `timestamp_query_alone_is_not_reported` in `skia-wgpu` pins this rule.
+Skia writes its timestamps in one of two ways, chosen by the backend (`DawnCaps.cpp`,
+`fSupportsCommandBufferTimestamps`). Unless `wgpu` runs on Metal, Skia writes them on the command
+encoder, outside any pass, which `wgpu` allows only with `TIMESTAMP_QUERY_INSIDE_ENCODERS` in
+addition to `TIMESTAMP_QUERY`. On Metal, Skia instead asks render passes to write timestamps at
+their beginning and end (`timestampWrites`), which `TIMESTAMP_QUERY` alone covers. The shim
+therefore reports `TimestampQuery` on Metal for a device with `TIMESTAMP_QUERY`, and on every other
+backend only for a device with both features. The test
+`timestamp_query_alone_is_reported_only_on_metal` in `skia-wgpu` pins this rule.
 
 ## Crates and `wgpu` versions
 
