@@ -43,16 +43,19 @@ approval immediately before each command.
 Publish in this order:
 
 1. `just release-publish-crates <version> <previous-version>` publishes the
-   required crates in dependency order, verifies registry availability, and
-   runs smoke tests. It automatically includes `skia-svg-macros` first when the
-   crate changed.
+   required crates in dependency order (`skia-bindings`, `skia-wgpu`,
+   `skia-safe`), verifies registry availability, and runs smoke tests. It
+   automatically includes `skia-svg-macros` first when the crate changed.
+   `skia-safe` depends on `skia-wgpu` through its `wgpu` features, so crates.io
+   rejects `skia-safe` until `skia-wgpu` of the same version is published.
 2. `just release-publish-github <version> <commit> <notes> true` creates or
    resumes the GitHub release as a prerelease and verifies the final tag.
    rust-skia GitHub releases are always prereleases; never omit `true`.
 
 Do not replace a published crate version. If only `skia-svg-macros` has been
 published, confirm that state against crates.io, reuse it, and resume at
-`skia-bindings`; never attempt to republish it. If the release commit must
-change after `skia-bindings` or `skia-safe` was published, use a new patch
-version. Any source fix invalidates verification; return to release
+`skia-bindings`; never attempt to republish it. The recipe skips every crate
+that is already published, so a rerun resumes at the first missing one. If the
+release commit must change after `skia-bindings`, `skia-wgpu`, or `skia-safe`
+was published, use a new patch version. Any source fix invalidates verification; return to release
 preparation and rerun the `rust-skia-release-verification` skill.

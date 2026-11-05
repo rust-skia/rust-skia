@@ -18,7 +18,9 @@ release.
    a clean working tree with the Skia submodule at its recorded tag, and `emcc`
    for the post-release smoke test. It verifies the branches and binary
    workflows/assets, verifies binary-download and source-build packaging, and
-   dry-runs `skia-svg-macros` packaging when that crate changed. Its output ends
+   dry-runs `skia-svg-macros` packaging when that crate changed. `skia-wgpu`
+   and `skia-safe` cannot be dry-run before `skia-bindings` is published,
+   because both require its exact version from crates.io. Its output ends
    with a `Summary:` block that lists every check that passed.
 2. Run `just release-verify-images <previous-version> <commit>` and inspect every
    reported difference. This compares the CPU-rendered PNGs across every

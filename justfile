@@ -138,6 +138,10 @@ publish-bindings-docs: bindings-docs
 publish-svg-macros:
     cd skia-svg-macros && cargo publish -vv
 
+# Publish skia-wgpu. Like skia-safe, it skips verification, which would build skia-bindings.
+publish-wgpu:
+    cd skia-wgpu && cargo publish -vv --no-verify
+
 # Publish skia-safe.
 publish-safe:
     cd skia-safe && cargo publish -vv --no-verify --allow-dirty
