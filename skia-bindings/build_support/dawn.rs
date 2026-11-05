@@ -79,13 +79,17 @@ pub fn prepare(python: &Path, offline: bool) {
     fs::write(stamp_file, stamp).unwrap();
 }
 
-/// The Dawn generator's targets that produce the files of [`FILES`].
+/// The Dawn generator's targets that produce the generated files of [`FILES`].
 const GENERATOR_TARGETS: &str = "headers,cpp_headers";
 
-/// Identifies what [`prepare`] generates: the revisions, the generator's targets, and the files that
-/// it copies. A build directory from before a change to any of them is generated again.
+/// Identifies what [`prepare`] generates: the revisions, the generator's targets, and the origin,
+/// source path, and destination of each file that it copies. A build directory from before a
+/// change to any of them is generated again.
 fn generation_stamp(revisions: &Revisions) -> String {
-    let files: Vec<&str> = FILES.iter().map(|(_, _, to)| *to).collect();
+    let files: Vec<String> = FILES
+        .iter()
+        .map(|(origin, from, to)| format!("{origin:?}:{from}->{to}"))
+        .collect();
     format!(
         "{} targets={GENERATOR_TARGETS} files={}",
         revisions.stamp(),
@@ -263,6 +267,7 @@ fn run_python(python: &Path, script: &Path, common_args: &[OsString], args: &[Os
 }
 
 /// Where each file of [`dir`] comes from: the Dawn source or the generator output.
+#[derive(Debug)]
 enum Origin {
     Source,
     Generated,
