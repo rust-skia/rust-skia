@@ -533,11 +533,13 @@ mod tests {
     use std::mem;
 
     use crate::prelude::*;
-    use crate::{AlphaType, ColorSpace, ImageInfo};
+    use crate::{AlphaType, ColorSpace, ImageInfo, named_gamut, named_transfer_fn};
 
     #[test]
     fn ref_cnt_in_relation_to_color_space() {
-        let cs = ColorSpace::new_srgb();
+        // Skia shares one sRGB instance between all tests, so this test counts the references of a
+        // color space that only it holds.
+        let cs = ColorSpace::new_rgb(&named_transfer_fn::LINEAR, &named_gamut::REC2020).unwrap();
         let before = cs.native().ref_cnt();
         {
             let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(cs.clone()));
