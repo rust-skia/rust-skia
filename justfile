@@ -4,9 +4,6 @@ qa_platforms := "linux-qa.yaml:skia-org-images-x86_64-unknown-linux-gnu macos-qa
 # Features of the documentation built on macOS.
 doc_features_mac := "gl,vulkan,metal,textlayout,svg,skottie,ureq,webp"
 
-# Features that docs.rs builds with. The published documentation bindings use them.
-doc_features_docs_rs := "ganesh,gl,textlayout,svg,skottie,ureq,webp,vulkan"
-
 # Features of the local build test.
 local_build_features := "gl,vulkan,webp,textlayout"
 
@@ -146,9 +143,13 @@ publish-wgpu:
 publish-safe:
     cd skia-safe && cargo publish -vv --no-verify --allow-dirty
 
-# Generate the bindings with the docs.rs features and copy them to `/tmp/bindings.rs`.
+# Generate the bindings with the features that docs.rs builds skia-safe with, read from its
+# `[package.metadata.docs.rs]`, and copy them to `/tmp/bindings.rs`.
 bindings-docs:
-    cargo build -vv --features {{ doc_features_docs_rs }}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    features="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "skia-safe") | .metadata.docs.rs.features | join(",")')"
+    cargo build -vv --features "$features"
     cp "$({{ bindings_latest }})" /tmp/bindings.rs
 
 # Build the skia-safe documentation and push it to rust-skia.github.io.

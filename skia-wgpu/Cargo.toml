@@ -14,6 +14,11 @@ rust-version.workspace = true
 # script, which is empty.
 links = "skia-wgpu"
 
+# docs.rs documents the API of the newest `wgpu` version. `bindings_docs.rs` contains the WebGPU
+# types because `skia-safe`'s docs.rs features include `wgpu`.
+[package.metadata.docs.rs]
+features = ["wgpu-30"]
+
 [features]
 wgpu-30 = ["dep:wgpu30", "skia-bindings/wgpu"]
 

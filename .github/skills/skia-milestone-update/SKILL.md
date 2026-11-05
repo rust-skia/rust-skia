@@ -412,6 +412,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     Prebuilt binaries need no change, because `skia-bindings`' feature `wgpu` does not depend on
     the `wgpu` version.
+  - `skia-wgpu/Cargo.toml` names the `wgpu-NN` feature that docs.rs documents, in
+    `[package.metadata.docs.rs]`. Move it to the newest supported version.
 - **Toolchain requirements:** list the upstream commits that may raise a compiler,
   C++ library, or OS minimum, and read each commit message:
 
