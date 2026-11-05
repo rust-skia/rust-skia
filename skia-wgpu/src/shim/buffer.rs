@@ -177,7 +177,10 @@ const _: sb::WGPUProcBufferGetUsage = Some(wgpuBufferGetUsage);
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuBufferDestroy(buffer: sb::WGPUBuffer) {
-    unsafe { Buffer::get(buffer) }.buffer.destroy();
+    let buffer = unsafe { Buffer::get(buffer) };
+    // `wgpu` unmaps a buffer that it destroys, so the view into the released mapping goes too.
+    *buffer.mapping.lock().unwrap() = Mapping::Unmapped;
+    buffer.buffer.destroy();
 }
 const _: sb::WGPUProcBufferDestroy = Some(wgpuBufferDestroy);
 
