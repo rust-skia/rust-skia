@@ -63,24 +63,30 @@ Note that the version component of a Skia fork tag does not track the milestone 
 tags up to `m152` (for example `m152-0.100.0`), and only aligns with it from `m153`
 on. Take both tags from the repository instead of deriving one from the other.
 
-## Accounting
+## Records
 
-Keep one accounting file per update, `$TMPDIR/mNEW_MILESTONE_accounting.md`. The PR
-checklist orders the work, and the accounting holds what each check found and the decision
-made for it. Create it before the first check, with one section per check of this skill:
+The PR description is the record of the update: what each check found and the decision made
+for it. Reviewers read it there, and it survives the wait for the Chrome release date. Open the
+PR as a draft from `PR_TEMPLATE.md` as soon as the parent branch is pushed (step 8 of the
+rebase below), with the records of every check that finished before.
 
-- Skia release notes
-- Build organization
-- Third-party dependencies (`DEPS`)
-- Dawn headers: changed WebGPU types and functions, undefined `wgpu*` functions, feature
-  checks
-- Spontaneous callbacks
-- `wgpu` versions
-- Toolchain requirements
-- Public headers
+The template has one section per check of this skill, and each section says what it records:
+Release notes, Build organization, Third-party dependencies, Dawn headers, Release poll, `wgpu`
+versions, Toolchain requirements, and Wrapper updates. Each check below ends by recording
+its outcome in its section. Update the description with `gh`:
 
-Each check below ends by recording its outcome in its section, `no change` included. The
-accounting is complete when every section has an entry for everything its check found.
+```sh
+gh pr view --json body --jq .body > "$TMPDIR/NEW_TAG-pr.md"
+# Edit the section in "$TMPDIR/NEW_TAG-pr.md".
+gh pr edit --body-file "$TMPDIR/NEW_TAG-pr.md"
+```
+
+The records are complete when every section holds at least one entry, with `no change` written
+out where the check found nothing, so a skipped check stands out from a clean one.
+
+The one working list outside the PR is the per-header list of the public header check, in
+`$TMPDIR/NEW_TAG-headers.md`. It is used before the wrapper edits start, and its outcome goes
+into Wrapper updates.
 
 ## Rebase the fork patch stack
 
@@ -226,7 +232,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
    Push the parent branch with `git push --recurse-submodules=no` once the tag is on the
    remote. The fork publishes its commits only as tags, so Git's submodule push check, which
-   looks for them on remote branches, rejects every push that changes the gitlink.
+   looks for them on remote branches, rejects every push that changes the gitlink. Then open
+   the draft PR (see Records above), unless it exists already.
 
 ## Notes that go beyond the wiki checklist
 
@@ -256,7 +263,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   previous milestone PRs. Update the title of an already opened PR if the
   milestone changes direction, but never during a same-milestone refresh.
 - **Skia release notes:** read them first, before the build organization diff and the
-  header accounting, and record a decision for every note in the accounting:
+  header accounting, and record a decision for every note in the PR's Release notes section:
 
   ```sh
   git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- RELEASE_NOTES.md relnotes/
@@ -276,7 +283,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   `default_args` in `.gn` apply to our build. A flag that `gn/skia.gni` declares off can
   therefore be on, as `skia_enable_packed_422_yuv` is. The defines that bindgen
   actually sees are in `skia-defines.txt`, next to the generated `bindings.rs`.
-  Record each file as `no change` or `updated build glue` in the accounting. Most
+  Record each file in the PR's Build organization section. Most
   source-list changes flow through existing Skia targets and need no rust-skia
   build glue change. However, any diff in the `gn`/`gni` files that looks
   relevant — one that may need special consideration or may indirectly affect
@@ -341,8 +348,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     `just check-third-party-sources` must pass. It checks every path the
     `third_party` build files list against the checkouts of the pinned libraries. It fails
     and names the libraries it skipped when their checkout is not at the pin.
-  - Record each library in the accounting with its old pin, its new pin, and which source
-    the new pin follows: Chromium, Skia, or a fixed release.
+  - Record the pins in the PR's Third-party dependencies section.
 - **Dawn headers (`wgpu` feature):** source builds with `wgpu` generate Skia's WebGPU
   headers from the Dawn revision in `[package.metadata].dawn`
   (`docs/adr/0003`). No file in the repository shows how they change, so every tag cut
@@ -388,10 +394,10 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     nm -u "$(ls -t target/debug/build/skia-bindings-*/out/skia/libskia-bindings.a | head -1)" | grep -oE 'wgpu[A-Z][A-Za-z]*' | sort -u
     ```
 
-    Record in the accounting every changed function, struct, enum value, and feature name
-    that Skia's Dawn backend uses, and every undefined `wgpu*` function that was added or
-    removed. Each of them needs a matching change in the `skia-wgpu` shim. The `nm` list
-    is the authoritative check: a function the shim lacks fails the link of the `wgpu` tests
+    Record the changes in the PR's Dawn headers section. Each changed function, struct,
+    enum value, and feature name that Skia's Dawn backend uses, and every undefined `wgpu*`
+    function that was added or removed, needs a matching change in the `skia-wgpu` shim. The
+    `nm` list is the authoritative check: a function the shim lacks fails the link of the `wgpu` tests
     only if the tests keep the backend code that calls it. A changed signature fails the
     shim's `WGPUProc*` check at compile time. A new
     `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
@@ -408,7 +414,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     The step is done when every listed callback is read, confirmed to use only its own
     buffer or state that outlives the device and the shared context, and recorded in the
-    accounting. A new callback, or one that reaches the device or the shared context,
+    PR's Release poll section. A new callback, or one that reaches the device or the shared context,
     invalidates the ADR's argument: surface it to the user, because the release poll needs a
     change before the update ships.
   - `skia-bindings` compiles Skia's Dawn backend itself, from the `.cpp` files of
@@ -429,8 +435,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     ```
 
     A `wgpu` minor or patch release needs no change, because `wgpuNN = { package = "wgpu",
-    version = "NN" }` already accepts it. Record the newest `wgpu` version and the newest
-    `wgpu-NN` feature in the accounting.
+    version = "NN" }` already accepts it. Record the outcome in the PR's `wgpu` versions section.
   - When a newer major exists, propose the shim update to the user and implement it only after
     their decision. The proposal names the new feature `wgpu-NN` with its optional dependency
     `wgpuNN` and module `skia-wgpu/src/vNN.rs`, the `wgpu` API changes that the shim's source
@@ -466,8 +471,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   the libstdc++ in the CI image (see `AGENTS.md`). Surface each requirement to the user as
   a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
   whether a `rust-skia:` fork patch existed only to support the old one, such as an
-  `@available` workaround. Record each commit that the log lists in the accounting, with
-  the requirement it raises or `no requirement`.
+  `@available` workaround. Record the outcome in the PR's Toolchain requirements section.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
@@ -505,7 +509,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
        is needed;
      - **new public header** — decide whether to add a binding + wrapper, and record
        the decision.
-  3. Record every changed header in the accounting's public headers section with its
+  3. Record every changed header in the header list, `$TMPDIR/NEW_TAG-headers.md`, with its
      decision: `no change`, `updated binding`, `updated wrapper`, `added new`, `skipped —
      internal only`, or `skipped — no binding/wrapper`. **Start editing wrappers only once
      every header has an entry.**
@@ -519,7 +523,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   `graphite/`, `mtl/`, `vk/`), `pathops/`, `svg/`, `utils/`, and `modules/` (with
   `paragraph/`, `shaper/`, `skottie/`, `skresources/`, `svg/`). For each area,
   cross-reference the changed headers against the corresponding `skia-bindings/src/*.cpp`
-  and `skia-safe/src/...` wrapper module, and record the outcome in the accounting.
+  and `skia-safe/src/...` wrapper module, and record the outcome in the header list.
 - **Wrapper updates:** follow the `rust-skia-bindings` skill for how to add or change
   a C shim and its Rust wrapper. In short: preserve method/debug-field ordering aligned
   with the upstream C++ header, prefer direct field access over getter/setter shims for
