@@ -19,8 +19,8 @@ use super::wgpu;
 #[derive(Debug)]
 pub struct ShaderModule {
     pub module: wgpu::ShaderModule,
-    /// The validation error of the module's creation. Skia learns about invalid WGSL only through
-    /// the compilation info, while `wgpu` reports it as an error of the creation.
+    /// The error of the module's creation. Skia learns about invalid WGSL only through the
+    /// compilation info, while `wgpu` reports it as an error of the creation.
     creation_error: Option<String>,
     /// The instance that owns the futures of `wgpuShaderModuleGetCompilationInfo`.
     instance: Arc<Instance>,
@@ -73,9 +73,9 @@ pub unsafe extern "C" fn wgpuDeviceCreateShaderModule(
         chain = chained.next;
     }
     let code = code.expect("WGPUShaderModuleDescriptor without WGSL source");
-    // Skia does not open an error scope around the creation, so without this one, `wgpu` would
-    // pass a WGSL error to its default handler, which panics.
-    let (module, creation_error) = device.capture_validation(|| {
+    // Skia does not open an error scope around the creation, so without these, `wgpu` would pass
+    // a WGSL error to its default handler, which panics.
+    let (module, creation_error) = device.capture_errors(|| {
         device
             .device
             .create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -85,7 +85,7 @@ pub unsafe extern "C" fn wgpuDeviceCreateShaderModule(
     });
     ShaderModule {
         module,
-        creation_error,
+        creation_error: creation_error.map(|error| error.to_string()),
         instance: device.instance.clone(),
     }
     .into_handle()
@@ -167,7 +167,7 @@ pub unsafe extern "C" fn wgpuDeviceCreateRenderPipeline(
 const _: sb::WGPUProcDeviceCreateRenderPipeline = Some(wgpuDeviceCreateRenderPipeline);
 
 /// Creates the pipeline at once and reports the result through the callback, with the pipeline's
-/// validation error if there is one.
+/// error if there is one.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuDeviceCreateRenderPipelineAsync(
     device: sb::WGPUDevice,
@@ -182,10 +182,10 @@ pub unsafe extern "C" fn wgpuDeviceCreateRenderPipelineAsync(
     };
     let device = unsafe { Device::get(device) };
     let (pipeline, error) =
-        device.capture_validation(|| unsafe { create_render_pipeline(device, &*descriptor) });
+        device.capture_errors(|| unsafe { create_render_pipeline(device, &*descriptor) });
     let result = match error {
         None => Ok(RenderPipeline { pipeline }),
-        Some(error) => Err(CallbackString::new(&error)),
+        Some(error) => Err(error),
     };
     let callback = callback_info
         .callback
@@ -211,12 +211,11 @@ type RenderPipelineCallback = unsafe extern "C" fn(
     *mut c_void,
 );
 
-/// Calls `callback` with the pipeline or the validation error, or with the status
-/// `CallbackCancelled` for `None`. The pipeline becomes a handle only here, so a cancelled callback
-/// leaks no handle.
+/// Calls `callback` with the pipeline or the creation error, or with the status `CallbackCancelled`
+/// for `None`. The pipeline becomes a handle only here, so a cancelled callback leaks no handle.
 unsafe fn call_render_pipeline_callback(
     callback: RenderPipelineCallback,
-    result: Option<Result<RenderPipeline, CallbackString>>,
+    result: Option<Result<RenderPipeline, wgpu::Error>>,
     userdata: Userdata,
 ) {
     use sb::WGPUCreatePipelineAsyncStatus as S;
@@ -226,11 +225,17 @@ unsafe fn call_render_pipeline_callback(
             pipeline.into_handle(),
             None,
         ),
-        Some(Err(message)) => (
-            S::WGPUCreatePipelineAsyncStatus_ValidationError,
-            ptr::null_mut(),
-            Some(message),
-        ),
+        Some(Err(error)) => {
+            // WebGPU reports an out-of-memory error of a pipeline creation as an internal error.
+            let status = match error {
+                wgpu::Error::Validation { .. } => S::WGPUCreatePipelineAsyncStatus_ValidationError,
+                wgpu::Error::Internal { .. } | wgpu::Error::OutOfMemory { .. } => {
+                    S::WGPUCreatePipelineAsyncStatus_InternalError
+                }
+            };
+            let message = CallbackString::new(&error.to_string());
+            (status, ptr::null_mut(), Some(message))
+        }
         None => (
             S::WGPUCreatePipelineAsyncStatus_CallbackCancelled,
             ptr::null_mut(),

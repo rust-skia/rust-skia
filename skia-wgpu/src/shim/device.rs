@@ -31,13 +31,22 @@ impl Device {
         Self { device, instance }
     }
 
-    /// Runs `create` in an error scope and returns its result and the validation error message, so
-    /// that the asynchronous creation functions can report errors through their callbacks.
-    pub fn capture_validation<T>(&self, create: impl FnOnce() -> T) -> (T, Option<String>) {
-        let scope = self.device.push_error_scope(wgpu::ErrorFilter::Validation);
+    /// Runs `create` in error scopes for all three error filters and returns its result and the
+    /// error it raised, so that the creation functions can report it through their callbacks.
+    ///
+    /// `wgpu` passes an error that no scope of its filter captures to the device's handler, which
+    /// panics by default. A pipeline whose shader `wgpu` cannot translate for its backend raises an
+    /// internal error, not a validation error, so a validation scope alone would let it panic.
+    pub fn capture_errors<T>(&self, create: impl FnOnce() -> T) -> (T, Option<wgpu::Error>) {
+        let validation = self.device.push_error_scope(wgpu::ErrorFilter::Validation);
+        let out_of_memory = self.device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
+        let internal = self.device.push_error_scope(wgpu::ErrorFilter::Internal);
         let result = create();
-        let error = block_on(scope.pop());
-        (result, error.map(|e| e.to_string()))
+        // `wgpu` closes the scopes of a thread innermost first.
+        let internal = block_on(internal.pop());
+        let out_of_memory = block_on(out_of_memory.pop());
+        let validation = block_on(validation.pop());
+        (result, validation.or(internal).or(out_of_memory))
     }
 }
 
