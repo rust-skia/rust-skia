@@ -59,10 +59,19 @@ impl<'a> InsertRecordingInfo<'a> {
     ///
     /// A recording that contains draws on a canvas from
     /// [`Recorder::make_deferred_canvas`](super::Recorder::make_deferred_canvas) needs a target
-    /// surface, and a recording without such draws must not have one. The surface must be
-    /// Graphite-backed, and its texture's [`TextureInfo`](super::TextureInfo) must match the one
-    /// the deferred canvas was made with. Otherwise
-    /// [`Context::insert_recording`](super::Context::insert_recording) fails.
+    /// surface, or [`Context::insert_recording`](super::Context::insert_recording) fails. A
+    /// recording without such draws replays nothing into the surface, but can still leave its
+    /// texture in a new state through
+    /// [`target_surface_with_state`](Self::target_surface_with_state). The surface must be
+    /// Graphite-backed, or the insert fails.
+    ///
+    /// The texture of the surface must match the [`TextureInfo`](super::TextureInfo) that the
+    /// deferred canvas was made with. Skia checks this only in debug builds, so release builds
+    /// replay the draws into a mismatched texture.
+    ///
+    /// A mipmapped deferred canvas has stricter rules: the surface must have the same dimensions,
+    /// and the insert fails with any [translation](Self::target_translation) or
+    /// [clip](Self::target_clip).
     pub fn target_surface(self, surface: &'a mut Surface) -> Self {
         unsafe { (*self.inner.as_ptr()).fTargetSurface = surface.native_mut() };
         self
@@ -78,7 +87,7 @@ impl<'a> InsertRecordingInfo<'a> {
     ///
     /// The clip is in the deferred canvas's coordinates, and Skia moves it by the
     /// [translation](Self::target_translation) together with the draws. Without a clip, the draws
-    /// are only clipped to the target surface's bounds.
+    /// are only clipped to the target surface's bounds. An empty clip is the same as no clip.
     pub fn target_clip(self, clip: impl AsRef<IRect>) -> Self {
         unsafe { (*self.inner.as_ptr()).fTargetClip = *clip.as_ref().native() };
         self
