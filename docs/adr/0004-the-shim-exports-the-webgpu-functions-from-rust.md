@@ -43,15 +43,19 @@ another library that was loaded earlier. A shared library that contains Skia wou
 shim's `wgpu*` functions, and another WebGPU implementation in the process, or a second copy of
 the shim, could take over Skia's calls with handles that it does not understand.
 
-`skia-bindings` therefore compiles Skia's Dawn backend with `WGPU_FUNCTION_ATTRIBUTE`, the macro
-that `webgpu.h` appends to every function declaration, set to `visibility("hidden")`. The linker
-gives a symbol the most restrictive visibility of all its references, so the shim's definitions
-become hidden in the output, and Skia's calls bind inside it. An experiment with a model of a
-Rust `cdylib` that contains a C library calling an exported Rust function confirmed this with
-GNU ld on aarch64 Linux, in debug and release builds. Without the attribute, the library exported
-the function, and with it, the function was local. Windows DLLs export only functions marked
-`dllexport`, and macOS binds each call to the library that defines the function, so neither
-needs the attribute.
+On ELF targets, `skia-bindings` therefore compiles its C++ sources, Skia's Dawn backend among
+them, with `WGPU_FUNCTION_ATTRIBUTE`, the macro that `webgpu.h` appends to every function
+declaration, set to `visibility("hidden")`. The linker gives a symbol the most restrictive
+visibility of all its references, so the shim's definitions become hidden in the output, and
+Skia's calls bind inside it. An experiment with a model of a Rust `cdylib` that contains a C
+library calling an exported Rust function confirmed this on aarch64 Linux with GNU ld, in debug
+and release builds, and with LLD 19 in a release build. Without the attribute, the library
+exported the function, and with it, the function was local.
+
+Windows and macOS do not need the attribute. A Rust `cdylib` exports the shim's functions there,
+too, but the linker binds the library's own calls to its own definitions: a DLL calls its
+functions directly, and macOS records the defining library with each import (two-level
+namespace).
 
 ## One set of exports per build
 

@@ -106,22 +106,24 @@ pub fn add_backend_sources(cc_build: &mut cc::Build, skia_source_dir: &Path) {
     for source in backend_sources(skia_source_dir) {
         cc_build.file(source);
     }
-    // `skia-wgpu` exports the `wgpu*` functions with default visibility. On ELF targets, a shared
-    // library that contains Skia would then export them, too, and another library that exports the
-    // same names could take over Skia's calls (ADR 0004). Hidden references make the linker hide
-    // the definitions in the output and bind Skia's calls inside it. `webgpu.h` appends this macro
-    // to every function declaration. Windows DLLs export nothing without `dllexport`, and macOS
-    // binds each call to the library that defines it, so neither needs it.
-    if !cargo::target().is_windows() {
+    // Hidden references make the linker hide the shim's `wgpu*` definitions on ELF targets, so a
+    // shared library that contains Skia neither exports them nor lets another library take over
+    // Skia's calls (ADR 0004). `webgpu.h` appends this macro to every function declaration.
+    let target = cargo::target();
+    let elf = !target.is_windows() && target.vendor != "apple" && !target.is_emscripten();
+    if elf {
         cc_build.define(
             "WGPU_FUNCTION_ATTRIBUTE",
             "__attribute__((visibility(\"hidden\")))",
         );
         // `webgpu.h` also appends the macro to its callback typedefs, where the compiler ignores
-        // the attribute and warns once per typedef and source file, thousands of times. Clang
-        // names the warning `ignored-attributes`, GCC `attributes`.
-        cc_build.flag_if_supported("-Wno-ignored-attributes");
-        cc_build.flag_if_supported("-Wno-attributes");
+        // the attribute and warns once per typedef and source file, thousands of times. GCC names
+        // the warning `attributes`, which in Clang is a group that also covers unknown attributes.
+        if cc_build.get_compiler().is_like_clang() {
+            cc_build.flag("-Wno-ignored-attributes");
+        } else {
+            cc_build.flag_if_supported("-Wno-attributes");
+        }
     }
     // Skia's internal headers leave many parameters unused, and Skia's own build turns this
     // warning off. `cc` enables it with `-Wall -Wextra` (`/W4` on MSVC) for the whole build.
