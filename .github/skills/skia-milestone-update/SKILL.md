@@ -360,17 +360,19 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
   - The `wgpu*` functions that `libskia-bindings.a` leaves undefined are the ones the
     `skia-wgpu` shim must export (`docs/adr/0004`). List them for the old and the new build,
-    from the newest `skia-bindings-*` build directory each time, and diff the lists:
+    from the newest `skia-bindings-*` build directory each time, and diff the lists. The
+    pattern skips the C++ namespace `wgpu` in mangled names:
 
     ```sh
-    nm -u target/debug/build/skia-bindings-*/out/skia/libskia-bindings.a | grep -o 'wgpu[A-Za-z]*' | sort -u
+    nm -u "$(ls -t target/debug/build/skia-bindings-*/out/skia/libskia-bindings.a | head -1)" | grep -oE 'wgpu[A-Z][A-Za-z]*' | sort -u
     ```
 
     Record in the accounting every changed function, struct, enum value, and feature name
     that Skia's Dawn backend uses, and every undefined `wgpu*` function that was added or
-    removed. Each of them needs a matching change in the `skia-wgpu` shim. A function the
-    shim lacks fails the link of the `wgpu` tests with an undefined symbol, and a changed
-    signature fails the shim's `WGPUProc*` check at compile time. A new
+    removed. Each of them needs a matching change in the `skia-wgpu` shim. The `nm` list
+    is the authoritative check: a function the shim lacks fails the link of the `wgpu` tests
+    only if the tests keep the backend code that calls it. A changed signature fails the
+    shim's `WGPUProc*` check at compile time. A new
     `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
     feature. Surface these changes to the user, as for the build organization diff above.
   - `skia-bindings` compiles Skia's Dawn backend itself, from the `.cpp` files of
