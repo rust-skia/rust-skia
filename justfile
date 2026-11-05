@@ -247,3 +247,8 @@ locate-bindings:
 # Open the most recently generated `bindings.rs` in VS Code.
 open-bindings:
     code "$({{ bindings_latest }})"
+
+# Render the skia-org examples with two raster drivers and list the images that differ, see
+# `.github/scripts/compare-org.sh`.
+compare-org a="cpu" b="wgpu" features="wgpu" fuzz="2%":
+    bash .github/scripts/compare-org.sh "{{ a }}" "{{ b }}" "{{ features }}" "{{ fuzz }}"
