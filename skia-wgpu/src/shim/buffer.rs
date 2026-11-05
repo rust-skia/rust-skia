@@ -275,14 +275,12 @@ mod tests {
         Buffer, wgpuBufferAddRef, wgpuBufferMapAsync, wgpuBufferRelease, wgpuDeviceCreateBuffer,
     };
 
-    /// Reproduces the leak of a buffer whose map is pending when Skia releases its device
-    /// (ADR 0003).
+    /// A buffer whose map is pending when Skia releases its device is freed without a poll by the
+    /// application (ADR 0003).
     ///
     /// Skia's map callback holds a reference to Skia's buffer, as the callback here does, and
-    /// `wgpu` holds the callback until the map completes. Unless the application submits or polls
-    /// on its device again, the map never completes.
+    /// `wgpu` holds the callback until the map completes.
     #[test]
-    #[ignore = "known leak: a pending buffer map outlives the released device (ADR 0003)"]
     fn releasing_the_device_frees_a_buffer_with_a_pending_map() {
         let Some((device, queue)) = testing::device() else {
             return;

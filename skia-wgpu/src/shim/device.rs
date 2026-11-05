@@ -41,6 +41,23 @@ impl Device {
     }
 }
 
+/// Completes the buffer maps that are still pending when Skia releases its last device handle.
+///
+/// `wgpu` holds the callback of a pending map until a poll completes it, and Skia's map callback
+/// holds Skia's buffer, which holds the `wgpu` buffer. Without this poll, the buffers leak if the
+/// application never polls or submits on its device again (ADR 0003). Skia's map callbacks fire
+/// here, while Skia destroys its shared context, which they do not use. The poll waits for all
+/// work submitted to the device, also the application's.
+impl Drop for Device {
+    fn drop(&mut self) {
+        // A failed poll leaves the maps pending, which only leaks them, as before.
+        let _ = self.device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
+    }
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuDeviceGetAdapter(device: sb::WGPUDevice) -> sb::WGPUAdapter {
     instance::adapter_handle(&unsafe { Device::get(device) }.device)

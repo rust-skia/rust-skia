@@ -183,15 +183,15 @@ application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a v
   supports only the newest `wgpu` major version.
 - Moving `skia-safe`'s feature `wgpu` to another `wgpu-NN` breaks applications that use their own
   `wgpu` dependency of the previous version, so it also only happens with a milestone version bump.
-- A buffer map that is still pending when the application drops Skia's Graphite context keeps
-  itself alive. `wgpu` holds the map's closure, the closure holds Skia's callback, and the callback
-  holds Skia's buffer, which holds the `wgpu` buffer. Any later submission or poll on the device
-  completes the map and frees all of them. If the application never submits or polls on the
-  device again, they leak, together with the device. A final blocking poll when Skia releases the
-  device would end the cycle. It needs a check first that Skia's map callbacks may run while Skia
-  destroys its shared context. The ignored test `releasing_the_device_frees_a_buffer_with_a_pending_map`
-  in `skia-wgpu` reproduces the leak, and `cargo test -p skia-wgpu --features wgpu-30 -- --ignored`
-  runs it.
+- When Skia releases its last device handle, the shim polls the device until all submitted work
+  is done. A buffer map that is still pending would otherwise keep itself alive: `wgpu` holds the
+  map's closure until a poll completes the map, the closure holds Skia's callback, and the callback
+  holds Skia's buffer, which holds the `wgpu` buffer. The poll fires Skia's map callbacks while
+  Skia destroys its shared context. This is safe, because maps are Skia's only callbacks with
+  `AllowSpontaneous`, and a map callback uses only its buffer, whose resource cache the buffer
+  keeps alive (`DawnBuffer.cpp`, `Resource.cpp`). The poll also waits for the application's work
+  on the device. The test `releasing_the_device_frees_a_buffer_with_a_pending_map` in `skia-wgpu`
+  pins this.
 - The `wgpu` backend is experimental. Until it stabilizes, no prebuilt binaries contain it, so the
   `wgpu` feature builds Skia from source.
 
