@@ -98,6 +98,11 @@ The feature `wgpu` selects the `wgpu` major version that this release recommends
 
 Skia uses its Dawn backend, and the [skia-wgpu](https://github.com/rust-skia/rust-skia/tree/master/skia-wgpu) crate implements the WebGPU functions that the backend calls on `wgpu`, so neither Dawn nor any other WebGPU implementation is linked. There are no prebuilt binaries with this feature yet: Skia is built from source, and the build downloads Dawn's WebGPU headers, so it does not work offline.
 
+To render the examples with Graphite on `wgpu`, use
+
+```bash
+(cd skia-org && cargo run --features wgpu -- [OUTPUT_DIR] --driver wgpu)
+```
 
 The Cargo feature `textlayout` enables text shaping with Harfbuzz and ICU by providing bindings to the Skia modules skshaper and skparagraph. 
 
