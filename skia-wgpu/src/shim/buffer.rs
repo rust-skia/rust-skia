@@ -259,3 +259,70 @@ impl Mapping {
         unsafe { base.add((offset - *mapped_offset) as usize) }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::c_void;
+    use std::ptr;
+    use std::sync::Arc;
+
+    use skia_bindings as sb;
+
+    use super::super::api::BackendHandles;
+    use super::super::handle::Handle;
+    use super::super::{convert, testing};
+    use super::{
+        Buffer, wgpuBufferAddRef, wgpuBufferMapAsync, wgpuBufferRelease, wgpuDeviceCreateBuffer,
+    };
+
+    /// Reproduces the leak of a buffer whose map is pending when Skia releases its device
+    /// (ADR 0003).
+    ///
+    /// Skia's map callback holds a reference to Skia's buffer, as the callback here does, and
+    /// `wgpu` holds the callback until the map completes. Unless the application submits or polls
+    /// on its device again, the map never completes.
+    #[test]
+    #[ignore = "known leak: a pending buffer map outlives the released device (ADR 0003)"]
+    fn releasing_the_device_frees_a_buffer_with_a_pending_map() {
+        let Some((device, queue)) = testing::device() else {
+            return;
+        };
+        let handles = BackendHandles::new(&device, &queue);
+        let descriptor = sb::WGPUBufferDescriptor {
+            nextInChain: ptr::null_mut(),
+            label: convert::empty_string(),
+            usage: sb::WGPUBufferUsage_MapRead,
+            size: 256,
+            mappedAtCreation: 0,
+        };
+        let buffer = unsafe { wgpuDeviceCreateBuffer(handles.device(), &descriptor) };
+        let alive = Arc::downgrade(&unsafe { Buffer::arc(buffer) });
+        // The callback's own reference, which it releases when it fires.
+        unsafe { wgpuBufferAddRef(buffer) };
+        let callback_info = sb::WGPUBufferMapCallbackInfo {
+            nextInChain: ptr::null_mut(),
+            mode: sb::WGPUCallbackMode::WGPUCallbackMode_AllowSpontaneous,
+            callback: Some(release_buffer),
+            userdata1: buffer.cast(),
+            userdata2: ptr::null_mut(),
+        };
+        unsafe { wgpuBufferMapAsync(buffer, sb::WGPUMapMode_Read, 0, usize::MAX, callback_info) };
+
+        unsafe { wgpuBufferRelease(buffer) };
+        drop(handles);
+
+        assert!(
+            alive.upgrade().is_none(),
+            "the buffer outlives the released device"
+        );
+    }
+
+    unsafe extern "C" fn release_buffer(
+        _: sb::WGPUMapAsyncStatus,
+        _: sb::WGPUStringView,
+        buffer: *mut c_void,
+        _: *mut c_void,
+    ) {
+        unsafe { wgpuBufferRelease(buffer.cast()) }
+    }
+}

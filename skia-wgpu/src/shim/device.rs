@@ -331,8 +331,27 @@ mod tests {
     use skia_bindings as sb;
 
     use super::super::api::BackendHandles;
-    use super::super::testing;
-    use super::{wgpuDevicePopErrorScope, wgpuDevicePushErrorScope};
+    use super::super::{testing, wgpu};
+    use super::{wgpuDeviceHasFeature, wgpuDevicePopErrorScope, wgpuDevicePushErrorScope};
+
+    /// `TimestampQuery` also requires `TIMESTAMP_QUERY_INSIDE_ENCODERS`, because Skia writes
+    /// timestamps outside passes (ADR 0003).
+    #[test]
+    fn timestamp_query_alone_is_not_reported() {
+        let Some((device, queue)) = testing::device_with(wgpu::Features::TIMESTAMP_QUERY) else {
+            return;
+        };
+        let handles = BackendHandles::new(&device, &queue);
+
+        let reported = unsafe {
+            wgpuDeviceHasFeature(
+                handles.device(),
+                sb::WGPUFeatureName::WGPUFeatureName_TimestampQuery,
+            )
+        };
+
+        assert_eq!(reported, 0);
+    }
 
     /// `wgpu` keeps error scopes per thread and panics when a thread pops a scope that another
     /// thread pushed, unless both scopes happen to have the same nesting depth. Skia's scoped error
