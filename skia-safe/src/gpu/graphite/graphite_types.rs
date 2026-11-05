@@ -1,5 +1,7 @@
 use skia_bindings as sb;
 
+use crate::{IRect, IVector, Surface, gpu::MutableTextureState, prelude::*};
+
 /// Status of recording insertion (`skgpu::graphite::InsertStatus::V`).
 ///
 /// [`Success`](InsertStatus::Success) is the only success value; every other
@@ -14,10 +16,16 @@ variant_name!(InsertStatus::Success);
 /// Borrows the [`Recording`](super::Recording) it references (it stores
 /// a raw `fRecording` pointer), so the borrow checker keeps the `Recording` alive
 /// for as long as this info — and any `insert_recording` call using it — is in use.
+/// The target surface and texture state set through the builder methods are
+/// borrowed for the same lifetime.
 #[derive(Debug)]
 pub struct InsertRecordingInfo<'a> {
     inner: std::ptr::NonNull<sb::skgpu_graphite_InsertRecordingInfo>,
-    _recording: std::marker::PhantomData<&'a mut super::Recording>,
+    _borrows: std::marker::PhantomData<(
+        &'a mut super::Recording,
+        &'a mut Surface,
+        &'a MutableTextureState,
+    )>,
 }
 
 impl Drop for InsertRecordingInfo<'_> {
@@ -43,8 +51,66 @@ impl<'a> InsertRecordingInfo<'a> {
         unsafe { (*inner.as_ptr()).fRecording = recording.native_ptr() };
         Self {
             inner,
-            _recording: std::marker::PhantomData,
+            _borrows: std::marker::PhantomData,
         }
+    }
+
+    /// Sets the surface that the draws of a deferred canvas replay into.
+    ///
+    /// A recording that contains draws on a canvas from
+    /// [`Recorder::make_deferred_canvas`](super::Recorder::make_deferred_canvas) needs a target
+    /// surface, or [`Context::insert_recording`](super::Context::insert_recording) fails. A
+    /// recording without such draws replays nothing into the surface, but can still leave its
+    /// texture in a new state through
+    /// [`target_surface_with_state`](Self::target_surface_with_state). The surface must be
+    /// Graphite-backed, or the insert fails.
+    ///
+    /// The texture of the surface must match the [`TextureInfo`](super::TextureInfo) that the
+    /// deferred canvas was made with. Skia checks this only in debug builds, so release builds
+    /// replay the draws into a mismatched texture.
+    ///
+    /// A mipmapped deferred canvas has stricter rules: the surface must have the same dimensions,
+    /// and the insert fails with any [translation](Self::target_translation) or
+    /// [clip](Self::target_clip).
+    pub fn target_surface(self, surface: &'a mut Surface) -> Self {
+        unsafe { (*self.inner.as_ptr()).fTargetSurface = surface.native_mut() };
+        self
+    }
+
+    /// Offsets the draws that replay into the [target surface](Self::target_surface).
+    pub fn target_translation(self, translation: impl Into<IVector>) -> Self {
+        unsafe { (*self.inner.as_ptr()).fTargetTranslation = translation.into().into_native() };
+        self
+    }
+
+    /// Clips the draws that replay into the [target surface](Self::target_surface).
+    ///
+    /// The clip is in the deferred canvas's coordinates, and Skia moves it by the
+    /// [translation](Self::target_translation) together with the draws. Without a clip, the draws
+    /// are only clipped to the target surface's bounds. An empty clip is the same as no clip.
+    pub fn target_clip(self, clip: impl AsRef<IRect>) -> Self {
+        unsafe { (*self.inner.as_ptr()).fTargetClip = *clip.as_ref().native() };
+        self
+    }
+
+    /// Sets the [target surface](Self::target_surface) together with the state, such as the
+    /// Vulkan image layout, that its texture is left in after the recording.
+    ///
+    /// The state is set only together with a surface, because Skia applies it to the target
+    /// surface without checking that there is one. Only the Vulkan backend applies the state, and
+    /// the other backends ignore it.
+    pub fn target_surface_with_state(
+        self,
+        surface: &'a mut Surface,
+        state: &'a MutableTextureState,
+    ) -> Self {
+        let this = self.target_surface(surface);
+        // Skia only reads the state, but the field is declared as a mutable pointer.
+        unsafe {
+            (*this.inner.as_ptr()).fTargetTextureState =
+                state.native() as *const _ as *mut sb::skgpu_MutableTextureState
+        };
+        this
     }
 
     pub(crate) fn native(&self) -> &sb::skgpu_graphite_InsertRecordingInfo {
