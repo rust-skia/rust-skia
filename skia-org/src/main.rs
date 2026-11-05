@@ -11,6 +11,7 @@ extern crate ash;
 // TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
 
 mod artifact;
+mod coordinates;
 mod drivers;
 mod helper;
 mod skblendmode_overview;
@@ -142,6 +143,7 @@ fn main() {
         skpath_overview::draw(driver, &out_path);
         skpaint_overview::draw(driver, &out_path);
         skblendmode_overview::draw(driver, &out_path);
+        coordinates::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
         {
