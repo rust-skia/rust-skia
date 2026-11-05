@@ -30,8 +30,28 @@ library both bundled into the rlib (`static=`, as on Unix) and passed to the lin
 `WGPUProcDeviceCreateBuffer`, and `skia-bindings` generates these types with the other WebGPU
 types. Next to each shim function, an assignment of the function to that type
 (`const _: WGPUProcDeviceCreateBuffer = Some(wgpuDeviceCreateBuffer);`) makes rustc check its
-signature against the header. A function that the backend calls and the shim lacks fails the
-link with an undefined symbol that names the function.
+signature against the header. A function that the backend calls and the shim lacks usually fails
+the link with an undefined symbol that names the function. The linker reports it only if it keeps
+the code of the backend that calls the function, so the list of undefined `wgpu*` symbols of
+`libskia-bindings.a` is the authoritative check.
+
+## Skia's calls stay inside the binary that contains them
+
+On ELF targets, such as Linux, a shared library exports every function with default visibility,
+and the dynamic linker may resolve the library's own calls of such a function to a definition in
+another library that was loaded earlier. A shared library that contains Skia would export the
+shim's `wgpu*` functions, and another WebGPU implementation in the process, or a second copy of
+the shim, could take over Skia's calls with handles that it does not understand.
+
+`skia-bindings` therefore compiles Skia's Dawn backend with `WGPU_FUNCTION_ATTRIBUTE`, the macro
+that `webgpu.h` appends to every function declaration, set to `visibility("hidden")`. The linker
+gives a symbol the most restrictive visibility of all its references, so the shim's definitions
+become hidden in the output, and Skia's calls bind inside it. An experiment with a model of a
+Rust `cdylib` that contains a C library calling an exported Rust function confirmed this with
+GNU ld on aarch64 Linux, in debug and release builds. Without the attribute, the library exported
+the function, and with it, the function was local. Windows DLLs export only functions marked
+`dllexport`, and macOS binds each call to the library that defines the function, so neither
+needs the attribute.
 
 ## One set of exports per build
 
@@ -52,12 +72,13 @@ on `skia-wgpu` keeps this guarantee on the crate that exports the symbols, so it
 ## Consequences
 
 - The undefined `wgpu*` symbols of `libskia-bindings.a` are the functions that the shim must
-  implement, 106 at m157. The link of a test binary names every function that a new milestone
-  adds. `cargo check` does not report a missing function.
+  implement, 106 at m157. The link of a test binary usually names a function that a new milestone
+  adds, and `nm -u` lists all of them. `cargo check` does not report a missing function.
 - If two crates in one dependency graph enable different `wgpu-NN` features of `skia-safe`, Cargo
   enables both, and the `compile_error!` fails the build.
-- The `wgpu*` symbols are global. An application that also links another WebGPU implementation
-  that exports them, such as Dawn or wgpu-native, fails to link with duplicate symbols.
+- The `wgpu*` symbols keep their `webgpu.h` names. An application that statically links another
+  WebGPU implementation that defines them, such as Dawn or wgpu-native, fails to link with
+  duplicate symbols. Shared libraries do not export them on ELF targets.
 - The link experiment did not cover Windows with MSVC's `link.exe`. Whether rustc's `symbols.o`
   also loads the shim's functions there is unverified.
 

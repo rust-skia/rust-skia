@@ -25,7 +25,8 @@ Terms used below:
 
 An arrow points from a crate to a crate it depends on. The dotted arrow is not a Cargo dependency.
 It shows that the linker resolves the `wgpu*` functions that Skia's library calls to the shim's
-definitions.
+definitions. On ELF targets, Skia's Dawn backend declares these functions with hidden visibility,
+so a shared library that contains Skia keeps them to itself and binds Skia's calls inside it.
 
 ```mermaid
 flowchart TD
@@ -76,8 +77,9 @@ flowchart LR
 ```
 
 Next to each shim function, an assignment to its `WGPUProc*` type makes rustc check the function's
-signature against the header. A function that the Dawn backend calls and the shim lacks fails the
-link with an undefined symbol that names the function.
+signature against the header. A function that the Dawn backend calls and the shim lacks usually
+fails the link with an undefined symbol that names the function. The list of undefined `wgpu*`
+symbols of `libskia-bindings.a` is the authoritative check.
 
 ## Path of one WebGPU call
 
