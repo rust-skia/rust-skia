@@ -40,7 +40,11 @@ pub trait Handle: Sized {
 /// The macro is invoked in the modules next to this one, so it names this module as
 /// `super::handle`. The shim source exists once per `wgpu` version, so `$crate` cannot name it.
 macro_rules! handles {
-    ($($shim:ty => $c:ident: $add_ref:ident: $add_ref_proc:ident, $release:ident: $release_proc:ident;)*) => {
+    ($(
+        $shim:ty => $c:ident:
+            $add_ref:ident: $add_ref_proc:ident,
+            $release:ident: $release_proc:ident;
+    )*) => {
         $(
             const _: () = {
                 const fn shared_between_threads<T: Send + Sync>() {}
