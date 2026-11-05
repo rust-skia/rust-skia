@@ -177,11 +177,16 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         F::WGPUFeatureName_Float32Filterable => W::FLOAT32_FILTERABLE,
         F::WGPUFeatureName_DualSourceBlending => W::DUAL_SOURCE_BLENDING,
         F::WGPUFeatureName_ClipDistances => W::CLIP_DISTANCES,
+        F::WGPUFeatureName_Float32Blendable => W::FLOAT32_BLENDABLE,
+        // Mapping buffers that the GPU reads directly only pays off on GPUs that share memory with
+        // the CPU, so the application decides by requesting the feature for its device (ADR 0003).
+        F::WGPUFeatureName_BufferMapExtendedUsages => W::MAPPABLE_PRIMARY_BUFFERS,
         // Dawn's own features, and the standard ones that the shim does not convert yet. Listing
-        // every variant makes a feature added to Dawn's header a compile error.
+        // every variant makes a feature added to Dawn's header a compile error. ADR 0003 explains
+        // why `TransientAttachments`, `Unorm16TextureFormats`, and `DawnAllowUndefinedLoadStoreOp`
+        // stay unreported although `wgpu` has a counterpart.
         F::WGPUFeatureName_TextureCompressionBCSliced3D
         | F::WGPUFeatureName_TextureCompressionASTCSliced3D
-        | F::WGPUFeatureName_Float32Blendable
         | F::WGPUFeatureName_Subgroups
         | F::WGPUFeatureName_TextureFormatsTier1
         | F::WGPUFeatureName_TextureFormatsTier2
@@ -208,7 +213,6 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         | F::WGPUFeatureName_MultiPlanarRenderTargets
         | F::WGPUFeatureName_MultiPlanarFormatNv12a
         | F::WGPUFeatureName_FramebufferFetch
-        | F::WGPUFeatureName_BufferMapExtendedUsages
         | F::WGPUFeatureName_AdapterPropertiesMemoryHeaps
         | F::WGPUFeatureName_AdapterPropertiesD3D
         | F::WGPUFeatureName_AdapterPropertiesVk
