@@ -3896,6 +3896,28 @@ ShaderBuilderUniformResult C_SkRuntimeShaderBuilder_setUniformInt(SkRuntimeShade
   }
   return ShaderBuilderUniformResult::Error;
 }
+
+// Binds `child` to the child named `name`, or unbinds it when `child` is null. Returns false when
+// the effect declares no child with that name, which Skia itself reports only in debug builds.
+// `child` is borrowed from Rust, so each branch takes its own reference.
+bool C_SkRuntimeShaderBuilder_setChild(SkRuntimeShaderBuilder *self,
+                                       const char *name, size_t count,
+                                       const SkRuntimeEffect::ChildPtr *child) {
+  auto builderChild = self->child(std::string_view(name, count));
+  if (!builderChild.fChild) {
+    return false;
+  }
+  if (!child) {
+    builderChild = nullptr;
+  } else if (auto shader = child->shader()) {
+    builderChild = sk_ref_sp(shader);
+  } else if (auto colorFilter = child->colorFilter()) {
+    builderChild = sk_ref_sp(colorFilter);
+  } else {
+    builderChild = sk_ref_sp(child->blender());
+  }
+  return true;
+}
 }
 
 //

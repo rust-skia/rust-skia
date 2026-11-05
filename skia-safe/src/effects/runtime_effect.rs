@@ -463,6 +463,26 @@ impl From<Blender> for ChildPtr {
     }
 }
 
+// Lets [`RuntimeShaderBuilder::set_child()`] take a shader, color filter, or blender directly, as
+// its `impl Into<Option<ChildPtr>>` parameter cannot chain two conversions.
+impl From<Shader> for Option<ChildPtr> {
+    fn from(shader: Shader) -> Self {
+        Some(shader.into())
+    }
+}
+
+impl From<ColorFilter> for Option<ChildPtr> {
+    fn from(color_filter: ColorFilter) -> Self {
+        Some(color_filter.into())
+    }
+}
+
+impl From<Blender> for Option<ChildPtr> {
+    fn from(blender: Blender) -> Self {
+        Some(blender.into())
+    }
+}
+
 // TODO: Create `ChildPtr` from a Flattenable?
 
 impl ChildPtr {
@@ -524,11 +544,15 @@ unsafe_send_sync!(RuntimeShaderBuilder);
 #[derive(Debug)]
 pub enum ShaderBuilderError {
     UniformSizeNotSupported,
+    ChildNotFound,
 }
 impl fmt::Display for ShaderBuilderError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ShaderBuilderError::UniformSizeNotSupported => write!(f, "Unsupported uniform size"),
+            ShaderBuilderError::ChildNotFound => {
+                write!(f, "The effect declares no child with this name")
+            }
         }
     }
 }
@@ -628,6 +652,37 @@ impl RuntimeShaderBuilder {
             ShaderBuilderUniformResult::Error => Err(ShaderBuilderError::UniformSizeNotSupported),
         }
     }
+
+    /// Binds `child` to the `uniform shader`, `uniform colorFilter`, or `uniform blender` named
+    /// `name`, or unbinds it when `child` is `None`. The equivalent of Skia's
+    /// `builder.child(name) = child`.
+    ///
+    /// Returns [`ShaderBuilderError::ChildNotFound`] when the effect declares no child named
+    /// `name`.
+    pub fn set_child(
+        &mut self,
+        name: impl AsRef<str>,
+        child: impl Into<Option<ChildPtr>>,
+    ) -> Result<(), ShaderBuilderError> {
+        let name = name.as_ref();
+        let child = child.into();
+        let native_child = child.as_ref().map(|child| child.native());
+        let found = unsafe {
+            sb::C_SkRuntimeShaderBuilder_setChild(
+                self.native_mut() as _,
+                name.as_bytes().as_ptr() as _,
+                name.len(),
+                native_child
+                    .as_ref()
+                    .map_or(ptr::null(), |native| &**native as *const _),
+            )
+        };
+        if found {
+            Ok(())
+        } else {
+            Err(ShaderBuilderError::ChildNotFound)
+        }
+    }
 }
 
 #[cfg(test)]
@@ -640,5 +695,21 @@ mod tests {
         RuntimeEffect::make_for_color_filter("", None);
         RuntimeEffect::make_for_shader("", None);
         RuntimeEffect::make_for_blender("", None);
+    }
+
+    /// Skia reports an unknown child name only in debug builds, so `set_child` checks it itself.
+    #[test]
+    fn set_child_rejects_an_unknown_name() {
+        let effect = RuntimeEffect::make_for_shader(
+            "uniform shader image; half4 main(float2 p) { return image.eval(p); }",
+            None,
+        )
+        .unwrap();
+        let mut builder = RuntimeShaderBuilder::new(effect);
+        assert!(builder.set_child("image", None).is_ok());
+        assert!(matches!(
+            builder.set_child("missing", None),
+            Err(ShaderBuilderError::ChildNotFound)
+        ));
     }
 }
