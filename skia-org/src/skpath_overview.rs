@@ -1,4 +1,4 @@
-use crate::DrawingDriver;
+use crate::{DrawingDriver, helper::default_typeface};
 use skia_safe::{Canvas, Color, Font, Paint, PathBuilder, paint};
 use std::path;
 
@@ -50,12 +50,14 @@ fn draw_example2(canvas: &Canvas) {
 }
 
 fn draw_example3(canvas: &Canvas) {
+    // A default font has an empty typeface and would draw no labels.
+    let font = &Font::from_typeface(default_typeface(), None);
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
     canvas
-        .draw_str("1st contour", (150, 100), &Font::default(), &paint)
-        .draw_str("2nd contour", (130, 160), &Font::default(), &paint)
-        .draw_str("3rd contour", (40, 30), &Font::default(), &paint);
+        .draw_str("1st contour", (150, 100), font, &paint)
+        .draw_str("2nd contour", (130, 160), font, &paint)
+        .draw_str("3rd contour", (40, 30), font, &paint);
     paint.set_style(paint::Style::Stroke);
     let mut path = PathBuilder::new();
     path.move_to((124, 108))
