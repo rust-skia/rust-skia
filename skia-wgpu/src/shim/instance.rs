@@ -1,6 +1,7 @@
 //! The instance, which owns the futures and polls the devices while Skia waits, and the adapter.
 
 use std::ffi::CString;
+use std::panic::{self, AssertUnwindSafe};
 use std::sync::Arc;
 
 use skia_bindings as sb;
@@ -43,19 +44,48 @@ impl Instance {
     }
 
     /// Lets `wgpu` report completed work. With `wait`, blocks until the submitted work is done.
-    pub fn poll(&self, wait: bool) {
-        let poll_type = if wait {
-            wgpu::PollType::Wait {
-                submission_index: None,
-                timeout: None,
+    ///
+    /// Callers that do not wait need not look at the result, because a callback that the poll
+    /// does not fire keeps waiting until its instance is released.
+    pub fn poll(&self, wait: bool) -> Polled {
+        loop {
+            let poll_type = if wait {
+                wgpu::PollType::Wait {
+                    submission_index: None,
+                    timeout: None,
+                }
+            } else {
+                wgpu::PollType::Poll
+            };
+            // On a lost device, `wgpu` panics in the poll instead of returning an error. The panic
+            // would abort the process inside the WebGPU function that polls, so it is caught here.
+            let poll = || self.device.poll(poll_type);
+            let Ok(result) = panic::catch_unwind(AssertUnwindSafe(poll)) else {
+                return Polled::Incomplete;
+            };
+            match result {
+                Ok(_) => return Polled::Complete,
+                // `wgpu`'s GL backend gives up a wait after about 2 s, so the wait starts again.
+                // On WebGL, a wait gives up at once, and the work cannot progress while it repeats.
+                Err(wgpu::PollError::Timeout) if !cfg!(target_family = "wasm") => {}
+                Err(wgpu::PollError::Timeout) => return Polled::Incomplete,
+                Err(error @ wgpu::PollError::WrongSubmissionIndex(..)) => {
+                    panic!("polling the wgpu device failed: {error}")
+                }
             }
-        } else {
-            wgpu::PollType::Poll
-        };
-        self.device
-            .poll(poll_type)
-            .expect("polling the wgpu device failed");
+        }
     }
+}
+
+/// How far a poll of the device got.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Polled {
+    /// `wgpu` reported every completion that the poll covers: the work that is already done, or
+    /// for a wait, all submitted work.
+    Complete,
+    /// Some of that work did not complete, because the device is lost, or because a wait on
+    /// WebGL gave up.
+    Incomplete,
 }
 
 impl Adapter {
@@ -93,14 +123,18 @@ pub unsafe extern "C" fn wgpuInstanceWaitAny(
         u64::MAX,
         "wgpuInstanceWaitAny with a finite timeout"
     );
-    // The wait returns once all submitted work is done, and `wgpu` has then reported every
+    let polled = instance.poll(true);
+    if instance.futures.fire_waited(infos) {
+        return S::WGPUWaitStatus_Success;
+    }
+    // A complete wait returns once all submitted work is done, and `wgpu` has then reported every
     // completion it will report, so a future that is still pending would never complete.
-    instance.poll(true);
-    assert!(
-        instance.futures.fire_waited(infos),
+    assert_eq!(
+        polled,
+        Polled::Incomplete,
         "wgpuInstanceWaitAny waits for futures that cannot complete"
     );
-    S::WGPUWaitStatus_Success
+    S::WGPUWaitStatus_Error
 }
 const _: sb::WGPUProcInstanceWaitAny = Some(wgpuInstanceWaitAny);
 

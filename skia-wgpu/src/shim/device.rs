@@ -59,12 +59,9 @@ impl Device {
 /// work submitted to the device, also the application's (ADR 0003).
 impl Drop for Device {
     fn drop(&mut self) {
-        // wgpu's GL backend caps the wait at about 4 s, and its WebGL backend does not wait at all,
-        // so a `Timeout` leaves the maps pending and leaks them (ADR 0003).
-        let _ = self.device.poll(wgpu::PollType::Wait {
-            submission_index: None,
-            timeout: None,
-        });
+        // An incomplete wait, on a lost device or on WebGL, leaves the maps pending and leaks
+        // them (ADR 0003).
+        let _ = self.instance.poll(true);
     }
 }
 

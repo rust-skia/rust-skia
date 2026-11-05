@@ -235,8 +235,15 @@ application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a v
   `AllowSpontaneous`, and a map callback uses only its buffer, whose resource cache the buffer
   keeps alive (`DawnBuffer.cpp`, `Resource.cpp`). The poll also waits for the application's work
   on the device. The test `releasing_the_device_frees_a_buffer_with_a_pending_map` in `skia-wgpu`
-  pins this. On `wgpu`'s GL backend, the poll gives up after about 4 seconds, and on WebGL it does
-  not wait at all. A map whose work is still running then stays pending, and its buffers leak.
+  pins this. On WebGL, the poll does not wait at all, so a map whose work is still running stays
+  pending, and its buffers leak.
+- Every blocking poll of the shim, in `wgpuInstanceWaitAny` and when Skia releases its last device
+  handle, waits until all submitted work is done. `wgpu`'s GL backend gives up a wait after about
+  2 seconds, so the shim starts the wait again. On a lost device, `wgpu` panics in the poll instead
+  of returning an error. The panic would abort the process inside the WebGPU function, so the shim
+  catches it. `wgpuInstanceWaitAny` then returns `WGPUWaitStatus_Error` for futures that can no
+  longer complete, and the release leaves the pending maps to leak. An application that builds
+  with `panic = "abort"` still aborts on a lost device.
 - The `wgpu` backend is experimental. Until it stabilizes, no prebuilt binaries contain it, so the
   `wgpu` feature builds Skia from source.
 
