@@ -35,7 +35,8 @@ and the application share one device. ADR 0004 decides how the backend's calls r
 
 `skia-bindings` generates the WebGPU types in its existing bindgen run, and the shim uses them.
 The shim implements only the functions that the backend calls, 106 at m157, of the 276 functions
-in `webgpu.h`.
+in `webgpu.h`. It also implements the `AddRef` functions of six object types that the backend only
+releases, so every object type has both.
 
 ## Which headers
 
@@ -166,8 +167,8 @@ application that takes its `wgpu` crate from `skia_safe::wgpu` does not name a v
 
 ## Consequences
 
-- The shim implements 74 methods and the `AddRef` and `Release` functions of 19 object types, 106
-  functions in total at m157. The functions change with each Skia milestone.
+- The shim implements 74 methods and the `AddRef` and `Release` functions of 19 object types, 112
+  functions in total at m157, of which the backend calls 106. The functions change with each Skia milestone.
 - Skia's SkSL compiler emits WGSL that Dawn's Tint compiler accepts. `wgpu` compiles WGSL with naga
   instead, and it is not yet verified that naga accepts Skia's output.
 - Everything the shim does passes through `wgpu`, so `wgpu` tracks resource state and
