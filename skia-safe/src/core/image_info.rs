@@ -1,6 +1,9 @@
-use crate::{AlphaType, ColorSpace, ColorType, IPoint, IRect, ISize, prelude::*};
-use skia_bindings::{self as sb, SkColorInfo, SkImageInfo};
 use std::{fmt, mem};
+
+use skia_bindings::{self as sb, SkColorInfo, SkImageInfo};
+
+use crate::prelude::*;
+use crate::{AlphaType, ColorSpace, ColorType, IPoint, IRect, ISize};
 
 pub use skia_bindings::SkYUVColorSpace as YUVColorSpace;
 variant_name!(YUVColorSpace::JPEG);
@@ -527,9 +530,10 @@ impl ImageInfo {
 
 #[cfg(test)]
 mod tests {
+    use std::mem;
+
     use crate::prelude::*;
     use crate::{AlphaType, ColorSpace, ImageInfo};
-    use std::mem;
 
     #[test]
     fn ref_cnt_in_relation_to_color_space() {
