@@ -63,6 +63,25 @@ Note that the version component of a Skia fork tag does not track the milestone 
 tags up to `m152` (for example `m152-0.100.0`), and only aligns with it from `m153`
 on. Take both tags from the repository instead of deriving one from the other.
 
+## Accounting
+
+Keep one accounting file per update, `$TMPDIR/mNEW_MILESTONE_accounting.md`. The PR
+checklist orders the work, and the accounting holds what each check found and the decision
+made for it. Create it before the first check, with one section per check of this skill:
+
+- Skia release notes
+- Build organization
+- Third-party dependencies (`DEPS`)
+- Dawn headers: changed WebGPU types and functions, undefined `wgpu*` functions, feature
+  checks
+- Spontaneous callbacks
+- `wgpu` versions
+- Toolchain requirements
+- Public headers
+
+Each check below ends by recording its outcome in its section, `no change` included. The
+accounting is complete when every section has an entry for everything its check found.
+
 ## Rebase the fork patch stack
 
 Use this sequence when `upstream/chrome/mXX` advances after the initial milestone
@@ -322,6 +341,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     `just check-third-party-sources` must pass. It checks every path the
     `third_party` build files list against the checkouts of the pinned libraries. It fails
     and names the libraries it skipped when their checkout is not at the pin.
+  - Record each library in the accounting with its old pin, its new pin, and which source
+    the new pin follows: Chromium, Skia, or a fixed release.
 - **Dawn headers (`wgpu` feature):** source builds with `wgpu` generate Skia's WebGPU
   headers from the Dawn revision in `[package.metadata].dawn`
   (`docs/adr/0003`). No file in the repository shows how they change, so every tag cut
@@ -385,10 +406,11 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     git -C skia-bindings/skia grep -n 'CallbackMode::AllowSpontaneous' refs/tags/NEW_TAG -- src/gpu/graphite/dawn
     ```
 
-    The step is done when every listed callback is read and confirmed to use only its own
-    buffer, or state that outlives the device and the shared context. A new callback, or one
-    that reaches the device or the shared context, invalidates the ADR's argument: surface it
-    to the user, because the release poll needs a change before the update ships.
+    The step is done when every listed callback is read, confirmed to use only its own
+    buffer or state that outlives the device and the shared context, and recorded in the
+    accounting. A new callback, or one that reaches the device or the shared context,
+    invalidates the ADR's argument: surface it to the user, because the release poll needs a
+    change before the update ships.
   - `skia-bindings` compiles Skia's Dawn backend itself, from the `.cpp` files of
     `skia_graphite_dawn_sources` in `gn/graphite.gni`, and leaves `skia_use_dawn` off. When the
     build organization diff changes what `skia_use_dawn` adds in `BUILD.gn` (sources, defines,
@@ -407,7 +429,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     ```
 
     A `wgpu` minor or patch release needs no change, because `wgpuNN = { package = "wgpu",
-    version = "NN" }` already accepts it.
+    version = "NN" }` already accepts it. Record the newest `wgpu` version and the newest
+    `wgpu-NN` feature in the accounting.
   - When a newer major exists, propose the shim update to the user and implement it only after
     their decision. The proposal names the new feature `wgpu-NN` with its optional dependency
     `wgpuNN` and module `skia-wgpu/src/vNN.rs`, the `wgpu` API changes that the shim's source
@@ -443,7 +466,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   the libstdc++ in the CI image (see `AGENTS.md`). Surface each requirement to the user as
   a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
   whether a `rust-skia:` fork patch existed only to support the old one, such as an
-  `@available` workaround.
+  `@available` workaround. Record each commit that the log lists in the accounting, with
+  the requirement it raises or `no requirement`.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
@@ -481,11 +505,10 @@ replays the old milestone's upstream-only commits as if they were fork patches.
        is needed;
      - **new public header** — decide whether to add a binding + wrapper, and record
        the decision.
-  3. Keep a written accounting (in a scratch file like `/tmp/mXX_accounting.md`) of
-     every changed header and the decision made for it (`no change`, `updated binding`,
-     `updated wrapper`, `added new`, `skipped — internal only`, `skipped — no
-     binding/wrapper`). **Do not start editing wrappers until every header has an entry
-     in this accounting.**
+  3. Record every changed header in the accounting's public headers section with its
+     decision: `no change`, `updated binding`, `updated wrapper`, `added new`, `skipped —
+     internal only`, or `skipped — no binding/wrapper`. **Start editing wrappers only once
+     every header has an entry.**
   4. Batch the headers by classification and process each batch in one pass, editing the
      matching `*.cpp` and `skia-safe/src/...` files together. Re-run
      `cargo check -p skia-bindings` (touching `bindings.cpp` first to force bindgen
