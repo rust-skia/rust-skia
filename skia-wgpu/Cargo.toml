@@ -4,9 +4,20 @@ description = "Runs Skia's Graphite Dawn backend on the wgpu crate"
 homepage = "https://github.com/rust-skia/rust-skia/tree/master/skia-wgpu"
 repository = "https://github.com/rust-skia/rust-skia"
 license = "MIT"
+readme = "README.md"
 version = "0.157.0"
 edition.workspace = true
 rust-version.workspace = true
+# The shim exports the `wgpu*` functions of `webgpu.h`, so two versions of this crate in one build
+# would export the same symbols. Cargo allows only one package per `links` value in a dependency
+# graph and rejects such a graph before it builds anything (ADR 0004). `links` requires a build
+# script, which is empty.
+links = "skia-wgpu"
+
+# docs.rs documents the API of the newest `wgpu` version. `bindings_docs.rs` contains the WebGPU
+# types because `skia-safe`'s docs.rs features include `wgpu`.
+[package.metadata.docs.rs]
+features = ["wgpu-30"]
 
 [features]
 wgpu-30 = ["dep:wgpu30", "skia-bindings/wgpu"]

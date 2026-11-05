@@ -11,8 +11,10 @@ extern crate ash;
 // TODO: think about making the examples more Rust-idiomatic, by using method chaining for Paint / Paths, for example.
 
 mod artifact;
+mod coordinates;
 mod drivers;
 mod helper;
+mod skblendmode_overview;
 mod skcanvas_overview;
 mod skpaint_overview;
 #[cfg(feature = "textlayout")]
@@ -20,6 +22,7 @@ mod skparagraph_example;
 mod skpath_overview;
 #[cfg(feature = "textlayout")]
 mod skshaper_example;
+mod sksl;
 
 pub use drivers::Driver;
 
@@ -125,12 +128,24 @@ fn main() {
         }
     }
 
+    #[cfg(feature = "wgpu")]
+    {
+        use drivers::wgpu::Wgpu;
+
+        if drivers.contains(&Driver::Wgpu) {
+            draw_all(&mut Wgpu::new(), &out_path)
+        }
+    }
+
     fn draw_all<Driver: DrawingDriver>(driver: &mut Driver, out_path: &Path) {
         let out_path = out_path.join(Driver::DRIVER.to_string());
 
         skcanvas_overview::draw(driver, &out_path);
         skpath_overview::draw(driver, &out_path);
         skpaint_overview::draw(driver, &out_path);
+        skblendmode_overview::draw(driver, &out_path);
+        coordinates::draw(driver, &out_path);
+        sksl::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
         {

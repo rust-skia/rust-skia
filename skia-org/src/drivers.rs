@@ -15,6 +15,8 @@ pub mod render_svg;
 pub mod svg;
 #[cfg(feature = "vulkan")]
 pub mod vulkan;
+#[cfg(feature = "wgpu")]
+pub mod wgpu;
 
 pub use cpu::Cpu;
 pub use pdf::Pdf;
@@ -47,6 +49,8 @@ pub enum Driver {
     Metal,
     #[cfg(feature = "d3d")]
     D3d,
+    #[cfg(feature = "wgpu")]
+    Wgpu,
     #[cfg(feature = "svg")]
     RenderSvg,
 }
@@ -70,6 +74,8 @@ impl FromStr for Driver {
             "metal" => Metal,
             #[cfg(feature = "d3d")]
             "d3d" => D3d,
+            #[cfg(feature = "wgpu")]
+            "wgpu" => Wgpu,
             _ => return Err("Unknown driver"),
         })
     }
@@ -92,6 +98,8 @@ impl Display for Driver {
             Metal => "metal",
             #[cfg(feature = "d3d")]
             D3d => "d3d",
+            #[cfg(feature = "wgpu")]
+            Wgpu => "wgpu",
             #[cfg(feature = "svg")]
             RenderSvg => "render-svg",
         };

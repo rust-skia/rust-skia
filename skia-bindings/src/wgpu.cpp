@@ -2,8 +2,8 @@
 // `build_support/dawn.rs` generates.
 //
 // Skia's Dawn backend calls the WebGPU C functions of `webgpu.h`. rust-skia links no WebGPU
-// implementation for them. They forward through Dawn's function table (`dawn_proc`), and the
-// `skia-wgpu` crate installs a table that calls the `wgpu` crate (see docs/adr/0003).
+// implementation for them. They stay undefined here, and the `skia-wgpu` crate exports them on
+// the `wgpu` crate (see docs/adr/0003 and docs/adr/0004).
 //
 // Only the C layer of WebGPU crosses into Rust. The functions below take the C handles
 // (`WGPUInstance`, `WGPUDevice`, ...) and wrap them in Dawn's C++ classes on this side.
@@ -14,8 +14,6 @@
 #include "include/gpu/graphite/ContextOptions.h"
 #include "include/gpu/graphite/dawn/DawnBackendContext.h"
 #include "include/gpu/graphite/dawn/DawnGraphiteTypes.h"
-
-#include "dawn/dawn_proc.h"
 
 //
 // gpu/graphite/dawn/DawnBackendContext.h

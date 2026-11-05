@@ -30,28 +30,67 @@ library both bundled into the rlib (`static=`, as on Unix) and passed to the lin
 `WGPUProcDeviceCreateBuffer`, and `skia-bindings` generates these types with the other WebGPU
 types. Next to each shim function, an assignment of the function to that type
 (`const _: WGPUProcDeviceCreateBuffer = Some(wgpuDeviceCreateBuffer);`) makes rustc check its
-signature against the header. A function that the backend calls and the shim lacks fails the
-link with an undefined symbol that names the function.
+signature against the header. A function that the backend calls and the shim lacks usually fails
+the link with an undefined symbol that names the function. The linker reports it only if it keeps
+the code of the backend that calls the function, so the list of undefined `wgpu*` symbols of
+`libskia-bindings.a` is the authoritative check.
+
+## Skia's calls stay inside the binary that contains them
+
+On ELF targets, such as Linux, a shared library exports every function with default visibility,
+and the dynamic linker may resolve the library's own calls of such a function to a definition in
+another library that was loaded earlier. A shared library that contains Skia would export the
+shim's `wgpu*` functions, and another WebGPU implementation in the process, or a second copy of
+the shim, could take over Skia's calls with handles that it does not understand.
+
+On ELF targets, `skia-bindings` therefore compiles its C++ sources, Skia's Dawn backend among
+them, with `WGPU_FUNCTION_ATTRIBUTE`, the macro that `webgpu.h` appends to every function
+declaration, set to `visibility("hidden")`. The linker gives a symbol the most restrictive
+visibility of all its references, so the shim's definitions become hidden in the output, and
+Skia's calls bind inside it. An experiment with a model of a Rust `cdylib` that contains a C
+library calling an exported Rust function confirmed this on aarch64 Linux with GNU ld, in debug
+and release builds, and with LLD 19 in a release build. Without the attribute, the library
+exported the function, and with it, the function was local.
+
+Windows and macOS do not need the attribute. A Rust `cdylib` exports the shim's functions there,
+too, but the linker binds the library's own calls to its own definitions: a DLL calls its
+functions directly, and macOS records the defining library with each import (two-level
+namespace).
 
 ## One set of exports per build
 
 ADR 0003 lets a build enable exactly one `wgpu-NN` feature of `skia-wgpu`. Each enabled version
-would export the same `wgpu*` symbols, so `skia-wgpu` stops the build with a `compile_error!` when
-more than one is enabled. For the same reason, `skia-wgpu` declares a `links` key. Cargo then
-allows only one version of `skia-wgpu` in a dependency graph, and two semver-incompatible versions
-cannot both export the symbols.
+would export the same `wgpu*` symbols. Once `skia-wgpu` supports a second `wgpu` major version, it
+stops the build with a `compile_error!` when more than one is enabled. With a single version, no
+build can enable two. For the same reason, `skia-wgpu` declares `links = "skia-wgpu"`, with
+the empty build script that Cargo requires for the key. Cargo then allows only one version of
+`skia-wgpu` in a dependency graph, and two semver-incompatible versions cannot both export the
+symbols. Cargo rejects such a graph when it resolves the dependencies, before anything is built.
+Without the check, the linker might load only one version's exports and silently send the other
+version's handles to them.
+
+`skia-bindings` declares `links = "skia"`, and `skia-wgpu` pins its exact version. As long as all
+crates share one version per milestone, these two already keep a second `skia-wgpu` out. The key
+on `skia-wgpu` keeps this guarantee on the crate that exports the symbols, so it also holds if
+`skia-wgpu` ever gets a version line of its own.
 
 ## Consequences
 
 - The undefined `wgpu*` symbols of `libskia-bindings.a` are the functions that the shim must
-  implement, 106 at m157. The link of a test binary names every function that a new milestone
-  adds. `cargo check` does not report a missing function.
+  implement, 106 at m157. The link of a test binary usually names a function that a new milestone
+  adds, and `nm -u` lists all of them. `cargo check` does not report a missing function.
 - If two crates in one dependency graph enable different `wgpu-NN` features of `skia-safe`, Cargo
-  enables both, and the `compile_error!` fails the build.
-- The `wgpu*` symbols are global. An application that also links another WebGPU implementation
-  that exports them, such as Dawn or wgpu-native, fails to link with duplicate symbols.
-- The link experiment did not cover Windows with MSVC's `link.exe`. Whether rustc's `symbols.o`
-  also loads the shim's functions there is unverified.
+  enables both, and the `compile_error!` that comes with the second supported version fails the
+  build.
+- The `wgpu*` symbols keep their `webgpu.h` names. An application that statically links another
+  WebGPU implementation that defines them, such as Dawn or wgpu-native, fails to link with
+  duplicate symbols. Shared libraries do not export them on ELF targets. If such an application
+  needs rust-skia, a prefix on the symbol names of both sides, through a generated header of
+  `#define`s for Skia's C++ sources and renamed exports in the shim, removes the clash without a
+  change to the public API.
+- The link experiment did not cover Windows with MSVC's `link.exe`. Windows QA on
+  `x86_64-pc-windows-msvc` and `aarch64-pc-windows-msvc` linked and ran the test binaries of the
+  `wgpu` feature with `link.exe`, so rustc's `symbols.o` loads the shim's functions there, too.
 
 ## Considered Options
 

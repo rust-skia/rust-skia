@@ -231,15 +231,12 @@ pub fn generate_bindings(
         cc_build.include(dawn_include_dir);
         dawn::add_backend_sources(&mut cc_build, &build.skia_source_dir);
 
-        // The WebGPU C layer: handles, descriptors, enums, flag constants, and Dawn's function
-        // table that `skia-wgpu` fills. Dawn's C++ wrapper classes (`wgpu::*`) stay on the C++
-        // side.
+        // The WebGPU C layer: handles, descriptors, enums, flag constants, and the function
+        // pointer types (`WGPUProc*`) that `skia-wgpu` checks its exported functions against.
+        // Dawn's C++ wrapper classes (`wgpu::*`) stay on the C++ side.
         builder = builder
             .allowlist_type("WGPU.*")
             .allowlist_var("WGPU.*")
-            .allowlist_type("DawnProcTable")
-            .allowlist_function("dawnProcSetProcs")
-            .allowlist_function("dawnProcGetVersion")
             .blocklist_type("wgpu::.*")
             .opaque_type("skgpu::graphite::DawnBackendContext");
     }

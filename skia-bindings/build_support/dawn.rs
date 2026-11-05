@@ -1,5 +1,5 @@
-//! Generates the Dawn headers and `dawn_proc` source that the `wgpu` feature builds Skia's Dawn
-//! backend with, and adds the backend to the `cc` build of `skia-bindings`.
+//! Generates the Dawn headers that the `wgpu` feature builds Skia's Dawn backend with, and adds the
+//! backend to the `cc` build of `skia-bindings`.
 //!
 //! Skia's Dawn backend is compiled against Dawn's generated WebGPU headers, and bindgen reads the
 //! same headers for the Rust types of the `skia-wgpu` shim (ADR 0003). Dawn's generator produces
@@ -20,7 +20,6 @@ const SOURCE_PATHS: &[&str] = &[
     "generator",
     "src/dawn/dawn.json",
     "include/webgpu",
-    "include/dawn/dawn_proc.h",
     "LICENSE",
 ];
 
@@ -29,7 +28,8 @@ const SOURCE_PATHS: &[&str] = &[
 /// argument `--<name>-path`.
 const PYTHON_PACKAGES: &[&str] = &["jinja2", "markupsafe"];
 
-/// Generates the Dawn files into [`dir`], unless they are already there for these revisions.
+/// Generates the Dawn files into [`dir`], unless they are already there for these revisions and
+/// this generation setup.
 ///
 /// `offline` builds panic, because generation downloads Dawn and the generator's Python packages.
 pub fn prepare(python: &Path, offline: bool) {
@@ -40,7 +40,7 @@ pub fn prepare(python: &Path, offline: bool) {
     );
 
     let revisions = Revisions::from_metadata();
-    let stamp = revisions.stamp();
+    let stamp = generation_stamp(&revisions);
     let stamp_file = dir().join("REVISION");
     if fs::read_to_string(&stamp_file).is_ok_and(|s| s == stamp) {
         return;
@@ -74,46 +74,73 @@ pub fn prepare(python: &Path, offline: bool) {
     }
 
     let generated = cargo::output_directory().join("dawn-generated");
-    generate(
-        &source_dir,
-        &revisions.dawn,
-        &packages_dir,
-        python,
-        &generated,
-    );
+    generate(&source_dir, &packages_dir, python, &generated);
     assemble(&source_dir, &generated, &dir());
     fs::write(stamp_file, stamp).unwrap();
 }
 
-/// Adds Skia's Dawn backend and `dawn_proc.cpp` to the `cc` build of `skia-bindings`.
+/// The Dawn generator's targets that produce the generated files of [`FILES`].
+const GENERATOR_TARGETS: &str = "headers,cpp_headers";
+
+/// Identifies what [`prepare`] generates: the revisions, the generator's targets, and the origin,
+/// source path, and destination of each file that it copies. A build directory from before a
+/// change to any of them is generated again.
+fn generation_stamp(revisions: &Revisions) -> String {
+    let files: Vec<String> = FILES
+        .iter()
+        .map(|(origin, from, to)| format!("{origin:?}:{from}->{to}"))
+        .collect();
+    format!(
+        "{} targets={GENERATOR_TARGETS} files={}",
+        revisions.stamp(),
+        files.join(",")
+    )
+}
+
+/// Adds Skia's Dawn backend to the `cc` build of `skia-bindings`.
 ///
 /// Skia's GN build compiles the Dawn backend only together with all of Dawn, which it builds with
 /// CMake. `skia-bindings` therefore leaves `skia_use_dawn` off and compiles the backend's sources
 /// itself, with the same defines as its own bindings. No Skia source outside the backend depends
 /// on `SK_DAWN`. The caller adds [`include_dir`] for both `cc` and bindgen.
+///
+/// The backend's calls of the `wgpu*` functions stay undefined in `libskia-bindings.a`. The crate
+/// `skia-wgpu` exports them (ADR 0004).
 pub fn add_backend_sources(cc_build: &mut cc::Build, skia_source_dir: &Path) {
     for source in backend_sources(skia_source_dir) {
         cc_build.file(source);
     }
-    cc_build.file(dir().join("src/dawn_proc.cpp"));
-    // The replacements for the Dawn internals that `dawn_proc.cpp` includes. Only that file
-    // includes them, and their paths (`src/utils/assert.h`, ...) exist nowhere in Skia, so they
-    // cannot shadow a Skia header. Cargo runs build scripts in the package's root directory.
-    let compat_dir = std::env::current_dir().unwrap().join("dawn/compat");
-    cargo::rerun_if_file_changed(&compat_dir);
-    cc_build.include(compat_dir);
+    // Hidden references make the linker hide the shim's `wgpu*` definitions on ELF targets, so a
+    // shared library that contains Skia neither exports them nor lets another library take over
+    // Skia's calls (ADR 0004). `webgpu.h` appends this macro to every function declaration.
+    let target = cargo::target();
+    let elf = !target.is_windows() && target.vendor != "apple" && !target.is_emscripten();
+    if elf {
+        cc_build.define(
+            "WGPU_FUNCTION_ATTRIBUTE",
+            "__attribute__((visibility(\"hidden\")))",
+        );
+        // `webgpu.h` also appends the macro to its callback typedefs, where the compiler ignores
+        // the attribute and warns once per typedef and source file, thousands of times. GCC names
+        // the warning `attributes`, which in Clang is a group that also covers unknown attributes.
+        if cc_build.get_compiler().is_like_clang() {
+            cc_build.flag("-Wno-ignored-attributes");
+        } else {
+            cc_build.flag_if_supported("-Wno-attributes");
+        }
+    }
     // Skia's internal headers leave many parameters unused, and Skia's own build turns this
     // warning off. `cc` enables it with `-Wall -Wextra` (`/W4` on MSVC) for the whole build.
     cc_build.flag_if_supported("-Wno-unused-parameter");
     cc_build.flag_if_supported("/wd4100");
 }
 
-/// The include directory of the Dawn headers (`webgpu/webgpu.h`, `dawn/dawn_proc.h`, ...).
+/// The include directory of the Dawn headers (`webgpu/webgpu.h`, `webgpu/webgpu_cpp.h`, ...).
 pub fn include_dir() -> PathBuf {
     dir().join("include")
 }
 
-/// The directory that [`prepare`] fills: `include/` and `src/dawn_proc.cpp`.
+/// The directory that [`prepare`] fills, with the headers in `include/`.
 pub fn dir() -> PathBuf {
     cargo::output_directory().join("dawn")
 }
@@ -195,11 +222,10 @@ fn download(url: &str, root: &str, include: impl Fn(&Path) -> bool, target: &Pat
     }
 }
 
-/// Runs Dawn's generators for the C header, the C++ wrapper, the function table, the forwarding
-/// functions of `dawn_proc`, and the revision stamp that `dawnProcSetProcs` checks.
+/// Runs Dawn's generator for the C header and the C++ wrapper.
 ///
 /// `packages_dir` contains a directory for each of the [`PYTHON_PACKAGES`].
-fn generate(source_dir: &Path, revision: &str, packages_dir: &Path, python: &Path, out: &Path) {
+fn generate(source_dir: &Path, packages_dir: &Path, python: &Path, out: &Path) {
     if out.exists() {
         fs::remove_dir_all(out).unwrap();
     }
@@ -225,23 +251,7 @@ fn generate(source_dir: &Path, revision: &str, packages_dir: &Path, python: &Pat
             "--dawn-json".into(),
             source_dir.join("src/dawn/dawn.json").into(),
             "--targets".into(),
-            "headers,cpp_headers,proc".into(),
-        ],
-    );
-
-    // The version generator reads the revision from git, unless a version file provides it. A
-    // download has no git metadata, so the file always provides it.
-    let version_file = out.join("dawn-version.txt");
-    fs::write(&version_file, revision).unwrap();
-    run_python(
-        python,
-        &generator.join("dawn_version_generator.py"),
-        &common_args,
-        &[
-            "--dawn-dir".into(),
-            source_dir.into(),
-            "--version-file".into(),
-            version_file.into(),
+            GENERATOR_TARGETS.into(),
         ],
     );
 }
@@ -257,6 +267,7 @@ fn run_python(python: &Path, script: &Path, common_args: &[OsString], args: &[Os
 }
 
 /// Where each file of [`dir`] comes from: the Dawn source or the generator output.
+#[derive(Debug)]
 enum Origin {
     Source,
     Generated,
@@ -281,11 +292,6 @@ const FILES: &[(Origin, &str, &str)] = &[
         "include/webgpu/webgpu_enum_class_bitmasks.h",
         "include/webgpu/webgpu_enum_class_bitmasks.h",
     ),
-    (
-        Origin::Source,
-        "include/dawn/dawn_proc.h",
-        "include/dawn/dawn_proc.h",
-    ),
     (Origin::Source, "LICENSE", "LICENSE"),
     (
         Origin::Generated,
@@ -301,21 +307,6 @@ const FILES: &[(Origin, &str, &str)] = &[
         Origin::Generated,
         "include/dawn/webgpu_cpp.h",
         "include/dawn/webgpu_cpp.h",
-    ),
-    (
-        Origin::Generated,
-        "include/dawn/dawn_proc_table.h",
-        "include/dawn/dawn_proc_table.h",
-    ),
-    (
-        Origin::Generated,
-        "include/dawn/dawn_version.h",
-        "include/dawn/dawn_version.h",
-    ),
-    (
-        Origin::Generated,
-        "src/dawn/dawn_proc.cpp",
-        "src/dawn_proc.cpp",
     ),
 ];
 

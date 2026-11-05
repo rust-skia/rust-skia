@@ -1,7 +1,9 @@
 use super::Data;
 use crate::prelude::*;
 use sb::SkNVRefCnt;
-use skia_bindings::{self as sb, SkColorSpace, SkColorSpacePrimaries, skcms_TransferFunction};
+use skia_bindings::{
+    self as sb, SkColorSpace, SkColorSpacePrimaries, skcms_Matrix3x3, skcms_TransferFunction,
+};
 use std::fmt;
 
 #[derive(Clone, PartialEq, Debug)]
@@ -32,6 +34,19 @@ pub struct ColorSpaceTransferFn {
 }
 
 native_transmutable!(skcms_TransferFunction, ColorSpaceTransferFn);
+
+/// A row-major 3x3 matrix that converts linear RGB into the XYZ D50 color space, and so defines
+/// the gamut of a [`ColorSpace`].
+///
+/// Skia names this type `skcms_Matrix3x3`. The Rust name follows [`ColorSpacePrimaries`] and
+/// [`ColorSpaceTransferFn`] and names what the matrix is for.
+#[derive(Clone, PartialEq, Debug)]
+#[repr(C)]
+pub struct ColorSpaceXYZ {
+    pub vals: [[f32; 3]; 3],
+}
+
+native_transmutable!(skcms_Matrix3x3, ColorSpaceXYZ);
 
 /// Color primaries defined by ITU-T H.273, table 2. Names are given by the first
 /// specification referenced in the value's row.
@@ -344,7 +359,54 @@ pub mod named_transfer_fn {
     pub const A98_RGB: ColorSpaceTransferFn = DOT22;
 }
 
-// TODO: SkNamedGamut
+pub mod named_gamut {
+    //! Named [`crate::ColorSpaceXYZ`] constants for common gamuts.
+    use crate::ColorSpaceXYZ;
+
+    // ICC fixed-point (16.16) representation, taken from skcms. Please keep them exactly in sync.
+    pub const SRGB: ColorSpaceXYZ = ColorSpaceXYZ {
+        vals: [
+            [fixed(0x6FA2), fixed(0x6299), fixed(0x24A0)],
+            [fixed(0x38F5), fixed(0xB785), fixed(0x0F84)],
+            [fixed(0x0390), fixed(0x18DA), fixed(0xB6CF)],
+        ],
+    };
+
+    // ICC fixed-point (16.16) representation.
+    pub const ADOBE_RGB: ColorSpaceXYZ = ColorSpaceXYZ {
+        vals: [
+            [fixed(0x9c18), fixed(0x348d), fixed(0x2631)],
+            [fixed(0x4fa5), fixed(0xa02c), fixed(0x102f)],
+            [fixed(0x04fc), fixed(0x0f95), fixed(0xbe9c)],
+        ],
+    };
+
+    pub const DISPLAY_P3: ColorSpaceXYZ = ColorSpaceXYZ {
+        vals: [
+            [0.515102, 0.291965, 0.157153],
+            [0.241182, 0.692236, 0.0665819],
+            [-0.00104941, 0.0418818, 0.784378],
+        ],
+    };
+
+    pub const REC2020: ColorSpaceXYZ = ColorSpaceXYZ {
+        vals: [
+            [0.673459, 0.165661, 0.125100],
+            [0.279033, 0.675338, 0.0456288],
+            [-0.00193139, 0.0299794, 0.797162],
+        ],
+    };
+
+    pub const XYZ: ColorSpaceXYZ = ColorSpaceXYZ {
+        vals: [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+    };
+
+    /// Converts a 16.16 fixed-point value to a float, like Skia's `SkFixedToFloat`, so the
+    /// constants above keep the exact values of Skia's header.
+    const fn fixed(value: i32) -> f32 {
+        value as f32 * (1.0 / 65536.0)
+    }
+}
 
 pub type ColorSpace = RCHandle<SkColorSpace>;
 unsafe_send_sync!(ColorSpace);
@@ -395,7 +457,12 @@ impl ColorSpace {
         Self::from_ptr(unsafe { sb::C_SkColorSpace_MakeICC(data.as_ptr() as _, data.len()) })
     }
 
-    // TODO: makeRGB
+    /// Create a [`ColorSpace`] from a transfer function and a row-major 3x3 transformation to XYZ.
+    ///
+    /// Returns `None` if the transfer function is invalid.
+    pub fn new_rgb(transfer_fn: &ColorSpaceTransferFn, to_xyz: &ColorSpaceXYZ) -> Option<Self> {
+        Self::from_ptr(unsafe { sb::C_SkColorSpace_MakeRGB(transfer_fn.native(), to_xyz.native()) })
+    }
 
     /// Creates a [`ColorSpace`] from code points specified in Rec. ITU-T H.273. Returns `None` for
     /// an invalid or unsupported combination of code points.
@@ -546,4 +613,17 @@ pub fn serialize_and_deserialize() {
         deserialized.native() as *const _,
     ));
     assert!(original == deserialized);
+}
+
+/// The fixed-point conversion of `named_gamut::SRGB` keeps the exact values of Skia's header.
+/// `ColorSpace::new_rgb()` tolerates small differences, so the test reads Skia's sRGB gamut back.
+#[test]
+fn named_srgb_gamut_equals_skias_srgb_gamut() {
+    let mut to_xyz = ColorSpaceXYZ {
+        vals: [[0.0; 3]; 3],
+    };
+    assert!(unsafe {
+        sb::SkColorSpace_toXYZD50(ColorSpace::new_srgb().native(), to_xyz.native_mut())
+    });
+    assert_eq!(to_xyz, named_gamut::SRGB);
 }

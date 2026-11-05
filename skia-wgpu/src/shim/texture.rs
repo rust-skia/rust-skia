@@ -28,12 +28,19 @@ pub struct Sampler {
 }
 
 handles! {
-    Texture => WGPUTexture: texture_add_ref, texture_release;
-    TextureView => WGPUTextureView: texture_view_add_ref, texture_view_release;
-    Sampler => WGPUSampler: sampler_add_ref, sampler_release;
+    Texture => WGPUTexture:
+        wgpuTextureAddRef: WGPUProcTextureAddRef,
+        wgpuTextureRelease: WGPUProcTextureRelease;
+    TextureView => WGPUTextureView:
+        wgpuTextureViewAddRef: WGPUProcTextureViewAddRef,
+        wgpuTextureViewRelease: WGPUProcTextureViewRelease;
+    Sampler => WGPUSampler:
+        wgpuSamplerAddRef: WGPUProcSamplerAddRef,
+        wgpuSamplerRelease: WGPUProcSamplerRelease;
 }
 
-pub unsafe extern "C" fn device_create_texture(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateTexture(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUTextureDescriptor,
 ) -> sb::WGPUTexture {
@@ -61,8 +68,10 @@ pub unsafe extern "C" fn device_create_texture(
     }
     .into_handle()
 }
+const _: sb::WGPUProcDeviceCreateTexture = Some(wgpuDeviceCreateTexture);
 
-pub unsafe extern "C" fn texture_create_view(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureCreateView(
     texture: sb::WGPUTexture,
     descriptor: *const sb::WGPUTextureViewDescriptor,
 ) -> sb::WGPUTextureView {
@@ -88,46 +97,70 @@ pub unsafe extern "C" fn texture_create_view(
     let view = texture.texture.create_view(&descriptor);
     TextureView { view }.into_handle()
 }
+const _: sb::WGPUProcTextureCreateView = Some(wgpuTextureCreateView);
 
-pub unsafe extern "C" fn texture_get_format(texture: sb::WGPUTexture) -> sb::WGPUTextureFormat {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureGetFormat(texture: sb::WGPUTexture) -> sb::WGPUTextureFormat {
     unsafe { Texture::get(texture) }.format
 }
+const _: sb::WGPUProcTextureGetFormat = Some(wgpuTextureGetFormat);
 
-pub unsafe extern "C" fn texture_get_width(texture: sb::WGPUTexture) -> u32 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureGetWidth(texture: sb::WGPUTexture) -> u32 {
     unsafe { Texture::get(texture) }.texture.width()
 }
+const _: sb::WGPUProcTextureGetWidth = Some(wgpuTextureGetWidth);
 
-pub unsafe extern "C" fn texture_get_height(texture: sb::WGPUTexture) -> u32 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureGetHeight(texture: sb::WGPUTexture) -> u32 {
     unsafe { Texture::get(texture) }.texture.height()
 }
+const _: sb::WGPUProcTextureGetHeight = Some(wgpuTextureGetHeight);
 
-pub unsafe extern "C" fn texture_get_mip_level_count(texture: sb::WGPUTexture) -> u32 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureGetMipLevelCount(texture: sb::WGPUTexture) -> u32 {
     unsafe { Texture::get(texture) }.texture.mip_level_count()
 }
+const _: sb::WGPUProcTextureGetMipLevelCount = Some(wgpuTextureGetMipLevelCount);
 
-pub unsafe extern "C" fn texture_get_sample_count(texture: sb::WGPUTexture) -> u32 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureGetSampleCount(texture: sb::WGPUTexture) -> u32 {
     unsafe { Texture::get(texture) }.texture.sample_count()
 }
+const _: sb::WGPUProcTextureGetSampleCount = Some(wgpuTextureGetSampleCount);
 
-pub unsafe extern "C" fn texture_get_usage(texture: sb::WGPUTexture) -> sb::WGPUTextureUsage {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureGetUsage(texture: sb::WGPUTexture) -> sb::WGPUTextureUsage {
     convert::c_texture_usage(unsafe { Texture::get(texture) }.texture.usage())
 }
+const _: sb::WGPUProcTextureGetUsage = Some(wgpuTextureGetUsage);
 
-pub unsafe extern "C" fn texture_destroy(texture: sb::WGPUTexture) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureDestroy(texture: sb::WGPUTexture) {
     unsafe { Texture::get(texture) }.texture.destroy();
 }
+const _: sb::WGPUProcTextureDestroy = Some(wgpuTextureDestroy);
 
-/// See `buffer_set_label`.
-pub unsafe extern "C" fn texture_set_label(_texture: sb::WGPUTexture, _label: sb::WGPUStringView) {}
+/// See `wgpuBufferSetLabel`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureSetLabel(
+    _texture: sb::WGPUTexture,
+    _label: sb::WGPUStringView,
+) {
+}
+const _: sb::WGPUProcTextureSetLabel = Some(wgpuTextureSetLabel);
 
-/// See `buffer_set_label`.
-pub unsafe extern "C" fn texture_view_set_label(
+/// See `wgpuBufferSetLabel`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuTextureViewSetLabel(
     _view: sb::WGPUTextureView,
     _label: sb::WGPUStringView,
 ) {
 }
+const _: sb::WGPUProcTextureViewSetLabel = Some(wgpuTextureViewSetLabel);
 
-pub unsafe extern "C" fn device_create_sampler(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceCreateSampler(
     device: sb::WGPUDevice,
     descriptor: *const sb::WGPUSamplerDescriptor,
 ) -> sb::WGPUSampler {
@@ -155,3 +188,4 @@ pub unsafe extern "C" fn device_create_sampler(
     let sampler = device.device.create_sampler(&descriptor);
     Sampler { sampler }.into_handle()
 }
+const _: sb::WGPUProcDeviceCreateSampler = Some(wgpuDeviceCreateSampler);

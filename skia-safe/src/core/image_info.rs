@@ -1,6 +1,9 @@
-use crate::{AlphaType, ColorSpace, ColorType, IPoint, IRect, ISize, prelude::*};
-use skia_bindings::{self as sb, SkColorInfo, SkImageInfo};
 use std::{fmt, mem};
+
+use skia_bindings::{self as sb, SkColorInfo, SkImageInfo};
+
+use crate::prelude::*;
+use crate::{AlphaType, ColorSpace, ColorType, IPoint, IRect, ISize};
 
 pub use skia_bindings::SkYUVColorSpace as YUVColorSpace;
 variant_name!(YUVColorSpace::JPEG);
@@ -527,13 +530,16 @@ impl ImageInfo {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
-    use crate::{AlphaType, ColorSpace, ImageInfo};
     use std::mem;
+
+    use crate::prelude::*;
+    use crate::{AlphaType, ColorSpace, ImageInfo, named_gamut, named_transfer_fn};
 
     #[test]
     fn ref_cnt_in_relation_to_color_space() {
-        let cs = ColorSpace::new_srgb();
+        // Skia shares one sRGB instance between all tests, so this test counts the references of a
+        // color space that only it holds.
+        let cs = ColorSpace::new_rgb(&named_transfer_fn::LINEAR, &named_gamut::REC2020).unwrap();
         let before = cs.native().ref_cnt();
         {
             let ii = ImageInfo::new_n32((10, 10), AlphaType::Premul, Some(cs.clone()));

@@ -21,7 +21,9 @@ pub struct Device {
 }
 
 handles! {
-    Device => WGPUDevice: device_add_ref, device_release;
+    Device => WGPUDevice:
+        wgpuDeviceAddRef: WGPUProcDeviceAddRef,
+        wgpuDeviceRelease: WGPUProcDeviceRelease;
 }
 
 impl Device {
@@ -29,25 +31,53 @@ impl Device {
         Self { device, instance }
     }
 
-    /// Runs `create` in an error scope and returns its result and the validation error message, so
-    /// that the asynchronous creation functions can report errors through their callbacks.
-    pub fn capture_validation<T>(&self, create: impl FnOnce() -> T) -> (T, Option<String>) {
-        let scope = self.device.push_error_scope(wgpu::ErrorFilter::Validation);
+    /// Runs `create` in error scopes for all three error filters and returns its result and the
+    /// error it raised, so that the creation functions can report it through their callbacks.
+    ///
+    /// `wgpu` passes an error that no scope of its filter captures to the device's handler, which
+    /// panics by default. A pipeline whose shader `wgpu` cannot translate for its backend raises an
+    /// internal error, not a validation error, so a validation scope alone would let it panic.
+    pub fn capture_errors<T>(&self, create: impl FnOnce() -> T) -> (T, Option<wgpu::Error>) {
+        let validation = self.device.push_error_scope(wgpu::ErrorFilter::Validation);
+        let out_of_memory = self.device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
+        let internal = self.device.push_error_scope(wgpu::ErrorFilter::Internal);
         let result = create();
-        let error = block_on(scope.pop());
-        (result, error.map(|e| e.to_string()))
+        // `wgpu` closes the scopes of a thread innermost first.
+        let internal = block_on(internal.pop());
+        let out_of_memory = block_on(out_of_memory.pop());
+        let validation = block_on(validation.pop());
+        (result, validation.or(internal).or(out_of_memory))
     }
 }
 
-pub unsafe extern "C" fn device_get_adapter(device: sb::WGPUDevice) -> sb::WGPUAdapter {
+/// Completes the buffer maps that are still pending when Skia releases its last device handle.
+///
+/// `wgpu` holds the callback of a pending map until a poll completes it, and Skia's map callback
+/// holds Skia's buffer, which holds the `wgpu` buffer. Without this poll, the buffers leak if the
+/// application never polls or submits on its device again (ADR 0003). Skia's map callbacks fire
+/// here, while Skia destroys its shared context, which they do not use. The poll waits for all
+/// work submitted to the device, also the application's (ADR 0003).
+impl Drop for Device {
+    fn drop(&mut self) {
+        // An incomplete wait on WebGL leaves the maps pending and leaks them (ADR 0003).
+        let _ = self.instance.poll(true);
+    }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceGetAdapter(device: sb::WGPUDevice) -> sb::WGPUAdapter {
     instance::adapter_handle(&unsafe { Device::get(device) }.device)
 }
+const _: sb::WGPUProcDeviceGetAdapter = Some(wgpuDeviceGetAdapter);
 
-pub unsafe extern "C" fn device_tick(device: sb::WGPUDevice) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceTick(device: sb::WGPUDevice) {
     unsafe { Device::get(device) }.instance.poll(false);
 }
+const _: sb::WGPUProcDeviceTick = Some(wgpuDeviceTick);
 
-pub unsafe extern "C" fn device_get_limits(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceGetLimits(
     device: sb::WGPUDevice,
     limits: *mut sb::WGPULimits,
 ) -> sb::WGPUStatus {
@@ -103,16 +133,20 @@ pub unsafe extern "C" fn device_get_limits(
     c.maxImmediateSize = w.max_immediate_size;
     sb::WGPUStatus::WGPUStatus_Success
 }
+const _: sb::WGPUProcDeviceGetLimits = Some(wgpuDeviceGetLimits);
 
 /// Reports a WebGPU feature as supported when the device has the `wgpu` feature that implements
-/// it. Dawn's own features have no `wgpu` equivalent, so Skia takes its fallback paths for them.
-pub unsafe extern "C" fn device_has_feature(
+/// it. The shim reports every other feature as unsupported, so Skia takes its fallback paths for
+/// them. ADR 0003 gives the reason for each.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDeviceHasFeature(
     device: sb::WGPUDevice,
     feature: sb::WGPUFeatureName,
 ) -> sb::WGPUBool {
     use sb::WGPUFeatureName as F;
     use wgpu::Features as W;
-    let features = unsafe { Device::get(device) }.device.features();
+    let device = &unsafe { Device::get(device) }.device;
+    let features = device.features();
     let required = match feature {
         // `wgpu` devices are never in WebGPU's compatibility mode.
         F::WGPUFeatureName_CoreFeaturesAndLimits => W::empty(),
@@ -121,8 +155,14 @@ pub unsafe extern "C" fn device_has_feature(
         F::WGPUFeatureName_TextureCompressionBC => W::TEXTURE_COMPRESSION_BC,
         F::WGPUFeatureName_TextureCompressionETC2 => W::TEXTURE_COMPRESSION_ETC2,
         F::WGPUFeatureName_TextureCompressionASTC => W::TEXTURE_COMPRESSION_ASTC,
-        // Skia writes timestamps from command encoders on every backend except Metal, which
-        // `wgpu` allows only with a native feature on top of WebGPU's timestamp queries.
+        // On Metal, Skia writes timestamps at the beginning and end of render passes, which
+        // WebGPU's timestamp queries cover. On every other backend, it writes them on the command
+        // encoder, which `wgpu` allows only with a native feature on top of them (ADR 0003).
+        F::WGPUFeatureName_TimestampQuery
+            if device.adapter_info().backend == wgpu::Backend::Metal =>
+        {
+            W::TIMESTAMP_QUERY
+        }
         F::WGPUFeatureName_TimestampQuery => {
             W::TIMESTAMP_QUERY | W::TIMESTAMP_QUERY_INSIDE_ENCODERS
         }
@@ -133,11 +173,16 @@ pub unsafe extern "C" fn device_has_feature(
         F::WGPUFeatureName_Float32Filterable => W::FLOAT32_FILTERABLE,
         F::WGPUFeatureName_DualSourceBlending => W::DUAL_SOURCE_BLENDING,
         F::WGPUFeatureName_ClipDistances => W::CLIP_DISTANCES,
-        // Dawn's own features, and the standard ones that the shim does not convert yet. Listing
-        // every variant makes a feature added to Dawn's header a compile error.
+        F::WGPUFeatureName_Float32Blendable => W::FLOAT32_BLENDABLE,
+        // Mapping buffers that the GPU reads directly only pays off on GPUs that share memory with
+        // the CPU, so the application decides by requesting the feature for its device (ADR 0003).
+        F::WGPUFeatureName_BufferMapExtendedUsages => W::MAPPABLE_PRIMARY_BUFFERS,
+        // Features without a `wgpu` counterpart, and those that the shim leaves off on purpose.
+        // Listing every variant makes a feature added to Dawn's header a compile error. ADR 0003
+        // explains why `TransientAttachments`, `Unorm16TextureFormats`, and
+        // `DawnAllowUndefinedLoadStoreOp` stay unreported although `wgpu` has a counterpart.
         F::WGPUFeatureName_TextureCompressionBCSliced3D
         | F::WGPUFeatureName_TextureCompressionASTCSliced3D
-        | F::WGPUFeatureName_Float32Blendable
         | F::WGPUFeatureName_Subgroups
         | F::WGPUFeatureName_TextureFormatsTier1
         | F::WGPUFeatureName_TextureFormatsTier2
@@ -164,7 +209,6 @@ pub unsafe extern "C" fn device_has_feature(
         | F::WGPUFeatureName_MultiPlanarRenderTargets
         | F::WGPUFeatureName_MultiPlanarFormatNv12a
         | F::WGPUFeatureName_FramebufferFetch
-        | F::WGPUFeatureName_BufferMapExtendedUsages
         | F::WGPUFeatureName_AdapterPropertiesMemoryHeaps
         | F::WGPUFeatureName_AdapterPropertiesD3D
         | F::WGPUFeatureName_AdapterPropertiesVk
@@ -218,8 +262,10 @@ pub unsafe extern "C" fn device_has_feature(
     };
     convert::c_bool(features.contains(required))
 }
+const _: sb::WGPUProcDeviceHasFeature = Some(wgpuDeviceHasFeature);
 
-pub unsafe extern "C" fn device_push_error_scope(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDevicePushErrorScope(
     device: sb::WGPUDevice,
     filter: sb::WGPUErrorFilter,
 ) {
@@ -235,8 +281,10 @@ pub unsafe extern "C" fn device_push_error_scope(
         .push_error_scope(filter);
     ERROR_SCOPES.with_borrow_mut(|scopes| scopes.entry(device as usize).or_default().push(scope));
 }
+const _: sb::WGPUProcDevicePushErrorScope = Some(wgpuDevicePushErrorScope);
 
-pub unsafe extern "C" fn device_pop_error_scope(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuDevicePopErrorScope(
     device: sb::WGPUDevice,
     callback_info: sb::WGPUPopErrorScopeCallbackInfo,
 ) -> sb::WGPUFuture {
@@ -301,6 +349,7 @@ pub unsafe extern "C" fn device_pop_error_scope(
     completion.complete((status, error_type, message));
     future
 }
+const _: sb::WGPUProcDevicePopErrorScope = Some(wgpuDevicePopErrorScope);
 
 thread_local! {
     /// The scopes that `wgpuDevicePushErrorScope` opened on this thread, by device handle,
@@ -317,8 +366,28 @@ mod tests {
     use skia_bindings as sb;
 
     use super::super::api::BackendHandles;
-    use super::super::testing;
-    use super::{device_pop_error_scope, device_push_error_scope};
+    use super::super::{testing, wgpu};
+    use super::{wgpuDeviceHasFeature, wgpuDevicePopErrorScope, wgpuDevicePushErrorScope};
+
+    /// `TimestampQuery` also requires `TIMESTAMP_QUERY_INSIDE_ENCODERS`, because Skia writes
+    /// timestamps outside passes, except on Metal (ADR 0003).
+    #[test]
+    fn timestamp_query_alone_is_reported_only_on_metal() {
+        let Some((device, queue)) = testing::device_with(wgpu::Features::TIMESTAMP_QUERY) else {
+            return;
+        };
+        let handles = BackendHandles::new(&device, &queue);
+
+        let reported = unsafe {
+            wgpuDeviceHasFeature(
+                handles.device(),
+                sb::WGPUFeatureName::WGPUFeatureName_TimestampQuery,
+            )
+        };
+
+        let metal = device.adapter_info().backend == wgpu::Backend::Metal;
+        assert_eq!(reported != 0, metal);
+    }
 
     /// `wgpu` keeps error scopes per thread and panics when a thread pops a scope that another
     /// thread pushed, unless both scopes happen to have the same nesting depth. Skia's scoped error
@@ -352,7 +421,7 @@ mod tests {
 
     fn push(device: usize) {
         unsafe {
-            device_push_error_scope(
+            wgpuDevicePushErrorScope(
                 device as sb::WGPUDevice,
                 sb::WGPUErrorFilter::WGPUErrorFilter_Validation,
             )
@@ -375,6 +444,6 @@ mod tests {
             userdata1: std::ptr::null_mut(),
             userdata2: std::ptr::null_mut(),
         };
-        unsafe { device_pop_error_scope(device as sb::WGPUDevice, callback_info) };
+        unsafe { wgpuDevicePopErrorScope(device as sb::WGPUDevice, callback_info) };
     }
 }

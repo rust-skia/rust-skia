@@ -26,8 +26,12 @@ pub struct Adapter {
 }
 
 handles! {
-    Instance => WGPUInstance: instance_add_ref, instance_release;
-    Adapter => WGPUAdapter: adapter_add_ref, adapter_release;
+    Instance => WGPUInstance:
+        wgpuInstanceAddRef: WGPUProcInstanceAddRef,
+        wgpuInstanceRelease: WGPUProcInstanceRelease;
+    Adapter => WGPUAdapter:
+        wgpuAdapterAddRef: WGPUProcAdapterAddRef,
+        wgpuAdapterRelease: WGPUProcAdapterRelease;
 }
 
 impl Instance {
@@ -39,19 +43,47 @@ impl Instance {
     }
 
     /// Lets `wgpu` report completed work. With `wait`, blocks until the submitted work is done.
-    pub fn poll(&self, wait: bool) {
-        let poll_type = if wait {
-            wgpu::PollType::Wait {
-                submission_index: None,
-                timeout: None,
+    ///
+    /// Callers that do not wait need not look at the result, because a callback that the poll
+    /// does not fire keeps waiting until its instance is released.
+    ///
+    /// On a lost device, `wgpu` panics in the poll, which aborts the process inside the WebGPU
+    /// function that polls. `wgpu` treats the loss as fatal, so the shim does too (ADR 0003).
+    /// The poll does not catch the panic, because `wgpu` fires every pending callback inside the
+    /// poll: the shim's, Skia's, and the application's. A catch would also swallow a panic of
+    /// those callbacks, mistake it for a lost device, and continue with half-updated state.
+    pub fn poll(&self, wait: bool) -> Polled {
+        loop {
+            let poll_type = if wait {
+                wgpu::PollType::Wait {
+                    submission_index: None,
+                    timeout: None,
+                }
+            } else {
+                wgpu::PollType::Poll
+            };
+            match self.device.poll(poll_type) {
+                Ok(_) => return Polled::Complete,
+                // `wgpu`'s GL backend gives up a wait after about 2 s, so the wait starts again.
+                // On WebGL, a wait gives up at once, and the work cannot progress while it repeats.
+                Err(wgpu::PollError::Timeout) if !cfg!(target_family = "wasm") => {}
+                Err(wgpu::PollError::Timeout) => return Polled::Incomplete,
+                Err(error @ wgpu::PollError::WrongSubmissionIndex(..)) => {
+                    panic!("polling the wgpu device failed: {error}")
+                }
             }
-        } else {
-            wgpu::PollType::Poll
-        };
-        self.device
-            .poll(poll_type)
-            .expect("polling the wgpu device failed");
+        }
     }
+}
+
+/// How far a poll of the device got.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Polled {
+    /// `wgpu` reported every completion that the poll covers: the work that is already done, or
+    /// for a wait, all submitted work.
+    Complete,
+    /// A wait on WebGL gave up before the submitted work was done.
+    Incomplete,
 }
 
 impl Adapter {
@@ -60,7 +92,8 @@ impl Adapter {
     }
 }
 
-pub unsafe extern "C" fn instance_wait_any(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuInstanceWaitAny(
     instance: sb::WGPUInstance,
     future_count: usize,
     futures: *mut sb::WGPUFutureWaitInfo,
@@ -82,25 +115,38 @@ pub unsafe extern "C" fn instance_wait_any(
             S::WGPUWaitStatus_TimedOut
         };
     }
-    // Skia waits without a timeout or not at all, so any other timeout waits without one. The
-    // wait returns once all submitted work is done, and `wgpu` has then reported every completion
-    // it will report, so a future that is still pending would never complete.
-    instance.poll(true);
-    assert!(
-        instance.futures.fire_waited(infos),
+    // Skia waits without a timeout or not at all, so the shim implements no other timeout.
+    assert_eq!(
+        timeout_ns,
+        u64::MAX,
+        "wgpuInstanceWaitAny with a finite timeout"
+    );
+    let polled = instance.poll(true);
+    if instance.futures.fire_waited(infos) {
+        return S::WGPUWaitStatus_Success;
+    }
+    // A complete wait returns once all submitted work is done, and `wgpu` has then reported every
+    // completion it will report, so a future that is still pending would never complete.
+    assert_eq!(
+        polled,
+        Polled::Incomplete,
         "wgpuInstanceWaitAny waits for futures that cannot complete"
     );
-    S::WGPUWaitStatus_Success
+    S::WGPUWaitStatus_Error
 }
+const _: sb::WGPUProcInstanceWaitAny = Some(wgpuInstanceWaitAny);
 
-pub unsafe extern "C" fn instance_process_events(instance: sb::WGPUInstance) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuInstanceProcessEvents(instance: sb::WGPUInstance) {
     // Owns a reference, because a callback may release the last handle to the instance.
     let instance = unsafe { Instance::arc(instance) };
     instance.poll(false);
     instance.futures.fire_process_events();
 }
+const _: sb::WGPUProcInstanceProcessEvents = Some(wgpuInstanceProcessEvents);
 
-pub unsafe extern "C" fn adapter_get_info(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuAdapterGetInfo(
     adapter: sb::WGPUAdapter,
     info: *mut sb::WGPUAdapterInfo,
 ) -> sb::WGPUStatus {
@@ -120,9 +166,11 @@ pub unsafe extern "C" fn adapter_get_info(
     info.subgroupMaxSize = 0;
     sb::WGPUStatus::WGPUStatus_Success
 }
+const _: sb::WGPUProcAdapterGetInfo = Some(wgpuAdapterGetInfo);
 
-/// Frees the strings that [`adapter_get_info`] allocated.
-pub unsafe extern "C" fn adapter_info_free_members(info: sb::WGPUAdapterInfo) {
+/// Frees the strings that [`wgpuAdapterGetInfo`] allocated.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuAdapterInfoFreeMembers(info: sb::WGPUAdapterInfo) {
     for view in [
         info.vendor,
         info.architecture,
@@ -134,13 +182,14 @@ pub unsafe extern "C" fn adapter_info_free_members(info: sb::WGPUAdapterInfo) {
         }
     }
 }
+const _: sb::WGPUProcAdapterInfoFreeMembers = Some(wgpuAdapterInfoFreeMembers);
 
 /// Creates the handle of a new adapter for the device's adapter information.
 pub fn adapter_handle(device: &wgpu::Device) -> sb::WGPUAdapter {
     Adapter::new(device.adapter_info()).into_handle()
 }
 
-/// A string that the receiver frees with [`adapter_info_free_members`].
+/// A string that the receiver frees with [`wgpuAdapterInfoFreeMembers`].
 fn owned_string(s: &str) -> sb::WGPUStringView {
     let length = s.len();
     sb::WGPUStringView {
@@ -179,7 +228,7 @@ mod tests {
     use skia_bindings as sb;
 
     use super::super::api::BackendHandles;
-    use super::super::buffer::{buffer_map_async, buffer_release, device_create_buffer};
+    use super::super::buffer::{wgpuBufferMapAsync, wgpuBufferRelease, wgpuDeviceCreateBuffer};
     use super::super::{convert, testing, wgpu};
 
     /// WebGPU calls every callback exactly once. A callback that has not fired when its instance
@@ -198,7 +247,7 @@ mod tests {
             size: 256,
             mappedAtCreation: 0,
         };
-        let buffer = unsafe { device_create_buffer(handles.device(), &descriptor) };
+        let buffer = unsafe { wgpuDeviceCreateBuffer(handles.device(), &descriptor) };
         let mut statuses: Vec<sb::WGPUMapAsyncStatus> = Vec::new();
         let callback_info = sb::WGPUBufferMapCallbackInfo {
             nextInChain: ptr::null_mut(),
@@ -207,7 +256,7 @@ mod tests {
             userdata1: (&raw mut statuses).cast(),
             userdata2: ptr::null_mut(),
         };
-        unsafe { buffer_map_async(buffer, sb::WGPUMapMode_Read, 0, usize::MAX, callback_info) };
+        unsafe { wgpuBufferMapAsync(buffer, sb::WGPUMapMode_Read, 0, usize::MAX, callback_info) };
         // The map completes, but its callback may fire only inside `wgpuInstanceWaitAny`, which
         // nobody calls.
         device
@@ -217,7 +266,7 @@ mod tests {
             })
             .expect("polling the device failed");
 
-        unsafe { buffer_release(buffer) };
+        unsafe { wgpuBufferRelease(buffer) };
         drop(handles);
 
         assert_eq!(

@@ -23,8 +23,7 @@ include = [
 	"build_support/**/*.rs",
 	"src/**/*.h",
 	"src/**/*.cpp",
-	"src/*.rs",
-	"dawn/compat/**/*.h" ]
+	"src/*.rs" ]
 
 [lib]
 doctest = false
@@ -60,8 +59,8 @@ webp-encode = []
 webp-decode = []
 pdf = ["jpeg"]
 graphite = []
-# Graphite's Dawn backend and Dawn's function table, but no WebGPU implementation (ADR 0003).
-# `skia-wgpu` installs a table that calls the `wgpu` crate.
+# Graphite's Dawn backend, but no WebGPU implementation (ADR 0003). Its `wgpu*` calls stay
+# undefined, and `skia-wgpu` exports them on the `wgpu` crate (ADR 0004).
 wgpu = ["graphite"]
 # sys libraries
 use-system-jpeg-turbo = ["dep:mozjpeg-sys"]

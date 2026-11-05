@@ -23,6 +23,11 @@ authors = ["Armin Sander <armin@replicator.org>"]
 edition.workspace = true
 rust-version.workspace = true
 
+# The features that docs.rs documents. docs.rs builds no Skia: `skia-bindings` copies the bindings
+# that `just publish-bindings-docs` generated with these features (`bindings_docs.rs`).
+[package.metadata.docs.rs]
+features = ["ganesh", "gl", "textlayout", "svg", "skottie", "ureq", "webp", "vulkan", "wgpu"]
+
 [lib]
 doctest = false
 

@@ -17,11 +17,13 @@ use std::task;
 
 use skia_bindings as sb;
 
-/// The futures of one instance, by id. Only the instance holds them. The device, the queue, the
-/// buffers, and the shader modules hold the instance, so the callbacks that wait in the futures
-/// are dropped, and therefore cancelled, when the last of these objects is released. A waiting
-/// callback that owns a handle to one of these objects keeps the instance alive, so it is never
-/// cancelled. Skia's waiting callbacks own no such handle.
+/// The futures of one instance, by id.
+///
+/// Only the instance holds them. The device, the queue, the buffers, and the shader modules hold
+/// the instance, so the callbacks that wait in the futures are dropped, and therefore cancelled,
+/// when the last of these objects is released. A waiting callback that owns a handle to one of
+/// these objects keeps the instance alive, so it is never cancelled. Skia's waiting callbacks own
+/// no such handle.
 #[derive(Debug, Default)]
 pub struct Futures {
     next_id: AtomicU64,
@@ -53,9 +55,10 @@ impl fmt::Debug for Entry {
 }
 
 impl Futures {
-    /// Registers a new future and returns it with the [`Completion`] that completes it. `call`
-    /// calls the C callback with the operation's result, or with the status `CallbackCancelled`
-    /// for `None`. It is called exactly once, see [`Callback`].
+    /// Registers a new future and returns it with the [`Completion`] that completes it.
+    ///
+    /// `call` calls the C callback with the operation's result, or with the status
+    /// `CallbackCancelled` for `None`. It is called exactly once, see [`Callback`].
     pub fn register<R>(
         self: &Arc<Self>,
         mode: sb::WGPUCallbackMode,
@@ -162,11 +165,12 @@ impl<R: Send + 'static> Completion<R> {
     }
 }
 
-/// A C callback, which WebGPU calls exactly once. [`Callback::fire`] calls it with the operation's
-/// result, and dropping it unfired calls it with the status `CallbackCancelled`. A callback is
-/// dropped unfired when its instance is released before the operation completes, or before the
-/// callback's mode lets it fire. `wgpu` calls the closure of every operation it accepts, so a
-/// [`Completion`] is not dropped unused.
+/// A C callback, which WebGPU calls exactly once.
+///
+/// [`Callback::fire`] calls it with the operation's result, and dropping it unfired calls it with
+/// the status `CallbackCancelled`. A callback is dropped unfired when its instance is released
+/// before the operation completes, or before the callback's mode lets it fire. `wgpu` calls the
+/// closure of every operation it accepts, so a [`Completion`] is not dropped unused.
 struct Callback<R> {
     call: Option<Box<dyn FnOnce(Option<R>) + Send>>,
 }

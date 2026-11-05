@@ -5,11 +5,10 @@ in ADR 0003 (`docs/adr/0003-skia-runs-on-wgpu-through-a-webgpu-shim.md`) and in 
 (`docs/adr/0004-the-shim-exports-the-webgpu-functions-from-rust.md`), which decides how Skia's
 calls reach the shim.
 
-The document shows the design of the ADRs, which the code does not fully reach yet. The code still
-forwards Skia's calls through Dawn's function table, a C struct with one function pointer per
-WebGPU function. The conversion to exported `wgpu*` functions removes the table and adds the
-`compile_error!` and the `links` key. A per-version `compat` module appears with the second
-supported `wgpu` major version.
+The document shows the design of the ADRs. Two parts of it appear only with the second supported
+`wgpu` major version: the per-version `compat` module, and the `compile_error!` that rejects more
+than one enabled `wgpu-NN` feature. With a single version, there is nothing for the
+`compile_error!` to compare.
 
 Terms used below:
 
@@ -26,7 +25,8 @@ Terms used below:
 
 An arrow points from a crate to a crate it depends on. The dotted arrow is not a Cargo dependency.
 It shows that the linker resolves the `wgpu*` functions that Skia's library calls to the shim's
-definitions.
+definitions. On ELF targets, Skia's Dawn backend declares these functions with hidden visibility,
+so a shared library that contains Skia keeps them to itself and binds Skia's calls inside it.
 
 ```mermaid
 flowchart TD
@@ -77,8 +77,9 @@ flowchart LR
 ```
 
 Next to each shim function, an assignment to its `WGPUProc*` type makes rustc check the function's
-signature against the header. A function that the Dawn backend calls and the shim lacks fails the
-link with an undefined symbol that names the function.
+signature against the header. A function that the Dawn backend calls and the shim lacks usually
+fails the link with an undefined symbol that names the function. The list of undefined `wgpu*`
+symbols of `libskia-bindings.a` is the authoritative check.
 
 ## Path of one WebGPU call
 
@@ -161,8 +162,9 @@ flowchart TD
 ```
 
 A build enables exactly one `wgpu-NN` feature, because each version would export the same `wgpu*`
-symbols. `skia-wgpu` stops the build with a `compile_error!` when more than one is enabled, and its
-`links` key keeps a second version of `skia-wgpu` out of the dependency graph. `skia-safe` forwards
+symbols. With the second supported version, `skia-wgpu` stops the build with a `compile_error!`
+when more than one is enabled. Its `links` key keeps a second version of `skia-wgpu` out of the
+dependency graph. `skia-safe` forwards
 each `wgpu-NN` feature, and its feature `wgpu` enables the version that the release recommends.
 Every `wgpu-NN` feature of `skia-safe` also enables its hidden feature `_wgpu`, on which all of
 `skia-safe`'s `wgpu` code depends, so that code never names a version.

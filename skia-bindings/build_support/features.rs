@@ -226,9 +226,8 @@ pub mod feature {
     pub const GANESH: &str = "ganesh";
     /// Build with Graphite support
     pub const GRAPHITE: &str = "graphite";
-    /// Build Graphite's Dawn backend and Dawn's function table (`dawn_proc`), but no WebGPU
-    /// implementation. The application installs one at runtime with `dawnProcSetProcs`, for
-    /// example `skia-wgpu`'s table that calls the `wgpu` crate.
+    /// Build Graphite's Dawn backend, but no WebGPU implementation. The backend's `wgpu*` calls
+    /// stay undefined, and `skia-wgpu` exports them on the `wgpu` crate.
     pub const WGPU: &str = "wgpu";
 
     /// Features related to text layout. Modules skshaper and skparagraph

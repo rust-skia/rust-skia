@@ -67,9 +67,9 @@ svg_dependency_version() {
         skia-safe/Cargo.toml
 }
 
-bindings_dependency_version() {
-    sed -nE 's/^skia-bindings.*version[[:space:]]*=[[:space:]]*"=([^"]+)".*/\1/p' \
-        skia-safe/Cargo.toml
+# The exact version of the dependency named $1 in the manifest $2.
+exact_dependency_version() {
+    sed -nE "s/^$1.*version[[:space:]]*=[[:space:]]*\"=([^\"]+)\".*/\\1/p" "$2"
 }
 
 svg_check() {
@@ -209,14 +209,19 @@ bindings_docs_check() {
 
 publish_crates() {
     local version="$1" previous="$2"
-    local bindings safe svg
+    local bindings wgpu safe svg
     bindings="$(package_version skia-bindings/Cargo.toml)"
+    wgpu="$(package_version skia-wgpu/Cargo.toml)"
     safe="$(package_version skia-safe/Cargo.toml)"
     svg="$(package_version skia-svg-macros/Cargo.toml)"
-    [[ "$bindings" == "$version" && "$safe" == "$version" ]] ||
-        die "requested $version, manifests contain bindings=$bindings safe=$safe"
-    [[ "$(bindings_dependency_version)" == "$version" ]] ||
+    [[ "$bindings" == "$version" && "$wgpu" == "$version" && "$safe" == "$version" ]] ||
+        die "requested $version, manifests contain bindings=$bindings wgpu=$wgpu safe=$safe"
+    [[ "$(exact_dependency_version skia-bindings skia-safe/Cargo.toml)" == "$version" ]] ||
         die "skia-safe does not require skia-bindings =$version"
+    [[ "$(exact_dependency_version skia-bindings skia-wgpu/Cargo.toml)" == "$version" ]] ||
+        die "skia-wgpu does not require skia-bindings =$version"
+    [[ "$(exact_dependency_version skia-wgpu skia-safe/Cargo.toml)" == "$version" ]] ||
+        die "skia-safe does not require skia-wgpu =$version"
     # The FORCE_SKIA_* overrides of the calling shell are cleared, so that the check of the
     # documentation bindings and the builds that publish obtain Skia the same way.
     unset FORCE_SKIA_BUILD FORCE_SKIA_BINARIES_DOWNLOAD
@@ -229,6 +234,7 @@ publish_crates() {
         publish_if_needed skia-svg-macros "$svg" just publish-svg-macros
     fi
     publish_if_needed skia-bindings "$version" just publish-bindings-docs
+    publish_if_needed skia-wgpu "$version" just publish-wgpu
     publish_if_needed skia-safe "$version" just publish-safe
     just crate-post-release-test "$version"
 }

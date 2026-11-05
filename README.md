@@ -9,7 +9,38 @@ Skia Submodule Status: chrome/m157 ([upstream changes][skia-upstream], [our chan
 
 ## About
 
-This project provides _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on desktop and mobile platforms, including GPU rendering backends for [Vulkan](<https://en.wikipedia.org/wiki/Vulkan_(API)>), [Metal](<https://en.wikipedia.org/wiki/Metal_(API)>), [OpenGL](https://en.wikipedia.org/wiki/OpenGL), and [Direct3D](https://en.wikipedia.org/wiki/Direct3D).
+This project provides _up to date_ safe bindings that bridge idiomatic Rust with Skia's C++ API on desktop and mobile platforms, including GPU rendering backends for [Vulkan](<https://en.wikipedia.org/wiki/Vulkan_(API)>), [Metal](<https://en.wikipedia.org/wiki/Metal_(API)>), [OpenGL](https://en.wikipedia.org/wiki/OpenGL), and [Direct3D](https://en.wikipedia.org/wiki/Direct3D). Skia can also render on the device of a [`wgpu`](https://wgpu.rs) application (experimental).
+
+## Contents
+
+- [Status](#status)
+  - [Documentation](#documentation)
+  - [Crate](#crate)
+  - [Platform Support, Build Targets, and Prebuilt Binaries](#platform-support-build-targets-and-prebuilt-binaries)
+  - [Wrappers & Codecs & Supported Features](#wrappers--codecs--supported-features)
+- [Building](#building)
+  - [On macOS](#on-macos)
+  - [On Windows](#on-windows)
+  - [On Linux](#on-linux)
+  - [For Android](#for-android)
+  - [For iOS](#for-ios)
+  - [For visionOS](#for-visionos)
+  - [For WebAssembly](#for-webassembly)
+  - [Skia](#skia)
+- [Example Applications](#example-applications)
+  - [wgpu-window](#wgpu-window)
+  - [gl-window](#gl-window)
+  - [vulkan-window](#vulkan-window)
+  - [metal-window](#metal-window)
+  - [metal-window-graphite](#metal-window-graphite)
+  - [d3d-window](#d3d-window)
+  - [icon](#icon)
+  - [skia-org](#skia-org)
+- [Example Images](#example-images)
+- [Contributing](#contributing)
+- [Notable Contributions](#notable-contributions)
+- [Maintainers](#maintainers)
+- [License](#license)
 
 ## Status
 
@@ -252,6 +283,16 @@ Please share your build experience so that we can try to automate the build furt
 
 ## Example Applications
 
+### wgpu-window
+
+[![wgpu-window](artwork/wgpu-window.png)](skia-safe/examples/wgpu-window)
+
+A `wgpu` application that renders a rotating cube. Skia draws the animated rust-skia icon into the cube's texture every frame, on the application's own `wgpu` device and queue.
+
+```bash
+cargo run --example wgpu-window --features wgpu
+```
+
 ### gl-window
 
 An example that opens an OpenGL Window and draws the rust-skia icon with skia-safe (contributed by [@nornagon](https://github.com/nornagon)).
@@ -359,7 +400,7 @@ Dash Path Effect:
 
 For more, you may take a look at the [rust-skia.github.io](https://github.com/rust-skia/rust-skia.github.io/tree/master/skia-org/cpu) repository.
 
-## This project needs contributions!
+## Contributing
 
 If you'd like to help with the bindings, take a look at the [Wiki](https://github.com/rust-skia/rust-skia/wiki) to get started and create an issue to prevent duplicate work. For smaller tasks, grep for "TODO"s in the source code. And for heroic work, check out the label [help wanted](https://github.com/rust-skia/rust-skia/labels/help%20wanted). And if you'd like to help make the Rust API nicer to use, look out for open issues with the label [api ergonomics](https://github.com/rust-skia/rust-skia/issues?q=is%3Aissue+is%3Aopen+label%3A%22api+ergonomics%22).
 
