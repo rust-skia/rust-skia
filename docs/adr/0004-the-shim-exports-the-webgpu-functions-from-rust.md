@@ -82,7 +82,10 @@ on `skia-wgpu` keeps this guarantee on the crate that exports the symbols, so it
   enables both, and the `compile_error!` fails the build.
 - The `wgpu*` symbols keep their `webgpu.h` names. An application that statically links another
   WebGPU implementation that defines them, such as Dawn or wgpu-native, fails to link with
-  duplicate symbols. Shared libraries do not export them on ELF targets.
+  duplicate symbols. Shared libraries do not export them on ELF targets. If such an application
+  needs rust-skia, a prefix on the symbol names of both sides, through a generated header of
+  `#define`s for Skia's C++ sources and renamed exports in the shim, removes the clash without a
+  change to the public API.
 - The link experiment did not cover Windows with MSVC's `link.exe`. Windows QA on
   `x86_64-pc-windows-msvc` and `aarch64-pc-windows-msvc` linked and ran the test binaries of the
   `wgpu` feature with `link.exe`, so rustc's `symbols.o` loads the shim's functions there, too.
