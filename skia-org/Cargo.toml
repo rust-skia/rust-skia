@@ -35,6 +35,7 @@ d3d = ["skia-safe/d3d", "dep:windows"]
 textlayout = ["skia-safe/textlayout"]
 webp = ["skia-safe/webp"]
 svg = ["skia-safe/svg"]
+wgpu = ["skia-safe/wgpu"]
 
 [dependencies]
 skia-safe = { path = "../skia-safe" }

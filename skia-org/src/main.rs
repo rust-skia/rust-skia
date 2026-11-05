@@ -125,6 +125,15 @@ fn main() {
         }
     }
 
+    #[cfg(feature = "wgpu")]
+    {
+        use drivers::wgpu::Wgpu;
+
+        if drivers.contains(&Driver::Wgpu) {
+            draw_all(&mut Wgpu::new(), &out_path)
+        }
+    }
+
     fn draw_all<Driver: DrawingDriver>(driver: &mut Driver, out_path: &Path) {
         let out_path = out_path.join(Driver::DRIVER.to_string());
 
