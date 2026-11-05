@@ -22,6 +22,7 @@ mod skparagraph_example;
 mod skpath_overview;
 #[cfg(feature = "textlayout")]
 mod skshaper_example;
+mod sksl;
 
 pub use drivers::Driver;
 
@@ -144,6 +145,7 @@ fn main() {
         skpaint_overview::draw(driver, &out_path);
         skblendmode_overview::draw(driver, &out_path);
         coordinates::draw(driver, &out_path);
+        sksl::draw(driver, &out_path);
 
         #[cfg(feature = "textlayout")]
         {
