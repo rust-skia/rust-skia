@@ -140,7 +140,8 @@ pub unsafe extern "C" fn wgpuDeviceGetLimits(
 const _: sb::WGPUProcDeviceGetLimits = Some(wgpuDeviceGetLimits);
 
 /// Reports a WebGPU feature as supported when the device has the `wgpu` feature that implements
-/// it. Dawn's own features have no `wgpu` equivalent, so Skia takes its fallback paths for them.
+/// it. The shim reports the features that it does not convert yet as unsupported, so Skia takes
+/// its fallback paths for them (ADR 0003).
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuDeviceHasFeature(
     device: sb::WGPUDevice,

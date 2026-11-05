@@ -3,9 +3,10 @@
 use super::future::block_on;
 use super::wgpu;
 
-/// Creates a device and its queue on the default adapter. Returns `None` and prints a note on a
-/// machine without an adapter, such as a CI runner without a GPU. The test then passes without
-/// checking anything.
+/// Creates a device and its queue on the default adapter.
+///
+/// Returns `None` and prints a note on a machine without an adapter, such as a CI runner without a
+/// GPU. The test then passes without checking anything.
 pub fn device() -> Option<(wgpu::Device, wgpu::Queue)> {
     device_with(wgpu::Features::empty())
 }
