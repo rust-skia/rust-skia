@@ -401,8 +401,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     only if the tests keep the backend code that calls it. A changed signature fails the
     shim's `WGPUProc*` check at compile time. A new
     `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
-    feature, recorded in `skia-wgpu/FEATURES.md`. Surface these changes to the user, as for the
-    build organization diff above.
+    feature, recorded in `skia-wgpu/FEATURES.md`, whose stated milestone moves to the new one.
+    Surface these changes to the user, as for the build organization diff above.
   - Re-check the release poll. Two kinds of Skia callbacks run while the shim's device and
     Skia's shared context are being torn down: the poll at the release of the last device
     handle fires the callbacks with `AllowSpontaneous`, and the release of the instance fires
@@ -444,7 +444,10 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     their decision. The proposal names the new feature `wgpu-NN` with its optional dependency
     `wgpuNN` and module `skia-wgpu/src/vNN.rs`, the `wgpu` API changes that the shim's source
     meets (from the `wgpu` changelog, and from `cargo check -p skia-wgpu --features wgpu-NN`),
-    and which of them go into the per-version `compat` module. It also asks whether `skia-safe`'s
+    and which of them go into the per-version `compat` module. It checks each deviation in the
+    previous version's `skia-wgpu/src/vNN/README.md` against the new version, so the new
+    `compat` module and its own `README.md` keep only the workarounds the new version still
+    needs. It also asks whether `skia-safe`'s
     feature `wgpu` moves to the new version, and whether an old `wgpu-NN` feature is removed.
   - A new `wgpu-NN` feature also needs its forwarding feature in `skia-safe/Cargo.toml`,
     `wgpu-NN = ["_wgpu", "skia-wgpu/wgpu-NN"]`. `skia-safe`'s `wgpu` code, its test

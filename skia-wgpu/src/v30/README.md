@@ -2,7 +2,8 @@
 
 This file lists where `wgpu` 30 deviates from WebGPU in ways that Skia runs into, and how the
 module `compat` next to it makes up for each. Remove a section, together with its `compat` item,
-once the shim no longer supports a `wgpu` version without the upstream fix.
+once the minimum `wgpu` 30 release that the shim requires contains the upstream fix. The whole
+folder goes when the shim drops `wgpu` 30.
 
 ## Immediates are lost before the first pipeline and on pipeline changes
 
