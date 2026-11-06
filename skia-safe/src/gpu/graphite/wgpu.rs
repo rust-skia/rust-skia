@@ -4,7 +4,7 @@
 //! (ADR 0003), so Skia and the application share one device, its queue, and its textures. The
 //! `wgpu` crate of the matching version is [`crate::wgpu`].
 
-use super::{Context, ContextOptions, Recorder, dawn};
+use super::{BackendTexture, Context, ContextOptions, Recorder, dawn};
 use crate::{AlphaType, ColorSpace, ColorType, Image, Surface, SurfaceProps, wgpu};
 
 pub mod context_factory {
@@ -34,7 +34,9 @@ pub mod context_factory {
 pub mod surfaces {
     //! Functions to create Graphite [`Surface`]s on `wgpu` textures.
 
-    use super::{ColorSpace, ColorType, Recorder, Surface, SurfaceProps, dawn, wgpu};
+    use super::{
+        ColorSpace, ColorType, Recorder, Surface, SurfaceProps, wgpu, wrap_backend_texture,
+    };
     use crate::gpu::graphite;
 
     /// Wraps `texture` as a surface, so that drawing to its canvas renders into the texture.
@@ -49,24 +51,22 @@ pub mod surfaces {
         color_space: impl Into<Option<ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Surface> {
-        let handle = skia_wgpu::TextureHandle::new(texture).ok()?;
-        // The backend texture takes no reference to the texture, but the surface that wraps it
-        // does, so the handle can go once the surface exists.
-        let backend_texture = unsafe { dawn::backend_textures::make_dawn(handle.handle()) };
-        graphite::surfaces::wrap_backend_texture(
-            recorder,
-            &backend_texture,
-            color_type,
-            color_space,
-            surface_props,
-        )
+        wrap_backend_texture(texture, |backend_texture| {
+            graphite::surfaces::wrap_backend_texture(
+                recorder,
+                backend_texture,
+                color_type,
+                color_space,
+                surface_props,
+            )
+        })
     }
 }
 
 pub mod images {
     //! Functions to create Graphite [`Image`]s from `wgpu` textures.
 
-    use super::{AlphaType, ColorSpace, ColorType, Image, Recorder, dawn, wgpu};
+    use super::{AlphaType, ColorSpace, ColorType, Image, Recorder, wgpu, wrap_backend_texture};
     use crate::gpu::graphite;
 
     /// Wraps `texture` as an image, so that Skia samples the texture when it draws the image.
@@ -82,14 +82,29 @@ pub mod images {
         alpha_type: AlphaType,
         color_space: impl Into<Option<ColorSpace>>,
     ) -> Option<Image> {
-        let handle = skia_wgpu::TextureHandle::new(texture).ok()?;
-        let backend_texture = unsafe { dawn::backend_textures::make_dawn(handle.handle()) };
-        graphite::images::wrap_texture(
-            recorder,
-            &backend_texture,
-            color_type,
-            alpha_type,
-            color_space,
-        )
+        wrap_backend_texture(texture, |backend_texture| {
+            graphite::images::wrap_texture(
+                recorder,
+                backend_texture,
+                color_type,
+                alpha_type,
+                color_space,
+            )
+        })
     }
+}
+
+/// Wraps `texture` as a Dawn backend texture and passes it to `wrap`, which returns the surface or
+/// image that wraps the backend texture. Returns `None` if the texture's format has no WebGPU
+/// equivalent.
+fn wrap_backend_texture<T>(
+    texture: &wgpu::Texture,
+    wrap: impl FnOnce(&BackendTexture) -> Option<T>,
+) -> Option<T> {
+    let handle = skia_wgpu::TextureHandle::new(texture).ok()?;
+    // The backend texture takes no reference to the texture, and `handle` keeps the texture alive
+    // while `wrap` runs. The surface or image that `wrap` returns takes its own reference, so the
+    // handle can go afterwards.
+    let backend_texture = unsafe { dawn::backend_textures::make_dawn(handle.handle()) };
+    wrap(&backend_texture)
 }
