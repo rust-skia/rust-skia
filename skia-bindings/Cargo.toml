@@ -36,7 +36,7 @@ doctest = false
 skia = "m158.1"
 # The Dawn revision that Skia's upstream `DEPS` pins for this milestone. The `wgpu` feature
 # generates Skia's WebGPU headers from it (ADR 0003).
-dawn = "ada567700e13aecf7989d78b21f7d330b522ea80"
+dawn = "1716e88cc9e58398fab5d4473f7f2e858667b677"
 # The Python packages that Dawn's generator imports, at the revisions that Skia's upstream `DEPS`
 # pins for this milestone. The fork's `DEPS` does not sync them.
 jinja2 = "c3027d884967773057bf74b957e3fea87e5df4d7"

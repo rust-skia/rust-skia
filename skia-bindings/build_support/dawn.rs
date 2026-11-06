@@ -19,6 +19,7 @@ use crate::build_support::cargo;
 const SOURCE_PATHS: &[&str] = &[
     "generator",
     "src/dawn/dawn.json",
+    "src/dawn/dawn_version.json",
     "include/webgpu",
     "LICENSE",
 ];
@@ -74,7 +75,13 @@ pub fn prepare(python: &Path, offline: bool) {
     }
 
     let generated = cargo::output_directory().join("dawn-generated");
-    generate(&source_dir, &packages_dir, python, &generated);
+    generate(
+        &source_dir,
+        &revisions.dawn,
+        &packages_dir,
+        python,
+        &generated,
+    );
     assemble(&source_dir, &generated, &dir());
     fs::write(stamp_file, stamp).unwrap();
 }
@@ -222,10 +229,12 @@ fn download(url: &str, root: &str, include: impl Fn(&Path) -> bool, target: &Pat
     }
 }
 
-/// Runs Dawn's generator for the C header and the C++ wrapper.
+/// Runs Dawn's generator for the C header and the C++ wrapper, and Dawn's version generator for
+/// the version header that the C header includes. `revision` is the Dawn revision of
+/// `source_dir`.
 ///
 /// `packages_dir` contains a directory for each of the [`PYTHON_PACKAGES`].
-fn generate(source_dir: &Path, packages_dir: &Path, python: &Path, out: &Path) {
+fn generate(source_dir: &Path, revision: &str, packages_dir: &Path, python: &Path, out: &Path) {
     if out.exists() {
         fs::remove_dir_all(out).unwrap();
     }
@@ -246,6 +255,7 @@ fn generate(source_dir: &Path, packages_dir: &Path, python: &Path, out: &Path) {
     run_python(
         python,
         &generator.join("dawn_json_generator.py"),
+        &[],
         &common_args,
         &[
             "--dawn-json".into(),
@@ -254,11 +264,40 @@ fn generate(source_dir: &Path, packages_dir: &Path, python: &Path, out: &Path) {
             GENERATOR_TARGETS.into(),
         ],
     );
+
+    // The generated `webgpu.h` includes `dawn/dawn_version.h`, which Dawn's version generator
+    // produces. The generator reads the Dawn revision from git, unless a version file names it.
+    // The download is no git checkout, so the revision is written to a version file.
+    let version_file = out.join("dawn-version.txt");
+    fs::write(&version_file, revision).unwrap();
+    run_python(
+        python,
+        &generator.join("dawn_version_generator.py"),
+        &["gen".into()],
+        &common_args,
+        &[
+            "--dawn-dir".into(),
+            source_dir.into(),
+            "--version-json".into(),
+            source_dir.join("src/dawn/dawn_version.json").into(),
+            "--version-file".into(),
+            version_file.into(),
+        ],
+    );
 }
 
-fn run_python(python: &Path, script: &Path, common_args: &[OsString], args: &[OsString]) {
+/// Runs a Python `script` of Dawn's generator. `action` holds the subcommand of a script that
+/// has one, which must precede all other arguments.
+fn run_python(
+    python: &Path,
+    script: &Path,
+    action: &[OsString],
+    common_args: &[OsString],
+    args: &[OsString],
+) {
     let status = Command::new(python)
         .arg(script)
+        .args(action)
         .args(common_args)
         .args(args)
         .status()
@@ -307,6 +346,11 @@ const FILES: &[(Origin, &str, &str)] = &[
         Origin::Generated,
         "include/dawn/webgpu_cpp.h",
         "include/dawn/webgpu_cpp.h",
+    ),
+    (
+        Origin::Generated,
+        "include/dawn/dawn_version.h",
+        "include/dawn/dawn_version.h",
     ),
 ];
 
