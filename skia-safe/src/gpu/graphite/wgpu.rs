@@ -5,7 +5,7 @@
 //! `wgpu` crate of the matching version is [`crate::wgpu`].
 
 use super::{Context, ContextOptions, Recorder, dawn};
-use crate::{ColorSpace, ColorType, Surface, SurfaceProps, wgpu};
+use crate::{AlphaType, ColorSpace, ColorType, Image, Surface, SurfaceProps, wgpu};
 
 pub mod context_factory {
     //! Factory functions to create a Graphite [`Context`] on a `wgpu` device.
@@ -59,6 +59,37 @@ pub mod surfaces {
             color_type,
             color_space,
             surface_props,
+        )
+    }
+}
+
+pub mod images {
+    //! Functions to create Graphite [`Image`]s from `wgpu` textures.
+
+    use super::{AlphaType, ColorSpace, ColorType, Image, Recorder, dawn, wgpu};
+    use crate::gpu::graphite;
+
+    /// Wraps `texture` as an image, so that Skia samples the texture when it draws the image.
+    ///
+    /// The texture needs `TEXTURE_BINDING` usage. `color_type` and `alpha_type` describe how
+    /// Skia interprets the texture's contents. Returns `None` if the format has no WebGPU
+    /// equivalent, or if Skia cannot sample the texture with `color_type`. The image keeps the
+    /// texture alive.
+    pub fn wrap_texture(
+        recorder: &mut Recorder,
+        texture: &wgpu::Texture,
+        color_type: ColorType,
+        alpha_type: AlphaType,
+        color_space: impl Into<Option<ColorSpace>>,
+    ) -> Option<Image> {
+        let handle = skia_wgpu::TextureHandle::new(texture).ok()?;
+        let backend_texture = unsafe { dawn::backend_textures::make_dawn(handle.handle()) };
+        graphite::images::wrap_texture(
+            recorder,
+            &backend_texture,
+            color_type,
+            alpha_type,
+            color_space,
         )
     }
 }
