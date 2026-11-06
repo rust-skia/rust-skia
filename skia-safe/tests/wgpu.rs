@@ -97,23 +97,47 @@ fn skia_renders_antialiasing_gradients_text_and_images() {
 }
 
 /// Draws on a device with every feature and limit of the adapter, as applications request it.
-/// With `IMMEDIATES`, Skia sets its intrinsic uniforms as immediates before the first pipeline.
-/// With `SHADER_F16`, it would write `f16` fragment outputs, which `wgpu` 30 rejects.
+///
+/// With `IMMEDIATES`, Skia sets its intrinsic uniforms as immediates once per pass, before the
+/// first pipeline. `wgpu` 30 rejects them there and zeroes them whenever the pipeline layout
+/// changes, which happens on every pipeline switch, because each Skia pipeline has its own layout.
+/// The circle and the gradient rect need different pipelines, so the shape that Skia draws second
+/// vanishes unless the shim sets the immediates again after each pipeline. With `SHADER_F16`,
+/// Skia would write `f16` fragment outputs, which `wgpu` 30 rejects.
 #[test]
 fn skia_renders_on_a_device_with_every_adapter_feature() {
     let Some(pixels) = render(Device::EveryAdapterFeature, |canvas, _| {
         canvas.clear(Color::WHITE);
         let mut paint = Paint::new(Color4f::from(Color::BLUE), None);
         paint.set_anti_alias(true);
-        canvas.draw_circle((32.0, 32.0), 20.0, &paint);
+        canvas.draw_circle((16.0, 16.0), 10.0, &paint);
+
+        // A gradient of a single color, so that its pixels are exact.
+        let colors = [Color4f::from(Color::RED), Color4f::from(Color::RED)];
+        let gradient = gradient::Gradient::new(
+            gradient::Colors::new_evenly_spaced(&colors, TileMode::Clamp, None),
+            gradient::Interpolation::default(),
+        );
+        let mut paint = Paint::default();
+        paint.set_shader(gradient::shaders::linear_gradient(
+            ((0.0, 0.0), (SIZE as f32, 0.0)),
+            &gradient,
+            None,
+        ));
+        canvas.draw_rect(Rect::from_xywh(36.0, 36.0, 20.0, 20.0), &paint);
     }) else {
         eprintln!("skipped: no wgpu adapter available");
         return;
     };
     assert_eq!(
-        pixel(&pixels, 32, 32),
+        pixel(&pixels, 16, 16),
         [0, 0, 255, 255],
         "the circle is not blue"
+    );
+    assert_eq!(
+        pixel(&pixels, 46, 46),
+        [255, 0, 0, 255],
+        "the rect is not red"
     );
     assert_eq!(
         pixel(&pixels, 2, 2),
