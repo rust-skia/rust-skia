@@ -95,7 +95,7 @@ Dawn defines. A reported feature is one for which the shim answers `true` when t
 |---|---|---|---|---|
 | `CoreFeaturesAndLimits` | standard | none needed | always reported | Skia limits itself to the formats of WebGPU's compatibility mode. `wgpu` devices are never in that mode. |
 | `TimestampQuery` | standard | `TIMESTAMP_QUERY`, and `TIMESTAMP_QUERY_INSIDE_ENCODERS` unless on Metal | reported | Skia reports no GPU timings. |
-| `ShaderF16` | standard | `SHADER_F16` | reported | Shaders use 32-bit floats where Skia would use half precision. |
+| `ShaderF16` | standard | `SHADER_F16` | not reported | Shaders use 32-bit floats where Skia would use half precision. |
 | `DualSourceBlending` | standard | `DUAL_SOURCE_BLENDING` | reported | Some blend modes that combine coverage with the destination read the destination through a texture copy. |
 | `TextureCompressionBC`, `TextureCompressionETC2` | standard | `TEXTURE_COMPRESSION_BC`, `TEXTURE_COMPRESSION_ETC2` | reported | Skia cannot sample these compressed formats. |
 | `RG11B10UfloatRenderable` | standard | `RG11B10UFLOAT_RENDERABLE` | reported | Skia cannot render into `RG11B10Ufloat`. |
@@ -119,8 +119,12 @@ GPUs that share memory with the CPU, and `wgpu` warns that it is slow on GPUs wi
 memory. The shim reports it when the application requested `MAPPABLE_PRIMARY_BUFFERS` for its
 device, so the application makes that trade-off, as it does for every reported feature.
 
-Three features that the shim does not report have a `wgpu` counterpart, but reporting them would
+Four features that the shim does not report have a `wgpu` counterpart, but reporting them would
 let Skia make calls that `wgpu` rejects or that break `wgpu`'s safety contract:
+
+- `ShaderF16`: Skia then writes `f16` fragment outputs. `wgpu` 30 rejects them for color targets
+  of `f32` formats, such as `BGRA8Unorm` (`check_texture_format` compares the scalar width).
+  `wgpu`'s trunk accepts them, so the shim can report the feature with the next `wgpu` version.
 
 - `TransientAttachments`: Skia makes its MSAA attachments transient when the device reports this
   feature, and it then expects to load the target into them with `DawnLoadResolveTexture`. Without

@@ -167,7 +167,6 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
             W::TIMESTAMP_QUERY | W::TIMESTAMP_QUERY_INSIDE_ENCODERS
         }
         F::WGPUFeatureName_IndirectFirstInstance => W::INDIRECT_FIRST_INSTANCE,
-        F::WGPUFeatureName_ShaderF16 => W::SHADER_F16,
         F::WGPUFeatureName_RG11B10UfloatRenderable => W::RG11B10UFLOAT_RENDERABLE,
         F::WGPUFeatureName_BGRA8UnormStorage => W::BGRA8UNORM_STORAGE,
         F::WGPUFeatureName_Float32Filterable => W::FLOAT32_FILTERABLE,
@@ -181,7 +180,10 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         // Listing every variant makes a feature added to Dawn's header a compile error. ADR 0003
         // explains why `TransientAttachments`, `Unorm16TextureFormats`, and
         // `DawnAllowUndefinedLoadStoreOp` stay unreported although `wgpu` has a counterpart.
-        F::WGPUFeatureName_TextureCompressionBCSliced3D
+        // With `ShaderF16`, Skia writes `f16` fragment outputs, which `wgpu` 30 rejects for color
+        // targets of `f32` formats, such as `BGRA8Unorm`.
+        F::WGPUFeatureName_ShaderF16
+        | F::WGPUFeatureName_TextureCompressionBCSliced3D
         | F::WGPUFeatureName_TextureCompressionASTCSliced3D
         | F::WGPUFeatureName_Subgroups
         | F::WGPUFeatureName_TextureFormatsTier1

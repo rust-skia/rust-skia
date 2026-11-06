@@ -22,7 +22,7 @@ const SIZE: u32 = 64;
 /// Skia uploads through a mapped buffer.
 #[test]
 fn skia_renders_antialiasing_gradients_text_and_images() {
-    let Some(pixels) = render(|canvas, recorder| {
+    let Some(pixels) = render(Device::Default, |canvas, recorder| {
         canvas.clear(Color::WHITE);
 
         let mut paint = Paint::default();
@@ -96,14 +96,52 @@ fn skia_renders_antialiasing_gradients_text_and_images() {
     );
 }
 
+/// Draws on a device with every feature and limit of the adapter, as applications request it.
+/// With `IMMEDIATES`, Skia sets its intrinsic uniforms as immediates before the first pipeline.
+/// With `SHADER_F16`, it would write `f16` fragment outputs, which `wgpu` 30 rejects.
+#[test]
+fn skia_renders_on_a_device_with_every_adapter_feature() {
+    let Some(pixels) = render(Device::EveryAdapterFeature, |canvas, _| {
+        canvas.clear(Color::WHITE);
+        let mut paint = Paint::new(Color4f::from(Color::BLUE), None);
+        paint.set_anti_alias(true);
+        canvas.draw_circle((32.0, 32.0), 20.0, &paint);
+    }) else {
+        eprintln!("skipped: no wgpu adapter available");
+        return;
+    };
+    assert_eq!(
+        pixel(&pixels, 32, 32),
+        [0, 0, 255, 255],
+        "the circle is not blue"
+    );
+    assert_eq!(
+        pixel(&pixels, 2, 2),
+        [255, 255, 255, 255],
+        "the background is not white"
+    );
+}
+
+enum Device {
+    Default,
+    EveryAdapterFeature,
+}
+
 /// Draws with Graphite into a texture of a new `wgpu` device and returns its RGBA pixels, or
 /// `None` on a machine without a `wgpu` adapter, such as a CI runner without a GPU.
-fn render(draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Option<Vec<u8>> {
+fn render(device: Device, draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Option<Vec<u8>> {
     let instance = wgpu::Instance::default();
     let adapter =
         block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default())).ok()?;
-    let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))
-        .expect("no wgpu device");
+    let descriptor = match device {
+        Device::Default => wgpu::DeviceDescriptor::default(),
+        Device::EveryAdapterFeature => wgpu::DeviceDescriptor {
+            required_features: adapter.features() - wgpu::Features::all_experimental_mask(),
+            required_limits: adapter.limits(),
+            ..Default::default()
+        },
+    };
+    let (device, queue) = block_on(adapter.request_device(&descriptor)).expect("no wgpu device");
     let texture = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("skia target"),
         size: wgpu::Extent3d {
