@@ -374,7 +374,7 @@ impl ParagraphStyle {
     /// Sets the string rendered at soft hyphen line breaks. It has no effect when soft hyphen
     /// rendering is disabled.
     pub fn set_soft_hyphen_string(&mut self, value: impl AsRef<str>) -> &mut Self {
-        self.native_mut().fSoftHyphenString.set_str(value);
+        unsafe { (*self.native_ptr()).fSoftHyphenString.set_str(value) };
         self
     }
 }
