@@ -14,7 +14,7 @@ use super::device::Device;
 use super::handle::{Handle, get_optional, handles};
 use super::pipeline::{ComputePipeline, RenderPipeline};
 use super::texture::{Texture, TextureView};
-use super::{convert, wgpu};
+use super::{compat, convert, wgpu};
 
 // Each `Option` turns `None` when Finish, End, or Submit consumes the `wgpu` object, while the
 // WebGPU handle lives on until Release.
@@ -34,17 +34,7 @@ pub struct CommandBuffer {
 /// Behind a `WGPURenderPassEncoder`: the pass until `wgpuRenderPassEncoderEnd` ends it.
 #[derive(Debug)]
 pub struct RenderPassEncoder {
-    pass: Mutex<Option<wgpu::RenderPass<'static>>>,
-    /// The immediates of the pass, which WebGPU keeps across pipeline changes and which Dawn
-    /// accepts before the first pipeline. `wgpu` 30 needs a pipeline for them, so the shim sets
-    /// them again after each `SetPipeline`.
-    immediates: Mutex<Immediates>,
-}
-
-#[derive(Debug, Default)]
-struct Immediates {
-    data: Vec<u8>,
-    has_pipeline: bool,
+    pass: Mutex<Option<compat::RenderPass>>,
 }
 
 /// Behind a `WGPUComputePassEncoder`: the pass until `wgpuComputePassEncoderEnd` ends it.
@@ -183,8 +173,7 @@ pub unsafe extern "C" fn wgpuCommandEncoderBeginRenderPass(
             .forget_lifetime()
     });
     RenderPassEncoder {
-        pass: Mutex::new(Some(pass)),
-        immediates: Mutex::default(),
+        pass: Mutex::new(Some(pass.into())),
     }
     .into_handle()
 }
@@ -365,15 +354,7 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderSetPipeline(
     pipeline: sb::WGPURenderPipeline,
 ) {
     let pipeline = &unsafe { RenderPipeline::get(pipeline) }.pipeline;
-    let encoder = unsafe { RenderPassEncoder::get(pass) };
-    let mut immediates = encoder.immediates.lock().unwrap();
-    immediates.has_pipeline = true;
-    encoder.with(|pass| {
-        pass.set_pipeline(pipeline);
-        if !immediates.data.is_empty() {
-            pass.set_immediates(0, &immediates.data);
-        }
-    });
+    unsafe { RenderPassEncoder::get(pass) }.with(|pass| pass.set_pipeline(pipeline));
 }
 const _: sb::WGPUProcRenderPassEncoderSetPipeline = Some(wgpuRenderPassEncoderSetPipeline);
 
@@ -468,16 +449,7 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderSetImmediates(
     size: usize,
 ) {
     let data = unsafe { convert::slice(data as *const u8, size) };
-    let encoder = unsafe { RenderPassEncoder::get(pass) };
-    let mut immediates = encoder.immediates.lock().unwrap();
-    let end = offset as usize + data.len();
-    if immediates.data.len() < end {
-        immediates.data.resize(end, 0);
-    }
-    immediates.data[offset as usize..end].copy_from_slice(data);
-    if immediates.has_pipeline {
-        encoder.with(|pass| pass.set_immediates(offset, data));
-    }
+    unsafe { RenderPassEncoder::get(pass) }.with(|pass| pass.set_immediates(offset, data));
 }
 const _: sb::WGPUProcRenderPassEncoderSetImmediates = Some(wgpuRenderPassEncoderSetImmediates);
 
@@ -718,7 +690,7 @@ unsafe fn texture_copy<'a>(c: &sb::WGPUTexelCopyTextureInfo) -> wgpu::TexelCopyT
 }
 
 impl RenderPassEncoder {
-    fn with<R>(&self, f: impl FnOnce(&mut wgpu::RenderPass<'static>) -> R) -> R {
+    fn with<R>(&self, f: impl FnOnce(&mut compat::RenderPass) -> R) -> R {
         let mut pass = self.pass.lock().unwrap();
         f(pass.as_mut().expect("render pass used after End"))
     }

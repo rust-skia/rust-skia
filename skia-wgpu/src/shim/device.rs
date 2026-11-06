@@ -11,7 +11,7 @@ use super::convert::{self, CallbackString};
 use super::future::{Userdata, block_on};
 use super::handle::{Handle, handles};
 use super::instance::{self, Instance};
-use super::wgpu;
+use super::{compat, wgpu};
 
 /// Behind a `WGPUDevice`: the application's `wgpu` device and the instance that polls it.
 #[derive(Debug)]
@@ -167,6 +167,9 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
             W::TIMESTAMP_QUERY | W::TIMESTAMP_QUERY_INSIDE_ENCODERS
         }
         F::WGPUFeatureName_IndirectFirstInstance => W::INDIRECT_FIRST_INSTANCE,
+        // With this feature, Skia writes `f16` fragment outputs, which some `wgpu` versions reject
+        // (ADR 0003).
+        F::WGPUFeatureName_ShaderF16 if compat::ACCEPTS_F16_FRAGMENT_OUTPUTS => W::SHADER_F16,
         F::WGPUFeatureName_RG11B10UfloatRenderable => W::RG11B10UFLOAT_RENDERABLE,
         F::WGPUFeatureName_BGRA8UnormStorage => W::BGRA8UNORM_STORAGE,
         F::WGPUFeatureName_Float32Filterable => W::FLOAT32_FILTERABLE,
@@ -178,10 +181,8 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         F::WGPUFeatureName_BufferMapExtendedUsages => W::MAPPABLE_PRIMARY_BUFFERS,
         // Features without a `wgpu` counterpart, and those that the shim leaves off on purpose.
         // Listing every variant makes a feature added to Dawn's header a compile error. ADR 0003
-        // explains why `TransientAttachments`, `Unorm16TextureFormats`, and
+        // explains why `ShaderF16`, `TransientAttachments`, `Unorm16TextureFormats`, and
         // `DawnAllowUndefinedLoadStoreOp` stay unreported although `wgpu` has a counterpart.
-        // With `ShaderF16`, Skia writes `f16` fragment outputs, which `wgpu` 30 rejects for color
-        // targets of `f32` formats, such as `BGRA8Unorm`.
         F::WGPUFeatureName_ShaderF16
         | F::WGPUFeatureName_TextureCompressionBCSliced3D
         | F::WGPUFeatureName_TextureCompressionASTCSliced3D

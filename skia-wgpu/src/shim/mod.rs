@@ -1,7 +1,8 @@
 //! The shim: the WebGPU C functions that Skia's Dawn backend calls, implemented on `wgpu`.
 //!
 //! This source is compiled once per supported `wgpu` major version. The parent module binds the
-//! name `wgpu` to that version's crate, so nothing in here names a version.
+//! name `wgpu` to that version's crate, so nothing in here names a version. It also provides
+//! `compat`, which makes up for where that version deviates from WebGPU (ADR 0003).
 //!
 //! Each shim function is exported under its C name from `webgpu.h`, such as
 //! `wgpuDeviceCreateBuffer`, so that the linker resolves Skia's calls to it (ADR 0004). A constant
@@ -15,7 +16,7 @@
 // The shim functions carry the C names of `webgpu.h`, which are not snake case.
 #![allow(non_snake_case)]
 
-use super::wgpu;
+use super::{compat, wgpu};
 
 pub mod api;
 mod binding;
