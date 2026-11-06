@@ -401,7 +401,8 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     only if the tests keep the backend code that calls it. A changed signature fails the
     shim's `WGPUProc*` check at compile time. A new
     `wgpuDeviceHasFeature` check in Skia needs a decision whether the shim reports the
-    feature. Surface these changes to the user, as for the build organization diff above.
+    feature, recorded in `skia-wgpu/FEATURES.md`. Surface these changes to the user, as for the
+    build organization diff above.
   - Re-check the release poll. Two kinds of Skia callbacks run while the shim's device and
     Skia's shared context are being torn down: the poll at the release of the last device
     handle fires the callbacks with `AllowSpontaneous`, and the release of the instance fires

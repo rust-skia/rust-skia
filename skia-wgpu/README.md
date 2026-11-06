@@ -18,6 +18,10 @@ The design is described in the rust-skia repository, in
 [ADR 0003](https://github.com/rust-skia/rust-skia/blob/master/docs/adr/0003-skia-runs-on-wgpu-through-a-webgpu-shim.md)
 and
 [ADR 0004](https://github.com/rust-skia/rust-skia/blob/master/docs/adr/0004-the-shim-exports-the-webgpu-functions-from-rust.md).
+[FEATURES.md](https://github.com/rust-skia/rust-skia/blob/master/skia-wgpu/FEATURES.md) lists
+which WebGPU features the shim reports to Skia. The notes of each `wgpu` version, such as
+[src/v30/README.md](https://github.com/rust-skia/rust-skia/blob/master/skia-wgpu/src/v30/README.md),
+list where that version deviates from WebGPU and how the shim makes up for it.
 
 ## License
 

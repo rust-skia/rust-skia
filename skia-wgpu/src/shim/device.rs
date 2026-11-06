@@ -137,7 +137,7 @@ const _: sb::WGPUProcDeviceGetLimits = Some(wgpuDeviceGetLimits);
 
 /// Reports a WebGPU feature as supported when the device has the `wgpu` feature that implements
 /// it. The shim reports every other feature as unsupported, so Skia takes its fallback paths for
-/// them. ADR 0003 gives the reason for each.
+/// them. The crate's `FEATURES.md` gives the reason for each.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuDeviceHasFeature(
     device: sb::WGPUDevice,
@@ -157,7 +157,7 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         F::WGPUFeatureName_TextureCompressionASTC => W::TEXTURE_COMPRESSION_ASTC,
         // On Metal, Skia writes timestamps at the beginning and end of render passes, which
         // WebGPU's timestamp queries cover. On every other backend, it writes them on the command
-        // encoder, which `wgpu` allows only with a native feature on top of them (ADR 0003).
+        // encoder, which `wgpu` allows only with a native feature on top of them (`FEATURES.md`).
         F::WGPUFeatureName_TimestampQuery
             if device.adapter_info().backend == wgpu::Backend::Metal =>
         {
@@ -168,7 +168,7 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         }
         F::WGPUFeatureName_IndirectFirstInstance => W::INDIRECT_FIRST_INSTANCE,
         // With this feature, Skia writes `f16` fragment outputs, which some `wgpu` versions reject
-        // (ADR 0003).
+        // (`src/vNN/README.md`).
         F::WGPUFeatureName_ShaderF16 if compat::ACCEPTS_F16_FRAGMENT_OUTPUTS => W::SHADER_F16,
         F::WGPUFeatureName_RG11B10UfloatRenderable => W::RG11B10UFLOAT_RENDERABLE,
         F::WGPUFeatureName_BGRA8UnormStorage => W::BGRA8UNORM_STORAGE,
@@ -177,12 +177,14 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         F::WGPUFeatureName_ClipDistances => W::CLIP_DISTANCES,
         F::WGPUFeatureName_Float32Blendable => W::FLOAT32_BLENDABLE,
         // Mapping buffers that the GPU reads directly only pays off on GPUs that share memory with
-        // the CPU, so the application decides by requesting the feature for its device (ADR 0003).
+        // the CPU, so the application decides by requesting the feature for its device
+        // (`FEATURES.md`).
         F::WGPUFeatureName_BufferMapExtendedUsages => W::MAPPABLE_PRIMARY_BUFFERS,
         // Features without a `wgpu` counterpart, and those that the shim leaves off on purpose.
-        // Listing every variant makes a feature added to Dawn's header a compile error. ADR 0003
-        // explains why `ShaderF16`, `TransientAttachments`, `Unorm16TextureFormats`, and
+        // Listing every variant makes a feature added to Dawn's header a compile error.
+        // `FEATURES.md` explains why `TransientAttachments`, `Unorm16TextureFormats`, and
         // `DawnAllowUndefinedLoadStoreOp` stay unreported although `wgpu` has a counterpart.
+        // `ShaderF16` lands here on a `wgpu` version that rejects Skia's `f16` outputs.
         F::WGPUFeatureName_ShaderF16
         | F::WGPUFeatureName_TextureCompressionBCSliced3D
         | F::WGPUFeatureName_TextureCompressionASTCSliced3D
@@ -373,7 +375,7 @@ mod tests {
     use super::{wgpuDeviceHasFeature, wgpuDevicePopErrorScope, wgpuDevicePushErrorScope};
 
     /// `TimestampQuery` also requires `TIMESTAMP_QUERY_INSIDE_ENCODERS`, because Skia writes
-    /// timestamps outside passes, except on Metal (ADR 0003).
+    /// timestamps outside passes, except on Metal (`FEATURES.md`).
     #[test]
     fn timestamp_query_alone_is_reported_only_on_metal() {
         let Some((device, queue)) = testing::device_with(wgpu::Features::TIMESTAMP_QUERY) else {

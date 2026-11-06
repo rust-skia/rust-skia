@@ -1,21 +1,17 @@
 //! Where `wgpu` 30 deviates from WebGPU in ways that Skia runs into, and how the shim makes up for
-//! it (ADR 0003). The shim reaches this module as `compat`, so its source names no `wgpu` version.
+//! it. `README.md` next to this file describes each deviation and its upstream fix. The shim
+//! reaches this module as `compat`, so its source names no `wgpu` version (ADR 0003).
 
 use std::ops::{Deref, DerefMut};
 
 use super::wgpu;
 
-/// Whether `wgpu` accepts `f16` fragment outputs for color targets of `f32` formats, such as
-/// `BGRA8Unorm`. Skia writes them when the device reports `ShaderF16`, and `wgpu` 30 rejects them
-/// because it compares the scalar width. gfx-rs/wgpu#9999 compares only the scalar kind.
+/// Whether `wgpu` accepts the `f16` fragment outputs that Skia writes with `ShaderF16` for `f32`
+/// color targets. `wgpu` 30 rejects them, so the shim does not report the feature (`README.md`).
 pub const ACCEPTS_F16_FRAGMENT_OUTPUTS: bool = false;
 
-/// A render pass that keeps its immediates as WebGPU does.
-///
-/// Skia sets its intrinsic uniforms as immediates once per pass, before the first pipeline.
-/// `wgpu` 30 rejects immediates before the first pipeline and zeroes them whenever the pipeline
-/// layout changes. This pass therefore keeps them and sets them again after each pipeline.
-/// gfx-rs/wgpu#9597 makes `wgpu` keep them itself.
+/// A render pass that keeps its immediates across pipeline changes, as WebGPU does and `wgpu` 30
+/// does not, because Skia sets them only once per pass (`README.md`).
 #[derive(Debug)]
 pub struct RenderPass {
     pass: wgpu::RenderPass<'static>,
