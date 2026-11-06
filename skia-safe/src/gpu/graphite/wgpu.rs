@@ -75,6 +75,10 @@ pub mod images {
     /// Skia interprets the texture's contents. Returns `None` if the format has no WebGPU
     /// equivalent, or if Skia cannot sample the texture with `color_type`. The image keeps the
     /// texture alive.
+    ///
+    /// Skia submits to the application's queue, so it reads the texture when Graphite submits the
+    /// recording that draws the image. The application submits the commands that fill the
+    /// texture before that, and none that change it in between.
     pub fn wrap_texture(
         recorder: &mut Recorder,
         texture: &wgpu::Texture,
