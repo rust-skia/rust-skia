@@ -66,7 +66,8 @@ impl Drop for Device {
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuDeviceGetAdapter(device: sb::WGPUDevice) -> sb::WGPUAdapter {
-    instance::adapter_handle(&unsafe { Device::get(device) }.device)
+    let device = unsafe { Device::get(device) };
+    instance::adapter_handle(&device.device, &device.instance)
 }
 const _: sb::WGPUProcDeviceGetAdapter = Some(wgpuDeviceGetAdapter);
 
