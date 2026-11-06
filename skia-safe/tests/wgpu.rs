@@ -22,7 +22,7 @@ const SIZE: u32 = 64;
 /// Skia uploads through a mapped buffer.
 #[test]
 fn skia_renders_antialiasing_gradients_text_and_images() {
-    let Some(pixels) = render(Device::Default, |canvas, recorder| {
+    let Some(pixels) = render(DeviceFeatures::Default, |canvas, recorder| {
         canvas.clear(Color::WHITE);
 
         let mut paint = Paint::default();
@@ -64,7 +64,6 @@ fn skia_renders_antialiasing_gradients_text_and_images() {
             .expect("uploading the image failed");
         canvas.draw_image(&image, (48.0, 48.0), None);
     }) else {
-        eprintln!("skipped: no wgpu adapter available");
         return;
     };
     // The gradient runs from red on the left to green on the right.
@@ -97,23 +96,41 @@ fn skia_renders_antialiasing_gradients_text_and_images() {
 }
 
 /// Draws on a device with every feature and limit of the adapter, as applications request it.
-/// With `IMMEDIATES`, Skia sets its intrinsic uniforms as immediates before the first pipeline.
-/// With `SHADER_F16`, it would write `f16` fragment outputs, which `wgpu` 30 rejects.
+/// The circle and the rect need different pipelines, so the test also covers Skia's immediates
+/// across a pipeline switch (`skia-wgpu/src/v30/README.md`).
 #[test]
 fn skia_renders_on_a_device_with_every_adapter_feature() {
-    let Some(pixels) = render(Device::EveryAdapterFeature, |canvas, _| {
+    let Some(pixels) = render(DeviceFeatures::EveryAdapterFeature, |canvas, _| {
         canvas.clear(Color::WHITE);
         let mut paint = Paint::new(Color4f::from(Color::BLUE), None);
         paint.set_anti_alias(true);
-        canvas.draw_circle((32.0, 32.0), 20.0, &paint);
+        canvas.draw_circle((16.0, 16.0), 10.0, &paint);
+
+        // A gradient of a single color, so that its pixels are exact.
+        let colors = [Color4f::from(Color::RED), Color4f::from(Color::RED)];
+        let gradient = gradient::Gradient::new(
+            gradient::Colors::new_evenly_spaced(&colors, TileMode::Clamp, None),
+            gradient::Interpolation::default(),
+        );
+        let mut paint = Paint::default();
+        paint.set_shader(gradient::shaders::linear_gradient(
+            ((0.0, 0.0), (SIZE as f32, 0.0)),
+            &gradient,
+            None,
+        ));
+        canvas.draw_rect(Rect::from_xywh(36.0, 36.0, 20.0, 20.0), &paint);
     }) else {
-        eprintln!("skipped: no wgpu adapter available");
         return;
     };
     assert_eq!(
-        pixel(&pixels, 32, 32),
+        pixel(&pixels, 16, 16),
         [0, 0, 255, 255],
         "the circle is not blue"
+    );
+    assert_eq!(
+        pixel(&pixels, 46, 46),
+        [255, 0, 0, 255],
+        "the rect is not red"
     );
     assert_eq!(
         pixel(&pixels, 2, 2),
@@ -122,24 +139,43 @@ fn skia_renders_on_a_device_with_every_adapter_feature() {
     );
 }
 
-enum Device {
+/// Which features and limits `render` requests for its device.
+enum DeviceFeatures {
+    /// The defaults of `wgpu::DeviceDescriptor`.
     Default,
+    /// Every feature and limit of the adapter, except the experimental features.
     EveryAdapterFeature,
 }
 
-/// Draws with Graphite into a texture of a new `wgpu` device and returns its RGBA pixels, or
-/// `None` on a machine without a `wgpu` adapter, such as a CI runner without a GPU.
-fn render(device: Device, draw: impl FnOnce(&Canvas, &mut graphite::Recorder)) -> Option<Vec<u8>> {
+/// Draws with Graphite into a texture of a new `wgpu` device and returns its RGBA pixels.
+///
+/// Returns `None` and prints a note on a machine without a `wgpu` adapter, such as a CI runner
+/// without a GPU. With `EveryAdapterFeature`, it does the same when the adapter lacks
+/// `IMMEDIATES`, because Skia then never uses immediates. The test then passes without checking
+/// anything.
+fn render(
+    features: DeviceFeatures,
+    draw: impl FnOnce(&Canvas, &mut graphite::Recorder),
+) -> Option<Vec<u8>> {
     let instance = wgpu::Instance::default();
-    let adapter =
-        block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default())).ok()?;
-    let descriptor = match device {
-        Device::Default => wgpu::DeviceDescriptor::default(),
-        Device::EveryAdapterFeature => wgpu::DeviceDescriptor {
-            required_features: adapter.features() - wgpu::Features::all_experimental_mask(),
-            required_limits: adapter.limits(),
-            ..Default::default()
-        },
+    let Ok(adapter) = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
+    else {
+        eprintln!("skipped: no wgpu adapter available");
+        return None;
+    };
+    let descriptor = match features {
+        DeviceFeatures::Default => wgpu::DeviceDescriptor::default(),
+        DeviceFeatures::EveryAdapterFeature => {
+            if !adapter.features().contains(wgpu::Features::IMMEDIATES) {
+                eprintln!("skipped: the wgpu adapter lacks IMMEDIATES");
+                return None;
+            }
+            wgpu::DeviceDescriptor {
+                required_features: adapter.features() - wgpu::Features::all_experimental_mask(),
+                required_limits: adapter.limits(),
+                ..Default::default()
+            }
+        }
     };
     let (device, queue) = block_on(adapter.request_device(&descriptor)).expect("no wgpu device");
     let texture = device.create_texture(&wgpu::TextureDescriptor {
