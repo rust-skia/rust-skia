@@ -22,7 +22,7 @@ const SIZE: u32 = 64;
 /// Skia uploads through a mapped buffer.
 #[test]
 fn skia_renders_antialiasing_gradients_text_and_images() {
-    let Some(pixels) = render(DeviceFeatures::Default, |canvas, recorder| {
+    let Some(pixels) = render(DeviceFeatures::Default, |canvas, recorder, _| {
         canvas.clear(Color::WHITE);
 
         let mut paint = Paint::default();
@@ -100,7 +100,7 @@ fn skia_renders_antialiasing_gradients_text_and_images() {
 /// across a pipeline switch (`skia-wgpu/src/v30/README.md`).
 #[test]
 fn skia_renders_on_a_device_with_every_adapter_feature() {
-    let Some(pixels) = render(DeviceFeatures::EveryAdapterFeature, |canvas, _| {
+    let Some(pixels) = render(DeviceFeatures::EveryAdapterFeature, |canvas, _, _| {
         canvas.clear(Color::WHITE);
         let mut paint = Paint::new(Color4f::from(Color::BLUE), None);
         paint.set_anti_alias(true);
@@ -139,6 +139,75 @@ fn skia_renders_on_a_device_with_every_adapter_feature() {
     );
 }
 
+/// Draws a texture of the application as an image, after the application dropped its texture.
+#[test]
+fn skia_draws_a_wgpu_texture_as_an_image() {
+    let Some(pixels) = render(
+        DeviceFeatures::Default,
+        |canvas, recorder, (device, queue)| {
+            canvas.clear(Color::WHITE);
+            let texture = solid_texture(device, queue, [0, 0, 255, 255]);
+            let image = graphite::wgpu::images::wrap_texture(
+                recorder,
+                &texture,
+                ColorType::RGBA8888,
+                AlphaType::Premul,
+                None,
+            )
+            .expect("no image for the wgpu texture");
+            drop(texture);
+            canvas.draw_image_rect(
+                &image,
+                None,
+                Rect::from_xywh(16.0, 16.0, 32.0, 32.0),
+                &Paint::default(),
+            );
+        },
+    ) else {
+        return;
+    };
+    assert_eq!(
+        pixel(&pixels, 32, 32),
+        [0, 0, 255, 255],
+        "the texture is not drawn"
+    );
+    assert_eq!(
+        pixel(&pixels, 4, 4),
+        [255, 255, 255, 255],
+        "the texture is drawn outside of its rectangle"
+    );
+}
+
+/// A 4 x 4 texture of one color, which Skia can sample.
+fn solid_texture(device: &wgpu::Device, queue: &wgpu::Queue, pixel: [u8; 4]) -> wgpu::Texture {
+    let size = wgpu::Extent3d {
+        width: 4,
+        height: 4,
+        depth_or_array_layers: 1,
+    };
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("solid texture"),
+        size,
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        view_formats: &[],
+    });
+    queue.write_texture(
+        texture.as_image_copy(),
+        &pixel.repeat(16),
+        wgpu::TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(16),
+            rows_per_image: None,
+        },
+        size,
+    );
+    texture
+}
+
 /// Which features and limits `render` requests for its device.
 enum DeviceFeatures {
     /// The defaults of `wgpu::DeviceDescriptor`.
@@ -155,7 +224,7 @@ enum DeviceFeatures {
 /// anything.
 fn render(
     features: DeviceFeatures,
-    draw: impl FnOnce(&Canvas, &mut graphite::Recorder),
+    draw: impl FnOnce(&Canvas, &mut graphite::Recorder, (&wgpu::Device, &wgpu::Queue)),
 ) -> Option<Vec<u8>> {
     let instance = wgpu::Instance::default();
     let Ok(adapter) = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
@@ -207,7 +276,7 @@ fn render(
         None,
     )
     .expect("no surface for the wgpu texture");
-    draw(surface.canvas(), &mut recorder);
+    draw(surface.canvas(), &mut recorder, (&device, &queue));
     drop(surface);
 
     let mut recording = recorder.snap().expect("no recording");

@@ -130,6 +130,10 @@ sequenceDiagram
     Skia-->>App: Surface that renders into the texture
 ```
 
+`images::wrap_texture` wraps a texture as an image in the same way, with
+`BackendTextures::MakeDawn` and `SkImages::WrapTexture`, so that Skia samples the application's
+texture when it draws the image.
+
 ## Several `wgpu` major versions
 
 `skia-wgpu` offers a feature `wgpu-NN` for each supported `wgpu` major version. Each feature
