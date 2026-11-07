@@ -21,9 +21,11 @@ impl PlatformDetails for Emscripten {
         let features = &config.features;
         let emcc_dir = emscripten_dir();
 
+        // emcc only accepts its own target, also when the Rust target is wasm32-unknown-unknown.
+        builder.target("wasm32-unknown-emscripten".to_string());
         builder
             .arg("skia_gl_standard", quote("webgl"))
-            .arg("skia_use_webgl", yes_if(features.ganesh()))
+            .arg("skia_use_webgl", yes_if(features[feature::GL]))
             .arg("target_cpu", quote("wasm"));
 
         // `skia_emsdk_dir` is deliberately not set. Skia's wasm toolchain and `config("wasm")`
@@ -104,6 +106,31 @@ impl PlatformDetails for Emscripten {
         features += feature::EMBED_FREETYPE;
         features
     }
+}
+
+fn is_unknown_os(target: &Target) -> bool {
+    target.architecture == "wasm32" && target.system == "unknown"
+}
+
+/// On `wasm32-unknown-unknown`, compiles the bindings with the emsdk's clang against Emscripten's
+/// sysroot. `cc` knows no compiler for that target that has a C++ standard library.
+pub fn configure_cc_for_unknown_os(target: &Target, cc_build: &mut cc::Build) {
+    if !is_unknown_os(target) {
+        return;
+    }
+    let emcc_dir = emscripten_dir();
+    let llvm_bin = Path::new(&emcc_dir).join("../bin");
+    let clang = llvm_bin.join("clang++");
+    assert!(
+        clang.exists(),
+        "The emsdk's clang is not at `{}`, next to `{emcc_dir}`.",
+        clang.display()
+    );
+    cc_build
+        .compiler(clang)
+        .archiver(llvm_bin.join("llvm-ar"))
+        .flag(format!("--sysroot={emcc_dir}/cache/sysroot"))
+        .flag("-fno-exceptions");
 }
 
 /// Resolved Emscripten SDK layout.

@@ -203,6 +203,7 @@ pub fn generate_bindings(
     }
 
     let mut cc_build = Build::new();
+    platform::emscripten::configure_cc_for_unknown_os(&target, &mut cc_build);
 
     for source in &build.binding_sources {
         cc_build.file(source);
