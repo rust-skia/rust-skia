@@ -10,7 +10,7 @@ use skia_bindings as sb;
 use super::binding::{BindGroupLayout, PipelineLayout};
 use super::convert::{self, CallbackString};
 use super::device::Device;
-use super::future::{Userdata, block_on};
+use super::future::{Userdata, ready_or_report_late};
 use super::handle::{Handle, get_optional, handles};
 use super::instance::Instance;
 use super::wgpu;
@@ -19,6 +19,7 @@ use super::wgpu;
 #[derive(Debug)]
 pub struct ShaderModule {
     pub module: wgpu::ShaderModule,
+    label: Option<String>,
     /// The error of the module's creation. Skia learns about invalid WGSL only through the
     /// compilation info, while `wgpu` reports it as an error of the creation.
     creation_error: Option<String>,
@@ -75,16 +76,18 @@ pub unsafe extern "C" fn wgpuDeviceCreateShaderModule(
     let code = code.expect("WGPUShaderModuleDescriptor without WGSL source");
     // Skia does not open an error scope around the creation, so without these, `wgpu` would pass
     // a WGSL error to its default handler, which panics.
-    let (module, creation_error) = device.capture_errors(|| {
+    let label = unsafe { convert::label(d.label) };
+    let (module, creation_error) = device.capture_errors("shader module", || {
         device
             .device
             .create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: unsafe { convert::label(d.label) },
+                label,
                 source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(code)),
             })
     });
     ShaderModule {
         module,
+        label: label.map(str::to_owned),
         creation_error: creation_error.map(|error| error.to_string()),
         instance: device.instance.clone(),
     }
@@ -99,11 +102,17 @@ pub unsafe extern "C" fn wgpuShaderModuleGetCompilationInfo(
 ) -> sb::WGPUFuture {
     unsafe { convert::no_chain(callback_info.nextInChain, "WGPUCompilationInfoCallbackInfo") };
     let module = unsafe { ShaderModule::get(shader_module) };
-    let mut messages: Vec<Message> = block_on(module.module.get_compilation_info())
-        .messages
-        .iter()
-        .map(Message::new)
-        .collect();
+    let info = {
+        let label = module.label.clone();
+        let module = module.module.clone();
+        ready_or_report_late(
+            async move { module.get_compilation_info().await },
+            move |info| late_compilation_errors(label.as_deref(), &info),
+        )
+    };
+    let mut messages: Vec<Message> = info
+        .map(|info| info.messages.iter().map(Message::new).collect())
+        .unwrap_or_default();
     let has_error = messages.iter().any(|m| {
         m.message_type == sb::WGPUCompilationMessageType::WGPUCompilationMessageType_Error
     });
@@ -124,6 +133,30 @@ pub unsafe extern "C" fn wgpuShaderModuleGetCompilationInfo(
     future
 }
 const _: sb::WGPUProcShaderModuleGetCompilationInfo = Some(wgpuShaderModuleGetCompilationInfo);
+
+/// The message for the errors in `info`, for when the browser reports them after Skia has used
+/// the shader module `label`.
+fn late_compilation_errors(label: Option<&str>, info: &wgpu::CompilationInfo) -> Option<String> {
+    let errors: Vec<String> = info
+        .messages
+        .iter()
+        .filter(|m| m.message_type == wgpu::CompilationMessageType::Error)
+        .map(|m| match m.location {
+            Some(l) => format!("line {}:{} {}", l.line_number, l.line_position, m.message),
+            None => m.message.clone(),
+        })
+        .collect();
+    let module = match label {
+        Some(label) if !label.is_empty() => format!("the shader module {label:?}"),
+        _ => "a shader module".to_owned(),
+    };
+    (!errors.is_empty()).then(|| {
+        format!(
+            "skia-wgpu: {module} has errors, after Skia continued with it:\n{}",
+            errors.join("\n")
+        )
+    })
+}
 
 /// The C callback of `wgpuShaderModuleGetCompilationInfo`.
 type CompilationInfoCallback = unsafe extern "C" fn(
@@ -181,8 +214,9 @@ pub unsafe extern "C" fn wgpuDeviceCreateRenderPipelineAsync(
         )
     };
     let device = unsafe { Device::get(device) };
-    let (pipeline, error) =
-        device.capture_errors(|| unsafe { create_render_pipeline(device, &*descriptor) });
+    let (pipeline, error) = device.capture_errors("render pipeline", || unsafe {
+        create_render_pipeline(device, &*descriptor)
+    });
     let result = match error {
         None => Ok(RenderPipeline { pipeline }),
         Some(error) => Err(error),
@@ -511,5 +545,66 @@ fn compilation_options<'a>(
     wgpu::PipelineCompilationOptions {
         constants,
         zero_initialize_workgroup_memory: true,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{late_compilation_errors, wgpu};
+
+    fn message(
+        message_type: wgpu::CompilationMessageType,
+        message: &str,
+        line: Option<(u32, u32)>,
+    ) -> wgpu::CompilationMessage {
+        wgpu::CompilationMessage {
+            message: message.to_owned(),
+            message_type,
+            location: line.map(|(line_number, line_position)| wgpu::SourceLocation {
+                line_number,
+                line_position,
+                offset: 0,
+                length: 0,
+            }),
+        }
+    }
+
+    #[test]
+    fn late_compilation_errors_reports_only_errors() {
+        use wgpu::CompilationMessageType as T;
+        let info = wgpu::CompilationInfo {
+            messages: vec![
+                message(T::Warning, "unused variable", Some((1, 2))),
+                message(T::Error, "unknown type", Some((3, 4))),
+                message(T::Error, "no location", None),
+            ],
+        };
+        assert_eq!(
+            late_compilation_errors(Some("fs"), &info).unwrap(),
+            "skia-wgpu: the shader module \"fs\" has errors, after Skia continued with it:\n\
+             line 3:4 unknown type\n\
+             no location"
+        );
+    }
+
+    #[test]
+    fn late_compilation_errors_names_no_label_that_is_empty() {
+        use wgpu::CompilationMessageType as T;
+        let info = wgpu::CompilationInfo {
+            messages: vec![message(T::Error, "unknown type", None)],
+        };
+        let expected = "skia-wgpu: a shader module has errors, after Skia continued with it:\n\
+                        unknown type";
+        assert_eq!(late_compilation_errors(Some(""), &info).unwrap(), expected);
+        assert_eq!(late_compilation_errors(None, &info).unwrap(), expected);
+    }
+
+    #[test]
+    fn late_compilation_errors_reports_nothing_without_errors() {
+        use wgpu::CompilationMessageType as T;
+        let info = wgpu::CompilationInfo {
+            messages: vec![message(T::Warning, "unused variable", None)],
+        };
+        assert_eq!(late_compilation_errors(None, &info), None);
     }
 }

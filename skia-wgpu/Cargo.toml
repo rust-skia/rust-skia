@@ -25,3 +25,11 @@ wgpu-30 = ["dep:wgpu30", "skia-bindings/wgpu"]
 [dependencies]
 skia-bindings = { version = "=0.157.0", path = "../skia-bindings", default-features = false }
 wgpu30 = { package = "wgpu", version = "30", optional = true }
+
+# In the browser, the shim completes the futures of `wgpu`'s JS promises from the event loop, and
+# writes the errors that arrive after Skia continued to the console.
+[target.'cfg(all(target_family = "wasm", target_os = "unknown"))'.dependencies]
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["console"] }
+# The shim's handles are `Send` and `Sync`, which `wgpu`'s types are in the browser only with this.
+wgpu30 = { package = "wgpu", version = "30", optional = true, features = ["fragile-send-sync-non-atomic-wasm"] }

@@ -10,6 +10,7 @@
 use std::collections::HashMap;
 use std::ffi::c_void;
 use std::fmt;
+#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
 use std::pin;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, Weak};
@@ -208,11 +209,44 @@ unsafe impl Send for Userdata {}
 /// Resolves a `wgpu` future that is ready at once. `wgpu`'s native backends resolve the futures
 /// that the shim waits on (adapters, devices, error scopes, and compilation info) when they are
 /// created, so nothing would ever wake a pending one.
+#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
 pub fn block_on<F: Future>(future: F) -> F::Output {
     let mut context = task::Context::from_waker(task::Waker::noop());
     match pin::pin!(future).poll(&mut context) {
         task::Poll::Ready(output) => output,
         task::Poll::Pending => panic!("a wgpu future that the shim waits on is not ready"),
+    }
+}
+
+/// Resolves a `wgpu` future like [`block_on`]. In the browser, where the futures are JS promises
+/// that resolve only after control returns to the event loop, a pending future yields `None`.
+/// Once it resolves, `late_error` turns its output into the message of an error, which is then
+/// written to the console, because Skia has continued without it.
+#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+pub fn ready_or_report_late<F: Future + 'static>(
+    future: F,
+    _late_error: impl FnOnce(F::Output) -> Option<String> + 'static,
+) -> Option<F::Output> {
+    Some(block_on(future))
+}
+
+#[cfg(all(target_family = "wasm", target_os = "unknown"))]
+pub fn ready_or_report_late<F: Future + 'static>(
+    future: F,
+    late_error: impl FnOnce(F::Output) -> Option<String> + 'static,
+) -> Option<F::Output> {
+    let mut future = Box::pin(future);
+    let mut context = task::Context::from_waker(task::Waker::noop());
+    match future.as_mut().poll(&mut context) {
+        task::Poll::Ready(output) => Some(output),
+        task::Poll::Pending => {
+            wasm_bindgen_futures::spawn_local(async move {
+                if let Some(message) = late_error(future.await) {
+                    web_sys::console::error_1(&message.into());
+                }
+            });
+            None
+        }
     }
 }
 
