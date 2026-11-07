@@ -9,7 +9,7 @@ use std::fmt;
 use skia_bindings as sb;
 
 use super::{BackendTexture, Context, ContextOptions};
-use crate::prelude::{self, NativeDrop};
+use crate::prelude::{self, NativeAccessMut, NativeDrop};
 
 pub use sb::{WGPUDevice, WGPUInstance, WGPUQueue, WGPUTexture};
 
@@ -38,6 +38,13 @@ impl BackendContext {
         BackendContext::construct(|backend_context| unsafe {
             sb::C_DawnBackendContext_Construct(backend_context, instance, device, queue)
         })
+    }
+
+    /// Makes the context non-yielding: Skia never waits for the GPU, so
+    /// [`Context::submit`] must not sync to the CPU, and the application must wait until
+    /// [`Context::has_unfinished_gpu_work`] returns `false` before it drops the context.
+    pub fn set_non_yielding(&mut self) {
+        unsafe { sb::C_DawnBackendContext_setNonYielding(self.native_mut()) }
     }
 }
 

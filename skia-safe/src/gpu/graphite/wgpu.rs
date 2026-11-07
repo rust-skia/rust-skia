@@ -24,9 +24,13 @@ pub mod context_factory {
     ) -> Option<Context> {
         let handles = skia_wgpu::BackendHandles::new(device, queue);
         // The context takes its own references to the handles, so they can go after creation.
-        let backend_context = unsafe {
+        let mut backend_context = unsafe {
             dawn::BackendContext::new(handles.instance(), handles.device(), handles.queue())
         };
+        // The browser's event loop cannot run while Skia waits.
+        if cfg!(all(target_family = "wasm", target_os = "unknown")) {
+            backend_context.set_non_yielding();
+        }
         dawn::context_factory::make_dawn(&backend_context, options)
     }
 }
