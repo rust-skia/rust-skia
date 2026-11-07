@@ -23,5 +23,5 @@ features = ["wgpu-30"]
 wgpu-30 = ["dep:wgpu30", "skia-bindings/wgpu"]
 
 [dependencies]
-skia-bindings = { version = "=0.157.0", path = "../skia-bindings" }
+skia-bindings = { version = "=0.157.0", path = "../skia-bindings", default-features = false }
 wgpu30 = { package = "wgpu", version = "30", optional = true }
