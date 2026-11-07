@@ -23,6 +23,11 @@ impl PlatformDetails for Emscripten {
 
         // emcc only accepts its own target, also when the Rust target is wasm32-unknown-unknown.
         builder.target("wasm32-unknown-emscripten".to_string());
+        // Without Emscripten's JS runtime, `setjmp` and `longjmp` stay plain calls, which
+        // `src/wasm_libc.rs` resolves.
+        if is_unknown_os(&config.target) {
+            builder.cflags(vec!["-sSUPPORT_LONGJMP=0".to_string()]);
+        }
         builder
             .arg("skia_gl_standard", quote("webgl"))
             .arg("skia_use_webgl", yes_if(features[feature::GL]))
@@ -131,6 +136,27 @@ pub fn configure_cc_for_unknown_os(target: &Target, cc_build: &mut cc::Build) {
         .archiver(llvm_bin.join("llvm-ar"))
         .flag(format!("--sysroot={emcc_dir}/cache/sysroot"))
         .flag("-fno-exceptions");
+}
+
+/// On `wasm32-unknown-unknown`, links Emscripten's libc, libc++, and compiler-rt, which Skia is
+/// compiled against, and enables `src/wasm_libc.rs`, which supplies what they import from
+/// Emscripten's JS runtime. An application that supplies all of it sets `SKIA_WASM_NO_LIBC`.
+pub fn link_runtime_for_unknown_os() {
+    println!("cargo:rustc-check-cfg=cfg(skia_wasm_libc)");
+    if !is_unknown_os(&cargo::target()) {
+        return;
+    }
+    if cargo::env_var("SKIA_WASM_NO_LIBC").is_some() {
+        return;
+    }
+    println!("cargo:rustc-cfg=skia_wasm_libc");
+    println!(
+        "cargo:rustc-link-search=native={}/cache/sysroot/lib/wasm32-emscripten",
+        emscripten_dir()
+    );
+    for lib in ["c++-noexcept", "c++abi-noexcept", "c", "clang_rt.builtins"] {
+        cargo::add_link_lib(format!("static={lib}"));
+    }
 }
 
 /// Resolved Emscripten SDK layout.

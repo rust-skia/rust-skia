@@ -52,6 +52,8 @@ fn main() -> Result<(), io::Error> {
     let binaries_config =
         binaries_config::BinariesConfiguration::from_features(&features, skia_debug);
 
+    platform::emscripten::link_runtime_for_unknown_os();
+
     //
     // skip attempting to download?
     //
