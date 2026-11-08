@@ -479,6 +479,24 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
   whether a `rust-skia:` fork patch existed only to support the old one, such as an
   `@available` workaround. Record the outcome in the PR's Toolchain requirements section.
+  - Compare the Android NDK that Skia's CI pins with the NDK in the Linux CI image, which
+    builds rust-skia's prebuilt Android binaries:
+
+    ```sh
+    git -C skia-bindings/skia grep -h 'NDK_VER =' refs/tags/NEW_TAG -- infra/bots/assets/android_ndk_linux/create.py
+    gh api repos/pragmatrix/rust-skia-images/contents/linux/Dockerfile --jq .content | base64 -d | grep 'ANDROID_NDK_VERSION='
+    ```
+
+    The image `ghcr.io/pragmatrix/rust-skia-linux` is built from that Dockerfile, and its NDK
+    must match Skia's pin. The NDK that builds the prebuilt binaries is the oldest NDK that
+    users can link them with, because the binaries reference the libc++ symbols of that NDK's
+    headers ([#1375](https://github.com/rust-skia/rust-skia/issues/1375)). A newer NDK forces
+    every Android user to upgrade. An older NDK is a toolchain that Skia's CI does not test.
+    When the two versions differ, surface a decision to the user: move the image to Skia's pin,
+    or keep it and say why. A move changes the Dockerfile in `pragmatrix/rust-skia-images`,
+    and the new image must be published before CI builds the release binaries. It also
+    changes the NDK version in the Android section of `README.md`. Record both versions and
+    the decision in the PR's Toolchain requirements section.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
