@@ -26,7 +26,8 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 - [ ] Compare the newest `wgpu` version with the newest `wgpu-NN` feature of `skia-wgpu`, and
   record the outcome under "`wgpu` versions" below.
 - [ ] Check the upstream commits for raised toolchain minimums, and compare the Android NDK of
-  Skia's CI with the NDK of the Linux CI image. List both under "Toolchain requirements" below.
+  Skia's CI with the NDK of the published Linux CI image. List both under "Toolchain
+  requirements" below.
 - [ ] Skia builds.
 - [ ] `/skia-bindings` builds.
 - [ ] `/skia-safe`: Update & add new wrappers by diffing include files.  
@@ -94,8 +95,8 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 
 > List each upstream commit that the toolchain search finds, with the minimum it raises and the
 > decision for it (raise the minimum, or carry a fork patch), or `no requirement`. Record the
-> Android NDK that Skia's CI pins and the NDK of the Linux CI image, which builds the prebuilt
-> Android binaries, and the decision when they differ.
+> Android NDK that Skia's CI pins and the NDK of the published Linux CI image, which builds
+> the prebuilt Android binaries, and the decision when they differ.
 
 ## Wrapper updates
 
