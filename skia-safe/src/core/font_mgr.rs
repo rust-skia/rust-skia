@@ -158,7 +158,7 @@ impl FontMgr {
     // Deprecated by Skia, but we continue to support it. This returns a font manager with
     // system fonts for the current platform.
     pub fn new() -> Self {
-        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_NewSystem() }).unwrap()
+        FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }
 
     /// Returns an empty font manager without any typeface dependencies.
@@ -295,7 +295,12 @@ impl FontMgr {
 
     /// Create a typeface for the specified data and TTC index (pass `None` for none), or `None`
     /// if the data is not recognized.
-    pub fn new_from_data(&self, data: Data, ttc_index: impl Into<Option<u32>>) -> Option<Typeface> {
+    pub fn new_from_data(
+        &self,
+        data: impl Into<Data>,
+        ttc_index: impl Into<Option<usize>>,
+    ) -> Option<Typeface> {
+        let data = data.into();
         Typeface::from_ptr(unsafe {
             sb::C_SkFontMgr_makeFromData(
                 self.native(),
@@ -310,7 +315,7 @@ impl FontMgr {
     pub fn new_from_bytes(
         &self,
         bytes: &[u8],
-        ttc_index: impl Into<Option<u32>>,
+        ttc_index: impl Into<Option<usize>>,
     ) -> Option<Typeface> {
         let mut stream = DynamicMemoryWStream::from_bytes(bytes);
         let mut stream = stream.detach_as_stream();
