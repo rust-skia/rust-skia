@@ -5,3 +5,4 @@
 
 CVE-2026-113679 harfbuzz's WebAssembly shaper is not compiled, because Skia's build does not define HAVE_WASM.
 CVE-2026-113680 harfbuzz's WebAssembly shaper is not compiled, because Skia's build does not define HAVE_WASM.
+CVE-2026-124317 expat decodes unknown multi-byte encodings only through an XML_SetUnknownEncodingHandler, and Skia never registers one. Pin expat 2.11.0, which contains the fix, once it is released.
