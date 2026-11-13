@@ -28,6 +28,8 @@ pub mod contexts {
     use crate::{Context, ContextOptions, gpu, gpu::gl, prelude::*};
 
     /// Creates a context wrapping a Ganesh GPU backend with OpenGL
+    ///
+    /// `None` for `gpu_options` selects Skia's default Ganesh options.
     pub fn make_ganesh<'a>(
         interface: impl Into<gl::Interface>,
         context_options: &ContextOptions,

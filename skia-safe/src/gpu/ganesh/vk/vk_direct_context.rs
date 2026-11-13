@@ -36,6 +36,8 @@ pub mod contexts {
     use crate::{Context, ContextOptions, gpu, gpu::vk, prelude::*};
 
     /// Creates a context wrapping a Ganesh GPU backend with Vulkan
+    ///
+    /// `None` for `gpu_options` selects Skia's default Ganesh options.
     pub fn make_ganesh<'a>(
         backend_context: &vk::BackendContext,
         context_options: &ContextOptions,

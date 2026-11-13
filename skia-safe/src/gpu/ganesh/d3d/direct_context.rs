@@ -29,6 +29,8 @@ pub mod contexts {
 
     #[allow(clippy::missing_safety_doc)]
     /// Creates a context wrapping a Ganesh GPU backend with D3D
+    ///
+    /// `None` for `gpu_options` selects Skia's default Ganesh options.
     pub unsafe fn make_ganesh<'a>(
         backend_context: &d3d::BackendContext,
         context_options: &ContextOptions,

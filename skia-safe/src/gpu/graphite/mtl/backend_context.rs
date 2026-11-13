@@ -73,6 +73,9 @@ pub mod contexts {
     use super::BackendContext;
     use crate::{Context, ContextOptions, gpu::graphite, prelude::*};
 
+    /// Creates a context wrapping a Graphite GPU backend using Metal
+    ///
+    /// `None` for `graphite_options` selects Skia's default Graphite options.
     pub fn make_graphite<'a>(
         backend_context: &BackendContext,
         context_options: &ContextOptions,

@@ -183,8 +183,9 @@ pub unsafe extern "C" fn wgpuDeviceHasFeature(
         F::WGPUFeatureName_BufferMapExtendedUsages => W::MAPPABLE_PRIMARY_BUFFERS,
         // Features without a `wgpu` counterpart, and those that the shim leaves off on purpose.
         // Listing every variant makes a feature added to Dawn's header a compile error.
-        // `FEATURES.md` explains why `TransientAttachments`, `Unorm16TextureFormats`, and
-        // `DawnAllowUndefinedLoadStoreOp` stay unreported although `wgpu` has a counterpart.
+        // `FEATURES.md` explains why `TransientAttachments`, `Unorm16TextureFormats`,
+        // `DawnAllowUndefinedLoadStoreOp`, and `Subgroups` stay unreported although `wgpu` has a
+        // counterpart.
         // `ShaderF16` lands here on a `wgpu` version that rejects Skia's `f16` outputs.
         F::WGPUFeatureName_ShaderF16
         | F::WGPUFeatureName_TextureCompressionBCSliced3D

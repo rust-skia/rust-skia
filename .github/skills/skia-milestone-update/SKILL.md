@@ -490,16 +490,16 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
     The second command reads the Dockerfile at the commit of the last successful publish run,
     not at `master`. Every publish run replaces the image, and a run can publish any branch, so
-    `master` can name an NDK that the image does not have yet. The image's NDK follows Skia's
-    pin by default. Users need the NDK that built the prebuilt binaries, or a newer one, to
-    link them, because the binaries can reference libc++ symbols that older NDKs lack. A newer
-    NDK in the image forces every Android user to upgrade. An older one is a toolchain that
-    Skia's CI does not test. When the two versions differ, surface a decision to the user: move
-    the image to Skia's pin, or keep it and say why. A move changes the Dockerfile in
+    `master` can name an NDK that the image does not have yet. The image's NDK always follows
+    Skia's pin. Users need the NDK that built the prebuilt binaries, or a newer one, to link
+    them, because the binaries can reference libc++ symbols that older NDKs lack. A newer NDK in
+    the image forces every Android user to upgrade. An older one is a toolchain that Skia's CI
+    does not test. The `qa` workflow enforces the rule: its step `just check-android-ndk` fails
+    when the NDK of the image differs from Skia's pin. When the two versions differ, tell the
+    user, and move the image to Skia's pin. The move changes the Dockerfile in
     `pragmatrix/rust-skia-images` and the NDK version in the Android section of `README.md`.
     Publish the new image before CI builds the release binaries, and run the check again to
-    confirm it. Record both versions and the decision in the PR's Toolchain requirements
-    section.
+    confirm it. Record both versions in the PR's Toolchain requirements section.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).

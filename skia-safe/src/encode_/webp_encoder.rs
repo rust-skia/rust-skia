@@ -26,7 +26,8 @@ pub struct Options {
     // TODO: fHdrMetadata (skhdr::Metadata is private)
     /// The libwebp compression method in `0..=6`. Lower values encode faster into larger files,
     /// while larger values encode slower into smaller files. `None` selects the default: 3 for
-    /// [`Compression::Lossy`] and 0 for [`Compression::Lossless`].
+    /// [`Compression::Lossy`] and 0 for [`Compression::Lossless`]. A value above 6 makes encoding
+    /// fail.
     pub method: Option<u8>,
     // TODO: ICCProfile
     // TODO: ICCProfileDescription

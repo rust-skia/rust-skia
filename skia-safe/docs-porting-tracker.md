@@ -2,7 +2,7 @@
 
 Persistent tracker of documentation ported from Skia C++ headers into `skia-safe` Rust rustdoc and **verified for completeness** against the C++ header (rule: C++ doc ported COMPLETELY, no shortening; only allowed drops = fiddle example links, out-param/nullptr→Option, ownership sentences, name translation + intra-doc links).
 
-**Milestone:** m158 (skia-bindings `skia = "m158.2"`; Skia submodule tag `m158.2`; crates `0.158.0`). The current state is described in the `# m154 update (2026-09-20)` and `# m157 update (2026-11-03)` sections below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
+**Milestone:** m158 (skia-bindings `skia = "m158.2"`; Skia submodule tag `m158.2`; crates `0.158.0`). The current state is described in the `# m154 update (2026-09-20)`, `# m157 update (2026-11-03)`, and `# m158 update (2026-11-13)` sections below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
 
 ## Verification method
 - Independent subagent audit comparing EVERY public item doc in each Rust file vs its C++ header.
@@ -212,6 +212,17 @@ Milestone m157: crates `0.157.0`, Skia submodule tag `m157.2`. The PR is rust-sk
 - `graphite::Context::set_mutable_state()`, from `setMutableState()` in `include/gpu/graphite/Context.h`.
 - `Subsampling`, whose doc gained the `PlaneConfig::YUYV` exception in `include/core/SkYUVAInfo.h`.
 - `Paragraph::get_rects_for_placeholders()`, from `getRectsForPlaceholders()` in `modules/skparagraph/include/Paragraph.h`.
+
+---
+
+# m158 update (2026-11-13)
+
+Milestone m158: crates `0.158.0`, Skia submodule tag `m158.2`. The PR is rust-skia/rust-skia#1357. The docs of the new and changed m158 items are ported completely from the m158 headers:
+
+- `ParagraphStyle::soft_hyphen_string()` and `set_soft_hyphen_string()`, from the comment on `getSoftHyphenString()` in `modules/skparagraph/include/ParagraphStyle.h`. The getter carries the first two sentences of that comment. The setter carries its last sentence, that the string has no effect when soft hyphen rendering is disabled.
+- `ParagraphStyle::height()` and `set_height()`, whose `#[deprecated]` note comes from the `DEPRECATED` comment in `modules/skparagraph/include/ParagraphStyle.h`. The C++ sentence "Kept until clients stop calling it" is left out, because the attribute itself says that.
+- `webp_encoder::Options::method`, from `fMethod` in `include/encode/SkWebpEncoder.h`. The sentence that a value above 6 makes encoding fail is rust-skia's own.
+- `make_ganesh()` of the `d3d`, `gl`, `mtl`, and `vk` Ganesh modules and `make_graphite()` of the `mtl` and `vk` Graphite modules, from `SkContexts::MakeGanesh()` and `SkContexts::MakeGraphite()` in the backend headers under `include/gpu/ganesh/` and `include/gpu/graphite/`. The sentence that `None` selects Skia's default options is rust-skia's own.
 
 ---
 

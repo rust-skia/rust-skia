@@ -161,6 +161,7 @@ pub unsafe extern "C" fn wgpuInstanceHasWGSLLanguageFeature(
 }
 const _: sb::WGPUProcInstanceHasWGSLLanguageFeature = Some(wgpuInstanceHasWGSLLanguageFeature);
 
+/// Returns the instance of the adapter's device.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuAdapterGetInstance(adapter: sb::WGPUAdapter) -> sb::WGPUInstance {
     Instance::handle_of(&unsafe { Adapter::get(adapter) }.instance)
