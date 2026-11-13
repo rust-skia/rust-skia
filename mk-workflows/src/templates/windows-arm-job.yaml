@@ -23,6 +23,8 @@ steps:
   uses: KyleMayes/install-llvm-action@v2
   with:
     version: "22.1.8"
+    # The action's list of known versions ends at 21.1.8, so the installer URL is given directly.
+    force-url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-woa64.exe"
 
 - name: Install Ninja
   run: choco install ninja
