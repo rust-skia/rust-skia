@@ -77,6 +77,10 @@ and CentOS Stream 9. The build script does not detect this on its own: on an old
 downloaded binaries fail to link. In that case, set `FORCE_SKIA_BUILD=1` (or disable the
 `binary-cache` feature) to build Skia from source instead.
 
+The `aarch64-pc-windows-msvc` binaries are built with the Visual Studio 2026 toolset (MSVC 14.5x).
+A library built with an MSVC toolset links only with that toolset or a newer one, so linking these
+binaries needs Visual Studio 2026 or newer. With Visual Studio 2022, build Skia from source instead.
+
 ### Wrappers & Codecs & Supported Features
 
 The supported wrappers, Skia codecs, and additional Skia features are documented in the [skia-safe package's readme](skia-safe/README.md). Prebuilt binaries are available for most feature combinations.
@@ -119,7 +123,8 @@ The build system for Skia. `ninja` is available as a binary package on all major
 
 - [Install Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE editions. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170) is installed.
 
-- Install the [latest LLVM](http://releases.llvm.org/download.html) distribution.
+- Install the [latest LLVM](http://releases.llvm.org/download.html) distribution. Visual Studio 2026
+  needs LLVM 22 or newer, because its C++ standard library rejects older Clang versions.
 
   If the environment variable `LLVM_HOME` is not defined, the build script will look for LLVM installations located at `C:\Program Files\LLVM\`, `C:\LLVM\`, and `%USERPROFILE%\scoop\apps\llvm\current\`.
 

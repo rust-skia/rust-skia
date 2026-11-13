@@ -22,7 +22,7 @@ steps:
 - name: Install LLVM and Clang
   uses: KyleMayes/install-llvm-action@v2
   with:
-    version: "20.1.3"
+    version: "22.1.8"
 
 - name: Install Ninja
   run: choco install ninja
