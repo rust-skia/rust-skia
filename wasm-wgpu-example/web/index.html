@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>rust-skia Graphite on WebGPU sample</title>
+  </head>
+  <body style="margin: 0">
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <script type="module">
+      import init from "./pkg/wasm_wgpu_example.js";
+      init();
+    </script>
+  </body>
+</html>
