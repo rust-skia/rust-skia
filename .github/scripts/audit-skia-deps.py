@@ -23,6 +23,7 @@ Usage: audit-skia-deps.py [path/to/DEPS [path/to/ignore-file]]
 """
 
 import json
+import os
 import sys
 import urllib.request
 
@@ -90,7 +91,8 @@ def main():
     # The batch endpoint returns one result per query, in query order, with vulnerability IDs only.
     results = post("querybatch", {"queries": [{"commit": commit} for _, _, commit in pins]})
 
-    failures = 0
+    # Each failure is a (directory, vulnerability line) pair for the summary at the end.
+    failures = []
     for (directory, repository, commit), result in zip(pins, results["results"]):
         ids = [vuln["id"] for vuln in result.get("vulns", [])]
         if not ids:
@@ -101,22 +103,31 @@ def main():
             aliases = details.get("aliases", [])
             # Many CVE records have no summary, so the start of the details text stands in for it.
             summary = details.get("summary") or details.get("details", "").split("\n")[0][:120]
-            print(f"  {id}" + (f" ({', '.join(aliases)})" if aliases else "") + f": {summary}")
-            print(f"    https://osv.dev/vulnerability/{id}")
+            line = f"{id}" + (f" ({', '.join(aliases)})" if aliases else "") + f": {summary}"
             ignored = [key for key in [id, *aliases] if key in ignores]
+            # The status label leads each vulnerability, so failures stand out from ignored ones.
+            print(f"  {'IGNORED' if ignored else 'FAILED '} {line}")
+            print(f"          https://osv.dev/vulnerability/{id}")
             if ignored:
                 matched_ignores.update(ignored)
-                print(f"    ignored: {ignores[ignored[0]]}")
+                print(f"          reason: {ignores[ignored[0]]}")
             else:
-                failures += 1
+                failures.append((directory, line))
 
     for id in sorted(set(ignores) - matched_ignores):
         print(f"Stale ignore entry, no pinned commit is affected by it anymore: {id}")
 
     print(
         f"Checked {len(pins)} pinned commits from {deps_path}, "
-        f"{failures} known vulnerabilities not ignored."
+        f"{len(failures)} known vulnerabilities not ignored."
     )
+    if failures:
+        print(f"\nThe audit fails, because {ignore_path} does not list these:")
+        for directory, line in failures:
+            print(f"  FAILED  {directory}: {line}")
+            # On GitHub Actions, this line becomes an error annotation on the run's summary page.
+            if os.environ.get("GITHUB_ACTIONS") == "true":
+                print(f"::error title=Vulnerable Skia dependency::{directory}: {line}")
     return 1 if failures else 0
 
 
