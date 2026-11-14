@@ -105,6 +105,8 @@ fn details(target: &Target) -> &dyn PlatformDetails {
     let host = cargo::host();
     match target.as_strs() {
         ("wasm32", "unknown", "emscripten", _) => &emscripten::Emscripten,
+        // Experiment: Skia compiled by the emsdk, linked into a wasm32-unknown-unknown binary.
+        ("wasm32", "unknown", "unknown", _) => &emscripten::Emscripten,
         (_, "linux", "android", _) | (_, "linux", "androideabi", _) => &android::Android,
         (_, "apple", "darwin", _) => &macos::MacOs,
         (_, "apple", "ios", _) => &ios::Ios,

@@ -8,7 +8,9 @@ use std::sync::Arc;
 use skia_bindings as sb;
 
 use super::convert::{self, CallbackString};
-use super::future::{Userdata, block_on};
+#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+use super::future::block_on;
+use super::future::{Userdata, ready_or_report_late};
 use super::handle::{Handle, handles};
 use super::instance::{self, Instance};
 use super::{compat, wgpu};
@@ -37,15 +39,29 @@ impl Device {
     /// `wgpu` passes an error that no scope of its filter captures to the device's handler, which
     /// panics by default. A pipeline whose shader `wgpu` cannot translate for its backend raises an
     /// internal error, not a validation error, so a validation scope alone would let it panic.
-    pub fn capture_errors<T>(&self, create: impl FnOnce() -> T) -> (T, Option<wgpu::Error>) {
+    ///
+    /// In the browser, the scopes resolve after this function returned. It then returns no error,
+    /// and an error of creating `what` is written to the console once the browser reports it.
+    pub fn capture_errors<T>(
+        &self,
+        what: &'static str,
+        create: impl FnOnce() -> T,
+    ) -> (T, Option<wgpu::Error>) {
         let validation = self.device.push_error_scope(wgpu::ErrorFilter::Validation);
         let out_of_memory = self.device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
         let internal = self.device.push_error_scope(wgpu::ErrorFilter::Internal);
         let result = create();
         // `wgpu` closes the scopes of a thread innermost first.
-        let internal = block_on(internal.pop());
-        let out_of_memory = block_on(out_of_memory.pop());
-        let validation = block_on(validation.pop());
+        let late_error = move |error: Option<wgpu::Error>| {
+            error.map(|error| {
+                format!(
+                    "skia-wgpu: creating a {what} failed, after Skia continued with it: {error}"
+                )
+            })
+        };
+        let internal = ready_or_report_late(internal.pop(), late_error).flatten();
+        let out_of_memory = ready_or_report_late(out_of_memory.pop(), late_error).flatten();
+        let validation = ready_or_report_late(validation.pop(), late_error).flatten();
         (result, validation.or(internal).or(out_of_memory))
     }
 }
@@ -324,36 +340,50 @@ pub unsafe extern "C" fn wgpuDevicePopErrorScope(
         }
         scope
     });
-    let (status, error_type, message) = match scope {
-        None => (
+    match scope {
+        None => completion.complete((
             S::WGPUPopErrorScopeStatus_Error,
             E::WGPUErrorType_NoError,
             None,
-        ),
-        Some(scope) => match block_on(scope.pop()) {
-            None => (
-                S::WGPUPopErrorScopeStatus_Success,
-                E::WGPUErrorType_NoError,
-                None,
-            ),
-            Some(error) => {
-                let error_type = match &error {
-                    wgpu::Error::OutOfMemory { .. } => E::WGPUErrorType_OutOfMemory,
-                    wgpu::Error::Validation { .. } => E::WGPUErrorType_Validation,
-                    wgpu::Error::Internal { .. } => E::WGPUErrorType_Internal,
-                };
-                let message = CallbackString::new(&error.to_string());
-                (
-                    S::WGPUPopErrorScopeStatus_Success,
-                    error_type,
-                    Some(message),
-                )
-            }
-        },
-    };
-    completion.complete((status, error_type, message));
+        )),
+        // The browser resolves the scope's promise only after control returns to its event loop.
+        #[cfg(all(target_family = "wasm", target_os = "unknown"))]
+        Some(scope) => wasm_bindgen_futures::spawn_local(async move {
+            completion.complete(pop_error_scope_result(scope.pop().await));
+        }),
+        #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+        Some(scope) => completion.complete(pop_error_scope_result(block_on(scope.pop()))),
+    }
     future
 }
+/// The callback arguments of `wgpuDevicePopErrorScope` for a scope that captured `error`.
+fn pop_error_scope_result(
+    error: Option<wgpu::Error>,
+) -> (
+    sb::WGPUPopErrorScopeStatus,
+    sb::WGPUErrorType,
+    Option<CallbackString>,
+) {
+    use sb::WGPUErrorType as E;
+    let Some(error) = error else {
+        return (
+            sb::WGPUPopErrorScopeStatus::WGPUPopErrorScopeStatus_Success,
+            E::WGPUErrorType_NoError,
+            None,
+        );
+    };
+    let error_type = match &error {
+        wgpu::Error::OutOfMemory { .. } => E::WGPUErrorType_OutOfMemory,
+        wgpu::Error::Validation { .. } => E::WGPUErrorType_Validation,
+        wgpu::Error::Internal { .. } => E::WGPUErrorType_Internal,
+    };
+    (
+        sb::WGPUPopErrorScopeStatus::WGPUPopErrorScopeStatus_Success,
+        error_type,
+        Some(CallbackString::new(&error.to_string())),
+    )
+}
+
 const _: sb::WGPUProcDevicePopErrorScope = Some(wgpuDevicePopErrorScope);
 
 thread_local! {

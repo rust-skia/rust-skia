@@ -82,6 +82,10 @@ jpeg-decode = []
 [dependencies]
 mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
 
+# `src/wasm_libc.rs` reads the browser's clock and writes Skia's output to its console.
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+web-sys = { version = "0.3", features = ["Window", "Performance", "console"] }
+
 [build-dependencies]
 cc = { version = "1.1.28" }
 bindgen = { version = "0.73.2" }

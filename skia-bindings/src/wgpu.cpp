@@ -31,6 +31,11 @@ extern "C" void C_DawnBackendContext_Construct(
     uninitialized->fQueue = wgpu::Queue(queue);
 }
 
+// Without a tick function, Graphite never waits for the GPU, see `DawnTickFunction`.
+extern "C" void C_DawnBackendContext_setNonYielding(skgpu::graphite::DawnBackendContext* self) {
+    self->fTick = nullptr;
+}
+
 extern "C" void C_DawnBackendContext_destruct(skgpu::graphite::DawnBackendContext* self) {
     self->~DawnBackendContext();
 }

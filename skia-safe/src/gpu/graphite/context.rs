@@ -111,6 +111,12 @@ impl Context {
         unsafe { sb::C_Context_checkAsyncWorkCompletion(self.native_ptr()) }
     }
 
+    /// Whether submitted work has not finished on the GPU yet, as far as
+    /// [`check_async_work_completion`](Self::check_async_work_completion) has seen.
+    pub fn has_unfinished_gpu_work(&self) -> bool {
+        unsafe { self.native().hasUnfinishedGpuWork() }
+    }
+
     /// Called to delete the passed in [`BackendTexture`]. This should only be called if the
     /// [`BackendTexture`] was created by calling `Recorder::createBackendTexture` on a [`Recorder`]
     /// created from this [`Context`]. If the [`BackendTexture`] is not valid or does not match the
