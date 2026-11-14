@@ -2,10 +2,10 @@
 
 [![crates.io](https://img.shields.io/crates/v/skia-safe)](https://crates.io/crates/skia-safe) [![license](https://img.shields.io/crates/l/skia-safe)](LICENSE) [![docs.rs](https://docs.rs/skia-safe/badge.svg)](https://docs.rs/skia-safe) [![Windows QA](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/windows-qa.yaml) [![Linux QA](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/linux-qa.yaml) [![macOS QA](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml/badge.svg?branch=master)](https://github.com/rust-skia/rust-skia/actions/workflows/macos-qa.yaml)
 
-Skia Submodule Status: chrome/m157 ([upstream changes][skia-upstream], [our changes][skia-ours]).
+Skia Submodule Status: chrome/m158 ([upstream changes][skia-upstream], [our changes][skia-ours]).
 
-[skia-upstream]: https://github.com/rust-skia/skia/compare/m157.3...google:chrome/m157
-[skia-ours]: https://github.com/google/skia/compare/chrome/m157...rust-skia:m157.3
+[skia-upstream]: https://github.com/rust-skia/skia/compare/m158.2...google:chrome/m158
+[skia-ours]: https://github.com/google/skia/compare/chrome/m158...rust-skia:m158.2
 
 ## About
 
@@ -77,6 +77,10 @@ and CentOS Stream 9. The build script does not detect this on its own: on an old
 downloaded binaries fail to link. In that case, set `FORCE_SKIA_BUILD=1` (or disable the
 `binary-cache` feature) to build Skia from source instead.
 
+The `aarch64-pc-windows-msvc` binaries are built with the Visual Studio 2026 toolset (MSVC 14.5x).
+A library built with an MSVC toolset links only with that toolset or a newer one, so linking these
+binaries needs Visual Studio 2026 or newer. With Visual Studio 2022, build Skia from source instead.
+
 ### Wrappers & Codecs & Supported Features
 
 The supported wrappers, Skia codecs, and additional Skia features are documented in the [skia-safe package's readme](skia-safe/README.md). Prebuilt binaries are available for most feature combinations.
@@ -119,7 +123,8 @@ The build system for Skia. `ninja` is available as a binary package on all major
 
 - [Install Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/downloads/) or one of the other IDE editions. If you installed the IDE, make sure that the [Desktop Development with C++ workload](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170) is installed.
 
-- Install the [latest LLVM](http://releases.llvm.org/download.html) distribution.
+- Install the [latest LLVM](http://releases.llvm.org/download.html) distribution. Visual Studio 2026
+  needs LLVM 22 or newer, because its C++ standard library rejects older Clang versions.
 
   If the environment variable `LLVM_HOME` is not defined, the build script will look for LLVM installations located at `C:\Program Files\LLVM\`, `C:\LLVM\`, and `%USERPROFILE%\scoop\apps\llvm\current\`.
 
@@ -157,13 +162,13 @@ For example, to compile for `aarch64`:
    ```bash
    rustup target install aarch64-linux-android
    ```
-2. Download the [r26d NDK](https://developer.android.com/ndk/downloads) (or newer) for your host architecture and unzip it.
+2. Download the [r27d NDK](https://developer.android.com/ndk/downloads) (or newer) for your host architecture and unzip it.
 3. Compile your project for the `aarch64-linux-android` target:
 
 On **macOS**:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r26d
+export ANDROID_NDK=:path-to-android-ndk-r27d
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
@@ -178,7 +183,7 @@ We don't support Apple's Clang to build for Android on macOS, so you need to ins
 On **Linux**:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r26d
+export ANDROID_NDK=:path-to-android-ndk-r27d
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++
@@ -191,7 +196,7 @@ cargo build -vv --target aarch64-linux-android
 On **Windows** the Android NDK Clang executable must be invoked through `.cmd` scripts:
 
 ```bash
-export ANDROID_NDK=:path-to-android-ndk-r26d
+export ANDROID_NDK=:path-to-android-ndk-r27d
 export PATH=$PATH:$ANDROID_NDK/toolchains/llvm/prebuilt/windows-x86_64/bin
 export CC_aarch64_linux_android=aarch64-linux-android26-clang.cmd
 export CXX_aarch64_linux_android=aarch64-linux-android26-clang++.cmd

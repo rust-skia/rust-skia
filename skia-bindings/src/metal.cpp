@@ -94,8 +94,10 @@ extern "C" GrDirectContext *C_GrContext_MakeMetal(
 
 extern "C" SkContext* C_SkContexts_MakeGaneshMetal(
     const GrMtlBackendContext* context,
-    const SkContextOptions* options) {
-    return SkContexts::MakeGanesh(*context, *options).release();
+    const SkContextOptions* contextOptions,
+    const GrContextOptions* grOptions) {
+    return SkContexts::MakeGanesh(
+        *context, *contextOptions, grOptions ? *grOptions : GrContextOptions()).release();
 }
 
 //

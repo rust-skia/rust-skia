@@ -10,7 +10,7 @@ The table describes the shim apart from any one `wgpu` version. Where a `wgpu` v
 from WebGPU in a way that makes the shim report less, the notes of that version say so, such as
 [`src/v30/README.md`](src/v30/README.md) for `wgpu` 30.
 
-The table lists every feature that Skia's Dawn backend queries at m157, in
+The table lists every feature that Skia's Dawn backend queries at m158, in
 `src/gpu/graphite/dawn/DawnCaps.cpp` and in the format table of `DawnGraphiteUtils.cpp`. A
 standard feature is part of the WebGPU specification. A Dawn feature is an extension that only
 Dawn defines. A reported feature is one for which the shim answers `true` when the device has the
@@ -38,6 +38,7 @@ Dawn defines. A reported feature is one for which the shim answers `true` when t
 | `DawnTexelCopyBufferRowAlignment` | Dawn | none | not reported | Skia pads each row of a copy between a buffer and a texture to 256 bytes. |
 | `FramebufferFetch` | Dawn | none | not reported | Advanced blend modes read the destination through a texture copy. |
 | `YCbCrVulkanSamplers` | Dawn | none | not reported | Skia cannot sample Vulkan YCbCr formats, such as video frames. |
+| `Subgroups` | standard | `SUBGROUP` | not reported | Skia does not use subgroup operations in its compute shaders. Skia also requires the WGSL language feature `subgroup_id`, which the shim cannot query, because it holds no `wgpu::Instance`. |
 
 `BufferMapExtendedUsages` lets Skia map the buffers that the GPU reads directly. That helps only on
 GPUs that share memory with the CPU, and `wgpu` warns that it is slow on GPUs with their own

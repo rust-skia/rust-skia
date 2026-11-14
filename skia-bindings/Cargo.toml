@@ -9,7 +9,7 @@ keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]
 categories = ["external-ffi-bindings", "graphics", "multimedia::images", "rendering::graphics-api", "visualization"]
 license = "MIT"
 
-version = "0.157.0"
+version = "0.158.0"
 authors = ["LongYinan <lynweklm@gmail.com>", "Armin Sander <armin@replicator.org>"]
 edition.workspace = true
 rust-version.workspace = true
@@ -33,10 +33,10 @@ doctest = false
 # prefixed with "skia-" it names the unpacked root directory, so keep it short because
 # filesystem path sizes are restricted.
 [package.metadata]
-skia = "m157.3"
+skia = "m158.2"
 # The Dawn revision that Skia's upstream `DEPS` pins for this milestone. The `wgpu` feature
 # generates Skia's WebGPU headers from it (ADR 0003).
-dawn = "ada567700e13aecf7989d78b21f7d330b522ea80"
+dawn = "1716e88cc9e58398fab5d4473f7f2e858667b677"
 # The Python packages that Dawn's generator imports, at the revisions that Skia's upstream `DEPS`
 # pins for this milestone. The fork's `DEPS` does not sync them.
 jinja2 = "c3027d884967773057bf74b957e3fea87e5df4d7"

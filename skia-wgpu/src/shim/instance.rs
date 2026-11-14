@@ -19,10 +19,12 @@ pub struct Instance {
 }
 
 /// The adapter of a device. `wgpu` 30 reports the adapter information through the device, so the
-/// shim needs no `wgpu::Adapter`.
+/// shim needs no `wgpu::Adapter`. The adapter keeps the device's instance, which
+/// `wgpuAdapterGetInstance` returns.
 #[derive(Debug)]
 pub struct Adapter {
     info: wgpu::AdapterInfo,
+    instance: Arc<Instance>,
 }
 
 handles! {
@@ -87,8 +89,8 @@ pub enum Polled {
 }
 
 impl Adapter {
-    pub fn new(info: wgpu::AdapterInfo) -> Self {
-        Self { info }
+    pub fn new(info: wgpu::AdapterInfo, instance: Arc<Instance>) -> Self {
+        Self { info, instance }
     }
 }
 
@@ -145,6 +147,27 @@ pub unsafe extern "C" fn wgpuInstanceProcessEvents(instance: sb::WGPUInstance) {
 }
 const _: sb::WGPUProcInstanceProcessEvents = Some(wgpuInstanceProcessEvents);
 
+/// Reports every WGSL language feature as unsupported.
+///
+/// Skia asks only for `SubgroupId`, and only after the device reports the `Subgroups` feature,
+/// which the shim leaves unreported (`FEATURES.md`). The shim holds no `wgpu::Instance`, which
+/// would know the language features.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuInstanceHasWGSLLanguageFeature(
+    _instance: sb::WGPUInstance,
+    _feature: sb::WGPUWGSLLanguageFeatureName,
+) -> sb::WGPUBool {
+    0
+}
+const _: sb::WGPUProcInstanceHasWGSLLanguageFeature = Some(wgpuInstanceHasWGSLLanguageFeature);
+
+/// Returns the instance of the adapter's device.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wgpuAdapterGetInstance(adapter: sb::WGPUAdapter) -> sb::WGPUInstance {
+    Instance::handle_of(&unsafe { Adapter::get(adapter) }.instance)
+}
+const _: sb::WGPUProcAdapterGetInstance = Some(wgpuAdapterGetInstance);
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn wgpuAdapterGetInfo(
     adapter: sb::WGPUAdapter,
@@ -184,9 +207,9 @@ pub unsafe extern "C" fn wgpuAdapterInfoFreeMembers(info: sb::WGPUAdapterInfo) {
 }
 const _: sb::WGPUProcAdapterInfoFreeMembers = Some(wgpuAdapterInfoFreeMembers);
 
-/// Creates the handle of a new adapter for the device's adapter information.
-pub fn adapter_handle(device: &wgpu::Device) -> sb::WGPUAdapter {
-    Adapter::new(device.adapter_info()).into_handle()
+/// Creates the handle of a new adapter for the device's adapter information and its instance.
+pub fn adapter_handle(device: &wgpu::Device, instance: &Arc<Instance>) -> sb::WGPUAdapter {
+    Adapter::new(device.adapter_info(), instance.clone()).into_handle()
 }
 
 /// A string that the receiver frees with [`wgpuAdapterInfoFreeMembers`].

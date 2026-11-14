@@ -45,6 +45,30 @@ check-skia-submodule-tag:
 
     echo "OK: skia submodule tag matches metadata tag ($expected_tag)"
 
+# Fail when the Android NDK of the Linux CI image differs from the NDK that Skia's CI pins. The
+# image builds the prebuilt Android binaries, and users need its NDK or a newer one to link them.
+# The image sets `ANDROID_NDK_VERSION`, so the check runs inside it, as a step of the `qa` workflow.
+check-android-ndk:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    pin_file=skia-bindings/skia/infra/bots/assets/android_ndk_linux/create.py
+    skia_ndk="$(sed -nE 's/^NDK_VER = "android-ndk-([^"]+)"/\1/p' "$pin_file")"
+    if [[ -z "$skia_ndk" ]]; then
+        echo "Could not find NDK_VER in $pin_file" >&2
+        exit 1
+    fi
+    if [[ -z "${ANDROID_NDK_VERSION:-}" ]]; then
+        echo "ANDROID_NDK_VERSION is not set. Run this check in the Linux CI image." >&2
+        exit 1
+    fi
+    if [[ "$ANDROID_NDK_VERSION" != "$skia_ndk" ]]; then
+        echo "Mismatch: the Linux CI image has Android NDK $ANDROID_NDK_VERSION, but Skia's CI pins $skia_ndk in $pin_file" >&2
+        exit 1
+    fi
+
+    echo "OK: the Linux CI image has Android NDK $ANDROID_NDK_VERSION, the version Skia's CI pins"
+
 # Check the third-party commits pinned in Skia's DEPS file against OSV.dev for known vulnerabilities.
 audit-skia-deps:
     python3 .github/scripts/audit-skia-deps.py

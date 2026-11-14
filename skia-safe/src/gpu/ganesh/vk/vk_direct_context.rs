@@ -33,18 +33,22 @@ pub mod contexts {
     //! Creates a [`crate::Context`] wrapping a Ganesh GPU backend with Vulkan.
     use skia_bindings as sb;
 
-    use crate::{Context, ContextOptions, gpu::vk, prelude::*};
+    use crate::{Context, ContextOptions, gpu, gpu::vk, prelude::*};
 
     /// Creates a context wrapping a Ganesh GPU backend with Vulkan
-    pub fn make_ganesh(
+    ///
+    /// `None` for `gpu_options` selects Skia's default Ganesh options.
+    pub fn make_ganesh<'a>(
         backend_context: &vk::BackendContext,
-        options: &ContextOptions,
+        context_options: &ContextOptions,
+        gpu_options: impl Into<Option<&'a gpu::ContextOptions>>,
     ) -> Option<Context> {
         unsafe {
             let end_resolving = backend_context.begin_resolving();
             let context = Context::from_ptr(sb::C_SkContexts_MakeGaneshVulkan(
                 backend_context.native.as_ptr() as _,
-                options.native(),
+                context_options.native(),
+                gpu_options.into().native_ptr_or_null(),
             ));
             drop(end_resolving);
             context
