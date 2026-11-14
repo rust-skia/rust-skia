@@ -8,8 +8,9 @@ use super::{
 use crate::prelude::*;
 use crate::{IPoint, ImageInfo, Surface, gpu::MutableTextureState};
 
-// `skgpu::graphite::Context` is `final` with no base class and is handed out as
-// `std::unique_ptr<Context>` (Context::MakeMetal etc.). It is NOT ref-counted,
+// `skgpu::graphite::Context` is `final`, derives only privately from the internal
+// `SkGPUContext` interface, and is handed out as `std::unique_ptr<Context>`
+// (Context::MakeMetal etc.). It is NOT ref-counted,
 // so it must be modeled as a `RefHandle` whose drop `delete`s it — modeling it
 // as an `RCHandle` would call `SkRefCntBase::unref()` on a non-ref-counted
 // object (UB; the real `~Context()` never runs -> leak).

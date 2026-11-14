@@ -27,12 +27,22 @@ pub mod contexts {
     //! Creates a [`crate::Context`] wrapping a Ganesh GPU backend with Metal.
     use skia_bindings as sb;
 
-    use crate::{Context, ContextOptions, gpu::mtl, prelude::*};
+    use crate::{Context, ContextOptions, gpu, gpu::mtl, prelude::*};
 
     /// Creates a context wrapping a Ganesh GPU backend with Metal
-    pub fn make_ganesh(backend: &mtl::BackendContext, options: &ContextOptions) -> Option<Context> {
+    ///
+    /// `None` for `gpu_options` selects Skia's default Ganesh options.
+    pub fn make_ganesh<'a>(
+        backend: &mtl::BackendContext,
+        context_options: &ContextOptions,
+        gpu_options: impl Into<Option<&'a gpu::ContextOptions>>,
+    ) -> Option<Context> {
         Context::from_ptr(unsafe {
-            sb::C_SkContexts_MakeGaneshMetal(backend.native(), options.native())
+            sb::C_SkContexts_MakeGaneshMetal(
+                backend.native(),
+                context_options.native(),
+                gpu_options.into().native_ptr_or_null(),
+            )
         })
     }
 }

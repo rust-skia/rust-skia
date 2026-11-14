@@ -46,7 +46,7 @@ pub struct Options {
     /// The 2i-th entry is the keyword for the i-th comment, and the (2i + 1)-th entry is the text
     /// for the i-th comment.
     pub comments: Vec<encode::Comment>,
-    // TODO: fHdrMetadata
+    // TODO: fHdrMetadata (skhdr::Metadata is private)
     // TODO: If SkGainmapInfo get out of private/ : fGainmap fGainmapInfo
 }
 

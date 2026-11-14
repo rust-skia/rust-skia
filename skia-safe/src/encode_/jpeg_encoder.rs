@@ -51,6 +51,7 @@ pub struct Options {
     pub alpha_option: AlphaOption,
     /// Optional XMP metadata.
     pub xmp_metadata: Option<String>,
+    // TODO: fHdrMetadata (skhdr::Metadata is private)
     pub origin: Option<EncodedOrigin>,
 }
 

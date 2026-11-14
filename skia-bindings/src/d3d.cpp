@@ -131,6 +131,8 @@ extern "C" GrDirectContext* C_GrDirectContext_MakeD3D(
 
 extern "C" SkContext* C_SkContexts_MakeGaneshD3D(
     const GrD3DBackendContext* backendContext,
-    const SkContextOptions* options) {
-    return SkContexts::MakeGanesh(*backendContext, *options).release();
+    const SkContextOptions* contextOptions,
+    const GrContextOptions* grOptions) {
+    return SkContexts::MakeGanesh(
+        *backendContext, *contextOptions, grOptions ? *grOptions : GrContextOptions()).release();
 }

@@ -479,6 +479,27 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   a decision: raise the minimum, or carry a fork patch. When a minimum rises, also check
   whether a `rust-skia:` fork patch existed only to support the old one, such as an
   `@available` workaround. Record the outcome in the PR's Toolchain requirements section.
+  - Compare the Android NDK that Skia's CI pins with the NDK in the published Linux CI image,
+    which builds rust-skia's prebuilt Android binaries:
+
+    ```sh
+    git -C skia-bindings/skia grep -h 'NDK_VER =' refs/tags/NEW_TAG -- infra/bots/assets/android_ndk_linux/create.py
+    sha=$(gh run list -R pragmatrix/rust-skia-images --workflow publish-images.yml --status success -L 1 --json headSha --jq '.[0].headSha')
+    gh api "repos/pragmatrix/rust-skia-images/contents/linux/Dockerfile?ref=$sha" --jq .content | base64 -d | grep 'ANDROID_NDK_VERSION='
+    ```
+
+    The second command reads the Dockerfile at the commit of the last successful publish run,
+    not at `master`. Every publish run replaces the image, and a run can publish any branch, so
+    `master` can name an NDK that the image does not have yet. The image's NDK always follows
+    Skia's pin. Users need the NDK that built the prebuilt binaries, or a newer one, to link
+    them, because the binaries can reference libc++ symbols that older NDKs lack. A newer NDK in
+    the image forces every Android user to upgrade. An older one is a toolchain that Skia's CI
+    does not test. The `qa` workflow enforces the rule: its step `just check-android-ndk` fails
+    when the NDK of the image differs from Skia's pin. When the two versions differ, tell the
+    user, and move the image to Skia's pin. The move changes the Dockerfile in
+    `pragmatrix/rust-skia-images` and the NDK version in the Android section of `README.md`.
+    Publish the new image before CI builds the release binaries, and run the check again to
+    confirm it. Record both versions in the PR's Toolchain requirements section.
 - **Include diffs:** use direct `git -C skia-bindings/skia diff refs/tags/OLD_TAG..refs/tags/NEW_TAG -- ...`
   commands. `just diff-skia` only compares the fork patch stack against master (it is
   the "Do the fork patches ... match with `master`" checklist item).
