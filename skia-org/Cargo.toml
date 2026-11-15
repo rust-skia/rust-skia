@@ -2,7 +2,6 @@
 name = "skia-org"
 
 description = "Renders examples from skia.org with rust-skia"
-homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
 # 5 max
 keywords = ["skia", "rust-bindings", "vulkan", "opengl", "pdf"]

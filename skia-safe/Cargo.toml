@@ -2,7 +2,6 @@
 name = "skia-safe"
 
 description = "Safe Skia Bindings for Rust"
-homepage = "https://github.com/rust-skia/rust-skia"
 repository = "https://github.com/rust-skia/rust-skia"
 documentation = "https://docs.rs/skia-safe"
 readme = "README.md"
