@@ -73,6 +73,45 @@ jobs:
       run: |
         source /emsdk/emsdk_env.sh && cd wasm-example && cargo build --target wasm32-unknown-emscripten
 
+  linux-wasm-unknown:
+    runs-on: ubuntu-24.04
+    container: ghcr.io/pragmatrix/rust-skia-linux:latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Fix git dubious ownership errors when synchronizing Skia dependencies
+      run: git config --global --add safe.directory '*'
+
+    - name: Prepare Rustup
+      run: (cd /github/home && ln -s /root/.cargo)
+
+    - name: Update Rustup and Rust
+      run: rustup update
+
+    - name: Configure Rust Toolchain
+      run: rustup default stable
+
+    - name: Install wasm32-unknown-unknown Target
+      run: rustup target add wasm32-unknown-unknown
+
+    - name: 'Build with Target wasm32-unknown-unknown'
+      shell: bash
+      run: |
+        source /emsdk/emsdk_env.sh && cd wasm-wgpu-example && cargo build --target wasm32-unknown-unknown
+
+    # An import from any other module is a function that neither Emscripten's libc nor
+    # `skia-bindings/src/wasm_libc.rs` supplies, which the browser can't resolve.
+    - name: 'Check that the module imports only from wasm-bindgen'
+      shell: bash
+      run: |
+        source /emsdk/emsdk_env.sh
+        imports=$("$EMSDK/upstream/bin/wasm-dis" wasm-wgpu-example/target/wasm32-unknown-unknown/debug/wasm_wgpu_example.wasm | grep -o '(import "[^"]*"' | sort -u)
+        echo "$imports"
+        ! echo "$imports" | grep -v '"__wbindgen_'
+
   # https://github.com/rust-skia/rust-skia/issues/535
   # linux-arm64-build:
   #   runs-on: ubuntu-20.04

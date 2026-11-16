@@ -38,6 +38,9 @@ pub use defaults::*;
 
 mod impls;
 
+#[cfg(skia_wasm_libc)]
+mod wasm_libc;
+
 #[cfg(feature = "textlayout")]
 pub mod icu;
 
