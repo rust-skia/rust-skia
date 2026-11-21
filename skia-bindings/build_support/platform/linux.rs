@@ -35,7 +35,11 @@ impl PlatformDetails for Linux {
 }
 
 pub fn link_libraries(features: &Features) -> Vec<String> {
-    let mut libs = vec!["stdc++".to_string()];
+    link_libraries_with_cpp_stdlib(features, "stdc++")
+}
+
+pub(super) fn link_libraries_with_cpp_stdlib(features: &Features, cpp_stdlib: &str) -> Vec<String> {
+    let mut libs = vec![cpp_stdlib.to_string()];
 
     // Use pkg-config for system libraries when available
     // When `embed-freetype` is enabled, Skia builds its own FreeType

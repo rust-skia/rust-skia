@@ -14,6 +14,7 @@ pub mod alpine;
 pub mod android;
 mod apple;
 pub mod emscripten;
+pub mod freebsd;
 mod generic;
 pub mod ios;
 pub mod linux;
@@ -114,6 +115,7 @@ fn details(target: &Target) -> &dyn PlatformDetails {
         (_, "unknown", "linux", Some("ohos")) => &ohos::OpenHarmony,
         (_, "unknown", "linux", Some("musl")) => &alpine::Musl,
         (_, _, "linux", _) => &linux::Linux,
+        (_, _, "freebsd", _) => &freebsd::FreeBsd,
         _ => &generic::Generic,
     }
 }

@@ -295,20 +295,45 @@ pub fn build(
     let python = &prerequisites::locate_python3_cmd();
     println!("Python 3 found: {python:?}");
     let ninja = ninja_command.unwrap_or_else(ninja::exe_name);
+    // `skia/bin/fetch-gn` only supports Linux, macOS, and Windows.
+    // On FreeBSD, default to `gn` from `PATH` when `SKIA_GN_COMMAND` is not set.
+    let gn_command = gn_command.or_else(|| {
+        if cargo::host().system == "freebsd" {
+            Some(PathBuf::from("gn"))
+        } else {
+            None
+        }
+    });
 
     if !offline {
         println!("Synchronizing Skia dependencies");
         #[cfg(feature = "binary-cache")]
         crate::build_support::binary_cache::resolve_dependencies();
+        let mut cmd = Command::new(python);
+        // Explicitly providing `GIT_SYNC_DEPS_PATH` fixes a problem with `git-sync-deps`
+        // accidentally resolving an absolute directory for `GIT_SYNC_DEPS_PATH` when MingW
+        // Python 3 runs on Windows under MSys.
+        cmd.env("GIT_SYNC_DEPS_PATH", "skia/DEPS")
+            .env("GIT_SYNC_DEPS_SKIP_EMSDK", "1");
+        if gn_command.is_some() {
+            // Skip `skia/bin/fetch-gn` when a system/explicit `gn` command is used
+            // (also required on platforms like FreeBSD that `fetch-gn` does not support).
+            cmd.args([
+                "-c",
+                concat!(
+                    "import importlib.machinery, importlib.util, os; ",
+                    "loader = importlib.machinery.SourceFileLoader('git_sync_deps', 'skia/tools/git-sync-deps'); ",
+                    "spec = importlib.util.spec_from_loader(loader.name, loader); ",
+                    "mod = importlib.util.module_from_spec(spec); ",
+                    "loader.exec_module(mod); ",
+                    "mod.git_sync_deps(os.environ['GIT_SYNC_DEPS_PATH'], [], True, not bool(os.environ.get('GIT_SYNC_DEPS_QUIET', False)))"
+                ),
+            ]);
+        } else {
+            cmd.arg("skia/tools/git-sync-deps");
+        }
         assert!(
-            Command::new(python)
-                // Explicitly providing `GIT_SYNC_DEPS_PATH` fixes a problem with `git-sync-deps`
-                // accidentally resolving an absolute directory for `GIT_SYNC_DEPS_PATH` when MingW
-                // Python 3 runs on Windows under MSys.
-                .env("GIT_SYNC_DEPS_PATH", "skia/DEPS")
-                .env("GIT_SYNC_DEPS_SKIP_EMSDK", "1")
-                .arg("skia/tools/git-sync-deps")
-                .stdout(Stdio::inherit())
+            cmd.stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .status()
                 .unwrap()
