@@ -561,8 +561,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   implementations for new wrappers.
 - **Ported docs:** record every doc ported or changed for the milestone in a
   `# mXX update` section of `skia-safe/docs-porting-tracker.md`, with the header each
-  doc comes from and any C++ sentence left out on purpose. The milestone line at the top
-  of the tracker points to that section.
+  doc comes from and any C++ sentence left out on purpose.
 
 ## Release notes
 
