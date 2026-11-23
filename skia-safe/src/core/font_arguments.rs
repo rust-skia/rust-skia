@@ -137,8 +137,7 @@ impl<'vp, 'p> FontArguments<'vp, 'p> {
     /// Any axis not specified uses the default value.
     /// Any specified axis not actually present in the font is ignored.
     ///
-    /// This borrows `position` data; the value must remain valid for the lifetime of
-    /// [`FontArguments`].
+    /// The returned [`FontArguments`] borrows the coordinates of `position`.
     ///
     /// - `position` variation coordinates to use.
     pub fn set_variation_design_position<'new_vp>(
@@ -151,8 +150,8 @@ impl<'vp, 'p> FontArguments<'vp, 'p> {
         };
         unsafe {
             sb::C_SkFontArguments_setVariationDesignPosition(self.native_mut(), position);
-            // The result borrows `position` instead of the previous coordinates. The palette
-            // stays borrowed, so the lifetime `'p` is kept.
+            // The result borrows the coordinates passed in instead of the previous ones. The
+            // palette stays borrowed, so the lifetime `'p` is kept.
             mem::transmute::<Self, FontArguments<'new_vp, 'p>>(self)
         }
     }
@@ -175,12 +174,11 @@ impl<'vp, 'p> FontArguments<'vp, 'p> {
         }
     }
 
-    // This function consumes `self` for it to be able to change its lifetime, because it borrows
-    // the coordinates referenced by `[Palette]`.
+    // This function consumes `self` so that it can change the lifetime `'p`, because the result
+    // borrows the overrides of `palette`.
     /// Specifies the color palette and optional palette entry overrides.
     ///
-    /// This borrows `palette` data; the value must remain valid for the lifetime of
-    /// [`FontArguments`].
+    /// The returned [`FontArguments`] borrows the overrides of `palette`.
     ///
     /// - `palette` palette index and override entries.
     pub fn set_palette<'new_p>(mut self, palette: Palette<'new_p>) -> FontArguments<'vp, 'new_p> {
@@ -191,8 +189,8 @@ impl<'vp, 'p> FontArguments<'vp, 'p> {
         };
         unsafe {
             sb::C_SkFontArguments_setPalette(self.native_mut(), palette);
-            // The result borrows `palette` instead of the previous overrides. The variation
-            // coordinates stay borrowed, so the lifetime `'vp` is kept.
+            // The result borrows the overrides passed in instead of the previous ones. The
+            // variation coordinates stay borrowed, so the lifetime `'vp` is kept.
             mem::transmute::<Self, FontArguments<'vp, 'new_p>>(self)
         }
     }
