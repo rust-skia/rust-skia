@@ -251,7 +251,7 @@ impl TextBlobBuilder {
                 offset.y,
                 bounds.native_ptr_or_null(),
             );
-            safer::from_raw_parts_mut(buffer.glyphs, count)
+            zeroed_slice_mut(buffer.glyphs, count)
         }
     }
 
@@ -287,8 +287,8 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos, count),
             )
         }
     }
@@ -322,8 +322,8 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut Point, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut Point, count),
             )
         }
     }
@@ -346,8 +346,8 @@ impl TextBlobBuilder {
                 .native_mut()
                 .allocRunRSXform(font.native(), count.try_into().unwrap());
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut RSXform, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut RSXform, count),
             )
         }
     }
@@ -390,9 +390,9 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut(buffer.clusters, count),
             )
         }
     }
@@ -434,10 +434,10 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos, count),
+                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut(buffer.clusters, count),
             )
         }
     }
@@ -476,10 +476,10 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut Point, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut Point, count),
+                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut(buffer.clusters, count),
             )
         }
     }
@@ -499,13 +499,30 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut RSXform, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut RSXform, count),
+                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut(buffer.clusters, count),
             )
         }
     }
+}
+
+/// Zeroes `len` elements at `ptr` and returns them as a mutable slice.
+///
+/// Skia leaves the buffers of a new run uninitialized. A mutable slice over them would let safe
+/// code read uninitialized integers or floats, which is undefined behavior.
+///
+/// # Safety
+///
+/// `ptr` must point to `len` writable elements that stay valid for `'a`, unless `len` is 0. A value
+/// of all zero bytes must be a valid `T`.
+unsafe fn zeroed_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+    if len > 0 {
+        assert!(!ptr.is_null());
+        unsafe { ptr::write_bytes(ptr, 0, len) };
+    }
+    unsafe { safer::from_raw_parts_mut(ptr, len) }
 }
 
 pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
