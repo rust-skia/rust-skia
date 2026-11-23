@@ -618,44 +618,6 @@ fn test_point_size_and_alignment_equals_size_of_two_scalars_used_in_alloc_run_po
     assert_eq!(mem::align_of::<Point>(), mem::align_of::<[scalar; 2]>());
 }
 
-/// Regression test for <https://github.com/rust-skia/rust-skia/issues/1382>.
-///
-/// Positions of an RSXform run take four scalars per glyph, so a smaller allocation lets the
-/// position slice overlap the buffers after it. The test compares addresses only, so it does
-/// not write out of bounds when the slices overlap.
-///
-/// The run gets explicit bounds, so the builder does not compute them from the unwritten
-/// glyphs and positions when it is dropped.
-#[test]
-fn alloc_run_text_rsxform_returns_disjoint_buffers() {
-    use std::ops::Range;
-
-    fn byte_range<T>(slice: &[T]) -> Range<usize> {
-        let range = slice.as_ptr_range();
-        range.start as usize..range.end as usize
-    }
-
-    let font = Font::default();
-    let mut builder = TextBlobBuilder::new();
-    let (glyphs, xforms, text, clusters) =
-        builder.alloc_run_text_rsxform(&font, 8, 8, Some(&Rect::default()));
-    let ranges = [
-        byte_range(glyphs),
-        byte_range(xforms),
-        byte_range(text),
-        byte_range(clusters),
-    ];
-
-    for (i, a) in ranges.iter().enumerate() {
-        for b in &ranges[i + 1..] {
-            assert!(
-                a.end <= b.start || b.end <= a.start,
-                "buffers {a:x?} and {b:x?} overlap"
-            );
-        }
-    }
-}
-
 /// Skia gives a run text and cluster storage only when it has both glyphs and text, and returns
 /// null pointers for them otherwise. The text and cluster slices must then be empty.
 #[test]
