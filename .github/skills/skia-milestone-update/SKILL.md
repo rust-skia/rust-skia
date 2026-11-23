@@ -171,13 +171,12 @@ replays the old milestone's upstream-only commits as if they were fork patches.
 
   Do not bump the Rust crate versions for a same-milestone upstream refresh.
 
-6. Update `[package.metadata].skia`, the README comparison links, the milestone line of
-   `skia-safe/docs-porting-tracker.md` (it names the current tag), and the parent
+6. Update `[package.metadata].skia`, the README comparison links, and the parent
    repository's submodule gitlink. Stage all of them before running Cargo or another
    build job:
 
    ```sh
-   git add README.md skia-bindings/Cargo.toml skia-safe/docs-porting-tracker.md skia-bindings/skia
+   git add README.md skia-bindings/Cargo.toml skia-bindings/skia
    ```
 
    The gitlink must name the rebased tip before any build that starts without a `skia/`
@@ -562,8 +561,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   implementations for new wrappers.
 - **Ported docs:** record every doc ported or changed for the milestone in a
   `# mXX update` section of `skia-safe/docs-porting-tracker.md`, with the header each
-  doc comes from and any C++ sentence left out on purpose. The milestone line at the top
-  of the tracker points to that section.
+  doc comes from and any C++ sentence left out on purpose.
 
 ## Release notes
 

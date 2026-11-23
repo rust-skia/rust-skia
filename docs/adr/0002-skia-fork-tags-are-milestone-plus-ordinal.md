@@ -19,8 +19,8 @@ value only as the git ref of a codeload URL and as the name of the unpacked root
 means the tag must stay short because it becomes part of a deep path. The only reader of the version
 component was the milestone procedure itself, which had to look it up before cutting, and the
 duplicated information drifted: the porting tracker recorded `m154-0.153.3` while the tree was
-already at `m154-0.153.4`. The milestone skill and `AGENTS.md` name the scheme, and
-`docs-porting-tracker.md` records the tag that is current.
+already at `m154-0.153.4`. The milestone skill and `AGENTS.md` name the scheme.
+`docs-porting-tracker.md` names no tag, so a new tag leaves it unchanged.
 
 ## Considered Options
 

@@ -2,7 +2,7 @@
 
 Persistent tracker of documentation ported from Skia C++ headers into `skia-safe` Rust rustdoc and **verified for completeness** against the C++ header (rule: C++ doc ported COMPLETELY, no shortening; only allowed drops = fiddle example links, out-param/nullptr→Option, ownership sentences, name translation + intra-doc links).
 
-**Milestone:** m158 (skia-bindings `skia = "m158.2"`; Skia submodule tag `m158.2`; crates `0.158.0`). The current state is described in the `# m154 update (2026-09-20)`, `# m157 update (2026-11-03)`, and `# m158 update (2026-11-13)` sections below; everything above it is the m153 doc corpus (verified against the m153 headers on 2026-09-08) and still applies to every header that did not change in m154.
+**Current state:** each `# mXX update` section below records the docs ported for one milestone update, the newest last. Everything above the first of these sections is the m153 doc corpus (verified against the m153 headers on 2026-09-08). It still applies to every header that no later update changed.
 
 ## Verification method
 - Independent subagent audit comparing EVERY public item doc in each Rust file vs its C++ header.
