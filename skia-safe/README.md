@@ -110,6 +110,8 @@ The Cargo feature `textlayout` enables text shaping with Harfbuzz and ICU by pro
 
 The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bindings for skparagraph are in the `skia_safe::textlayout` module. 
 
+The ICU data (`icudtl.dat`) that the build includes holds only the items that Skia loads: the break rules and dictionaries, the emoji properties, and the data that resolves `-u-` keywords in locale tags. This saves about 7.5 MB per binary. To include the complete ICU data, build Skia from source with `SKIA_GN_ARGS="skia_icu_filter_data=false"`.
+
 ### `svg`
 
 This feature enables support for rendering SVG files (`svg::Dom`).
