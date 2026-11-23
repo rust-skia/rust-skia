@@ -357,6 +357,9 @@ impl TextBlobBuilder {
     /// text buffer, and `count` monotonic indexes into the text buffer into the returned cluster
     /// buffer before the next call to the text blob builder.
     ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
+    ///
     /// Glyphs share metrics in `font`.
     ///
     /// Glyphs are positioned on a baseline at `offset`, using font metrics to determine their
@@ -391,8 +394,8 @@ impl TextBlobBuilder {
             );
             (
                 zeroed_slice_mut(buffer.glyphs, count),
-                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
-                zeroed_slice_mut(buffer.clusters, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
@@ -402,6 +405,9 @@ impl TextBlobBuilder {
     /// returned position buffer, `text_byte_count` UTF-8 code units into the returned text buffer,
     /// and `count` monotonic indexes into the text buffer into the returned cluster buffer before
     /// the next call to the text blob builder.
+    ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
     ///
     /// Glyphs share metrics in `font`.
     ///
@@ -436,8 +442,8 @@ impl TextBlobBuilder {
             (
                 zeroed_slice_mut(buffer.glyphs, count),
                 zeroed_slice_mut(buffer.pos, count),
-                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
-                zeroed_slice_mut(buffer.clusters, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
@@ -447,6 +453,9 @@ impl TextBlobBuilder {
     /// buffer, `text_byte_count` UTF-8 code units into the returned text buffer, and `count`
     /// monotonic indexes into the text buffer into the returned cluster buffer before the next call
     /// to the text blob builder.
+    ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
     ///
     /// Glyphs share metrics in `font`.
     ///
@@ -478,8 +487,8 @@ impl TextBlobBuilder {
             (
                 zeroed_slice_mut(buffer.glyphs, count),
                 zeroed_slice_mut(buffer.pos as *mut Point, count),
-                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
-                zeroed_slice_mut(buffer.clusters, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
@@ -501,8 +510,8 @@ impl TextBlobBuilder {
             (
                 zeroed_slice_mut(buffer.glyphs, count),
                 zeroed_slice_mut(buffer.pos as *mut RSXform, count),
-                zeroed_slice_mut(buffer.utf8text as *mut u8, text_byte_count),
-                zeroed_slice_mut(buffer.clusters, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
@@ -523,6 +532,21 @@ unsafe fn zeroed_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
         unsafe { ptr::write_bytes(ptr, 0, len) };
     }
     unsafe { safer::from_raw_parts_mut(ptr, len) }
+}
+
+/// Like [`zeroed_slice_mut`], but returns an empty slice when `ptr` is null.
+///
+/// Skia gives a run text and cluster storage only when it has both glyphs and text, and leaves
+/// the text and cluster pointers null otherwise.
+///
+/// # Safety
+///
+/// If `ptr` is not null, the safety requirements of [`zeroed_slice_mut`] apply.
+unsafe fn zeroed_slice_mut_or_empty<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+    if ptr.is_null() {
+        return &mut [];
+    }
+    unsafe { zeroed_slice_mut(ptr, len) }
 }
 
 pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
@@ -630,4 +654,18 @@ fn alloc_run_text_rsxform_returns_disjoint_buffers() {
             );
         }
     }
+}
+
+/// Skia gives a run text and cluster storage only when it has both glyphs and text, and returns
+/// null pointers for them otherwise. The text and cluster slices must then be empty.
+#[test]
+fn alloc_run_text_returns_empty_text_and_clusters_without_text_or_glyphs() {
+    let font = Font::default();
+    let mut builder = TextBlobBuilder::new();
+
+    let (glyphs, text, clusters) = builder.alloc_run_text(&font, 4, Point::default(), 0, None);
+    assert_eq!((glyphs.len(), text.len(), clusters.len()), (4, 0, 0));
+
+    let (glyphs, text, clusters) = builder.alloc_run_text(&font, 0, Point::default(), 4, None);
+    assert_eq!((glyphs.len(), text.len(), clusters.len()), (0, 0, 0));
 }
