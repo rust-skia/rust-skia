@@ -493,6 +493,28 @@ impl TextBlobBuilder {
         }
     }
 
+    /// Returns a run with storage for glyphs, [`RSXform`] positions, text, and clusters. The
+    /// caller must write `count` glyphs to the returned glyph buffer, `count` [`RSXform`]s to the
+    /// returned position buffer, `text_byte_count` UTF-8 code units into the returned text buffer,
+    /// and `count` monotonic indexes into the text buffer into the returned cluster buffer before
+    /// the next call to the text blob builder.
+    ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
+    ///
+    /// Glyphs share metrics in `font`.
+    ///
+    /// Glyphs are positioned using the [`RSXform`]s written by the caller to the returned position
+    /// buffer.
+    ///
+    /// `bounds` defines an optional bounding box, used to suppress drawing when the text blob bounds
+    /// does not intersect the surface bounds. If `bounds` is `None`, the text blob bounds is
+    /// computed from the position buffer and the glyph metrics.
+    ///
+    /// - `font` font used for this run
+    /// - `count` number of glyphs
+    /// - `text_byte_count` number of UTF-8 code units
+    /// - `bounds` optional run bounding box
     pub fn alloc_run_text_rsxform(
         &mut self,
         font: &Font,
