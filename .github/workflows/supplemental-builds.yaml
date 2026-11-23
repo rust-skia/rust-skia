@@ -275,3 +275,31 @@ jobs:
       shell: bash
       run: |
         cargo build --features gl,egl,vulkan,x11,wayland,textlayout,svg,webp
+
+  # No prebuilt binary enables `freetype-woff2`, so this job is the only build that compiles and
+  # links the brotli decoder that Skia's own FreeType needs for WOFF2 fonts (#1381).
+  linux-embed-freetype-woff2:
+    runs-on: ubuntu-24.04
+    container: ghcr.io/pragmatrix/rust-skia-linux:latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Fix git dubious ownership errors when synchronizing Skia dependencies
+      run: git config --global --add safe.directory '*'
+
+    - name: Prepare Rustup
+      run: (cd /github/home && ln -s /root/.cargo)
+
+    - name: Update Rustup and Rust
+      run: rustup update
+
+    - name: Configure Rust Toolchain
+      run: rustup default stable
+
+    - name: 'Test skia-safe with embedded FreeType and WOFF2 support'
+      shell: bash
+      run: |
+        cargo test -p skia-safe --features embed-freetype,freetype-woff2
