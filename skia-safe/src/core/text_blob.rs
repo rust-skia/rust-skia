@@ -492,7 +492,7 @@ impl TextBlobBuilder {
         bounds: Option<&Rect>,
     ) -> (&mut [GlyphId], &mut [RSXform], &mut [u8], &mut [u32]) {
         unsafe {
-            let buffer = &*self.native_mut().allocRunTextPos(
+            let buffer = &*self.native_mut().allocRunTextRSXform(
                 font.native(),
                 count.try_into().unwrap(),
                 text_byte_count.try_into().unwrap(),
@@ -575,4 +575,39 @@ fn test_point_size_and_alignment_equals_size_of_two_scalars_used_in_alloc_run_po
     use std::mem;
     assert_eq!(mem::size_of::<Point>(), mem::size_of::<[scalar; 2]>());
     assert_eq!(mem::align_of::<Point>(), mem::align_of::<[scalar; 2]>());
+}
+
+/// Regression test for <https://github.com/rust-skia/rust-skia/issues/1382>.
+///
+/// The position buffer of a text run with RSXform positioning holds four scalars per glyph. If
+/// the run is allocated with fewer, the returned position slice reaches into the buffers that
+/// follow it, and filling it corrupts them. The test compares addresses only, so it does not
+/// write out of bounds when the slices overlap.
+#[test]
+fn alloc_run_text_rsxform_returns_disjoint_buffers() {
+    use std::ops::Range;
+
+    fn byte_range<T>(slice: &[T]) -> Range<usize> {
+        let range = slice.as_ptr_range();
+        range.start as usize..range.end as usize
+    }
+
+    let font = Font::default();
+    let mut builder = TextBlobBuilder::new();
+    let (glyphs, xforms, text, clusters) = builder.alloc_run_text_rsxform(&font, 8, 8, None);
+    let ranges = [
+        byte_range(glyphs),
+        byte_range(xforms),
+        byte_range(text),
+        byte_range(clusters),
+    ];
+
+    for (i, a) in ranges.iter().enumerate() {
+        for b in &ranges[i + 1..] {
+            assert!(
+                a.end <= b.start || b.end <= a.start,
+                "buffers {a:x?} and {b:x?} overlap"
+            );
+        }
+    }
 }
