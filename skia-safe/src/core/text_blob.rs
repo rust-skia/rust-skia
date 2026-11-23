@@ -579,10 +579,12 @@ fn test_point_size_and_alignment_equals_size_of_two_scalars_used_in_alloc_run_po
 
 /// Regression test for <https://github.com/rust-skia/rust-skia/issues/1382>.
 ///
-/// The position buffer of a text run with RSXform positioning holds four scalars per glyph. If
-/// the run is allocated with fewer, the returned position slice reaches into the buffers that
-/// follow it, and filling it corrupts them. The test compares addresses only, so it does not
-/// write out of bounds when the slices overlap.
+/// Positions of an RSXform run take four scalars per glyph, so a smaller allocation lets the
+/// position slice overlap the buffers after it. The test compares addresses only, so it does
+/// not write out of bounds when the slices overlap.
+///
+/// The run gets explicit bounds, so the builder does not compute them from the unwritten
+/// glyphs and positions when it is dropped.
 #[test]
 fn alloc_run_text_rsxform_returns_disjoint_buffers() {
     use std::ops::Range;
@@ -594,7 +596,8 @@ fn alloc_run_text_rsxform_returns_disjoint_buffers() {
 
     let font = Font::default();
     let mut builder = TextBlobBuilder::new();
-    let (glyphs, xforms, text, clusters) = builder.alloc_run_text_rsxform(&font, 8, 8, None);
+    let (glyphs, xforms, text, clusters) =
+        builder.alloc_run_text_rsxform(&font, 8, 8, Some(&Rect::default()));
     let ranges = [
         byte_range(glyphs),
         byte_range(xforms),
