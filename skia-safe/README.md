@@ -110,7 +110,7 @@ The Cargo feature `textlayout` enables text shaping with Harfbuzz and ICU by pro
 
 The skshaper module can be accessed through `skia_safe::Shaper` and the Rust bindings for skparagraph are in the `skia_safe::textlayout` module. 
 
-The ICU data (`icudtl.dat`) that the build includes holds only the items that Skia loads: the break rules and dictionaries, the emoji properties, and the data that resolves `-u-` keywords in locale tags. This saves about 7.5 MB per binary. To include the complete ICU data, build Skia from source with `SKIA_GN_ARGS="skia_icu_filter_data=false"`.
+On desktop targets, the ICU data (`icudtl.dat`) that the build includes holds only the items that Skia loads: the break rules and dictionaries, the emoji properties, and the data that resolves `-u-` keywords in locale tags. This saves about 7.5 MB per binary. To include the complete ICU data there, build Skia from source with `FORCE_SKIA_BUILD=1` and `SKIA_GN_ARGS="skia_icu_filter_data=false"`. Setting `SKIA_GN_ARGS` alone does not stop the download of the prebuilt binaries, which include the filtered data. Android, iOS, and WebAssembly builds embed the ICU data that Skia ships for those platforms, which this option does not change.
 
 ### `svg`
 

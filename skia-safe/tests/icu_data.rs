@@ -20,7 +20,14 @@
 //! locale has no `-u-` keywords, and languages without a break bundle of their own share the
 //! root locale. In one process, the first line break request therefore decides the rules of all
 //! later requests that resolve to the same locale. So every case runs in a process of its own.
-#![cfg(feature = "textlayout")]
+//!
+//! The expected boundaries hold for the desktop ICU data, which the filter selects from. Android,
+//! iOS, and WebAssembly builds embed the ICU data that Skia ships for those platforms, so the
+//! tests do not run there.
+#![cfg(all(
+    feature = "textlayout",
+    not(any(target_os = "android", target_os = "ios", target_arch = "wasm32"))
+))]
 
 use std::{
     env,
@@ -30,10 +37,128 @@ use std::{
 
 use skia_bindings::{self as sb, SkUnicode_BreakType as BreakType};
 
+/// Runs each case in a child process of this test binary, because Skia's break iterator cache
+/// lets the first case decide the line rules of later cases (see the module documentation).
+#[test]
+fn break_iterators_find_the_boundaries_of_the_complete_icu_data() {
+    if let Ok(index) = env::var(CASE_INDEX_VAR) {
+        run_case_in_this_process(&CASES[index.parse::<usize>().unwrap()]);
+        return;
+    }
+
+    let test_binary = env::current_exe().unwrap();
+    let mut failures = Vec::new();
+    for (index, case) in CASES.iter().enumerate() {
+        let output = Command::new(&test_binary)
+            .args([TEST_NAME, "--exact", "--nocapture"])
+            .env(CASE_INDEX_VAR, index.to_string())
+            .output()
+            .unwrap();
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let ran = stderr.lines().any(|line| line == RAN_LINE);
+        let failure = stderr
+            .lines()
+            .find_map(|line| line.strip_prefix(FAILURE_PREFIX));
+        match (output.status.success(), ran, failure) {
+            (true, true, None) => {}
+            (_, _, Some(failure)) => failures.push(failure.to_owned()),
+            (_, ran, None) => failures.push(format!(
+                "{} ({}): the child process {}: {}{}",
+                case.data,
+                case.locale,
+                if ran {
+                    "failed after it ran the case"
+                } else {
+                    "did not run the case"
+                },
+                String::from_utf8_lossy(&output.stdout),
+                stderr,
+            )),
+        }
+    }
+    assert!(failures.is_empty(), "\n{}", failures.join("\n"));
+}
+
+/// `uemoji.icu` holds the emoji properties. Without it, ICU reports no code point as an emoji.
+#[test]
+fn emoji_properties_are_available() {
+    skia_safe::icu::init();
+    let is_emoji = |c: char| unsafe { sb::C_SkUnicodes_ICU_isEmoji(c as i32) };
+    assert!(is_emoji('😀'));
+    assert!(is_emoji('\u{1FAE8}'));
+    assert!(!is_emoji('a'));
+}
+
+/// The name of the test that runs the cases. It must match the test function's name, because a
+/// child process selects the test by this name with `--exact`.
+const TEST_NAME: &str = "break_iterators_find_the_boundaries_of_the_complete_icu_data";
 /// The environment variable that tells a child process which case of [`CASES`] to run.
 const CASE_INDEX_VAR: &str = "SKIA_SAFE_ICU_DATA_CASE";
 /// The prefix of the line in which a child process reports a failing case.
 const FAILURE_PREFIX: &str = "icu data case failed: ";
+/// The line a child process prints after it ran its case.
+const RAN_LINE: &str = "icu data case ran";
+
+/// Runs one case in this process and reports its outcome on stderr, which the parent process
+/// reads. The test harness writes its own output to stdout, without a line break before the test
+/// output when it runs on one thread, so stdout cannot carry the report reliably.
+fn run_case_in_this_process(case: &Case) {
+    skia_safe::icu::init();
+    let actual = breaks(case.locale, case.break_type, case.text);
+    if actual.as_deref() != Some(case.expected) {
+        eprintln!(
+            "{FAILURE_PREFIX}{} ({}, {:?}): expected {:?} {:?}, got {:?} {:?}",
+            case.data,
+            case.locale,
+            case.break_type,
+            case.expected,
+            segments(case.text, case.expected),
+            actual,
+            actual.as_deref().map(|a| segments(case.text, a)),
+        );
+    }
+    eprintln!("{RAN_LINE}");
+}
+
+/// Returns the boundaries that Skia's ICU break iterator finds, or `None` if ICU cannot open the
+/// break iterator.
+fn breaks(locale: &str, break_type: BreakType, text: &str) -> Option<Vec<i32>> {
+    unsafe extern "C" fn set_positions(ptr: *mut i32, len: usize, positions: *mut c_void) {
+        let positions = unsafe { &mut *positions.cast::<Vec<i32>>() };
+        if len > 0 {
+            positions.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
+        }
+    }
+
+    let locale = CString::new(locale).unwrap();
+    let mut positions = Vec::new();
+    let mut sink = sb::VecSink {
+        data: (&mut positions as *mut Vec<i32>).cast(),
+        set_fn: Some(set_positions),
+        _phantom_0: Default::default(),
+    };
+    let opened = unsafe {
+        sb::C_SkUnicodes_ICU_breaks(
+            locale.as_ptr(),
+            break_type,
+            text.as_ptr() as _,
+            text.len(),
+            &mut sink,
+        )
+    };
+    opened.then_some(positions)
+}
+
+/// Splits `text` at `positions`, so that a failure shows the segments instead of offsets.
+fn segments<'a>(text: &'a str, positions: &[i32]) -> Vec<&'a str> {
+    positions
+        .windows(2)
+        .map(|w| {
+            text.get(w[0] as usize..w[1] as usize)
+                .unwrap_or("<not a char boundary>")
+        })
+        .collect()
+}
 
 /// One break iterator query and the boundaries the complete ICU data produces for it.
 struct Case {
@@ -200,112 +325,3 @@ const CASES: &[Case] = &[
         expected: &[0, 6, 12, 15, 21, 24, 27, 30, 36, 39, 45, 51],
     },
 ];
-
-/// Returns the boundaries that Skia's ICU break iterator finds, or `None` if ICU cannot open the
-/// break iterator.
-fn breaks(locale: &str, break_type: BreakType, text: &str) -> Option<Vec<i32>> {
-    unsafe extern "C" fn set_positions(ptr: *mut i32, len: usize, positions: *mut c_void) {
-        let positions = unsafe { &mut *positions.cast::<Vec<i32>>() };
-        if len > 0 {
-            positions.extend_from_slice(unsafe { std::slice::from_raw_parts(ptr, len) });
-        }
-    }
-
-    let locale = CString::new(locale).unwrap();
-    let mut positions = Vec::new();
-    let mut sink = sb::VecSink {
-        data: (&mut positions as *mut Vec<i32>).cast(),
-        set_fn: Some(set_positions),
-        _phantom_0: Default::default(),
-    };
-    let opened = unsafe {
-        sb::C_SkUnicodes_ICU_breaks(
-            locale.as_ptr(),
-            break_type,
-            text.as_ptr() as _,
-            text.len(),
-            &mut sink,
-        )
-    };
-    opened.then_some(positions)
-}
-
-/// Splits `text` at `positions`, so that a failure shows the segments instead of offsets.
-fn segments<'a>(text: &'a str, positions: &[i32]) -> Vec<&'a str> {
-    positions
-        .windows(2)
-        .map(|w| {
-            text.get(w[0] as usize..w[1] as usize)
-                .unwrap_or("<not a char boundary>")
-        })
-        .collect()
-}
-
-const TEST_NAME: &str = "break_iterators_find_the_boundaries_of_the_complete_icu_data";
-
-/// Runs every case in a child process of this test binary, see the module documentation.
-#[test]
-fn break_iterators_find_the_boundaries_of_the_complete_icu_data() {
-    if let Ok(index) = env::var(CASE_INDEX_VAR) {
-        run_case_in_this_process(&CASES[index.parse::<usize>().unwrap()]);
-        return;
-    }
-
-    let test_binary = env::current_exe().unwrap();
-    let mut failures = Vec::new();
-    for (index, case) in CASES.iter().enumerate() {
-        let output = Command::new(&test_binary)
-            .args([TEST_NAME, "--exact", "--nocapture"])
-            .env(CASE_INDEX_VAR, index.to_string())
-            .output()
-            .unwrap();
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let ran = stdout.lines().any(|line| line == RAN_LINE);
-        let failure = stdout
-            .lines()
-            .find_map(|line| line.strip_prefix(FAILURE_PREFIX));
-        match (output.status.success(), ran, failure) {
-            (true, true, None) => {}
-            (_, _, Some(failure)) => failures.push(failure.to_owned()),
-            _ => failures.push(format!(
-                "{} ({}): the child process did not run the case: {}{}",
-                case.data,
-                case.locale,
-                stdout,
-                String::from_utf8_lossy(&output.stderr),
-            )),
-        }
-    }
-    assert!(failures.is_empty(), "\n{}", failures.join("\n"));
-}
-
-/// The line a child process prints after it ran its case.
-const RAN_LINE: &str = "icu data case ran";
-
-fn run_case_in_this_process(case: &Case) {
-    skia_safe::icu::init();
-    let actual = breaks(case.locale, case.break_type, case.text);
-    if actual.as_deref() != Some(case.expected) {
-        println!(
-            "{FAILURE_PREFIX}{} ({}, {:?}): expected {:?} {:?}, got {:?} {:?}",
-            case.data,
-            case.locale,
-            case.break_type,
-            case.expected,
-            segments(case.text, case.expected),
-            actual,
-            actual.as_deref().map(|a| segments(case.text, a)),
-        );
-    }
-    println!("{RAN_LINE}");
-}
-
-/// `uemoji.icu` holds the emoji properties. Without it, ICU reports no code point as an emoji.
-#[test]
-fn emoji_properties_are_available() {
-    skia_safe::icu::init();
-    let is_emoji = |c: char| unsafe { sb::C_SkUnicodes_ICU_isEmoji(c as i32) };
-    assert!(is_emoji('😀'));
-    assert!(is_emoji('\u{1FAE8}'));
-    assert!(!is_emoji('a'));
-}
