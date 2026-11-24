@@ -251,7 +251,7 @@ impl TextBlobBuilder {
                 offset.y,
                 bounds.native_ptr_or_null(),
             );
-            safer::from_raw_parts_mut(buffer.glyphs, count)
+            zeroed_slice_mut(buffer.glyphs, count)
         }
     }
 
@@ -287,8 +287,8 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos, count),
             )
         }
     }
@@ -322,8 +322,8 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut Point, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut Point, count),
             )
         }
     }
@@ -346,8 +346,8 @@ impl TextBlobBuilder {
                 .native_mut()
                 .allocRunRSXform(font.native(), count.try_into().unwrap());
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut RSXform, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut RSXform, count),
             )
         }
     }
@@ -356,6 +356,9 @@ impl TextBlobBuilder {
     /// glyphs to the returned glyph buffer, `text_byte_count` UTF-8 code units into the returned
     /// text buffer, and `count` monotonic indexes into the text buffer into the returned cluster
     /// buffer before the next call to the text blob builder.
+    ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
     ///
     /// Glyphs share metrics in `font`.
     ///
@@ -390,9 +393,9 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
@@ -402,6 +405,9 @@ impl TextBlobBuilder {
     /// returned position buffer, `text_byte_count` UTF-8 code units into the returned text buffer,
     /// and `count` monotonic indexes into the text buffer into the returned cluster buffer before
     /// the next call to the text blob builder.
+    ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
     ///
     /// Glyphs share metrics in `font`.
     ///
@@ -434,10 +440,10 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
@@ -447,6 +453,9 @@ impl TextBlobBuilder {
     /// buffer, `text_byte_count` UTF-8 code units into the returned text buffer, and `count`
     /// monotonic indexes into the text buffer into the returned cluster buffer before the next call
     /// to the text blob builder.
+    ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
     ///
     /// Glyphs share metrics in `font`.
     ///
@@ -476,14 +485,36 @@ impl TextBlobBuilder {
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut Point, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut Point, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
 
+    /// Returns a run with storage for glyphs, [`RSXform`] positions, text, and clusters. The
+    /// caller must write `count` glyphs to the returned glyph buffer, `count` [`RSXform`]s to the
+    /// returned position buffer, `text_byte_count` UTF-8 code units into the returned text buffer,
+    /// and `count` monotonic indexes into the text buffer into the returned cluster buffer before
+    /// the next call to the text blob builder.
+    ///
+    /// If `count` or `text_byte_count` is 0, the run has no text, and the returned text and cluster
+    /// buffers are empty.
+    ///
+    /// Glyphs share metrics in `font`.
+    ///
+    /// Glyphs are positioned using the [`RSXform`]s written by the caller to the returned position
+    /// buffer.
+    ///
+    /// `bounds` defines an optional bounding box, used to suppress drawing when the text blob bounds
+    /// does not intersect the surface bounds. If `bounds` is `None`, the text blob bounds is
+    /// computed from the position buffer and the glyph metrics.
+    ///
+    /// - `font` font used for this run
+    /// - `count` number of glyphs
+    /// - `text_byte_count` number of UTF-8 code units
+    /// - `bounds` optional run bounding box
     pub fn alloc_run_text_rsxform(
         &mut self,
         font: &Font,
@@ -492,20 +523,52 @@ impl TextBlobBuilder {
         bounds: Option<&Rect>,
     ) -> (&mut [GlyphId], &mut [RSXform], &mut [u8], &mut [u32]) {
         unsafe {
-            let buffer = &*self.native_mut().allocRunTextPos(
+            let buffer = &*self.native_mut().allocRunTextRSXform(
                 font.native(),
                 count.try_into().unwrap(),
                 text_byte_count.try_into().unwrap(),
                 bounds.native_ptr_or_null(),
             );
             (
-                safer::from_raw_parts_mut(buffer.glyphs, count),
-                safer::from_raw_parts_mut(buffer.pos as *mut RSXform, count),
-                safer::from_raw_parts_mut(buffer.utf8text as *mut u8, text_byte_count),
-                safer::from_raw_parts_mut(buffer.clusters, count),
+                zeroed_slice_mut(buffer.glyphs, count),
+                zeroed_slice_mut(buffer.pos as *mut RSXform, count),
+                zeroed_slice_mut_or_empty(buffer.utf8text as *mut u8, text_byte_count),
+                zeroed_slice_mut_or_empty(buffer.clusters, count),
             )
         }
     }
+}
+
+/// Like [`zeroed_slice_mut`], but returns an empty slice when `ptr` is null.
+///
+/// Skia gives a run text and cluster storage only when it has both glyphs and text, and leaves
+/// the text and cluster pointers null otherwise.
+///
+/// # Safety
+///
+/// If `ptr` is not null, the safety requirements of [`zeroed_slice_mut`] apply.
+unsafe fn zeroed_slice_mut_or_empty<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+    if ptr.is_null() {
+        return &mut [];
+    }
+    unsafe { zeroed_slice_mut(ptr, len) }
+}
+
+/// Zeroes `len` elements at `ptr` and returns them as a mutable slice.
+///
+/// Skia leaves the buffers of a new run uninitialized. A mutable slice over them would let safe
+/// code read uninitialized integers or floats, which is undefined behavior.
+///
+/// # Safety
+///
+/// `ptr` must point to `len` writable elements that stay valid for `'a`, unless `len` is 0. A value
+/// of all zero bytes must be a valid `T`.
+unsafe fn zeroed_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+    if len > 0 {
+        assert!(!ptr.is_null());
+        unsafe { ptr::write_bytes(ptr, 0, len) };
+    }
+    unsafe { safer::from_raw_parts_mut(ptr, len) }
 }
 
 pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
@@ -575,4 +638,18 @@ fn test_point_size_and_alignment_equals_size_of_two_scalars_used_in_alloc_run_po
     use std::mem;
     assert_eq!(mem::size_of::<Point>(), mem::size_of::<[scalar; 2]>());
     assert_eq!(mem::align_of::<Point>(), mem::align_of::<[scalar; 2]>());
+}
+
+/// Skia gives a run text and cluster storage only when it has both glyphs and text, and returns
+/// null pointers for them otherwise. The text and cluster slices must then be empty.
+#[test]
+fn alloc_run_text_returns_empty_text_and_clusters_without_text_or_glyphs() {
+    let font = Font::default();
+    let mut builder = TextBlobBuilder::new();
+
+    let (glyphs, text, clusters) = builder.alloc_run_text(&font, 4, Point::default(), 0, None);
+    assert_eq!((glyphs.len(), text.len(), clusters.len()), (4, 0, 0));
+
+    let (glyphs, text, clusters) = builder.alloc_run_text(&font, 0, Point::default(), 4, None);
+    assert_eq!((glyphs.len(), text.len(), clusters.len()), (0, 0, 0));
 }
