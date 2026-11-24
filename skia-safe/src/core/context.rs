@@ -160,6 +160,9 @@ impl fmt::Debug for Context {
     }
 }
 
+// The methods take `&self` even where the C++ method is not `const`, so that recorders can keep
+// borrowing the context while it is used. They write only to the context's shared caches and to
+// the recorders they create, never to `SkContext` itself, and `Context` is not `Sync`.
 impl Context {
     /// Creates a context that uses software rasterization only.
     pub fn new_raster(options: &ContextOptions) -> Option<Self> {
@@ -172,7 +175,8 @@ impl Context {
     /// Creates and returns a new recorder for this context based on the requested backend.
     ///
     /// Returns `None` for [`BackendSelection::GPU`] when the context has no GPU backend.
-    // TODO: Wrap the Graphite recorder options.
+    // TODO: Wrap the Graphite recorder options, and a way to turn a Graphite recorder into a
+    // `graphite::Recorder`, so that its recording can be snapped and submitted.
     pub fn make_recorder(&self, backend: BackendSelection) -> Option<OwnedRecorder<'_>> {
         OwnedRecorder::from_ptr(
             unsafe { sb::C_SkContext_makeRecorder(self.native_mut_force(), backend) },
@@ -188,8 +192,8 @@ impl Context {
 
     /// Sets the maximum number of bytes that the font cache uses, and returns the previous limit.
     /// If the cache needs to allocate more, it purges previous entries.
-    pub fn set_font_cache_limit(&mut self, bytes: usize) -> usize {
-        unsafe { sb::SkContext_setFontCacheLimit(self.native_ptr(), bytes) }
+    pub fn set_font_cache_limit(&self, bytes: usize) -> usize {
+        unsafe { sb::SkContext_setFontCacheLimit(self.native_mut_force(), bytes) }
     }
 
     /// Returns the number of bytes that the font cache currently uses.
@@ -206,8 +210,8 @@ impl Context {
     /// Sets the limit of the number of entries in the font cache, and returns the previous limit.
     /// If the new limit is lower than the previous one, the cache tries to purge entries to meet
     /// it.
-    pub fn set_font_cache_count_limit(&mut self, count: i32) -> i32 {
-        unsafe { sb::SkContext_setFontCacheCountLimit(self.native_ptr(), count) }
+    pub fn set_font_cache_count_limit(&self, count: i32) -> i32 {
+        unsafe { sb::SkContext_setFontCacheCountLimit(self.native_mut_force(), count) }
     }
 
     /// Returns the number of entries in the font cache.
@@ -217,14 +221,14 @@ impl Context {
 
     /// For debugging purposes, attempts to purge the font cache. It does not change the limit,
     /// but causes subsequent font measures and draws to be recreated.
-    pub fn purge_font_cache(&mut self) {
-        unsafe { sb::SkContext_purgeFontCache(self.native_ptr()) }
+    pub fn purge_font_cache(&self) {
+        unsafe { sb::SkContext_purgeFontCache(self.native_mut_force()) }
     }
 
     /// If the strike cache is above the cache limit, attempts to purge strikes with pinners. Call
     /// it after releasing locks on pinned strikes.
-    pub fn purge_pinned_font_cache(&mut self) {
-        unsafe { sb::SkContext_purgePinnedFontCache(self.native_ptr()) }
+    pub fn purge_pinned_font_cache(&self) {
+        unsafe { sb::SkContext_purgePinnedFontCache(self.native_mut_force()) }
     }
 
     /// Returns the memory used for temporary images and other resources.
@@ -239,8 +243,8 @@ impl Context {
     }
 
     /// Sets the memory usage limit of the resource cache, and returns the previous limit.
-    pub fn set_resource_cache_total_byte_limit(&mut self, new_limit: usize) -> usize {
-        unsafe { sb::SkContext_setResourceCacheTotalByteLimit(self.native_ptr(), new_limit) }
+    pub fn set_resource_cache_total_byte_limit(&self, new_limit: usize) -> usize {
+        unsafe { sb::SkContext_setResourceCacheTotalByteLimit(self.native_mut_force(), new_limit) }
     }
 
     /// Returns the size limit of a single entry in the resource cache. An entry larger than the
@@ -255,12 +259,12 @@ impl Context {
     /// Sets the size limit of a single entry in the resource cache, and returns the previous
     /// limit. `None` means no limit.
     pub fn set_resource_cache_single_allocation_byte_limit(
-        &mut self,
+        &self,
         new_limit: Option<usize>,
     ) -> Option<usize> {
         let size = unsafe {
             sb::SkContext_setResourceCacheSingleAllocationByteLimit(
-                self.native_ptr(),
+                self.native_mut_force(),
                 new_limit.unwrap_or_default(),
             )
         };
@@ -268,8 +272,8 @@ impl Context {
     }
 
     /// For debugging purposes, attempts to purge the resource cache. It does not change the limit.
-    pub fn purge_resource_cache(&mut self) {
-        unsafe { sb::SkContext_purgeResourceCache(self.native_ptr()) }
+    pub fn purge_resource_cache(&self) {
+        unsafe { sb::SkContext_purgeResourceCache(self.native_mut_force()) }
     }
 
     /// Returns the limit of the number of entries in the typeface cache. A cache entry is
@@ -280,8 +284,8 @@ impl Context {
 
     /// Sets the limit of the number of entries in the typeface cache, and returns the previous
     /// limit. A change takes effect the next time each cache object is modified.
-    pub fn set_typeface_cache_count_limit(&mut self, count: i32) -> i32 {
-        unsafe { sb::SkContext_setTypefaceCacheCountLimit(self.native_ptr(), count) }
+    pub fn set_typeface_cache_count_limit(&self, count: i32) -> i32 {
+        unsafe { sb::SkContext_setTypefaceCacheCountLimit(self.native_mut_force(), count) }
     }
 
     // TODO: Wrap `dumpMemoryStatistics()`, which needs a wrapper for `SkTraceMemoryDump`.
