@@ -191,7 +191,7 @@ extern "C" const char* C_string_view_ptr_size(const std::string_view* self, size
 }
 ```
 
-`SkSpan<T>` never appears in the Rust API — a shim always constructs it from a
+An `SkSpan<T>` parameter never crosses the boundary. A shim constructs it from a
 `(ptr, len)` pair coming from Rust:
 
 ```cpp
