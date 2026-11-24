@@ -7,7 +7,8 @@ use std::{
 
 use skia_bindings::{self as sb, SkData};
 
-use crate::{interop::RustStream, prelude::*};
+use crate::interop::{RustStream, sk_span};
+use crate::prelude::*;
 
 pub type Data = RCHandle<SkData>;
 unsafe_send_sync!(Data);
@@ -56,7 +57,7 @@ impl fmt::Debug for Data {
 
 impl Data {
     pub fn size(&self) -> usize {
-        self.native().fSpan.fSize
+        unsafe { sk_span::parts::<u8>(&self.native().fSpan) }.1
     }
 
     pub fn is_empty(&self) -> bool {
@@ -64,7 +65,10 @@ impl Data {
     }
 
     pub fn as_bytes(&self) -> &[u8] {
-        unsafe { safer::from_raw_parts(self.native().fSpan.fPtr as _, self.size()) }
+        unsafe {
+            let (ptr, size) = sk_span::parts::<u8>(&self.native().fSpan);
+            safer::from_raw_parts(ptr, size)
+        }
     }
 
     // TODO:

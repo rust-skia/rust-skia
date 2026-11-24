@@ -124,7 +124,6 @@ pub use codec::Result as CodecResult;
 pub use codec::{Codec, EncodedImageFormat, EncodedOrigin, codecs};
 
 mod core;
-pub mod cpu;
 #[cfg(feature = "pdf")]
 mod docs;
 mod effects;

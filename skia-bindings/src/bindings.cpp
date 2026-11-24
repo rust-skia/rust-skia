@@ -36,7 +36,6 @@
 #include "include/core/SkColorTable.h"
 #include "include/core/SkContext.h"
 #include "include/core/SkContextOptions.h"
-#include "include/cpu/Recorder.h"
 #include "include/core/SkContourMeasure.h"
 #include "include/core/SkCoverageMode.h"
 #include "include/core/SkCubicMap.h"
@@ -342,6 +341,11 @@ extern "C" SkContext* C_SkContexts_MakeRaster(const SkContextOptions& options) {
 
 extern "C" void C_SkContext_delete(SkContext* self) {
     delete self;
+}
+
+// The Graphite recorder options stay at their default, because no caller passes them yet.
+extern "C" SkRecorder* C_SkContext_makeRecorder(SkContext* self, SkContext::BackendSelection backend) {
+    return self->makeRecorder(backend).release();
 }
 
 //

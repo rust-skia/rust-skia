@@ -18,7 +18,7 @@ pub mod color_filter;
 mod color_space;
 mod color_table;
 mod color_type;
-mod context;
+pub mod context;
 pub mod contour_measure;
 mod coverage_mode;
 mod cubic_map;
@@ -148,7 +148,7 @@ pub use point::*;
 pub use point3::*;
 #[allow(unused)]
 pub use raster_handle_allocator::*;
-pub use recorder::{Recorder, RecorderRef};
+pub use recorder::{OwnedRecorder, Recorder, RecorderRef};
 pub use rect::*;
 pub use region::Region;
 pub use rrect::RRect;

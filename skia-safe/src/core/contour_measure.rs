@@ -9,6 +9,7 @@ use skia_bindings::{
     SkContourMeasure_VerbMeasure, SkContourMeasureIter, SkRefCntBase,
 };
 
+use crate::interop::sk_span;
 use crate::{Matrix, Path, PathBuilder, PathVerb, Point, Vector, prelude::*, scalar};
 
 pub type ContourMeasure = RCHandle<SkContourMeasure>;
@@ -239,10 +240,8 @@ impl VerbMeasure<'_> {
     /// Returns the verb points.
     pub fn points(&self) -> &[Point] {
         unsafe {
-            safer::from_raw_parts(
-                Point::from_native_ptr(self.verb_measure.fPts.fPtr),
-                self.verb_measure.fPts.fSize,
-            )
+            let (points, count) = sk_span::parts(&self.verb_measure.fPts);
+            safer::from_raw_parts(Point::from_native_ptr(points), count)
         }
     }
 }

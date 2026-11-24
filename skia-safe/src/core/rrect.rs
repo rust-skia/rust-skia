@@ -407,7 +407,8 @@ impl RRect {
 
     /// Translates this rounded rectangle by `delta`.
     pub fn offset(&mut self, delta: impl Into<Vector>) {
-        Rect::from_native_ref_mut(&mut self.native_mut().fRect).offset(delta)
+        let delta = delta.into();
+        unsafe { self.native_mut().offset(delta.x, delta.y) }
     }
 
     /// Returns this rounded rectangle translated by `delta`, with unchanged corner radii.

@@ -215,6 +215,17 @@ Milestone m157: crates `0.157.0`, Skia submodule tag `m157.2`. The PR is rust-sk
 
 ---
 
+# m159 update (2026-11-24)
+
+Milestone m159: crates `0.159.0`, Skia submodule tag `m159.0`. The docs of the new and changed m159 items:
+
+- `Context::make_recorder()`, from the comment on `makeRecorder()` in `include/core/SkContext.h`. The sentence that `BackendSelection::GPU` returns `None` without a GPU backend comes from the comment on `kGPU`.
+- `BackendSelection`, rust-skia's own summary. Its variants keep the bindgen re-export without docs, because the C++ comments are plain `//` comments that bindgen does not carry.
+- The cache methods of `Context` (`font_cache_limit()` through `set_typeface_cache_count_limit()`), from the matching functions of `include/core/SkGraphics.h`, because `include/core/SkContext.h` documents none of them. The C++ parameter lists are left out, because each method has one parameter.
+- `OwnedRecorder`, rust-skia's own; it has no C++ counterpart.
+
+---
+
 # m158 update (2026-11-13)
 
 Milestone m158: crates `0.158.0`, Skia submodule tag `m158.2`. The PR is rust-skia/rust-skia#1357. The docs of the new and changed m158 items are ported completely from the m158 headers:

@@ -2,6 +2,8 @@
 mod cpp;
 pub use cpp::*;
 
+pub mod sk_span;
+
 mod stream;
 pub use self::stream::*;
 
