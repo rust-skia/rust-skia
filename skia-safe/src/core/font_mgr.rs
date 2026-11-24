@@ -166,9 +166,13 @@ impl FontMgr {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefEmpty() }).unwrap()
     }
 
-    // Custom empty manager. This avoids scanning system fonts when they are not required.
-    //
-    // Returns `None` on platforms where Skia is not compiled with freetype (e.g. Windows)
+    /// Returns a FreeType font manager without any fonts, which creates typefaces from font data
+    /// with [`Self::new_from_data()`]. This avoids scanning system fonts when they are not
+    /// required.
+    ///
+    /// Returns `None` on platforms where Skia is not compiled with FreeType: the Apple platforms
+    /// and Windows, unless the feature `freetype-alongside-native` builds FreeType on macOS and
+    /// Windows.
     pub fn custom_empty() -> Option<Self> {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_NewCustomEmpty() })
     }

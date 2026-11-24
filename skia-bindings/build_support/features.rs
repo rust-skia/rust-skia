@@ -80,6 +80,9 @@ impl Features {
         if cfg!(feature = "freetype-woff2") {
             features += feature::FREETYPE_WOFF2;
         }
+        if cfg!(feature = "freetype-alongside-native") {
+            features += feature::FREETYPE_ALONGSIDE_NATIVE;
+        }
 
         if cfg!(feature = "jpeg-encode") {
             features += feature::JPEG_ENCODE;
@@ -245,6 +248,10 @@ pub mod feature {
     pub const EMBED_FREETYPE: &str = "embed-freetype";
     /// Build with FreeType WOFF2 support
     pub const FREETYPE_WOFF2: &str = "freetype-woff2";
+    /// On platforms whose system font manager is native (macOS: CoreText, Windows: DirectWrite),
+    /// build and embed FreeType next to it, so that `FontMgr::custom_empty()` returns a FreeType
+    /// font manager. The system font manager stays native.
+    pub const FREETYPE_ALONGSIDE_NATIVE: &str = "freetype-alongside-native";
 
     pub const JPEG_ENCODE: &str = "jpeg-encode";
     pub const JPEG_DECODE: &str = "jpeg-decode";
@@ -266,6 +273,7 @@ pub mod feature {
         (WEBP_DECODE, "webpd"),
         (EMBED_FREETYPE, "ftembed"),
         (FREETYPE_WOFF2, "ftwoff2"),
+        (FREETYPE_ALONGSIDE_NATIVE, "ftnative"),
         (JPEG_ENCODE, "jpege"),
         (JPEG_DECODE, "jpegd"),
     ];
