@@ -160,9 +160,9 @@ impl fmt::Debug for Context {
     }
 }
 
-// The methods take `&self` even where the C++ method is not `const`, so that recorders can keep
-// borrowing the context while it is used. They write only to the context's shared caches and to
-// the recorders they create, never to `SkContext` itself, and `Context` is not `Sync`.
+// The methods take `&self` so that recorders can keep borrowing the context. They write only
+// through `fSharedState` and `fGPUContext`, never to `SkContext` itself, and no other thread
+// shares a non-global context's state. Revisit this before wrapping Skia's global context.
 impl Context {
     /// Creates a context that uses software rasterization only.
     pub fn new_raster(options: &ContextOptions) -> Option<Self> {
