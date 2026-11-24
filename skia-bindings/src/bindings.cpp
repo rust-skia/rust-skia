@@ -324,6 +324,21 @@ extern "C" void C_Core_Types(
 extern "C" void C_SkDocument_Types(SkDocument*) {}
 
 //
+// core/SkSpan.h
+//
+
+// bindgen cannot represent SkSpan, because SkSpan keeps its pointer and size in a templated base
+// class with a non-type template parameter, the extent. This replacement gives bindgen the layout
+// of a dynamic-extent SkSpan, which every Skia struct field uses, and bindgen's layout tests check
+// it against the real SkSpan on each target.
+/// <div rustbindgen replaces="SkSpan"></div>
+template <typename T>
+class SkSpanReplacement {
+    T* fPtr;
+    size_t fSize;
+};
+
+//
 // core/SkContext.h, core/SkContextOptions.h, core/RasterContext.h
 //
 

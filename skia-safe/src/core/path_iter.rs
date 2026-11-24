@@ -4,7 +4,6 @@ use skia_bindings::{
     self as sb, SkPath, SkPathContourIter, SkPathContourIter_Rec, SkPathIter, SkPathIter_Rec,
 };
 
-use crate::interop::sk_span;
 use crate::{PathVerb, Point, prelude::*};
 
 #[repr(transparent)]
@@ -79,8 +78,7 @@ impl PathIterRec<'_> {
     /// borrow from itself, so the record has to own its points.
     fn from_native(rec: &SkPathIter_Rec) -> Self {
         let source: &[Point] = unsafe {
-            let (points, count) = sk_span::parts(&rec.fPoints);
-            safer::from_raw_parts(Point::from_native_ptr(points), count)
+            safer::from_raw_parts(Point::from_native_ptr(rec.fPoints.fPtr), rec.fPoints.fSize)
         };
         let mut points = [Point::default(); MAX_REC_POINTS];
         points[..source.len()].copy_from_slice(source);
@@ -179,11 +177,9 @@ impl fmt::Debug for PathContourIter<'_> {
     }
 }
 
-// The raw pointer in the marker keeps the record neither `Send` nor `Sync`. The native record
-// holds its spans as opaque bytes, which would make it both.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct PathContourIterRec<'a>(SkPathContourIter_Rec, PhantomData<&'a *const ()>);
+pub struct PathContourIterRec<'a>(SkPathContourIter_Rec, PhantomData<&'a ()>);
 
 impl NativeAccess for PathContourIterRec<'_> {
     type Native = SkPathContourIter_Rec;
@@ -212,23 +208,19 @@ impl fmt::Debug for PathContourIterRec<'_> {
 impl PathContourIterRec<'_> {
     pub fn points(&self) -> &[Point] {
         unsafe {
-            let (points, count) = sk_span::parts(&self.native().fPoints);
-            safer::from_raw_parts(Point::from_native_ptr(points), count)
+            safer::from_raw_parts(
+                Point::from_native_ptr(self.native().fPoints.fPtr),
+                self.native().fPoints.fSize,
+            )
         }
     }
 
     pub fn verbs(&self) -> &[PathVerb] {
-        unsafe {
-            let (verbs, count) = sk_span::parts(&self.native().fVerbs);
-            safer::from_raw_parts(verbs, count)
-        }
+        unsafe { safer::from_raw_parts(self.native().fVerbs.fPtr, self.native().fVerbs.fSize) }
     }
 
     pub fn conics(&self) -> &[f32] {
-        unsafe {
-            let (conics, count) = sk_span::parts(&self.native().fConics);
-            safer::from_raw_parts(conics, count)
-        }
+        unsafe { safer::from_raw_parts(self.native().fConics.fPtr, self.native().fConics.fSize) }
     }
 }
 
