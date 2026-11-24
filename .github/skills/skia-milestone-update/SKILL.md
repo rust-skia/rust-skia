@@ -361,20 +361,29 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     ```
 
   - Before bumping, build with the old revision and keep its output. The generated files
-    are in `out/dawn` of the `skia-bindings` build directory, next to `out/skia/bindings.rs`:
+    are in `out/dawn` of the newest `skia-bindings` build directory, next to
+    `out/skia/bindings.rs`. Cargo's build directory layout differs between versions, so take
+    the directory from `just locate-bindings`, which finds the newest `bindings.rs` in either
+    layout:
 
     ```sh
     cargo build -p skia-bindings --features wgpu
-    cp -R target/debug/build/skia-bindings-*/out/dawn "$TMPDIR/dawn-old"
+    out=$(dirname "$(dirname "$(just locate-bindings)")")
+    cp -R "$out/dawn" "$TMPDIR/dawn-old"
+    nm -u "$out/skia/libskia-bindings.a" | grep -oE 'wgpu[A-Z][A-Za-z]*' | sort -u > "$TMPDIR/wgpu-old.txt"
     ```
 
-    When several `skia-bindings-*` build directories exist, take the newest one, as for
-    `bindings.rs`.
+    `out/dawn/REVISION` names the Dawn, Jinja2, and MarkupSafe revisions the output was
+    generated from. An existing build directory whose `REVISION` names the old revisions can
+    serve as the old side instead of a new build.
   - Bump `[package.metadata].dawn`, build again, and diff:
 
     ```sh
     cargo build -p skia-bindings --features wgpu
-    diff -ru "$TMPDIR/dawn-old" target/debug/build/skia-bindings-*/out/dawn
+    out=$(dirname "$(dirname "$(just locate-bindings)")")
+    diff -ru "$TMPDIR/dawn-old" "$out/dawn"
+    nm -u "$out/skia/libskia-bindings.a" | grep -oE 'wgpu[A-Z][A-Za-z]*' | sort -u > "$TMPDIR/wgpu-new.txt"
+    diff "$TMPDIR/wgpu-old.txt" "$TMPDIR/wgpu-new.txt"
     ```
 
   - Read the whole diff of `include/dawn/webgpu.h`, and diff Skia's Dawn backend between
@@ -385,13 +394,9 @@ replays the old milestone's upstream-only commits as if they were fork patches.
     ```
 
   - The `wgpu*` functions that `libskia-bindings.a` leaves undefined are the ones the
-    `skia-wgpu` shim must export (`docs/adr/0004`). List them for the old and the new build,
-    from the newest `skia-bindings-*` build directory each time, and diff the lists. The
-    pattern skips the C++ namespace `wgpu` in mangled names:
-
-    ```sh
-    nm -u "$(ls -t target/debug/build/skia-bindings-*/out/skia/libskia-bindings.a | head -1)" | grep -oE 'wgpu[A-Z][A-Za-z]*' | sort -u
-    ```
+    `skia-wgpu` shim must export (`docs/adr/0004`). The `nm` lists of the two builds above
+    hold them, and their `diff` shows the added and removed ones. The pattern skips the C++
+    namespace `wgpu` in mangled names.
 
     Record the changes in the PR's Dawn headers section. Each changed function, struct,
     enum value, and feature name that Skia's Dawn backend uses, and every undefined `wgpu*`
