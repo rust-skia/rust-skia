@@ -117,21 +117,16 @@ fn recorder_type(recorder: &SkRecorder) -> Type {
 
 #[cfg(test)]
 mod tests {
-    use super::{OwnedRecorder, Recorder, RecorderRef};
+    use super::{Recorder, RecorderRef};
 
     #[allow(deref_nullptr)]
     fn _passing_the_different_kinds_of_recorder_compiles() {
         test(None);
         test(Some(borrowed_recorder()));
-        test(Some(owned_recorder()));
 
         fn test(_recorder: Option<&mut dyn Recorder>) {}
 
         fn borrowed_recorder() -> &'static mut RecorderRef {
-            unsafe { &mut *std::ptr::null_mut() }
-        }
-
-        fn owned_recorder() -> &'static mut OwnedRecorder<'static> {
             unsafe { &mut *std::ptr::null_mut() }
         }
     }
