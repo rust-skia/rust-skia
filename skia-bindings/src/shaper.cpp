@@ -266,3 +266,36 @@ extern "C" SkShaper::BiDiRunIterator* C_SkShapers_unicode_BidiRunIterator(const 
     }
     return SkShapers::unicode::BidiRunIterator(std::move(unicode), utf8, utf8Bytes, bidiLevel).release();
 }
+
+// SkUnicodes::ICU
+//
+// These functions reach the ICU data that Skia embeds only through the calls that Skia's own
+// ICU-based SkUnicode makes. The skia-safe tests use them to check that the embedded ICU data
+// holds every item that these calls load.
+
+/// Writes the boundaries that a break iterator of the given locale and type finds in `utf8` into
+/// `positions`, as UTF-8 offsets. Returns false if ICU cannot open the break iterator.
+extern "C" bool C_SkUnicodes_ICU_breaks(
+    const char* locale, SkUnicode::BreakType type,
+    const char* utf8, size_t utf8Bytes,
+    VecSink<SkBreakIterator::Position>* positions) {
+    auto unicode = SkUnicodes::ICU::Make();
+    if (!unicode) {
+        return false;
+    }
+    auto iterator = unicode->makeBreakIterator(locale, type);
+    if (!iterator || !iterator->setText(utf8, static_cast<int>(utf8Bytes))) {
+        return false;
+    }
+    std::vector<SkBreakIterator::Position> result;
+    for (auto pos = iterator->first(); !iterator->isDone(); pos = iterator->next()) {
+        result.push_back(pos);
+    }
+    positions->set(result);
+    return true;
+}
+
+extern "C" bool C_SkUnicodes_ICU_isEmoji(SkUnichar unichar) {
+    auto unicode = SkUnicodes::ICU::Make();
+    return unicode && unicode->isEmoji(unichar);
+}
