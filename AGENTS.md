@@ -31,7 +31,9 @@
 - Bindgen parses the `.cpp` files in `skia-bindings/src/` to discover `extern "C"` functions and types.
 - Touch `skia-bindings/src/bindings.cpp` and run `cargo check -p skia-bindings` to force regeneration.
 - Generated bindings land in `target/*/build/skia-bindings-*/out/skia/bindings.rs`.
-- C++ `enum class` variants get their `k` prefix stripped automatically by bindgen.
+- C++ enum variants are renamed (for example, their `k` prefix stripped) only when their enum is listed
+  in `ENUM_REWRITES` in `skia-bindings/build_support/skia_bindgen.rs`. All others keep their C++
+  names, such as `SkUnicode_BreakType::kLines`.
 - C++ namespaced types like `SkShapers::CT::LineBreakMode` become `SkShapers_CT_LineBreakMode`.
 
 ## Common patterns in skia-safe
