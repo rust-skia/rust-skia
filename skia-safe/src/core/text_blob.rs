@@ -539,6 +539,21 @@ impl TextBlobBuilder {
     }
 }
 
+/// Like [`zeroed_slice_mut`], but returns an empty slice when `ptr` is null.
+///
+/// Skia gives a run text and cluster storage only when it has both glyphs and text, and leaves
+/// the text and cluster pointers null otherwise.
+///
+/// # Safety
+///
+/// If `ptr` is not null, the safety requirements of [`zeroed_slice_mut`] apply.
+unsafe fn zeroed_slice_mut_or_empty<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+    if ptr.is_null() {
+        return &mut [];
+    }
+    unsafe { zeroed_slice_mut(ptr, len) }
+}
+
 /// Zeroes `len` elements at `ptr` and returns them as a mutable slice.
 ///
 /// Skia leaves the buffers of a new run uninitialized. A mutable slice over them would let safe
@@ -554,21 +569,6 @@ unsafe fn zeroed_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
         unsafe { ptr::write_bytes(ptr, 0, len) };
     }
     unsafe { safer::from_raw_parts_mut(ptr, len) }
-}
-
-/// Like [`zeroed_slice_mut`], but returns an empty slice when `ptr` is null.
-///
-/// Skia gives a run text and cluster storage only when it has both glyphs and text, and leaves
-/// the text and cluster pointers null otherwise.
-///
-/// # Safety
-///
-/// If `ptr` is not null, the safety requirements of [`zeroed_slice_mut`] apply.
-unsafe fn zeroed_slice_mut_or_empty<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
-    if ptr.is_null() {
-        return &mut [];
-    }
-    unsafe { zeroed_slice_mut(ptr, len) }
 }
 
 pub type TextBlobIter<'a> = Borrows<'a, Handle<SkTextBlob_Iter>>;
