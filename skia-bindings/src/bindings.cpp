@@ -2799,10 +2799,6 @@ extern "C" void C_SkRecorder_type(const SkRecorder* self, SkRecorder::Type* ty) 
     *ty = self->type();
 }
 
-extern "C" skcpu::Recorder* C_SkRecorder_cpuRecorder(SkRecorder* self) {
-    return self->cpuRecorder();
-}
-
 //
 // core/SkRect.h
 //
