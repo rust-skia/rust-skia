@@ -2,7 +2,6 @@
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
-#include "include/cpu/Recorder.h"
 #include "include/core/SkDrawable.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkSurface.h"
@@ -119,10 +118,6 @@ extern "C" bool C_GrRecordingContext_abandoned(GrRecordingContext* self) {
 
 extern "C" int C_GrRecordingContext_maxSurfaceSampleCountForColorType(const GrRecordingContext* self, SkColorType colorType) {
     return self->maxSurfaceSampleCountForColorType(colorType);
-}
-
-extern "C" skcpu::Recorder* C_GrRecordingContext_makeCPURecorder(GrRecordingContext* self) {
-    return self->makeCPURecorder().release();
 }
 
 extern "C" void C_GrDirectContext_flushAndSubmit(GrDirectContext* self, GrSyncCpu sync, GrDirectContext::FlushResult* result) {

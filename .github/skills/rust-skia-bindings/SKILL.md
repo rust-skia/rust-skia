@@ -99,8 +99,9 @@ touch skia-bindings/src/bindings.cpp && cargo check -p skia-bindings
 ```
 
 Bindgen is re-run when any `src/*.cpp` or the Skia `include/` directory changes.
-The output lands in `target/*/build/skia-bindings-*/out/skia/bindings.rs`;
-`just locate-bindings` prints the newest one and `just open-bindings` opens it.
+The output lands in `out/skia/bindings.rs` of the `skia-bindings` build directory, whose
+path differs between Cargo versions. `just locate-bindings` prints the newest one, and
+`just open-bindings` opens it.
 Read the generated bindings to confirm names, signatures, and field presence before
 writing the Rust wrapper. The bindings are feature-dependent, so check with the same
 features you intend to test.

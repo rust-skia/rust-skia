@@ -1,7 +1,7 @@
 use std::fmt;
 
 use crate::{
-    ColorType, TextureCompressionType, cpu,
+    ColorType, TextureCompressionType,
     gpu::{BackendFormat, DirectContext, Renderable},
     prelude::*,
     recorder::RecorderRef,
@@ -142,12 +142,6 @@ impl RecordingContext {
     /// Returns this context as a [`RecorderRef`].
     pub fn as_recorder(&mut self) -> &mut RecorderRef {
         RecorderRef::from_ref_mut(unsafe { &mut *self.native_mut().asRecorder() })
-    }
-    /// Returns a new CPU recorder associated with this context.
-    pub fn make_cpu_recorder(&mut self) -> cpu::Recorder<'_> {
-        cpu::Recorder::from_owned(unsafe {
-            &mut *sb::C_GrRecordingContext_makeCPURecorder(self.native_mut())
-        })
     }
 
     // TODO: Wrap Arenas (if used).

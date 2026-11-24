@@ -137,6 +137,7 @@ mod core {
 
     assert_not_impl_any!(dyn Recorder: Send, Sync);
     assert_not_impl_any!(RecorderRef: Send, Sync);
+    assert_not_impl_any!(OwnedRecorder<'static>: Send, Sync);
 
     assert_impl_all!(Region: Send, Sync);
     assert_not_impl_any!(region::Iterator: Send, Sync);

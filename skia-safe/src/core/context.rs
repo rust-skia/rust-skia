@@ -1,8 +1,11 @@
+//! [`Context`], Skia's central object for shared resources and caches, and the options it is created
+//! with.
+
 use std::fmt;
 
 use skia_bindings::{self as sb, SkContext, SkContextOptions};
 
-use crate::prelude::*;
+use crate::{OwnedRecorder, prelude::*};
 
 /// Options shared by Skia's raster and GPU context factories.
 pub type ContextOptions = Handle<SkContextOptions>;
@@ -132,13 +135,177 @@ impl NativeDelete for SkContext {
 
 impl fmt::Debug for Context {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Context").finish()
+        f.debug_struct("Context")
+            .field("font_cache_limit", &self.font_cache_limit())
+            .field("font_cache_used", &self.font_cache_used())
+            .field("font_cache_count_limit", &self.font_cache_count_limit())
+            .field("font_cache_count_used", &self.font_cache_count_used())
+            .field(
+                "resource_cache_total_bytes_used",
+                &self.resource_cache_total_bytes_used(),
+            )
+            .field(
+                "resource_cache_total_byte_limit",
+                &self.resource_cache_total_byte_limit(),
+            )
+            .field(
+                "resource_cache_single_allocation_byte_limit",
+                &self.resource_cache_single_allocation_byte_limit(),
+            )
+            .field(
+                "typeface_cache_count_limit",
+                &self.typeface_cache_count_limit(),
+            )
+            .finish()
     }
 }
 
+// The methods take `&self` so that recorders can keep borrowing the context. They write only
+// through `fSharedState` and `fGPUContext`, never to `SkContext` itself, and no other thread
+// shares a non-global context's state. Revisit this before wrapping Skia's global context.
 impl Context {
     /// Creates a context that uses software rasterization only.
     pub fn new_raster(options: &ContextOptions) -> Option<Self> {
         Self::from_ptr(unsafe { sb::C_SkContexts_MakeRaster(options.native()) })
+    }
+
+    // TODO: Wrap `startCapture()` and `endCapture()` once `SkCapture` is public. Today it is
+    // defined only in a private header, so Rust could not read or serialize a capture.
+
+    /// Creates and returns a new recorder for this context based on the requested backend.
+    ///
+    /// Returns `None` for [`BackendSelection::GPU`] when the context has no GPU backend.
+    // TODO: Wrap the Graphite recorder options, and a way to turn a Graphite recorder into a
+    // `graphite::Recorder`, so that its recording can be snapped and submitted.
+    pub fn make_recorder(&self, backend: BackendSelection) -> Option<OwnedRecorder<'_>> {
+        OwnedRecorder::from_ptr(
+            unsafe { sb::C_SkContext_makeRecorder(self.native_mut_force(), backend) },
+            self,
+        )
+    }
+
+    /// Returns the maximum number of bytes that the font cache uses. If the cache needs to
+    /// allocate more, it purges previous entries.
+    pub fn font_cache_limit(&self) -> usize {
+        unsafe { self.native().fontCacheLimit() }
+    }
+
+    /// Sets the maximum number of bytes that the font cache uses, and returns the previous limit.
+    /// If the cache needs to allocate more, it purges previous entries.
+    pub fn set_font_cache_limit(&self, bytes: usize) -> usize {
+        unsafe { sb::SkContext_setFontCacheLimit(self.native_mut_force(), bytes) }
+    }
+
+    /// Returns the number of bytes that the font cache currently uses.
+    pub fn font_cache_used(&self) -> usize {
+        unsafe { self.native().fontCacheUsed() }
+    }
+
+    /// Returns the limit of the number of entries in the font cache. A cache entry is associated
+    /// with each typeface + point size + matrix.
+    pub fn font_cache_count_limit(&self) -> i32 {
+        unsafe { self.native().fontCacheCountLimit() }
+    }
+
+    /// Sets the limit of the number of entries in the font cache, and returns the previous limit.
+    /// If the new limit is lower than the previous one, the cache tries to purge entries to meet
+    /// it.
+    pub fn set_font_cache_count_limit(&self, count: i32) -> i32 {
+        unsafe { sb::SkContext_setFontCacheCountLimit(self.native_mut_force(), count) }
+    }
+
+    /// Returns the number of entries in the font cache.
+    pub fn font_cache_count_used(&self) -> i32 {
+        unsafe { self.native().fontCacheCountUsed() }
+    }
+
+    /// For debugging purposes, attempts to purge the font cache. It does not change the limit,
+    /// but causes subsequent font measures and draws to be recreated.
+    pub fn purge_font_cache(&self) {
+        unsafe { sb::SkContext_purgeFontCache(self.native_mut_force()) }
+    }
+
+    /// If the strike cache is above the cache limit, attempts to purge strikes with pinners. Call
+    /// it after releasing locks on pinned strikes.
+    pub fn purge_pinned_font_cache(&self) {
+        unsafe { sb::SkContext_purgePinnedFontCache(self.native_mut_force()) }
+    }
+
+    /// Returns the memory used for temporary images and other resources.
+    pub fn resource_cache_total_bytes_used(&self) -> usize {
+        unsafe { self.native().resourceCacheTotalBytesUsed() }
+    }
+
+    /// Returns the memory usage limit of the resource cache, used for temporary bitmaps and other
+    /// resources. Entries are purged from the cache when the memory usage exceeds this limit.
+    pub fn resource_cache_total_byte_limit(&self) -> usize {
+        unsafe { self.native().resourceCacheTotalByteLimit() }
+    }
+
+    /// Sets the memory usage limit of the resource cache, and returns the previous limit.
+    pub fn set_resource_cache_total_byte_limit(&self, new_limit: usize) -> usize {
+        unsafe { sb::SkContext_setResourceCacheTotalByteLimit(self.native_mut_force(), new_limit) }
+    }
+
+    /// Returns the size limit of a single entry in the resource cache. An entry larger than the
+    /// limit is not cached at all, so that it does not purge most of the other entries.
+    ///
+    /// `None` means no limit, so Skia always attempts to cache entries.
+    pub fn resource_cache_single_allocation_byte_limit(&self) -> Option<usize> {
+        let size = unsafe { self.native().resourceCacheSingleAllocationByteLimit() };
+        (size != 0).then_some(size)
+    }
+
+    /// Sets the size limit of a single entry in the resource cache, and returns the previous
+    /// limit. `None` means no limit.
+    pub fn set_resource_cache_single_allocation_byte_limit(
+        &self,
+        new_limit: Option<usize>,
+    ) -> Option<usize> {
+        let size = unsafe {
+            sb::SkContext_setResourceCacheSingleAllocationByteLimit(
+                self.native_mut_force(),
+                new_limit.unwrap_or_default(),
+            )
+        };
+        (size != 0).then_some(size)
+    }
+
+    /// For debugging purposes, attempts to purge the resource cache. It does not change the limit.
+    pub fn purge_resource_cache(&self) {
+        unsafe { sb::SkContext_purgeResourceCache(self.native_mut_force()) }
+    }
+
+    /// Returns the limit of the number of entries in the typeface cache. A cache entry is
+    /// associated with each typeface.
+    pub fn typeface_cache_count_limit(&self) -> i32 {
+        unsafe { self.native().typefaceCacheCountLimit() }
+    }
+
+    /// Sets the limit of the number of entries in the typeface cache, and returns the previous
+    /// limit. A change takes effect the next time each cache object is modified.
+    pub fn set_typeface_cache_count_limit(&self, count: i32) -> i32 {
+        unsafe { sb::SkContext_setTypefaceCacheCountLimit(self.native_mut_force(), count) }
+    }
+
+    // TODO: Wrap `dumpMemoryStatistics()`, which needs a wrapper for `SkTraceMemoryDump`.
+}
+
+/// Selects the backend of the recorder that [`Context::make_recorder`] creates.
+pub use sb::SkContext_BackendSelection as BackendSelection;
+variant_name!(BackendSelection::Automatic);
+
+#[cfg(test)]
+mod tests {
+    use super::{BackendSelection, Context, ContextOptions};
+    use crate::{Recorder, recorder::Type};
+
+    #[test]
+    fn raster_context_makes_only_cpu_recorders() {
+        let context = Context::new_raster(&ContextOptions::default()).unwrap();
+        let recorder = |backend| context.make_recorder(backend).map(|r| r.ty());
+        assert_eq!(recorder(BackendSelection::Automatic), Some(Type::CPU));
+        assert_eq!(recorder(BackendSelection::CPU), Some(Type::CPU));
+        assert_eq!(recorder(BackendSelection::GPU), None);
     }
 }

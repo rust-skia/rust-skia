@@ -68,7 +68,7 @@ dependencies.
 
 ### Additional GN arguments
 
-Additional arguments for the `gn` executable can be specified by setting the `SKIA_GN_ARGS` environment variable.
+Additional arguments for the `gn` executable can be specified by setting the `SKIA_GN_ARGS` environment variable. They apply only when Skia is built from source, so set `FORCE_SKIA_BUILD=1` as well when prebuilt binaries would otherwise be downloaded.
 
 ### Using system libraries
 

@@ -655,6 +655,8 @@ const ENUM_REWRITES: &[EnumEntry] = &[
     // SkBlurImageFilter_TileMode
     // SkMatrixConvolutionImageFilter_TileMode
     ("TileMode", rewrite::k_xxx_name),
+    // SkContext_BackendSelection
+    ("BackendSelection", rewrite::k_xxx),
     // SkCanvas_*
     ("PointMode", rewrite::k_xxx_name),
     ("SrcRectConstraint", rewrite::k_xxx_name),

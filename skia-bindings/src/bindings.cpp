@@ -36,7 +36,6 @@
 #include "include/core/SkColorTable.h"
 #include "include/core/SkContext.h"
 #include "include/core/SkContextOptions.h"
-#include "include/cpu/Recorder.h"
 #include "include/core/SkContourMeasure.h"
 #include "include/core/SkCoverageMode.h"
 #include "include/core/SkCubicMap.h"
@@ -325,6 +324,20 @@ extern "C" void C_Core_Types(
 extern "C" void C_SkDocument_Types(SkDocument*) {}
 
 //
+// core/SkSpan.h
+//
+
+// bindgen cannot represent SkSpan's templated base class, so this gives it the layout of a
+// dynamic-extent SkSpan (with SK_USE_LEGACY_SKSPAN). bindgen's layout tests check its size, and
+// `data::tests::share_subset` its member order.
+/// <div rustbindgen replaces="SkSpan"></div>
+template <typename T>
+class SkSpanReplacement {
+    T* fPtr;
+    size_t fSize;
+};
+
+//
 // core/SkContext.h, core/SkContextOptions.h, core/RasterContext.h
 //
 
@@ -342,6 +355,11 @@ extern "C" SkContext* C_SkContexts_MakeRaster(const SkContextOptions& options) {
 
 extern "C" void C_SkContext_delete(SkContext* self) {
     delete self;
+}
+
+// The Graphite recorder options stay at their default, because no caller passes them yet.
+extern "C" SkRecorder* C_SkContext_makeRecorder(SkContext* self, SkContext::BackendSelection backend) {
+    return self->makeRecorder(backend).release();
 }
 
 //
@@ -2778,10 +2796,6 @@ extern "C" void C_SkRecorder_delete(SkRecorder* self) {
 
 extern "C" void C_SkRecorder_type(const SkRecorder* self, SkRecorder::Type* ty) {
     *ty = self->type();
-}
-
-extern "C" skcpu::Recorder* C_SkRecorder_cpuRecorder(SkRecorder* self) {
-    return self->cpuRecorder();
 }
 
 //
