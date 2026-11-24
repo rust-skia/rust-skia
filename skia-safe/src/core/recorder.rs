@@ -46,7 +46,6 @@ impl fmt::Debug for RecorderRef {
 }
 
 impl RecorderRef {
-    #[allow(unused)] // ... in non-gpu builds.
     pub(crate) fn from_ref_mut(native: &mut SkRecorder) -> &mut Self {
         unsafe { transmute_ref_mut(native) }
     }
@@ -118,16 +117,21 @@ fn recorder_type(recorder: &SkRecorder) -> Type {
 
 #[cfg(test)]
 mod tests {
-    use super::{Recorder, RecorderRef};
+    use super::{OwnedRecorder, Recorder, RecorderRef};
 
     #[allow(deref_nullptr)]
     fn _passing_the_different_kinds_of_recorder_compiles() {
         test(None);
+        test(Some(borrowed_recorder()));
         test(Some(owned_recorder()));
 
         fn test(_recorder: Option<&mut dyn Recorder>) {}
 
-        fn owned_recorder() -> &'static mut RecorderRef {
+        fn borrowed_recorder() -> &'static mut RecorderRef {
+            unsafe { &mut *std::ptr::null_mut() }
+        }
+
+        fn owned_recorder() -> &'static mut OwnedRecorder<'static> {
             unsafe { &mut *std::ptr::null_mut() }
         }
     }
