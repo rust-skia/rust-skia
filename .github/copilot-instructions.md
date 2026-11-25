@@ -41,11 +41,11 @@ Update it whenever you learn something new about the project's patterns, convent
 
 ## Skills
 The following is the complete list of workspace skills:
-- [`cpp-to-rust-documentation`](skills/cpp-to-rust-documentation/SKILL.md): use when porting documentation from Skia C++ headers to Rust APIs.
-- [`rust-skia-bindings`](skills/rust-skia-bindings/SKILL.md): use when creating or updating bindings and wrappers — C shims in `skia-bindings/src/*.cpp`, wrapper kinds, `sk_sp`/ownership idioms, and the exceptions where the normal pattern does not apply.
-- [`rust-skia-release-publishing`](skills/rust-skia-release-publishing/SKILL.md): use when publishing a previously verified rust-skia release to crates.io and GitHub.
-- [`rust-skia-release-verification`](skills/rust-skia-release-verification/SKILL.md): use when verifying release commits, CI, artifacts, images, packaging, and notes before publication.
-- [`skia-milestone-update`](skills/skia-milestone-update/SKILL.md): use when updating Skia to a milestone or refreshing the current milestone from its upstream `chrome/mXX` branch.
+- [`cpp-to-rust-documentation`](../.agents/skills/cpp-to-rust-documentation/SKILL.md): use when porting documentation from Skia C++ headers to Rust APIs.
+- [`rust-skia-bindings`](../.agents/skills/rust-skia-bindings/SKILL.md): use when creating or updating bindings and wrappers — C shims in `skia-bindings/src/*.cpp`, wrapper kinds, `sk_sp`/ownership idioms, and the exceptions where the normal pattern does not apply.
+- [`rust-skia-release-publishing`](../.agents/skills/rust-skia-release-publishing/SKILL.md): use when publishing a previously verified rust-skia release to crates.io and GitHub.
+- [`rust-skia-release-verification`](../.agents/skills/rust-skia-release-verification/SKILL.md): use when verifying release commits, CI, artifacts, images, packaging, and notes before publication.
+- [`skia-milestone-update`](../.agents/skills/skia-milestone-update/SKILL.md): use when updating Skia to a milestone or refreshing the current milestone from its upstream `chrome/mXX` branch, or when cutting a Skia fork tag for a new fork patch.
 
 ## Documentation
 - Markdown documentation updates to existing files are fine.
