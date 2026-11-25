@@ -16,7 +16,7 @@ We did our best to cover most of the Skia API, but you'll find a lot of blind sp
 
 For larger contributions, familiarize yourself with the [various wrapper types](https://github.com/rust-skia/rust-skia/wiki) and consider filing an issue beforehand to give us a heads up and to receive additional directions.
 
-Documentation porting is welcome too. Good documentation is just as important as code, and much of the Skia API surface still lacks it. Porting documentation from the Skia C++ headers into the Rust wrappers is a valuable contribution on its own — you don't need to touch any code. To learn the conventions we use, follow the guidance in [`cpp-to-rust-documentation`](.github/skills/cpp-to-rust-documentation/SKILL.md) — it explains how to port C++ header docs to the corresponding Rust APIs, and how to word them so they render correctly in rustdoc. Even porting a single function's documentation is appreciated.
+Documentation porting is welcome too. Good documentation is just as important as code, and much of the Skia API surface still lacks it. Porting documentation from the Skia C++ headers into the Rust wrappers is a valuable contribution on its own — you don't need to touch any code. To learn the conventions we use, follow the guidance in [`cpp-to-rust-documentation`](.agents/skills/cpp-to-rust-documentation/SKILL.md) — it explains how to port C++ header docs to the corresponding Rust APIs, and how to word them so they render correctly in rustdoc. Even porting a single function's documentation is appreciated.
 
 ## Contributing Examples
 

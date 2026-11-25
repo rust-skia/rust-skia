@@ -1,12 +1,12 @@
 ---
 name: rust-skia-release-verification
-description: Verify a prepared rust-skia release after the release branch has built its binaries. Use to check release commits, CI, binary assets, generated images, crate packaging, and release notes before publication. This skill never publishes crates or creates GitHub releases.
+description: Verify a prepared rust-skia release after the release branch has built its binaries. Use to check release commits, CI, binary assets, generated images, and crate packaging, and to draft the release notes, before publication. This skill never publishes crates or creates GitHub releases.
 ---
 
 # rust-skia Release Verification
 
-Read the [release checklist](../../release-checklist.md) and the
-[release notes rules](../../release-notes-guidelines.md). Coordinate executable
+Read the [release checklist](../../../.github/release-checklist.md) and the
+[release notes rules](../../../.github/release-notes-guidelines.md). Coordinate executable
 operations through the verification recipes in the repository `justfile`.
 
 Establish the release version, previous version, exact release commit, and

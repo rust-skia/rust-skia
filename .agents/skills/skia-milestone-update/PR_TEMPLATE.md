@@ -69,7 +69,7 @@ This PR aligns rust-skia with Skia's `chrome/mXX` branch.
 
 > List each changed `DEPS` pin with its old and new version, and whether it is Chromium's
 > commit for the milestone, Skia's newer pin, or a stable release taken for a vulnerability
-> fix. List the entries added to or removed from `.github/scripts/audit-skia-deps.ignore`,
+> fix. List the entries added to or removed from `scripts/audit-skia-deps.ignore`,
 > and any `third_party/*/BUILD.gn` change the new pins needed.
 
 ## Dawn headers

@@ -99,8 +99,8 @@ compare_format() {
             printf 'identical\t0\t-\t%s\t%s/%s\n' "$tag" "$subdir" "$path" >>"$comparison/summary.tsv"
             continue
         fi
-        old_img="$(prepare_image "$old" "$ext" "$tag" "$subdir" "$path")"
-        new_img="$(prepare_image "$new" "$ext" "$tag" "$subdir" "$path")"
+        old_img="$(prepare_image "$old" "$ext")"
+        new_img="$(prepare_image "$new" "$ext")"
 
         old_size="$(magick identify -format '%wx%h' "$old_img")"
         new_size="$(magick identify -format '%wx%h' "$new_img")"

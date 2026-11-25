@@ -71,39 +71,39 @@ check-android-ndk:
 
 # Check the third-party commits pinned in Skia's DEPS file against OSV.dev for known vulnerabilities.
 audit-skia-deps:
-    python3 .github/scripts/audit-skia-deps.py
+    python3 scripts/audit-skia-deps.py
 
 # Compare the Skia DEPS pins with Chromium's pins for a milestone.
 chromium-deps-pins milestone:
-    python3 .github/scripts/chromium-deps-pins.py {{ milestone }}
+    python3 scripts/chromium-deps-pins.py {{ milestone }}
 
 # Check that every source path the third-party build files list exists in the pinned checkouts.
 check-third-party-sources:
-    python3 .github/scripts/check-third-party-sources.py
+    python3 scripts/check-third-party-sources.py
 
 # Verify the release commit, workflows/assets, binary downloads, and source builds.
 release-verify version previous commit remote="upstream":
-    bash .github/scripts/release.sh verify "{{ version }}" "{{ previous }}" "{{ commit }}" "{{ remote }}"
+    bash scripts/release.sh verify "{{ version }}" "{{ previous }}" "{{ commit }}" "{{ remote }}"
 
 # Download matching QA artifacts and compare all generated images across every
 # platform that produces QA artifacts. Without `report`, the script writes to a new
 # directory under $TMPDIR and prints its path.
 release-verify-images previous commit report="" platforms="" runs="":
-    bash .github/skills/rust-skia-release-verification/scripts/compare-images.sh "{{ previous }}" "{{ commit }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}" "{{ runs }}"
+    bash scripts/compare-images.sh "{{ previous }}" "{{ commit }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}" "{{ runs }}"
 
 # Advisory comparison of the SVG and PDF outputs between two commits, across
 # every platform that produces QA artifacts. Without `report`, the script writes to
 # a new directory under $TMPDIR and prints its path.
 release-verify-vector previous commit formats="svg pdf" report="" platforms="" runs="":
-    bash .github/skills/rust-skia-release-verification/scripts/compare-vector.sh "{{ previous }}" "{{ commit }}" "{{ formats }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}" "{{ runs }}"
+    bash scripts/compare-vector.sh "{{ previous }}" "{{ commit }}" "{{ formats }}" "{{ report }}" "{{ if platforms == "" { qa_platforms } else { platforms } }}" "{{ runs }}"
 
 # Publish required crates in dependency order, verify them, and run smoke tests.
 release-publish-crates version previous:
-    bash .github/scripts/release.sh publish-crates "{{ version }}" "{{ previous }}"
+    bash scripts/release.sh publish-crates "{{ version }}" "{{ previous }}"
 
 # Create or resume the GitHub release and verify its tag.
 release-publish-github version commit notes prerelease="false" remote="upstream":
-    bash .github/scripts/release.sh publish-github "{{ version }}" "{{ commit }}" "{{ notes }}" "{{ prerelease }}" "{{ remote }}"
+    bash scripts/release.sh publish-github "{{ version }}" "{{ commit }}" "{{ notes }}" "{{ prerelease }}" "{{ remote }}"
 
 # Mac Catalyst needs `build-std`, see https://github.com/rust-skia/rust-skia/issues/548.
 # Build the Mac Catalyst targets with a nightly toolchain.
@@ -275,9 +275,9 @@ open-bindings:
 # Print the skia.org pages with fiddles that `skia-org/README.md` lists neither as ported nor as
 # skipped, and fail when there are any.
 org-unlisted-pages:
-    bash .github/scripts/org-unlisted-pages.sh
+    bash scripts/org-unlisted-pages.sh
 
 # Render the skia-org examples with two raster drivers and list the images that differ, see
-# `.github/scripts/compare-org.sh`.
+# `scripts/compare-org.sh`.
 compare-org a="cpu" b="wgpu" features="wgpu" fuzz="2%":
-    bash .github/scripts/compare-org.sh "{{ a }}" "{{ b }}" "{{ features }}" "{{ fuzz }}"
+    bash scripts/compare-org.sh "{{ a }}" "{{ b }}" "{{ features }}" "{{ fuzz }}"

@@ -41,10 +41,13 @@ differences=0
 byte_differences=0
 compared_any=0
 
-# Rasterize an SVG or PDF to a PNG for pixel comparison.
+# Rasterize an SVG or PDF to a PNG for pixel comparison. The PNG mirrors the source's
+# path inside the report, so the baseline and the candidate, which share a relative
+# path, get distinct PNGs.
 prepare_image() {
-    local src="$1" ext="$2" tag="$3" subdir="$4" path="$5"
-    local dst="$comparison/tmp/${tag}_${subdir}_${path//\//_}.png"
+    local src="$1" ext="$2"
+    local dst="$comparison/tmp/${src#"$report"/}.png"
+    mkdir -p "$(dirname "$dst")"
     case "$ext" in
         svg) rsvg-convert -o "$dst" "$src" ;;
         pdf) gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -r150 -sOutputFile="$dst" "$src" ;;

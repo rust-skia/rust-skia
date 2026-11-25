@@ -3,7 +3,7 @@
 
 Chrome compiles Skia's code against Chromium's own copies of the third-party libraries, so
 Chromium's pins for a milestone are the reference for rust-skia's pins (see the DEPS step of
-`.github/skills/skia-milestone-update/SKILL.md`). This script looks up Chromium's pin for every
+`.agents/skills/skia-milestone-update/SKILL.md`). This script looks up Chromium's pin for every
 library that Skia's DEPS file pins under `third_party/externals`, and decides which of the two
 commits is newer:
 

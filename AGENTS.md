@@ -20,49 +20,15 @@
   `skia-safe` uses it behind the same features.
 - `skia-org/` - Ports of the fiddles on skia.org, rendered per driver. `skia-org/README.md` maps
   each skia.org page to its module and records how to fetch and port a fiddle.
+- `scripts/` - Scripts behind the `justfile` recipes. Run them through `just`, which starts them
+  from the repository root.
 - `mk-workflows/` - Generator for the platform CI workflows in `.github/workflows/`; edit it, then
   run `just workflows`. The macOS deployment target lives here.
 - CI Linux toolchain: `ghcr.io/pragmatrix/rust-skia-linux` is built from
   `pragmatrix/rust-skia-images` (`linux/Dockerfile`, checked out at `../rust-skia-images`) and
   published by that repo's manual Docker Image CI workflow. `docker/` here is unofficial.
 
-## Binding generation
+## Skills
 
-- Bindgen parses the `.cpp` files in `skia-bindings/src/` to discover `extern "C"` functions and types.
-- Touch `skia-bindings/src/bindings.cpp` and run `cargo check -p skia-bindings` to force regeneration.
-- Generated bindings land in `target/*/build/skia-bindings-*/out/skia/bindings.rs`.
-- C++ `enum class` variants get their `k` prefix stripped automatically by bindgen.
-- C++ namespaced types like `SkShapers::CT::LineBreakMode` become `SkShapers_CT_LineBreakMode`.
-
-## Common patterns in skia-safe
-
-- **Enum wrapping:** `pub type Foo = skia_bindings::SkFoo;` + `variant_name!(Foo::SomeVariant);`
-- **Struct wrapping:** `pub type Foo = Handle<SkFoo>;` or `pub type Foo = RCHandle<SkFoo>;`
-- **native_transmutable!** for types that are bit-for-bit compatible.
-- **require_type_equality!** to verify base class assumptions at compile time (e.g. `SkPixelRef_INHERITED` == `SkRefCnt`).
-- **variant_name!** to verify a variant exists at compile time (catches bindgen name changes).
-- Platform-gated code uses `#[cfg(any(target_os = "macos", target_os = "ios"))]`.
-- Functions returning `Option<Self>` via `Self::from_ptr(unsafe { ... })` - returns `None` if the C function returns null (used for platform-optional features like CoreText).
-
-## Skia milestone update checklist
-
-Task skills live in `.github/skills/`, and `.claude/skills/` links to them for Claude Code. Read
-the matching `SKILL.md` before a bindings change, a milestone update, or a release.
-
-Every Skia fork tag cut — a new milestone, a refresh from upstream, or a new fork patch — follows
-`.github/skills/skia-milestone-update/SKILL.md`. Versioning in short: crates are `0.XX.0` for
-milestone `mXX`; a same-milestone cut takes the next tag ordinal and keeps the crate version.
-
-Fork patches are named `rust-skia: <summary>`.
-
-`just diff-skia` range-diffs the fork patch stack of the submodule checkout (every commit on top of
-`upstream/chrome/mXX`) against the stack master records; it needs the `upstream` remote
-(google/skia) with both milestone branches fetched. It answers whether the fork patches match
-master; include/API diffs between milestones use direct
-`git -C skia-bindings/skia diff OLD_TAG..NEW_TAG -- ...` commands.
-
-## Release notes
-
-For rust-skia release notes format and authoring rules, use:
-
-- `.github/release-notes-guidelines.md`
+Task skills live in `.agents/skills/`. `.claude/skills/` links to it for Claude Code.
+Read the matching `SKILL.md` before a bindings change, a Skia fork tag cut, or a release.

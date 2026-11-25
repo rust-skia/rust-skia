@@ -28,7 +28,7 @@ import sys
 import urllib.request
 
 DEFAULT_DEPS_PATH = "skia-bindings/skia/DEPS"
-DEFAULT_IGNORE_PATH = ".github/scripts/audit-skia-deps.ignore"
+DEFAULT_IGNORE_PATH = "scripts/audit-skia-deps.ignore"
 OSV_API = "https://api.osv.dev/v1"
 
 

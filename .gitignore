@@ -7,4 +7,4 @@ target/
 .DS_Store
 
 /skia-bindings/bindings_docs.rs
-/.github/scripts/__pycache__/
+/scripts/__pycache__/
