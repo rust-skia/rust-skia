@@ -4,9 +4,9 @@ name = "skia-svg-macros"
 description = "Skia SVG Macros for Dom bindings"
 # This crate is versioned on its own, independent of the Skia milestone. Any change to the
 # crate, the metadata in this file included, bumps the version here and in the
-# `skia-svg-macros` dependency of `skia-safe/Cargo.toml`: the patch version for a
-# compatible change, the minor version for a breaking one. Release verification stops on a
-# change that keeps the published version.
+# `skia-svg-macros` dependency of `skia-safe/Cargo.toml`. A compatible change bumps the
+# patch version, and a breaking change bumps the minor version. `just release-verify` fails
+# when the crate changed since the previous release tag but kept that tag's version.
 version = "0.2.1"
 edition.workspace = true
 rust-version.workspace = true
