@@ -5,8 +5,8 @@ description: Publish a previously verified rust-skia release to crates.io and Gi
 
 # rust-skia Release Publishing
 
-Read the [release checklist](../../release-checklist.md) and the
-[release notes rules](../../release-notes-guidelines.md). Coordinate every
+Read the [release checklist](../../../.github/release-checklist.md) and the
+[release notes rules](../../../.github/release-notes-guidelines.md). Coordinate every
 operation through the publishing recipes in the repository `justfile`.
 
 Before publishing, require the completed verification result: release version,
