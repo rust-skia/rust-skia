@@ -1,6 +1,6 @@
 ---
 name: skia-milestone-update
-description: Perform a Skia milestone update for rust-skia or refresh the current milestone from its upstream chrome/mXX branch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, the Dawn revision and its generated headers, the newest `wgpu` version, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
+description: Perform a Skia milestone update for rust-skia, refresh the current milestone from its upstream chrome/mXX branch, or cut a Skia fork tag for a new fork patch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", adds a `rust-skia:` fork patch, or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, the Dawn revision and its generated headers, the newest `wgpu` version, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
 ---
 
 # Skia Milestone Update
@@ -11,8 +11,12 @@ the working PR checklist and follow every item in order. The item on the Chrome
 release date blocks every item below it. While that release is 7 or more days away, stop
 at that item and tell the user the date. It is based on the
 [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR)
-wiki page and extends it with project-specific coverage such as Graphite. The
-`just diff-skia` caveat lives in `AGENTS.md` — read it before starting.
+wiki page and extends it with project-specific coverage such as Graphite.
+
+`just diff-skia` range-diffs the fork patch stack of the submodule checkout (every commit
+on top of `upstream/chrome/mXX`) against the stack that `master` records. It needs the
+`upstream` remote (google/skia) with both milestone branches fetched, so fetch them
+before starting.
 
 CI builds and tests every platform on the PR. Leave each build or check that CI runs to
 CI, unless the checklist or this skill names it, and run the named ones natively on the
@@ -28,6 +32,9 @@ A Skia fork tag is `m<milestone>.<ordinal>`, where the ordinal is the tag's posi
 within the milestone: `m155.0` is the first tag ever cut for milestone 155, `m155.1`
 the second. The ordinal is independent of the crate version and carries no other
 meaning; see `docs/adr/0002-skia-fork-tags-are-milestone-plus-ordinal.md`.
+
+A fork patch is a commit of the fork on top of `upstream/chrome/mXX`, named
+`rust-skia: <summary>`.
 
 Determine `OLD_TAG` from `git -C skia-bindings/skia describe --tags`, and
 `NEW_TAG` from `git -C skia-bindings/skia tag --list 'm<MILESTONE>*'`. For a new
@@ -572,8 +579,8 @@ milestone update unless explicitly asked.
 
 ## Style & conventions
 
-See the `rust-skia-bindings` skill for binding and wrapper mechanics, and `AGENTS.md`
-and `.github/copilot-instructions.md` for the full set. Highlights:
+See the `rust-skia-bindings` skill for binding and wrapper mechanics, and
+`.github/copilot-instructions.md` for the full set. Highlights:
 - Keep Rust method and debug-field ordering aligned with the upstream C++ header order.
 - Keep top-level type declarations in the same sequence as the upstream C++ header.
 - For nested C++ types, keep the parent Rust type first and define nested Rust types

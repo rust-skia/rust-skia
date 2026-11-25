@@ -101,6 +101,8 @@ touch skia-bindings/src/bindings.cpp && cargo check -p skia-bindings
 Bindgen is re-run when any `src/*.cpp` or the Skia `include/` directory changes.
 The output lands in `target/*/build/skia-bindings-*/out/skia/bindings.rs`;
 `just locate-bindings` prints the newest one and `just open-bindings` opens it.
+Bindgen joins the parts of a namespaced C++ type with `_`, so
+`SkShapers::CT::LineBreakMode` becomes `SkShapers_CT_LineBreakMode`.
 Read the generated bindings to confirm names, signatures, and field presence before
 writing the Rust wrapper. The bindings are feature-dependent, so check with the same
 features you intend to test.
@@ -124,7 +126,7 @@ file. Port the C++ documentation following the `cpp-to-rust-documentation` skill
 
 ## Style & Conventions
 
-See `AGENTS.md` and `.github/copilot-instructions.md` for the full set. Highlights:
+See `.github/copilot-instructions.md` for the full set. Highlights:
 
 - Keep Rust method and debug-field ordering aligned with the upstream C++ header order.
 - Keep top-level type declarations in the same sequence as the upstream C++ header, and
