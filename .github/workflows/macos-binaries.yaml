@@ -25,6 +25,7 @@ jobs:
             runTests: true
             exampleArgs: ''
             generateArtifacts: false
+            reuseBinaries: true
           - target: x86_64-apple-darwin
             androidEnv: false
             emscriptenEnv: false
@@ -32,6 +33,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
+            reuseBinaries: false
           - target: aarch64-apple-ios
             androidEnv: false
             emscriptenEnv: false
@@ -39,6 +41,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
+            reuseBinaries: false
           - target: aarch64-apple-ios-sim
             androidEnv: false
             emscriptenEnv: false
@@ -46,6 +49,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
+            reuseBinaries: false
           - target: x86_64-apple-ios
             androidEnv: false
             emscriptenEnv: false
@@ -53,6 +57,7 @@ jobs:
             runTests: false
             exampleArgs: ''
             generateArtifacts: false
+            reuseBinaries: false
         exclude:
           - target: aarch64-apple-ios
             features: 'ganesh,vulkan'
@@ -125,6 +130,19 @@ jobs:
       env:
         BUILD_ARTIFACTSTAGINGDIRECTORY: ${{ runner.temp }}
         EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MAX_WEBGL_VERSION=2"
+
+    # Each cargo step below gets a new skia-bindings build script output directory and would
+    # build Skia again. FORCE_SKIA_BINARIES_DOWNLOAD makes their build scripts install the
+    # binaries that the build above exported from this archive instead. When the key differs,
+    # the step fails instead of rebuilding.
+    - name: 'Package binaries for the following cargo steps'
+      shell: bash
+      if: ${{ matrix.reuseBinaries }}
+      run: |
+        cd "${SKIA_STAGING_PATH}"
+        tar -czf "skia-binaries-${SKIA_BINARIES_KEY}.tar.gz" skia-binaries
+        echo "SKIA_BINARIES_URL=file://${SKIA_STAGING_PATH}/skia-binaries-{key}.tar.gz" >> ${GITHUB_ENV}
+        echo "FORCE_SKIA_BINARIES_DOWNLOAD=1" >> ${GITHUB_ENV}
 
     - name: 'Run Clippy'
       shell: bash

@@ -238,6 +238,9 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         }
         .unwrap_or_default();
         let generate_artifacts = !example_args.is_empty();
+        // Enables the template step that lets the later cargo steps reuse the Skia binaries of
+        // the build.
+        let reuse_binaries = run_clippy || run_tests || generate_artifacts;
 
         matrix_lines.push(format!("      - target: {}", target.target));
         matrix_lines.push(format!("        androidEnv: {}", android_env));
@@ -246,6 +249,7 @@ fn build_job(workflow: &Workflow, template: &str, job: &Job, targets: &[TargetCo
         matrix_lines.push(format!("        runTests: {}", run_tests));
         matrix_lines.push(format!("        exampleArgs: '{}'", example_args));
         matrix_lines.push(format!("        generateArtifacts: {}", generate_artifacts));
+        matrix_lines.push(format!("        reuseBinaries: {}", reuse_binaries));
         if let JobFeatures::Direct(features) = &job.features {
             let effective_features = effective_features(workflow, features, target).to_string();
             matrix_lines.push(format!("        features: '{}'", effective_features));
@@ -307,6 +311,7 @@ fn render_generic_steps(workflow: &Workflow, _job: &Job) -> String {
         ("runClippy", "${{ matrix.runClippy }}"),
         ("exampleArgs", "${{ matrix.exampleArgs }}"),
         ("generateArtifacts", "${{ matrix.generateArtifacts }}"),
+        ("reuseBinaries", "${{ matrix.reuseBinaries }}"),
         ("releaseBinaries", &release_binaries.to_string()),
         ("hostBinExt", workflow.host_bin_ext),
         ("stepIf", "true"),
