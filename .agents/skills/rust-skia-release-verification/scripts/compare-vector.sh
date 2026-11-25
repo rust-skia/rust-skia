@@ -41,13 +41,12 @@ differences=0
 byte_differences=0
 compared_any=0
 
-# Rasterize an SVG or PDF to a PNG for pixel comparison. The PNG is named after the
-# source file's full path, because the baseline and the candidate share the same
-# relative path. A name built from that relative path alone would let the candidate's
-# PNG overwrite the baseline's, and every file would then be compared with itself.
+# Rasterize an SVG or PDF to a PNG for pixel comparison. The PNG mirrors the source's
+# path inside the report, so the baseline and the candidate, which share a relative
+# path, get distinct PNGs.
 prepare_image() {
     local src="$1" ext="$2"
-    local dst="$comparison/tmp/${src#/}.png"
+    local dst="$comparison/tmp/${src#"$report"/}.png"
     mkdir -p "$(dirname "$dst")"
     case "$ext" in
         svg) rsvg-convert -o "$dst" "$src" ;;
