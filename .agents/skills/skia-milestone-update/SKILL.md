@@ -321,7 +321,7 @@ replays the old milestone's upstream-only commits as if they were fork patches.
   - A vulnerability applies when rust-skia compiles the affected code. For example,
     harfbuzz's WebAssembly shaper is never compiled, because Skia does not define
     `HAVE_WASM`. Record every accepted vulnerability with its reason in
-    `.github/scripts/audit-skia-deps.ignore`, and remove the entries that no longer
+    `scripts/audit-skia-deps.ignore`, and remove the entries that no longer
     match.
   - When a new pin needs build glue changes in `third_party/<lib>/BUILD.gn`, follow
     Chromium's `third_party/<lib>/BUILD.gn` on the same branch, and compile the upstream
