@@ -20,6 +20,8 @@
   `skia-safe` uses it behind the same features.
 - `skia-org/` - Ports of the fiddles on skia.org, rendered per driver. `skia-org/README.md` maps
   each skia.org page to its module and records how to fetch and port a fiddle.
+- `scripts/` - Scripts behind the `justfile` recipes. Run them through `just`, which starts them
+  from the repository root.
 - `mk-workflows/` - Generator for the platform CI workflows in `.github/workflows/`; edit it, then
   run `just workflows`. The macOS deployment target lives here.
 - CI Linux toolchain: `ghcr.io/pragmatrix/rust-skia-linux` is built from
