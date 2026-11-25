@@ -1,6 +1,6 @@
 ---
 name: skia-milestone-update
-description: Perform a Skia milestone update for rust-skia, refresh the current milestone from its upstream chrome/mXX branch, or cut a Skia fork tag for a new fork patch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", adds a `rust-skia:` fork patch, or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, the Dawn revision and its generated headers, the newest `wgpu` version, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
+description: Perform a Skia milestone update for rust-skia, refresh the current milestone from its upstream chrome/mXX branch, or cut a Skia fork tag for a new fork patch. Use when the user asks to "continue the milestone update", "update to milestone mXX", "update Skia from upstream", or references the milestone update process. Covers the Skia fork rebase and tag sequence, README update, build org diff, third-party DEPS pins, the Dawn revision and its generated headers, the newest `wgpu` version, header diff accounting, wrapper updates, version bump, API diff review, and final checks.
 ---
 
 # Skia Milestone Update
@@ -13,10 +13,8 @@ at that item and tell the user the date. It is based on the
 [Template: Skia Milestone Update PR](https://github.com/rust-skia/rust-skia/wiki/Template:-Skia-Milestone-Update-PR)
 wiki page and extends it with project-specific coverage such as Graphite.
 
-`just diff-skia` range-diffs the fork patch stack of the submodule checkout (every commit
-on top of `upstream/chrome/mXX`) against the stack that `master` records. It needs the
-`upstream` remote (google/skia) with both milestone branches fetched, so fetch them
-before starting.
+`just diff-skia` needs the `upstream` remote (google/skia) with both milestone branches
+fetched, so fetch them before starting.
 
 CI builds and tests every platform on the PR. Leave each build or check that CI runs to
 CI, unless the checklist or this skill names it, and run the named ones natively on the
