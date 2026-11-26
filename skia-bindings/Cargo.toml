@@ -84,7 +84,7 @@ mozjpeg-sys = { version = "2", features = ["with_simd"], optional = true }
 
 [build-dependencies]
 cc = { version = "1.1.28" }
-bindgen = { version = "0.73.2" }
+bindgen = { version = "0.73.2", default-features = false, features = ["logging", "runtime"] }
 pkg-config = "0.3.32"
 
 # For enum variant name replacements.
@@ -103,7 +103,7 @@ toml = "1.0.3"
 [dev-dependencies]
 # build dependencies duplicated for testing :(
 cc = { version = "1.1.28" }
-bindgen = { version = "0.73.2" }
+bindgen = { version = "0.73.2", default-features = false, features = ["logging", "runtime"] }
 pkg-config = "0.3.32"
 regex = "1.12.3"
 heck = "0.5.0"
