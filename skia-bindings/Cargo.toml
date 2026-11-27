@@ -71,6 +71,8 @@ binary-cache = ["dep:flate2", "dep:tar"]
 embed-icudtl = []
 embed-freetype = []
 freetype-woff2 = []
+# Build FreeType next to CoreText (macOS) and DirectWrite (Windows), for `FontMgr::custom_empty()`.
+freetype-alongside-native = []
 # Panic when any compilation steps are required to run.
 # See <https://github.com/rust-skia/rust-skia/pull/1121>.
 no-compile = []

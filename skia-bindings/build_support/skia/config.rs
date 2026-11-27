@@ -207,7 +207,7 @@ impl FinalBuildConfiguration {
                 builder.arg("skia_use_system_libwebp", yes_if(use_system_libraries));
             }
 
-            let use_freetype = platform::uses_freetype(&build.target);
+            let use_freetype = platform::uses_freetype(&build.target, &features);
             builder.arg("skia_use_freetype", yes_if(use_freetype));
             if use_freetype {
                 builder.arg(
@@ -215,7 +215,9 @@ impl FinalBuildConfiguration {
                     yes_if(features[feature::FREETYPE_WOFF2]),
                 );
 
-                if features[feature::EMBED_FREETYPE] {
+                // Next to a native font backend, there is no system FreeType to use.
+                if features[feature::EMBED_FREETYPE] || features[feature::FREETYPE_ALONGSIDE_NATIVE]
+                {
                     builder.arg("skia_use_system_freetype2", no());
                 } else {
                     // third_party/freetype2/BUILD.gn hard-codes /usr/include/freetype2

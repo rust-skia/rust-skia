@@ -9,6 +9,10 @@ impl PlatformDetails for Msvc {
         false
     }
 
+    fn supports_freetype_alongside_native(&self) -> bool {
+        true
+    }
+
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         if let Some(win_vc) = resolve_vc() {
             builder.arg(
@@ -81,6 +85,10 @@ pub struct Generic;
 impl PlatformDetails for Generic {
     fn uses_freetype(&self) -> bool {
         false
+    }
+
+    fn supports_freetype_alongside_native(&self) -> bool {
+        true
     }
 
     fn gn_args(&self, config: &BuildConfiguration, builder: &mut GnArgsBuilder) {

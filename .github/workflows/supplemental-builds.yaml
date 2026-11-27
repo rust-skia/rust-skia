@@ -303,3 +303,48 @@ jobs:
       shell: bash
       run: |
         cargo test -p skia-safe --features embed-freetype,freetype-woff2
+
+  # `freetype-alongside-native` builds FreeType next to CoreText and DirectWrite. No prebuilt
+  # binary includes it, so these jobs are the only builds that compile and test it (#1380).
+  macos-freetype-alongside-native:
+    runs-on: macos-15
+    env:
+      MACOSX_DEPLOYMENT_TARGET: '11.0'
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: true
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+
+    - name: Install Ninja
+      run: brew install ninja
+
+    - name: 'Test skia-safe with FreeType next to CoreText'
+      shell: bash
+      run: |
+        cargo test -p skia-safe --features freetype-alongside-native,freetype-woff2 --lib --test freetype_alongside_native
+
+  windows-freetype-alongside-native:
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: true
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+
+    - name: Upgrade LLVM
+      run: choco upgrade llvm
+
+    - name: Install Ninja
+      run: choco install ninja
+
+    - name: 'Test skia-safe with FreeType next to DirectWrite'
+      shell: bash
+      run: |
+        cargo test -p skia-safe --features freetype-alongside-native,freetype-woff2 --lib --test freetype_alongside_native

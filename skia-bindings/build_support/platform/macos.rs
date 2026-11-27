@@ -12,6 +12,10 @@ impl PlatformDetails for MacOs {
         false
     }
 
+    fn supports_freetype_alongside_native(&self) -> bool {
+        true
+    }
+
     fn gn_args(&self, _config: &BuildConfiguration, builder: &mut GnArgsBuilder) {
         builder.target_os_and_default_cpu("mac");
         builder.cflags(flags());

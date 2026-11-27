@@ -26,9 +26,23 @@ mod windows;
 ///
 /// It currently only checks for freetype dependent features.
 pub fn redundant_features(features: &Features, target: &Target) -> Features {
+    let details = details(target);
     let mut redundant = Features::default();
 
-    if !uses_freetype(target) {
+    // Without a native font backend that FreeType can be built next to, or on a platform that
+    // uses FreeType anyway, `freetype-alongside-native` changes nothing.
+    if features[feature::FREETYPE_ALONGSIDE_NATIVE]
+        && !builds_freetype_alongside_native(details, features)
+    {
+        redundant += feature::FREETYPE_ALONGSIDE_NATIVE;
+    }
+
+    if builds_freetype_alongside_native(details, features) {
+        // FreeType is always embedded next to a native font backend.
+        if features[feature::EMBED_FREETYPE] {
+            redundant += feature::EMBED_FREETYPE;
+        }
+    } else if !details.uses_freetype() {
         for ft_specific in feature::FREETYPE_SPECIFIC {
             if features[ft_specific] {
                 redundant += ft_specific
@@ -39,8 +53,18 @@ pub fn redundant_features(features: &Features, target: &Target) -> Features {
     redundant
 }
 
-pub fn uses_freetype(target: &Target) -> bool {
-    details(target).uses_freetype()
+/// Whether Skia is built with FreeType for the target and the (non-redundant) features.
+pub fn uses_freetype(target: &Target, features: &Features) -> bool {
+    let details = details(target);
+    details.uses_freetype() || builds_freetype_alongside_native(details, features)
+}
+
+/// Whether `freetype-alongside-native` builds FreeType next to the native font backend of the
+/// platform.
+fn builds_freetype_alongside_native(details: &dyn PlatformDetails, features: &Features) -> bool {
+    features[feature::FREETYPE_ALONGSIDE_NATIVE]
+        && !details.uses_freetype()
+        && details.supports_freetype_alongside_native()
 }
 
 pub fn gn_args(config: &BuildConfiguration, mut builder: GnArgsBuilder) -> Vec<(String, String)> {
@@ -76,6 +100,12 @@ pub fn filter_features(
 pub trait PlatformDetails {
     /// We need this information relatively early on to help parameterizing GN.
     fn uses_freetype(&self) -> bool;
+
+    /// Whether FreeType can be built and embedded next to the platform's native font backend, if
+    /// `uses_freetype()` is `false` (feature `freetype-alongside-native`).
+    fn supports_freetype_alongside_native(&self) -> bool {
+        false
+    }
 
     /// Whether the platform supplies its own compiler tools (`cc`/`cxx`/`ar`)
     /// through `gn_args`. When `true`, the default compiler tools derived from

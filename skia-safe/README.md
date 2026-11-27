@@ -142,6 +142,14 @@ Simple examples of how to use the `skshaper` and `skparagraph` module bindings c
 
 On most platforms, Skia builds and runs well with the [FreeType](https://freetype.org/) version that is already installed. If you encounter FreeType related build errors on older platforms (like with for example Debian 9 "stretch"), `embed-freetype` makes sure that FreeType is built and embedded alongside with Skia.
 
+On the Apple platforms and Windows, Skia does not use FreeType: it renders text with CoreText and DirectWrite. There, `embed-freetype` and `freetype-woff2` are ignored with a warning.
+
+### `freetype-alongside-native`
+
+On macOS and Windows, this feature builds and embeds FreeType next to CoreText and DirectWrite. `FontMgr::new()` stays CoreText or DirectWrite, and `FontMgr::custom_empty()` returns a FreeType font manager instead of `None`. Fonts loaded through it are measured and rasterized by FreeType, like on Linux, Android, and WebAssembly, so text can be laid out identically on every platform. With `freetype-woff2`, it also loads WOFF2 fonts.
+
+No prebuilt binaries include FreeType for these platforms, so Skia is built from source. On the other platforms, this feature is ignored with a warning: either they use FreeType anyway, or they are not supported yet. To get FreeType everywhere, enable `embed-freetype` and `freetype-alongside-native` together: `embed-freetype` is then ignored where FreeType is built next to a native backend.
+
 ## Multithreading
 
 Conflicting with Rust philosophy, we've decided to fully support Skia's reference counting semantics, which means that all reference counted types can be cloned and modified from within the same thread. To send a reference counted type to another thread, its reference count must be 1, and must be wrapped with the `Sendable` type and then unwrapped in the receiving thread. The following functions support the sending mechanism:
